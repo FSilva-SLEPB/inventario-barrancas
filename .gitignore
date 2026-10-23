@@ -1,0 +1,23 @@
+# Configuración local y variables de entorno
+.env
+.env.*
+!.env.example
+
+# Dependencias
+node_modules/
+
+# Archivos generados por Next.js y TypeScript
+.next/
+out/
+*.tsbuildinfo
+
+# Registros de ejecución
+*.log
+
+# Documentos y respaldos locales
+/storage/
+/backups/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
