@@ -1,0 +1,15 @@
+# Entorno de desarrollo
+services:
+  web:
+    image: node:24-bookworm-slim
+    user: "${LOCAL_UID:?Falta LOCAL_UID}:${LOCAL_GID:?Falta LOCAL_GID}"
+    working_dir: /app
+    init: true
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+      npm_config_cache: /tmp/npm-cache
+    volumes:
+      - ./web:/app:Z
+    ports:
+      - "127.0.0.1:3000:3000"
+    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]

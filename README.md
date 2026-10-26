@@ -44,4 +44,24 @@ Las contraseñas, credenciales y respaldos quedarán fuera del repositorio.
 
 ## Estado
 
-Planificación inicial y preparación del repositorio.
+Base de Next.js funcionando con Docker Compose. ESLint, TypeScript y compilación de producción verificados.
+
+## Desarrollo local
+
+Requisitos: Git, Docker Engine y Docker Compose.
+
+Para preparar una copia nueva, ejecutar desde la raíz del repositorio:
+
+1. Crear la configuración local: `printf 'LOCAL_UID=%s\nLOCAL_GID=%s\n' "$(id -u)" "$(id -g)" > .env`
+2. Instalar las dependencias: `docker compose run --rm web npm ci`
+3. Iniciar la aplicación: `docker compose up -d`
+
+Comandos de trabajo:
+
+- Revisar el código: `docker compose exec web npm run lint`
+- Compilar para producción: `docker compose exec web npm run build`
+- Consultar los registros: `docker compose logs --tail=40 web`
+- Detener la aplicación: `docker compose stop web`
+
+El servicio escucha en `127.0.0.1:3000` del equipo CentOS.
+El acceso desde otro equipo se realizará mediante un túnel SSH.
