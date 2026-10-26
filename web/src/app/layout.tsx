@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Navegacion from "../components/navegacion";
 import "./globals.css";
 
 const gobCl = localFont({
@@ -27,7 +28,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-CL" className={gobCl.className}>
-      <body>{children}</body>
+      <body>
+        <Navegacion />
+        {children}
+      </body>
     </html>
   );
 }
