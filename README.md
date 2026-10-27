@@ -87,3 +87,19 @@ Las pruebas utilizan una base temporal con credenciales de prueba.
 Los registros ficticios se crean dentro de una transacción que se revierte.
 
 Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`.
+
+## Catálogos y bodegas
+
+La sección `/catalogos` permite consultar las categorías de bienes.
+La creación, edición y activación o desactivación están habilitadas
+en desarrollo mientras se incorpora la autenticación con Google Workspace.
+
+La web utiliza el usuario limitado `inventario_app` para acceder a PostgreSQL.
+
+La organización prevista es reunir los catálogos y la consulta de
+existencias dentro de Mantenedores, con dos bodegas:
+
+- Equipos: registros individuales con cantidad 1, identificación por serie
+  e inventario, asignaciones y devoluciones.
+- Suministros: productos con cantidades, ingresos y entregas. Las existencias
+  se actualizarán mediante los movimientos de bodega.
