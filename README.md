@@ -54,7 +54,9 @@ Para preparar una copia nueva, ejecutar desde la raíz del repositorio:
 
 1. Crear la configuración local: `bash scripts/preparar-entorno.sh`
 2. Instalar las dependencias: `docker compose run --rm web npm ci`
-3. Iniciar la aplicación: `docker compose up -d`
+3. Iniciar la aplicación: `docker compose up -d --wait`
+4. Preparar el usuario de la aplicación: `docker compose exec -T db psql -X -U inventario_admin -d inventario -v ON_ERROR_STOP=1 --single-transaction -f - < database/preparar-usuario.sql`
+5. Aplicar las migraciones: `docker compose run --build --rm migrar`
 
 Comandos de trabajo:
 
@@ -74,3 +76,14 @@ volumen `postgres_data` y la contraseña local se guarda en `.env`.
 El script `scripts/preparar-entorno.sh` conserva una contraseña ya configurada.
 
 Para detener ambos servicios conservando los datos: `docker compose stop`.
+
+## Verificaciones automáticas
+
+GitHub Actions revisa dependencias, ESLint, migraciones, permisos,
+integridad de los catálogos y compilación en los pull requests hacia
+`main` y al actualizar esa rama.
+
+Las pruebas utilizan una base temporal con credenciales de prueba.
+Los registros ficticios se crean dentro de una transacción que se revierte.
+
+Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`.

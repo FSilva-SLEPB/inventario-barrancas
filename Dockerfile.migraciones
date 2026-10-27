@@ -1,0 +1,12 @@
+FROM node:24-bookworm-slim
+
+ENV npm_config_cache=/tmp/npm-cache
+WORKDIR /app
+
+COPY web/package.json web/package-lock.json ./
+RUN npm ci --ignore-scripts
+
+COPY web/migrations ./migrations
+
+USER node
+CMD ["npm", "run", "db:migrate"]

@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "node-pg-migrate up --migrations-schema public --no-verbose"
   },
   "dependencies": {
     "next": "16.4.3",
+    "pg": "8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -19,6 +21,7 @@
     "@types/react-dom": "^19",
     "eslint": "^10.13.0",
     "eslint-config-next": "16.4.3",
+    "node-pg-migrate": "9.0.0",
     "typescript": "^5"
   },
   "allowScripts": {

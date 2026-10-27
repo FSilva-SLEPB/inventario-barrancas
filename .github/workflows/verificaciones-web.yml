@@ -19,9 +19,28 @@ jobs:
     defaults:
       run:
         working-directory: web
+        shell: bash
 
     env:
       NEXT_TELEMETRY_DISABLED: "1"
+
+    # Credenciales exclusivas de la base temporal de CI.
+    services:
+      db:
+        image: postgres:18-bookworm
+        env:
+          POSTGRES_DB: inventario
+          POSTGRES_USER: inventario_admin
+          POSTGRES_PASSWORD: ci_admin_inventario
+          APP_DB_PASSWORD: ci_app_inventario
+        ports:
+          - "5432"
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U inventario_admin -d inventario"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 10s
 
     steps:
       - name: Obtener código
@@ -39,8 +58,64 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Revisar vulnerabilidades conocidas
+        run: npm audit --audit-level=high
+
       - name: Revisar código
         run: npm run lint
+
+      - name: Preparar usuario de la aplicación
+        env:
+          DB_CONTAINER: ${{ job.services.db.id }}
+        run: |
+          docker exec -i "$DB_CONTAINER" psql -X \
+            -U inventario_admin -d inventario \
+            -v ON_ERROR_STOP=1 --single-transaction -f - \
+            < ../database/preparar-usuario.sql
+
+      - name: Aplicar migraciones y comprobar repetición
+        env:
+          DATABASE_URL: "postgresql://inventario_admin:ci_admin_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+        run: |
+          npm run db:migrate
+          npm run db:migrate
+
+      - name: Verificar conexión, permisos y catálogos
+        env:
+          DATABASE_URL: "postgresql://inventario_app:ci_app_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+          import pg from "pg";
+
+          const cliente = new pg.Client({
+            connectionString: process.env.DATABASE_URL,
+            connectionTimeoutMillis: 5000,
+          });
+
+          await cliente.connect();
+          try {
+            const contar = async () => {
+              const { rows } = await cliente.query(`
+                SELECT
+                  (SELECT count(*) FROM public.sedes) AS sedes,
+                  (SELECT count(*) FROM public.dependencias) AS dependencias,
+                  (SELECT count(*) FROM public.categorias_bienes) AS categorias
+              `);
+              return JSON.stringify(rows[0]);
+            };
+            const antes = await contar();
+            await cliente.query(
+              await readFile("../database/verificar-catalogos.sql", "utf8")
+            );
+            if (await contar() !== antes) {
+              throw new Error("Las pruebas alteraron la cantidad de registros.");
+            }
+            console.log("Conexión, permisos y catálogos verificados.");
+          } finally {
+            await cliente.end();
+          }
+          NODE
 
       - name: Compilar aplicación
         run: npm run build
