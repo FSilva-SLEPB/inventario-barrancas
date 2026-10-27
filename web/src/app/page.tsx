@@ -1,15 +1,56 @@
+import Link from "next/link";
+
+const accesos = [
+  {
+    href: "/inventario",
+    titulo: "Inventario",
+    descripcion: "Equipos y bienes del servicio.",
+  },
+  {
+    href: "/solicitudes",
+    titulo: "Solicitudes",
+    descripcion:
+      "Solicitudes de suministros para establecimientos y Nivel Central.",
+  },
+  {
+    href: "/mantenedores",
+    titulo: "Mantenedores",
+    descripcion: "Categorías de bienes y catálogos del sistema.",
+  },
+];
+
 export default function Home() {
   return (
     <main>
       <header>
-        <p>Servicio Local de Educación Pública Barrancas</p>
-        <h1>Sistema de Inventario 2.0 EE y TI</h1>
+        <h1>Inicio</h1>
+        <p className="descripcion-pagina">
+          Gestión de inventario y solicitudes de insumos para establecimientos
+          educacionales y Nivel Central.
+        </p>
       </header>
 
-      <p>
-        Gestión de inventario y solicitudes de insumos para establecimientos
-        educacionales y Nivel Central.
-      </p>
+      <section aria-labelledby="titulo-accesos">
+        <h2 id="titulo-accesos">Accesos principales</h2>
+
+        <div className="accesos-inicio">
+          {accesos.map((acceso) => (
+            <Link
+              key={acceso.href}
+              href={acceso.href}
+              className="acceso-inicio"
+            >
+              <span className="titulo-acceso">{acceso.titulo}</span>
+              <span className="descripcion-acceso">
+                {acceso.descripcion}
+              </span>
+              <span className="enlace-acceso">
+                Ir a {acceso.titulo} <span aria-hidden="true">→</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

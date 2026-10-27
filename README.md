@@ -117,5 +117,5 @@ por secciones y Mantenedores desplegable.
 Se conservará la tipografía gobCL. Los formularios y tablas se presentarán
 en paneles blancos, con adaptación a pantallas pequeñas y navegación por teclado.
 
-Bootstrap se incorporará mediante npm, con versión fijada y recursos
+Bootstrap se incorpora mediante npm, con versión fijada y recursos
 servidos desde la aplicación. Las interacciones se implementarán con React.
