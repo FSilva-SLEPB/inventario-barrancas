@@ -82,7 +82,7 @@ main > p {
   background: var(--color-fondo);
 }
 
-.navegacion-principal a[aria-current="page"] {
+.navegacion-principal a[aria-current] {
   background: var(--color-primario);
   color: #ffffff;
 }

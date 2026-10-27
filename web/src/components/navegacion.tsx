@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const enlaces = [
   { href: "/", texto: "Inicio" },
   { href: "/inventario", texto: "Inventario" },
-  { href: "/catalogos", texto: "Catálogos" },
+  { href: "/mantenedores", texto: "Mantenedores" },
   { href: "/solicitudes", texto: "Solicitudes" },
 ];
 
@@ -16,16 +16,22 @@ export default function Navegacion() {
   return (
     <nav className="navegacion-principal" aria-label="Principal">
       <ul>
-        {enlaces.map((enlace) => (
-          <li key={enlace.href}>
-            <Link
-              href={enlace.href}
-              aria-current={rutaActual === enlace.href ? "page" : undefined}
-            >
-              {enlace.texto}
-            </Link>
-          </li>
-        ))}
+        {enlaces.map((enlace) => {
+          const esPagina = rutaActual === enlace.href;
+          const esSeccion = enlace.href !== "/"
+            && rutaActual.startsWith(enlace.href + "/");
+
+          return (
+            <li key={enlace.href}>
+              <Link
+                href={enlace.href}
+                aria-current={esPagina ? "page" : esSeccion ? "location" : undefined}
+              >
+                {enlace.texto}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );

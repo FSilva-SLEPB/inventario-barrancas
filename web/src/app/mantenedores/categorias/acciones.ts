@@ -86,7 +86,7 @@ export async function guardarCategoria(
     return fallo("No pudimos guardar los cambios. Inténtalo nuevamente.");
   }
 
-  revalidatePath("/catalogos");
+  revalidatePath("/mantenedores/categorias");
 
   return {
     resultado: "guardado",
