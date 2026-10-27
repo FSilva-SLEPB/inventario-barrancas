@@ -6,7 +6,7 @@ import { useActionState } from "react";
 import {
   guardarCategoria,
   type EstadoCategoria,
-} from "@/app/catalogos/acciones";
+} from "@/app/mantenedores/categorias/acciones";
 import type { CategoriaBien } from "@/lib/catalogos";
 
 export default function FormularioCategoria({
@@ -76,7 +76,7 @@ export default function FormularioCategoria({
         <button type="submit" className="boton-catalogos" disabled={pendiente}>
           {pendiente ? "Guardando…" : categoria ? "Guardar cambios" : "Crear categoría"}
         </button>
-        {categoria && <Link href="/catalogos">Finalizar edición</Link>}
+        {categoria && <Link href="/mantenedores/categorias">Finalizar edición</Link>}
       </div>
     </form>
   );

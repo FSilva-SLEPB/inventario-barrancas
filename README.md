@@ -90,7 +90,7 @@ Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`
 
 ## Catálogos y bodegas
 
-La sección `/catalogos` permite consultar las categorías de bienes.
+La sección `/mantenedores/categorias` permite consultar las categorías de bienes.
 La creación, edición y activación o desactivación están habilitadas
 en desarrollo mientras se incorpora la autenticación con Google Workspace.
 
@@ -103,3 +103,19 @@ existencias dentro de Mantenedores, con dos bodegas:
   e inventario, asignaciones y devoluciones.
 - Suministros: productos con cantidades, ingresos y entregas. Las existencias
   se actualizarán mediante los movimientos de bodega.
+
+## Referencias de interfaz
+
+- [SLEP Santa Corina](https://slepsantacorina.gob.cl/)
+- [Framework del Gobierno Digital](https://framework.digital.gob.cl/)
+- [Recomendaciones WEB 2026](https://kitdigital.gob.cl/archivos/Recomendaciones-WEB-2026.pdf)
+
+La interfaz tomará como guía las capturas del sistema anterior:
+cabecera institucional azul, identidad de SLEP Barrancas, menú lateral
+por secciones y Mantenedores desplegable.
+
+Se conservará la tipografía gobCL. Los formularios y tablas se presentarán
+en paneles blancos, con adaptación a pantallas pequeñas y navegación por teclado.
+
+Bootstrap se incorporará mediante npm, con versión fijada y recursos
+servidos desde la aplicación. Las interacciones se implementarán con React.

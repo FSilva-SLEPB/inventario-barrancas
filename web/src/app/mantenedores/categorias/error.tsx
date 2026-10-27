@@ -9,7 +9,7 @@ export default function ErrorCatalogos({
     <main>
       <header>
         <p>SLEP Barrancas</p>
-        <h1>Catálogos</h1>
+        <h1>Categorías de bienes</h1>
       </header>
 
       <p role="alert">
