@@ -8,6 +8,7 @@ services:
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
       npm_config_cache: /tmp/npm-cache
+      DATABASE_URL: "postgresql://inventario_app:${APP_DB_PASSWORD:?Falta APP_DB_PASSWORD}@db:5432/inventario"
     volumes:
       - ./web:/app:Z
     ports:

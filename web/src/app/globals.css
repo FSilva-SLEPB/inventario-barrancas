@@ -91,3 +91,117 @@ main > p {
   outline: 3px solid var(--color-texto);
   outline-offset: 3px;
 }
+
+.tabla-catalogos {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+.tabla-catalogos caption {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.tabla-catalogos th,
+.tabla-catalogos td {
+  padding: 0.75rem;
+  border: 1px solid var(--color-borde);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.tabla-catalogos thead {
+  background: var(--color-fondo);
+}
+
+.tabla-catalogos th[scope="row"] {
+  font-weight: 400;
+}
+
+.boton-catalogos {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primario);
+  border-radius: 0.25rem;
+  background: var(--color-primario);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-catalogos:focus-visible {
+  outline: 3px solid var(--color-texto);
+  outline-offset: 3px;
+}
+
+.panel-catalogos {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-borde);
+  scroll-margin-top: 1rem;
+}
+
+.formulario-catalogos {
+  max-width: 38rem;
+}
+
+.campo-catalogos {
+  display: grid;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.campo-catalogos label {
+  font-weight: 700;
+}
+
+.campo-catalogos input,
+.campo-catalogos select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.625rem;
+  border: 1px solid var(--color-parrafo);
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: var(--color-texto);
+  font: inherit;
+}
+
+.campo-catalogos input[aria-invalid="true"] {
+  border: 2px solid #b42318;
+}
+
+.ayuda-catalogos {
+  margin: 0;
+  color: var(--color-parrafo);
+}
+
+.error-catalogos {
+  color: #b42318;
+}
+
+.acciones-catalogos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.acciones-catalogos .boton-catalogos {
+  margin-top: 0;
+}
+
+.boton-catalogos:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.campo-catalogos input:focus-visible,
+.campo-catalogos select:focus-visible,
+main a:focus-visible {
+  outline: 3px solid var(--color-texto);
+  outline-offset: 3px;
+}
