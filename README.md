@@ -52,7 +52,7 @@ Requisitos: Git, Docker Engine y Docker Compose.
 
 Para preparar una copia nueva, ejecutar desde la raíz del repositorio:
 
-1. Crear la configuración local: `printf 'LOCAL_UID=%s\nLOCAL_GID=%s\n' "$(id -u)" "$(id -g)" > .env`
+1. Crear la configuración local: `bash scripts/preparar-entorno.sh`
 2. Instalar las dependencias: `docker compose run --rm web npm ci`
 3. Iniciar la aplicación: `docker compose up -d`
 
@@ -65,3 +65,12 @@ Comandos de trabajo:
 
 El servicio escucha en `127.0.0.1:3000` del equipo CentOS.
 El acceso desde otro equipo se realizará mediante un túnel SSH.
+
+## Base de datos de desarrollo
+
+El servicio `db` utiliza PostgreSQL 18. Los datos se conservan en el
+volumen `postgres_data` y la contraseña local se guarda en `.env`.
+
+El script `scripts/preparar-entorno.sh` conserva una contraseña ya configurada.
+
+Para detener ambos servicios conservando los datos: `docker compose stop`.
