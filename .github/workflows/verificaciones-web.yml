@@ -123,5 +123,17 @@ jobs:
           }
           NODE
 
+      - name: Probar respaldo y restauración
+        env:
+          RESPALDO_DB_CONTAINER: ${{ job.services.db.id }}
+        run: |
+          docker exec -i "$RESPALDO_DB_CONTAINER" psql -X \
+            -U inventario_admin -d inventario -v ON_ERROR_STOP=1 -f - \
+            < ../database/datos-prueba-respaldo.sql
+          directorio_ci="$(mktemp -d "$RUNNER_TEMP/respaldos-postgresql.XXXXXXXX")"
+          trap 'rm -rf -- "$directorio_ci"' EXIT
+          respaldo_ci="$(bash ../scripts/respaldar-postgresql.sh "$directorio_ci")"
+          bash ../scripts/verificar-respaldo-postgresql.sh "$respaldo_ci" --datos-ci
+
       - name: Compilar aplicación
         run: npm run build
