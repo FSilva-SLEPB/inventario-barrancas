@@ -64,6 +64,9 @@ jobs:
       - name: Probar validación de sedes
         run: node --test tests/validacion-sedes.test.mjs
 
+      - name: Probar validación de dependencias
+        run: node --test tests/validacion-dependencias.test.mjs
+
       - name: Revisar código
         run: npm run lint
 

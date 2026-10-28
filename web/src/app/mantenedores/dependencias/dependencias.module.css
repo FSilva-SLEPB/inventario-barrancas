@@ -1,0 +1,52 @@
+.contenedorTabla {
+  max-width: 100%;
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 38rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.tabla caption {
+  caption-side: top;
+  padding-bottom: 0.5rem;
+  color: var(--color-parrafo);
+  font-weight: 700;
+  text-align: left;
+}
+
+.tabla th, .tabla td {
+  padding: 0.75rem;
+  border: 1px solid var(--color-borde);
+  vertical-align: top;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.tabla thead {
+  background: var(--color-superficie-suave);
+}
+
+.tabla thead th:first-child {
+  width: 28%;
+}
+
+.tabla thead th:nth-child(2) {
+  width: 38%;
+}
+
+.tabla th[scope="row"] {
+  font-weight: 400;
+}
+
+.detalleSede {
+  display: block;
+  color: var(--color-parrafo);
+  font-size: 0.875rem;
+}
