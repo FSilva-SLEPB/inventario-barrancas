@@ -77,6 +77,21 @@ El script `scripts/preparar-entorno.sh` conserva una contraseña ya configurada.
 
 Para detener ambos servicios conservando los datos: `docker compose stop`.
 
+## Respaldos de PostgreSQL
+
+Crear una copia local y comprobar su recuperación:
+
+```bash
+respaldo_pg="$(bash scripts/respaldar-postgresql.sh)" &&
+bash scripts/verificar-respaldo-postgresql.sh "$respaldo_pg"
+```
+
+Las copias se guardan en `backups/postgresql/`, con permisos privados y fuera
+del seguimiento de Git. La recuperación se prueba en un contenedor independiente.
+
+Consulta el alcance y los pasos pendientes en
+[Respaldos de PostgreSQL](docs/respaldos-postgresql.md).
+
 ## Verificaciones automáticas
 
 GitHub Actions revisa dependencias, ESLint, migraciones, permisos,
@@ -84,7 +99,8 @@ integridad de los catálogos y compilación en los pull requests hacia
 `main` y al actualizar esa rama.
 
 Las pruebas utilizan una base temporal con credenciales de prueba.
-Los registros ficticios se crean dentro de una transacción que se revierte.
+Las pruebas de catálogos revierten sus registros ficticios. La prueba de respaldo
+utiliza datos ficticios que se eliminan junto con la base temporal al terminar CI.
 
 Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`.
 
