@@ -61,6 +61,9 @@ jobs:
       - name: Revisar vulnerabilidades conocidas
         run: npm audit --audit-level=high
 
+      - name: Probar validación de sedes
+        run: node --test tests/validacion-sedes.test.mjs
+
       - name: Revisar código
         run: npm run lint
 
