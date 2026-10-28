@@ -15,7 +15,7 @@ export default function Mantenedores() {
 
       <section aria-labelledby="titulo-catalogos">
         <h2 id="titulo-catalogos">Catálogos</h2>
-        <p>Administra las categorías de bienes y los datos de las sedes.</p>
+        <p>Administra las categorías de bienes, las sedes y sus dependencias.</p>
         <ul>
           <li>
             <Link href="/mantenedores/categorias">
@@ -25,6 +25,11 @@ export default function Mantenedores() {
           <li>
             <Link href="/mantenedores/sedes">
               Sedes
+            </Link>
+          </li>
+          <li>
+            <Link href="/mantenedores/dependencias">
+              Dependencias
             </Link>
           </li>
         </ul>

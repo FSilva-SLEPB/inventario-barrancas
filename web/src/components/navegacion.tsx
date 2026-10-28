@@ -126,6 +126,15 @@ export default function Navegacion() {
                 Sedes
               </Link>
             </li>
+            <li>
+              <Link
+                href="/mantenedores/dependencias"
+                aria-current={rutaActual === "/mantenedores/dependencias" ? "page" : undefined}
+                onClick={cerrarMenu}
+              >
+                Dependencias
+              </Link>
+            </li>
           </ul>
         </details>
 
