@@ -117,6 +117,15 @@ export default function Navegacion() {
                 Categorías de bienes
               </Link>
             </li>
+            <li>
+              <Link
+                href="/mantenedores/sedes"
+                aria-current={rutaActual === "/mantenedores/sedes" ? "page" : undefined}
+                onClick={cerrarMenu}
+              >
+                Sedes
+              </Link>
+            </li>
           </ul>
         </details>
 

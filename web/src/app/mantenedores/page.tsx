@@ -15,11 +15,16 @@ export default function Mantenedores() {
 
       <section aria-labelledby="titulo-catalogos">
         <h2 id="titulo-catalogos">Catálogos</h2>
-        <p>Administra las categorías utilizadas para registrar los bienes.</p>
+        <p>Administra las categorías de bienes y los datos de las sedes.</p>
         <ul>
           <li>
             <Link href="/mantenedores/categorias">
               Categorías de bienes
+            </Link>
+          </li>
+          <li>
+            <Link href="/mantenedores/sedes">
+              Sedes
             </Link>
           </li>
         </ul>
