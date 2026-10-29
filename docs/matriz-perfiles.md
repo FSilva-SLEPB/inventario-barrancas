@@ -114,6 +114,13 @@ desde la que se conecte, por el nombre del correo ni por una sede elegida librem
 El encargado solo accederá a los equipos y movimientos de su sede, incluso si
 intenta cambiar un identificador en una URL, formulario, petición o exportación.
 
+El encargado podrá consultar **Pendientes de entrega** de su única sede en
+una sección separada del inventario recibido. Esa consulta no incorporará los
+equipos al inventario recibido ni a sus totales. Solo los perfiles Administrador
+de gestión y Administrador del sistema podrán confirmar la entrega desde UTIC,
+con fecha, receptor y acta. El encargado no podrá hacerlo mediante un cambio
+de estado ni consultar pendientes de otra sede por una petición directa.
+
 El encargado podrá incorporar de inmediato equipos de compra propia, donación
 u otro origen a su sede y al consolidado EE/JI, sin validación previa de UTIC.
 Se conservarán procedencia, autor, fecha y respaldo disponible, con controles de
@@ -171,6 +178,8 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
    ámbitos, pero no puede concederse ni conceder perfiles administrativos reservados.
 3. Esa protección también cubre la edición de cuentas existentes, su activación
    y los cambios de alcance; ocultar una opción del selector no es suficiente.
+   La consulta de pendientes propios no permite confirmar entregas ni incorpora
+   esos equipos al inventario recibido o sus totales.
 4. Consulta general / Auditor consulta todos los ámbitos sin ejecutar escrituras.
    Consulta de establecimiento solo lee su única sede y no puede consultar otra
    ni modificar datos, incluso mediante peticiones directas o exportaciones.
