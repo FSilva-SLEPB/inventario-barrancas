@@ -208,8 +208,10 @@ Central mediante el perfil Administrador de gestión. No podrán conceder los
 perfiles administrativos reservados ni administrar la configuración técnica.
 Los encargados podrán gestionar el inventario, asignaciones, ubicaciones y
 préstamos de su sede. El auditor consultará todos los ámbitos sin modificarlos.
-Varios correos podrán representar a una misma sede; las posibles excepciones
-de una cuenta para varias sedes aún requieren revisión.
+Varias personas podrán acceder a una misma sede con sus propios correos. Cada
+encargado estará vinculado a una única sede; no habrá encargados de varias sedes.
+Los perfiles administrativos mantienen su alcance global y el auditor su consulta
+global, conforme a la matriz.
 
 La validación de robos, los traspasos entre inventarios y las bajas formales
 quedarán reservados a la administración del sistema y de gestión. Este documento
@@ -245,10 +247,9 @@ Las mejoras visuales podrán incorporarse sin alterar las reglas funcionales aco
 La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfiles.md).
 Antes de implementarla quedan por precisar, paso a paso:
 
-- ¿Existen excepciones de una cuenta responsable de varias sedes?
 - ¿Qué campos puede corregir el encargado y cómo registra equipos que no vienen de UTIC?
 - ¿Qué información de equipos pendientes puede consultar el encargado de la sede,
   sin confundirla con equipos recibidos?
 
-La primera revisión tratará las posibles excepciones de acceso a varias sedes.
-Las demás preguntas se resolverán en su etapa; no es necesario responderlas todas juntas.
+La vinculación de cada encargado a una única sede ya está acordada.
+Las preguntas restantes se resolverán en su etapa; no es necesario responderlas todas juntas.

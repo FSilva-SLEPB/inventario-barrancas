@@ -99,6 +99,12 @@ Varios correos institucionales pueden corresponder a una misma sede. Cada cuenta
 tendrá autorización individual e historial de sus propias acciones. Compartir
 sede no significa compartir contraseña ni identidad en la bitácora.
 
+Cada persona utilizará su propio correo. El perfil Encargado de EE/JI requerirá
+exactamente una sede asignada; no se habilitarán encargados con varias sedes.
+El alcance global del Administrador del sistema y del Administrador de gestión
+proviene de su perfil, no de acumular asignaciones como encargado. El auditor
+conserva la consulta global sin facultades de modificación.
+
 La sede autorizada se vinculará a la cuenta: **no se inferirá por la red o la IP
 desde la que se conecte, por el nombre del correo ni por una sede elegida libremente**.
 El encargado solo accederá a los equipos y movimientos de su sede, incluso si
@@ -138,14 +144,13 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
    cambiando otros campos del equipo.
 6. Desactivar o limitar una cuenta afecta su siguiente petición; los cambios de
    autorización mantienen historial y protección ante concurrencia.
-7. Los módulos todavía inexistentes no se anuncian como disponibles al crear el
+7. No se puede guardar ni utilizar un perfil Encargado de EE/JI sin sede o con
+   más de una sede; varias cuentas personales sí pueden compartir la misma sede.
+8. Los módulos todavía inexistentes no se anuncian como disponibles al crear el
    perfil; sus permisos se prueban al incorporar cada módulo.
 
 ## 8. Decisiones que aún requieren revisión
 
-- El caso normal acordado es un encargado limitado a su propia sede. Falta
-  decidir si habrá excepciones de personas responsables de varias sedes y cómo
-  se autorizarán; no se habilitará esa ampliación por defecto.
 - Precisar los campos que un encargado puede corregir y el procedimiento de
   ingreso de equipos propios que no provengan de una entrega de UTIC.
 - Precisar la participación de la sede en las actas de recepción y los préstamos
@@ -154,5 +159,5 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
 - Definir el acceso a antecedentes sensibles sin ampliar por defecto las facultades
   de auditor ni de los encargados.
 
-Estas decisiones se revisarán paso a paso en su etapa. La siguiente revisión
-tratará si existen responsables autorizados de más de una sede.
+Estas decisiones se revisarán paso a paso en su etapa. La regla de una sola
+sede por encargado ya está confirmada.
