@@ -138,12 +138,16 @@ test("login, revocación inmediata y actualización de sesión sin escalación",
     e.roles.set(perfil.email, "consulta");
     assert.equal((await session({ session: {}, token })).user.rol, "consulta");
     e.roles.delete(perfil.email);
-    assert.equal((await session({ session: {}, token })).user, undefined);
+    const denegada = await session({ session: {}, token });
+    assert.equal(denegada.user, undefined);
+    assert.equal(denegada.accesoDenegado, true);
     assert.equal((await session({ session: {}, token: { email: perfil.email, sub: "id" } })).user, undefined);
     assert.equal(await redirect({ baseUrl: "http://localhost:3000", url: "https://sitio-ajeno.cl" }), "http://localhost:3000/");
     e.fallarBD();
-    assert.equal(await signIn({ account: { provider: "google" }, profile: perfil }), false);
-    assert.equal((await session({ session: {}, token })).user, undefined);
+    assert.equal(await signIn({ account: { provider: "google" }, profile: perfil }), "/ingresar?error=ServicioNoDisponible");
+    const falloServicio = await session({ session: {}, token });
+    assert.equal(falloServicio.user, undefined);
+    assert.equal(falloServicio.accesoDenegado, false);
   } finally {
     for (const n of ["NEXTAUTH_URL", "NEXTAUTH_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]) {
       if (original[n] === undefined) delete process.env[n]; else process.env[n] = original[n];

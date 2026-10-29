@@ -7,15 +7,22 @@ import { autenticacionConfigurada } from "@/lib/configuracion-auth";
 import { puedeAdministrar } from "@/lib/politica-acceso";
 
 // React cache dura una petición de renderizado; no conserva permisos entre usuarios.
-export const obtenerAcceso = cache(async () => {
+export const obtenerSesion = cache(async () => {
   if (!autenticacionConfigurada()) return null;
-  const sesion = await getServerSession(opcionesAuth);
+  return getServerSession(opcionesAuth);
+});
+
+export const obtenerAcceso = cache(async () => {
+  const sesion = await obtenerSesion();
   return sesion?.user ?? null;
 });
 
 export async function exigirAcceso() {
   const acceso = await obtenerAcceso();
-  if (!acceso) redirect("/ingresar");
+  if (!acceso) {
+    const sesion = await obtenerSesion();
+    redirect(sesion?.accesoDenegado ? "/acceso-denegado" : "/ingresar");
+  }
   return acceso;
 }
 

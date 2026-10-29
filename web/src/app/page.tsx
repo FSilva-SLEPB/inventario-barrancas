@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { obtenerAcceso } from "@/lib/acceso";
+import { redirect } from "next/navigation";
+import { obtenerAcceso, obtenerSesion } from "@/lib/acceso";
 
 const accesos = [
   {
@@ -22,6 +23,7 @@ const accesos = [
 
 export default async function Home() {
   const acceso = await obtenerAcceso();
+  if (!acceso && (await obtenerSesion())?.accesoDenegado) redirect("/acceso-denegado");
   if (!acceso) return <main className="portal-bienvenida">
     <section className="portal-presentacion" aria-labelledby="bienvenida-titulo">
       <p className="portal-etiqueta">SLEP Barrancas · UTIC</p>

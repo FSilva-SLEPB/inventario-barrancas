@@ -2,14 +2,14 @@
 
 import { signIn, signOut } from "next-auth/react";
 
-export function BotonIngresar() {
+export function BotonIngresar({ otraCuenta = false }: { otraCuenta?: boolean }) {
   return <button className="btn btn-primary" onClick={() => signIn("google", { callbackUrl: "/" })}>
-    Ingresar con Google Workspace
+    {otraCuenta ? "Usar otra cuenta" : "Ingresar con Google Workspace"}
   </button>;
 }
 
-export function BotonSalir() {
+export function BotonSalir({ texto = "Cerrar sesión" }: { texto?: string }) {
   return <button className="btn btn-outline-primary" onClick={() => signOut({ callbackUrl: "/" })}>
-    Cerrar sesión
+    {texto}
   </button>;
 }
