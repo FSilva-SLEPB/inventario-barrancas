@@ -35,7 +35,7 @@ export const opcionesAuth: NextAuthOptions = {
         return (await consultarRol(correo)) !== null;
       } catch {
         console.error("No se pudo comprobar la autorización de acceso.");
-        return false;
+        return "/ingresar?error=ServicioNoDisponible";
       }
     },
     async jwt({ token, account, profile }) {
@@ -50,11 +50,13 @@ export const opcionesAuth: NextAuthOptions = {
     async session({ session, token }) {
       const correo = token.correoInstitucional;
       session.user = undefined;
+      session.accesoDenegado = false;
       if (typeof correo !== "string" || !token.sub) return session;
       try {
         // Revisar el permiso actual en cada petición; una baja no espera 8 horas.
         const rol = await consultarRol(correo);
         if (rol) session.user = { email: correo, rol };
+        else session.accesoDenegado = true;
       } catch {
         console.error("No se pudo comprobar el permiso de la sesión.");
       }

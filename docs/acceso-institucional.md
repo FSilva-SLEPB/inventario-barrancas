@@ -139,6 +139,12 @@ lateral ni botón de cierre de sesión. La portada no muestra datos de catálogo
 Después de ingresar, `/` presenta el panel y la navegación de la cuenta.
 Usuarios y perfiles solo aparece en el menú del administrador; el servidor
 también protege sus consultas y acciones ante peticiones directas.
+Las cuentas rechazadas por falta de autorización y las sesiones cuyo permiso
+fue retirado se dirigen a `/acceso-denegado`, con el mensaje **No tienes acceso
+al sistema**, sin menú ni datos privados. Allí se puede usar otra cuenta,
+contactar a UTIC o cerrar la sesión para volver a la bienvenida.
+Las sesiones ausentes o vencidas siguen dirigiéndose al ingreso normal.
+Los fallos técnicos al comprobar permisos no se clasifican como una baja de la cuenta.
 Establecimientos, jardines y Nivel Central son por ahora ámbitos informativos
 de la portada; todavía no conceden ni restringen acceso a datos por sede.
 

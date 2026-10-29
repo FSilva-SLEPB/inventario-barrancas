@@ -178,7 +178,29 @@ try {
   assert.equal((await leerGestion()).activo, false, 'Un formulario obsoleto no debe reactivar la cuenta.');
   verificaciones += 2;
   await base.query("UPDATE public.usuarios_acceso SET activo = false WHERE correo = $1", [correo]);
-  assert.equal((await pedir("/mantenedores/sedes", consulta)).status, 307);
+  for (const ruta of ['/mantenedores/sedes', '/', '/ingresar']) {
+    const revocada = await pedir(ruta, consulta);
+    assert.equal(revocada.status, 307);
+    assert.equal(revocada.headers.get('location'), '/acceso-denegado');
+    verificaciones++;
+  }
+  const denegada = await pedir('/acceso-denegado', consulta);
+  assert.equal(denegada.status, 200);
+  const htmlDenegado = await denegada.text();
+  for (const texto of ['No tienes acceso al sistema', 'Usar otra cuenta', 'Contactar a UTIC', 'Volver a la bienvenida']) {
+    assert.ok(htmlDenegado.includes(texto));
+  }
+  assert.ok(!htmlDenegado.includes('<nav'));
+  verificaciones++;
+  assert.equal((await pedir('/ingresar?error=AccessDenied')).headers.get('location'), '/acceso-denegado');
+  assert.equal((await pedir('/acceso-denegado', admin)).headers.get('location'), '/');
+  const errorOAuth = await pedir('/ingresar?error=OAuthCallback');
+  assert.equal(errorOAuth.status, 200);
+  assert.ok((await errorOAuth.text()).includes('No fue posible ingresar'));
+  verificaciones += 3;
+  const errorServicio = await pedir('/ingresar?error=ServicioNoDisponible');
+  assert.equal(errorServicio.status, 200);
+  assert.ok((await errorServicio.text()).includes('No pudimos comprobar tu acceso'));
   verificaciones++;
   assert.equal((await pedir("/mantenedores/sedes", admin.slice(0, -5) + "xxxxx")).status, 307);
   verificaciones++;
@@ -190,7 +212,18 @@ try {
   verificaciones++;
   const csrf = await pedir("/api/auth/csrf");
   assert.equal(csrf.status, 200);
-  assert.ok((await csrf.json()).csrfToken);
+  const csrfToken = (await csrf.json()).csrfToken;
+  assert.ok(csrfToken);
+  verificaciones++;
+  const cookiesCsrf = csrf.headers.getSetCookie().map(c => c.split(';')[0]);
+  const salida = await fetch(origen + '/api/auth/signout', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded',
+      Cookie: [consulta, ...cookiesCsrf].join('; ') },
+    body: new URLSearchParams({ csrfToken, callbackUrl: '/', json: 'true' }),
+  });
+  assert.equal(salida.status, 200);
+  assert.ok(salida.headers.getSetCookie().some(c => c.startsWith('next-auth.session-token=;')),
+    'Volver a la bienvenida debe retirar la cookie revocada.');
   verificaciones++;
   console.log(`${verificaciones} comprobaciones HTTP: anónimo, administrador, consulta, revocación, cookie alterada y CSRF.`);
   console.log("Se usaron identidades y cookies de prueba; el consentimiento real de Google queda pendiente.");
