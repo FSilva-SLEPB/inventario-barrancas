@@ -137,6 +137,10 @@ El acceso requiere una cuenta institucional expresamente autorizada. Consultar
 [Acceso con Google Workspace](docs/acceso-institucional.md) para configurar
 el cliente OAuth, el administrador inicial y las cuentas de consulta.
 
+Los administradores gestionan las cuentas desde **Mantenedores → Usuarios y perfiles**:
+registro, asignación de perfil y activación o desactivación, con historial de cambios.
+Antes de ingresar se muestra una portada institucional y un portal de acceso sin menú lateral.
+
 La sección `/mantenedores/categorias` permite consultar las categorías de bienes.
 La creación, edición y activación o desactivación requieren una sesión con
 permiso de administración, comprobado en el servidor.

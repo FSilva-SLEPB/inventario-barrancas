@@ -456,3 +456,61 @@
   margin-bottom: 1rem;
   overflow-wrap: anywhere;
 }
+
+.estructura-publica {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 76rem;
+}
+
+.contenido-app > .portal-bienvenida {
+  padding: 0;
+  overflow: hidden;
+}
+
+.portal-presentacion {
+  padding: clamp(1.75rem, 6vw, 5rem);
+  background: linear-gradient(125deg, var(--color-superficie), var(--color-seleccion));
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+
+.portal-etiqueta {
+  color: var(--color-primario);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 0.875rem;
+}
+
+.portal-presentacion h1 {
+  max-width: 22ch;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.12;
+  margin-block: 1rem;
+}
+
+.portal-descripcion {
+  max-width: 53ch;
+  color: var(--color-parrafo);
+  font-size: 1.125rem;
+}
+
+.portal-acceso { margin-block: 1rem; padding: 0.875rem 1.5rem; }
+.portal-nota { font-size: 0.875rem; color: var(--color-parrafo); }
+.portal-comunidad { padding: clamp(1.5rem, 4vw, 3rem); }
+.portal-comunidad h2 { font-size: 1.375rem; margin-bottom: 1.5rem; }
+.portal-ambitos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+.portal-ambitos article { border-top: 2px solid var(--color-primario); padding-top: 1rem; }
+.portal-numero { font-weight: 700; color: var(--color-primario); }
+.portal-ambitos h3 { font-size: 1.125rem; margin-block: 0.75rem; }
+.portal-ambitos p { color: var(--color-parrafo); margin: 0; }
+.contenido-app > .portal-ingreso { max-width: 38rem; margin: clamp(1rem, 5vh, 4rem) auto; padding: clamp(1.5rem, 4vw, 3rem); }
+.portal-ingreso h1 { margin-block: 1rem; }
+.portal-ingreso .btn { margin-top: 1rem; min-height: 2.75rem; }
+.portal-volver { margin: 2rem 0 0; }
+.tabla-usuarios-contenedor { overflow-x: auto; }
+.tabla-usuarios-contenedor th { overflow-wrap: anywhere; }
+.usuario-nombre { display: block; }
+.perfiles-ayuda { margin-top: 2rem; border-top: 1px solid var(--color-borde-suave); padding-top: 1.5rem; }
+
+@media (max-width: 767.98px) {
+  .portal-ambitos { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+}

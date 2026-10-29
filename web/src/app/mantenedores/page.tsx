@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Mantenedores() {
-  await exigirAcceso();
+  const acceso = await exigirAcceso();
   return (
     <main>
       <header>
@@ -19,6 +19,9 @@ export default async function Mantenedores() {
         <h2 id="titulo-catalogos">Catálogos</h2>
         <p>Administra las categorías de bienes, las sedes y sus dependencias.</p>
         <ul>
+          {acceso.rol === "administrador" && <li>
+            <Link href="/mantenedores/usuarios">Usuarios y perfiles</Link>
+          </li>}
           <li>
             <Link href="/mantenedores/categorias">
               Categorías de bienes

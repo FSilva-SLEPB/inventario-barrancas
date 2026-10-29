@@ -152,7 +152,7 @@ test("login, revocación inmediata y actualización de sesión sin escalación",
 });
 
 for (const [nombre, accion] of [["categorias", "guardarCategoria"], ["sedes", "guardarSede"],
-  ["dependencias", "guardarDependencia"]]) {
+  ["dependencias", "guardarDependencia"], ["usuarios", "guardarUsuario"]]) {
   for (const rol of [null, "consulta"]) {
     test(`acción ${nombre} rechaza ${rol ?? "anónimo"} antes de consultar o escribir datos`, async () => {
       const e = await entorno();
@@ -175,3 +175,31 @@ for (const [nombre, accion] of [["categorias", "guardarCategoria"], ["sedes", "g
     });
   }
 }
+
+test("usuarios normaliza correo y nombre y rechaza perfiles y formularios inválidos", async () => {
+  const e = await entorno();
+  const { validarUsuario } = await e.importar("@/lib/validacion-usuarios");
+  const formulario = (cambios = {}) => {
+    const datos = new FormData();
+    for (const [k, v] of Object.entries({ correo: " PRUEBA@slepb.gob.cl ", nombre: "  Nombre  Prueba  ",
+      rol: "consulta", activo: "true", version: "0", ...cambios })) datos.set(k, v);
+    return datos;
+  };
+  const correcto = validarUsuario(formulario());
+  assert.equal(correcto.datos.correo, "prueba@slepb.gob.cl");
+  assert.equal(correcto.datos.nombre, "Nombre Prueba");
+  assert.equal(correcto.datos.rol, "consulta");
+  for (const cambio of [{ correo: "externo@gmail.com" }, { correo: "a@slepb.gob.cl.otro.cl" },
+    { rol: "inventado" }, { activo: "sí" }, { version: "-1" }, { version: "2147483647" },
+    { nombre: "nombre\nsalto" }, { nombre: "a".repeat(121) }]) {
+    assert.equal(validarUsuario(formulario(cambio)).datos, null);
+  }
+  for (const campo of ["correo", "nombre", "rol", "activo", "version"]) {
+    const repetido = formulario(); repetido.append(campo, "repetido");
+    assert.equal(validarUsuario(repetido).datos, null);
+    const faltante = formulario(); faltante.delete(campo);
+    assert.equal(validarUsuario(faltante).datos, null);
+    const archivo = formulario(); archivo.set(campo, new File(["prueba"], "prueba.txt"));
+    assert.equal(validarUsuario(archivo).datos, null);
+  }
+});

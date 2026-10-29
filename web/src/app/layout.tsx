@@ -82,8 +82,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
 
-        <div className="estructura-app">
-          <Navegacion />
+        <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
+          {acceso && <Navegacion administrador={acceso.rol === "administrador"} />}
           <div id="contenido-principal" className="contenido-app" tabIndex={-1}>
             {acceso && <div className="sesion-institucional">
               <span>{acceso.email} · {acceso.rol === "administrador" ? "Administración" : "Consulta"}</span>
