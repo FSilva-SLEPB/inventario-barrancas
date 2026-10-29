@@ -9,6 +9,7 @@ import Navegacion from "@/components/navegacion";
 import { BotonSalir } from "@/components/botones-sesion";
 import { obtenerAcceso } from "@/lib/acceso";
 import { PERFILES, puedeAdministrar } from "@/lib/politica-acceso";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
@@ -87,7 +88,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} />}
           <div id="contenido-principal" className="contenido-app" tabIndex={-1}>
             {acceso && <div className="sesion-institucional">
-              <span>{acceso.email} · {PERFILES[acceso.rol]}{acceso.sedeNombre ? ` · ${acceso.sedeNombre}` : ""}</span>
+              <span>{acceso.email} · {PERFILES[acceso.rol]}{acceso.sedeNombre
+                ? ` · ${etiquetaSede({ nombre: acceso.sedeNombre, rbd: acceso.sedeRbd })}` : ""}</span>
               <BotonSalir />
             </div>}
             {children}

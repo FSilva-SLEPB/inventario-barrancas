@@ -6,6 +6,7 @@ import { guardarUsuario } from "@/app/mantenedores/usuarios/acciones";
 import { PERFILES, valoresUsuario, type UsuarioAcceso, type EstadoUsuario } from "@/lib/validacion-usuarios";
 import { perfilReservado, requiereSede } from "@/lib/politica-acceso";
 import type { Sede } from "@/lib/validacion-sedes";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 export default function FormularioUsuario({ usuario, sedes, sistema }: {
   usuario?: UsuarioAcceso; sedes: Sede[]; sistema: boolean;
@@ -72,7 +73,7 @@ function CamposUsuario({ estado, usuario, pendiente, sedes, sistema }: {
           <option value="">Selecciona una sede</option>
           {sedes.filter(s => (s.activo || s.id === estado.valores.sedeId) && s.tipo !== "nivel_central")
             .map(s => <option key={s.id} value={s.id} disabled={!s.activo}>
-              {s.nombre}{s.rbd ? ` · ${s.rbd}` : ""}{!s.activo ? " (inactiva)" : ""}
+              {etiquetaSede(s)}{!s.activo ? " (inactiva)" : ""}
             </option>)}
         </select>
         <p id="usuario-sede-ayuda" className="ayuda-catalogos">

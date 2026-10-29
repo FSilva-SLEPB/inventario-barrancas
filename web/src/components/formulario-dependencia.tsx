@@ -13,6 +13,7 @@ import {
   type ValoresDependencia,
 } from "@/lib/validacion-dependencias";
 import { TIPOS_SEDE, type Sede } from "@/lib/validacion-sedes";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 function CamposDependencia({ valores, errores, pendiente, sedes }: {
   valores: ValoresDependencia;
@@ -35,8 +36,7 @@ function CamposDependencia({ valores, errores, pendiente, sedes }: {
           <option value="" disabled>Selecciona una sede</option>
           {sedes.map((sede) => (
             <option key={sede.id} value={sede.id}>
-              {sede.nombre} — {TIPOS_SEDE[sede.tipo]}
-              {sede.rbd ? ` · RBD ${sede.rbd}` : ""}
+              {etiquetaSede(sede)} — {TIPOS_SEDE[sede.tipo]}
               {sede.activo ? "" : " (inactiva)"}
             </option>
           ))}

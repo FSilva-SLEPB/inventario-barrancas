@@ -6,6 +6,7 @@ import { PERFILES } from "@/lib/validacion-usuarios";
 import FormularioUsuario from "@/components/formulario-usuario";
 import { listarSedes } from "@/lib/sedes";
 import { perfilReservado } from "@/lib/politica-acceso";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 export const metadata = { title: "Usuarios y perfiles | Inventario SLEP Barrancas" };
 
@@ -31,14 +32,16 @@ export default async function Usuarios({ searchParams }: {
           <caption>Cuentas autorizadas y desactivadas</caption>
           <thead><tr><th scope="col">Usuario</th><th scope="col">Perfil</th><th scope="col">Sede / alcance</th><th scope="col">Estado</th>
             <th scope="col">Acciones</th></tr></thead>
-          <tbody>{usuarios.map(u => <tr key={u.correo}>
+          <tbody>{usuarios.map(u => {
+            const sede = sedes.find(s => s.id === u.sedeId);
+            return <tr key={u.correo}>
             <th scope="row">{u.nombre && <span className="usuario-nombre">{u.nombre}</span>}{u.correo}
               {u.correo === actor.email && <small className="usuario-nombre">Tu cuenta</small>}</th>
-            <td>{PERFILES[u.rol]}</td><td>{u.sedeId ? sedes.find(s => s.id === u.sedeId)?.nombre ?? "Sede no disponible" : "Todos los ámbitos"}</td>
+            <td>{PERFILES[u.rol]}</td><td>{u.sedeId ? sede ? etiquetaSede(sede) : "Sede no disponible" : "Todos los ámbitos"}</td>
             <td>{u.activo ? "Activo" : "Inactivo"}</td>
             <td>{sistema || !perfilReservado(u.rol) ? <Link href={`/mantenedores/usuarios?editar=${encodeURIComponent(u.correo)}#formulario-usuario`}
               aria-label={`Editar acceso de ${u.correo}`}>Editar</Link> : "Reservado al administrador del sistema"}</td>
-          </tr>)}</tbody>
+          </tr>; })}</tbody>
         </table>
       </div>
     </section>

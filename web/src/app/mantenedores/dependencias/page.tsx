@@ -12,6 +12,7 @@ import { puedeGestionarDependencias } from "@/lib/politica-acceso";
 import { esIdDependencia } from "@/lib/validacion-dependencias";
 import { TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./dependencias.module.css";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 export const runtime = "nodejs";
 
@@ -78,10 +79,9 @@ export default async function Dependencias({ searchParams }: Propiedades) {
                   <tr key={dependencia.id}>
                     <th scope="row">{dependencia.nombre}</th>
                     <td>
-                      {dependencia.sedeNombre}
+                      {etiquetaSede({ nombre: dependencia.sedeNombre, rbd: dependencia.sedeRbd })}
                       <small className={estilos.detalleSede}>
                         {TIPOS_SEDE[dependencia.sedeTipo]}
-                        {dependencia.sedeRbd ? ` · RBD ${dependencia.sedeRbd}` : ""}
                         {dependencia.sedeActiva ? "" : " · Sede inactiva"}
                       </small>
                     </td>
@@ -90,7 +90,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
                       <td>
                         <Link
                           href={`/mantenedores/dependencias?editar=${dependencia.id}#formulario-dependencia`}
-                          aria-label={`Editar dependencia ${dependencia.nombre} de ${dependencia.sedeNombre}`}
+                          aria-label={`Editar dependencia ${dependencia.nombre} de ${etiquetaSede({ nombre: dependencia.sedeNombre, rbd: dependencia.sedeRbd })}`}
                         >
                           Editar
                         </Link>
