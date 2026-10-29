@@ -192,10 +192,23 @@ Los documentos y antecedentes sensibles tendrán acceso restringido.
 ## 8. Permisos y trazabilidad transversales
 
 Hoy solo están implementados Administrador y Consulta, con alcance global.
-El diseño siguiente deberá incorporar asignación a sedes y capacidades específicas:
-consultar, registrar, solicitar, entregar, reportar incidentes y validar incidentes.
-Los nombres y la matriz final de esas autorizaciones requieren revisión; este
-documento no crea perfiles nuevos ni concede permisos a usuarios existentes.
+La [matriz de perfiles y acceso por sede](matriz-perfiles.md) documenta el diseño
+acordado para la siguiente etapa: Administrador del sistema, Administrador de
+gestión, Encargado de EE/JI, Auditor y Consulta. Todavía no están implementados
+los perfiles nuevos ni el filtrado por sede.
+
+La jefatura y el compañero de UTIC autorizados podrán gestionar todos los
+inventarios, los mantenedores, usuarios operativos, actas y registros de Nivel
+Central mediante el perfil Administrador de gestión. No podrán conceder los
+perfiles administrativos reservados ni administrar la configuración técnica.
+Los encargados podrán gestionar el inventario, asignaciones, ubicaciones y
+préstamos de su sede. El auditor consultará todos los ámbitos sin modificarlos.
+Varios correos podrán representar a una misma sede; las posibles excepciones
+de una cuenta para varias sedes aún requieren revisión.
+
+La validación de robos, los traspasos entre inventarios y las bajas formales
+quedarán reservados a la administración del sistema y de gestión. Este documento
+no concede permisos nuevos a ninguna cuenta ni modifica los actuales.
 
 La trazabilidad deberá identificar actor, fecha, motivo cuando corresponda,
 estado anterior/posterior y documentos asociados. No se borrarán movimientos
@@ -224,14 +237,13 @@ Las mejoras visuales podrán incorporarse sin alterar las reglas funcionales aco
 
 ## 10. Próxima decisión de diseño
 
-Preparar la matriz de acceso por sede antes de implementar el inventario.
-Preguntas a resolver en esa etapa, paso a paso:
+La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfiles.md).
+Antes de implementarla quedan por precisar, paso a paso:
 
-- ¿Puede una cuenta representar más de una sede? ¿Qué funciones tendrá en cada una?
-- ¿Qué personal de UTIC consulta o modifica cada ámbito?
-- ¿Quién puede reportar y quién puede validar incidentes en cada ámbito?
+- ¿Existen excepciones de una cuenta responsable de varias sedes?
+- ¿Qué campos puede corregir el encargado y cómo registra equipos que no vienen de UTIC?
 - ¿Qué información de equipos pendientes puede consultar el encargado de la sede,
   sin confundirla con equipos recibidos?
 
-La primera revisión tratará el acceso de usuarios a una o varias sedes. Las demás
-preguntas se resolverán en su etapa; no es necesario responderlas todas juntas.
+La primera revisión tratará las posibles excepciones de acceso a varias sedes.
+Las demás preguntas se resolverán en su etapa; no es necesario responderlas todas juntas.
