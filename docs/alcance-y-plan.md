@@ -236,7 +236,8 @@ Los documentos y antecedentes sensibles tendrán acceso restringido.
 Hoy solo están implementados Administrador y Consulta, con alcance global.
 La [matriz de perfiles y acceso por sede](matriz-perfiles.md) documenta el diseño
 acordado para la siguiente etapa: Administrador del sistema, Administrador de
-gestión, Encargado de EE/JI, Auditor y Consulta. Todavía no están implementados
+gestión, Encargado de EE/JI, Consulta general / Auditor y Consulta de establecimiento.
+Todavía no están implementados
 los perfiles nuevos ni el filtrado por sede.
 
 La jefatura y el compañero de UTIC autorizados podrán gestionar todos los
@@ -244,7 +245,10 @@ inventarios, los mantenedores, usuarios operativos, actas y registros de Nivel
 Central mediante el perfil Administrador de gestión. No podrán conceder los
 perfiles administrativos reservados ni administrar la configuración técnica.
 Los encargados podrán gestionar el inventario, asignaciones, ubicaciones y
-préstamos de su sede. El auditor consultará todos los ámbitos sin modificarlos.
+préstamos de su sede. Consulta general / Auditor consultará todos los ámbitos
+sin modificarlos. Consulta de establecimiento estará vinculada a una única sede
+EE/JI y solo podrá ver su inventario y documentos autorizados, sin registrar,
+editar, asignar ni eliminar. Las cuentas serán personales para ambos perfiles.
 Varias personas podrán acceder a una misma sede con sus propios correos. Cada
 encargado estará vinculado a una única sede; no habrá encargados de varias sedes.
 Los perfiles administrativos mantienen su alcance global y el auditor su consulta

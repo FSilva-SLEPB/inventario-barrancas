@@ -27,8 +27,8 @@ del menú acompañará estos permisos; no será el control de seguridad.
 | Administrador del sistema | Felipe: administra las autorizaciones de mayor nivel y la operación completa | Nivel Central y todos los EE/JI |
 | Administrador de gestión | Jefatura y compañero de la unidad que Felipe autorice: autonomía completa para administrar la operación, incluidos usuarios operativos | Nivel Central y todos los EE/JI |
 | Encargado de EE/JI | Administra el inventario propio, sus asignaciones, ubicaciones, préstamos, solicitudes y reportes | Solo la sede asignada |
-| Auditor | Consulta los inventarios y su historial sin modificar datos | Nivel Central y todos los EE/JI |
-| Consulta | Mantiene la posibilidad de autorizar una cuenta solo para consulta | Alcance que se le autorice; la asignación final está pendiente de diseño |
+| Consulta general / Auditor | Consulta los inventarios y su historial sin modificar datos | Nivel Central y todos los EE/JI |
+| Consulta de establecimiento | Consulta el inventario de su sede sin modificar datos | Una única sede, EE o JI |
 
 El perfil Administrador de gestión **no es un gestor limitado al registro**:
 puede crear usuarios, asignar perfiles operativos, administrar los inventarios de
@@ -41,13 +41,13 @@ a la administración de privilegios superiores y a la configuración técnica.
 En la columna de Encargado, todas las facultades se limitan a su sede. Las acciones
 sobre módulos pendientes se habilitarán cuando esos módulos se implementen.
 
-| Operación | Administrador del sistema | Administrador de gestión | Encargado EE/JI | Auditor | Consulta |
+| Operación | Administrador del sistema | Administrador de gestión | Encargado EE/JI | Consulta general / Auditor | Consulta de establecimiento |
 | --- | --- | --- | --- | --- | --- |
-| Consultar inventarios | Todos | Todos | Su sede | Todos | Alcance autorizado |
+| Consultar inventarios | Todos | Todos | Su sede | Todos | Su sede |
 | Registrar ingresos de equipos | Sí | Sí | Su sede; ingreso propio inmediato, sin aprobación UTIC | No | No |
 | Corregir datos permitidos, serie y número de inventario | Sí | Sí | Su sede, con motivo e historial | No | No |
 | Gestionar asignaciones, ubicaciones y préstamos | Sí | Sí | Su sede | No | No |
-| Gestionar ingresos, entregas y actas desde UTIC | Sí | Sí | Recepción y participación de su sede; facultades exactas pendientes | Solo consulta autorizada | Solo consulta autorizada |
+| Gestionar ingresos, entregas y actas desde UTIC | Sí | Sí | Recepción y participación de su sede; facultades exactas pendientes | Solo consulta autorizada | Solo consulta autorizada de su sede |
 | Gestionar mantenedores globales, incluidas categorías y sedes | Sí | Sí | No | No modifica | No modifica |
 | Gestionar ubicaciones y dependencias locales | Sí | Sí | Su sede | No | No |
 | Registrar usuarios y asignar perfiles operativos | Sí | Sí | No | No | No |
@@ -70,7 +70,8 @@ Ningún perfil operativo podrá borrar el historial para ocultar una corrección
 ## 4. Administración delegada de usuarios
 
 El Administrador de gestión podrá registrar cuentas, activar o desactivar accesos
-operativos y asignar perfiles Encargado, Consulta o Auditor con el alcance que
+operativos y asignar perfiles Encargado, Consulta general / Auditor o Consulta
+de establecimiento con el alcance que
 corresponda. Cada operación identificará al administrador que la realizó.
 
 Para preservar la separación acordada:
@@ -89,7 +90,10 @@ Para preservar la separación acordada:
   administrador del sistema activo y contra sobrescribir cambios concurrentes.
 
 Antes de migrar se preparará una correspondencia explícita para los actuales
-Administrador y Consulta. No se elevarán usuarios por su correo, nombre, cargo o
+Administrador y Consulta. Consulta general tendrá el mismo alcance de lectura
+global que Auditor; Consulta de establecimiento será la alternativa limitada
+a una única sede. Estos nombres no implican permisos adicionales para Auditor.
+Las cuentas existentes no se reasignarán automáticamente a una sede. No se elevarán usuarios por su correo, nombre, cargo o
 por trabajar en UTIC. Felipe identificará las cuentas de jefatura y compañero;
 no se inventarán ni asignarán esos correos durante el diseño.
 
@@ -142,6 +146,14 @@ separación aun cuando el auditor y los administradores puedan consultar ambos.
 
 ## 6. Auditoría y datos sensibles
 
+Consulta general / Auditor tendrá lectura global. Consulta de establecimiento
+requerirá exactamente una sede asignada y solo podrá consultar su inventario,
+historial y documentos autorizados. No podrá registrar, editar, asignar, entregar,
+aprobar, eliminar ni administrar usuarios. El filtro de sede se aplicará también
+a peticiones directas y exportaciones, sin conceder acceso al inventario de NC.
+Ambos perfiles usarán cuentas personales y tendrán bloqueadas las escrituras
+en el servidor; el acceso a documentos respetará su alcance y sensibilidad.
+
 El auditor podrá consultar todos los inventarios de NC, EE y JI, así como los
 movimientos y las actas autorizadas. No podrá crear, editar, entregar, aprobar
 ni administrar usuarios por ese perfil.
@@ -159,7 +171,9 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
    ámbitos, pero no puede concederse ni conceder perfiles administrativos reservados.
 3. Esa protección también cubre la edición de cuentas existentes, su activación
    y los cambios de alcance; ocultar una opción del selector no es suficiente.
-4. El auditor consulta todos los ámbitos sin poder ejecutar acciones de escritura.
+4. Consulta general / Auditor consulta todos los ámbitos sin ejecutar escrituras.
+   Consulta de establecimiento solo lee su única sede y no puede consultar otra
+   ni modificar datos, incluso mediante peticiones directas o exportaciones.
 5. El encargado puede reportar un robo, pero no validarlo ni generar una baja
    cambiando otros campos del equipo.
 6. Desactivar o limitar una cuenta afecta su siguiente petición; los cambios de
@@ -176,7 +190,8 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
   incorporación inmediata sin aprobación UTIC ya están acordadas.
 - Precisar la participación de la sede en las actas de recepción y los préstamos
   a terceros, su devolución, vencimiento y documentación.
-- Precisar el alcance del perfil Consulta al migrar las cuentas existentes.
+- Revisar la correspondencia de las cuentas existentes al implementar la migración;
+  los alcances de Consulta general y Consulta de establecimiento ya están acordados.
 - Definir el acceso a antecedentes sensibles sin ampliar por defecto las facultades
   de auditor ni de los encargados.
 
