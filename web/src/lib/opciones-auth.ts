@@ -3,15 +3,23 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { obtenerBaseDatos } from "@/lib/db";
-import { correoInstitucional, rolValido, type RolAcceso } from "@/lib/politica-acceso";
+import { correoInstitucional, rolValido, requiereSede } from "@/lib/politica-acceso";
 import { autenticacionConfigurada } from "@/lib/configuracion-auth";
 
-async function consultarRol(correo: string): Promise<RolAcceso | null> {
-  const { rows } = await obtenerBaseDatos().query<{ rol: unknown }>(
-    "SELECT rol FROM public.usuarios_acceso WHERE correo = $1 AND activo = true",
+async function consultarAcceso(correo: string) {
+  const { rows } = await obtenerBaseDatos().query<{
+    rol: unknown; sedeId: string | null; sedeNombre: string | null;
+  }>(
+    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre"
+     FROM public.usuarios_acceso u LEFT JOIN public.sedes s ON s.id = u.sede_id
+     WHERE u.correo = $1 AND u.activo
+       AND (u.rol NOT IN ('encargado', 'consulta_sede')
+            OR (s.activo AND s.tipo IN ('establecimiento', 'jardin_infantil')))`,
     [correo],
   );
-  return rolValido(rows[0]?.rol) ? rows[0].rol : null;
+  const fila = rows[0];
+  if (!rolValido(fila?.rol) || (requiereSede(fila.rol) && !fila.sedeId)) return null;
+  return { rol: fila.rol, sedeId: fila.sedeId ?? null, sedeNombre: fila.sedeNombre ?? null };
 }
 
 export const opcionesAuth: NextAuthOptions = {
@@ -32,7 +40,7 @@ export const opcionesAuth: NextAuthOptions = {
       const correo = correoInstitucional(profile);
       if (!correo) return false;
       try {
-        return (await consultarRol(correo)) !== null;
+        return (await consultarAcceso(correo)) !== null;
       } catch {
         console.error("No se pudo comprobar la autorización de acceso.");
         return "/ingresar?error=ServicioNoDisponible";
@@ -54,8 +62,8 @@ export const opcionesAuth: NextAuthOptions = {
       if (typeof correo !== "string" || !token.sub) return session;
       try {
         // Revisar el permiso actual en cada petición; una baja no espera 8 horas.
-        const rol = await consultarRol(correo);
-        if (rol) session.user = { email: correo, rol };
+        const acceso = await consultarAcceso(correo);
+        if (acceso) session.user = { email: correo, ...acceso };
         else session.accesoDenegado = true;
       } catch {
         console.error("No se pudo comprobar el permiso de la sesión.");

@@ -3,7 +3,7 @@ import type { RolAcceso } from "@/lib/politica-acceso";
 
 declare module "next-auth" {
   interface Session {
-    user?: { email: string; rol: RolAcceso };
+    user?: { email: string; rol: RolAcceso; sedeId: string | null; sedeNombre: string | null };
     accesoDenegado?: boolean;
   }
   interface Profile {

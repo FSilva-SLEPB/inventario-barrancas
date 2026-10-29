@@ -28,7 +28,7 @@ Referencia revisada: `main`, commit `bb4a3eb`.
 | Capacidad | Estado al corte |
 | --- | --- |
 | Acceso institucional de Google Workspace y lista de cuentas autorizadas | Implementado; probado en CentOS |
-| Perfiles Administrador y Consulta | Implementados; pruebas de ingreso, consulta y rechazo realizadas |
+| Perfiles y alcance | Administrador y Consulta probados en CentOS; ampliación a cinco perfiles y sede única preparada en esta rama, pendiente de integración e instalación |
 | Mantenedor de usuarios y perfiles; activación/desactivación e historial | Implementado y probado por el usuario |
 | Protección del último administrador activo y control de ediciones obsoletas | Implementado; probado automáticamente |
 | Portada, portal sin menú y pantalla de acceso denegado | Implementados y comprobados en CentOS |
@@ -37,7 +37,7 @@ Referencia revisada: `main`, commit `bb4a3eb`.
 | Control diario de capacidad y plan de retención | Configurado; borrado automático desactivado |
 | Avisos por correo | Pendientes de configurar y probar el transporte |
 | Inventario operativo, movimientos, actas y solicitudes | Pendientes; las páginas actuales son bases de interfaz |
-| Permisos y filtrado de datos por sede | Pendientes; no se deben considerar disponibles por tener perfiles globales |
+| Permisos y filtrado de datos por sede | Preparados para sedes/dependencias y gestión de usuarios; pendientes de instalación. Inventarios y demás módulos se comprobarán al implementarlos |
 | Funcionarios y habilitación tecnológica de Nivel Central | Pendientes |
 | Reportes y validación de incidentes de robo | Pendientes |
 
@@ -251,12 +251,15 @@ Los documentos y antecedentes sensibles tendrán acceso restringido.
 
 ## 8. Permisos y trazabilidad transversales
 
-Hoy solo están implementados Administrador y Consulta, con alcance global.
+La primera implementación de perfiles y alcance está preparada en la rama de
+desarrollo, pendiente de integrar y probar en CentOS. La migración conserva
+Administrador como Administrador del sistema y Consulta como Consulta general /
+Auditor, con su alcance global anterior.
 La [matriz de perfiles y acceso por sede](matriz-perfiles.md) documenta el diseño
 acordado para la siguiente etapa: Administrador del sistema, Administrador de
 gestión, Encargado de EE/JI, Consulta general / Auditor y Consulta de establecimiento.
-Todavía no están implementados
-los perfiles nuevos ni el filtrado por sede.
+Se incorporan los cinco perfiles y el filtrado por sede en los mantenedores
+existentes. Los permisos de los módulos futuros siguen pendientes de cada etapa.
 
 La jefatura y el compañero de UTIC autorizados podrán gestionar todos los
 inventarios, los mantenedores, usuarios operativos, actas y registros de Nivel
@@ -283,7 +286,7 @@ No se registrarán contraseñas, tokens ni PIN en bitácoras.
 
 ## 9. Orden propuesto de desarrollo
 
-Todas las etapas siguientes están pendientes. El orden es una propuesta para
+La etapa 1 está preparada para revisión; las demás siguen pendientes. El orden es una propuesta para
 revisar con Felipe; no representa una fecha comprometida ni aprobación de los
 detalles técnicos que aún faltan.
 

@@ -21,7 +21,7 @@ async function entorno() {
     if (falloBD) throw new Error("fallo simulado");
     if (sql.includes("usuarios_acceso")) {
       const rol = roles.get(parametros[0]);
-      return { rows: rol ? [{ rol }] : [] };
+      return { rows: rol ? [typeof rol === "string" ? { rol, sedeId: null, sedeNombre: null } : rol] : [] };
     }
     return { rows: [], rowCount: 1 };
   };
@@ -82,10 +82,11 @@ test("dominio, correo verificado e identidad de Google son obligatorios", async 
   assert.equal(correoInstitucional({ ...perfil, email: perfil.email.toUpperCase() }), perfil.email);
 });
 
-test("solo administrador puede modificar; roles desconocidos no conceden permisos", async () => {
+test("solo perfiles administrativos pueden modificar catálogos globales", async () => {
   const e = await entorno();
   const { puedeAdministrar, rolValido } = await e.importar("@/lib/politica-acceso");
   assert.equal(puedeAdministrar("administrador"), true);
+  assert.equal(puedeAdministrar("administrador_gestion"), true);
   for (const rol of ["consulta", "editor", "ADMIN", undefined, null, {}]) {
     assert.equal(puedeAdministrar(rol), false);
   }
@@ -186,7 +187,7 @@ test("usuarios normaliza correo y nombre y rechaza perfiles y formularios invál
   const formulario = (cambios = {}) => {
     const datos = new FormData();
     for (const [k, v] of Object.entries({ correo: " PRUEBA@slepb.gob.cl ", nombre: "  Nombre  Prueba  ",
-      rol: "consulta", activo: "true", version: "0", ...cambios })) datos.set(k, v);
+      rol: "consulta", activo: "true", version: "0", sedeId: "", ...cambios })) datos.set(k, v);
     return datos;
   };
   const correcto = validarUsuario(formulario());
@@ -198,7 +199,7 @@ test("usuarios normaliza correo y nombre y rechaza perfiles y formularios invál
     { nombre: "nombre\nsalto" }, { nombre: "a".repeat(121) }]) {
     assert.equal(validarUsuario(formulario(cambio)).datos, null);
   }
-  for (const campo of ["correo", "nombre", "rol", "activo", "version"]) {
+  for (const campo of ["correo", "nombre", "rol", "activo", "version", "sedeId"]) {
     const repetido = formulario(); repetido.append(campo, "repetido");
     assert.equal(validarUsuario(repetido).datos, null);
     const faltante = formulario(); faltante.delete(campo);
@@ -206,4 +207,32 @@ test("usuarios normaliza correo y nombre y rechaza perfiles y formularios invál
     const archivo = formulario(); archivo.set(campo, new File(["prueba"], "prueba.txt"));
     assert.equal(validarUsuario(archivo).datos, null);
   }
+});
+
+
+test("perfiles locales requieren una sola sede y los generales no aceptan sede", async () => {
+  const e = await entorno();
+  const { validarUsuario } = await e.importar("@/lib/validacion-usuarios");
+  for (const rol of ["encargado", "consulta_sede", "consulta", "administrador_gestion", "administrador"]) {
+    for (const sedeId of ["", "no-uuid", randomUUID()]) {
+      const f = new FormData();
+      for (const [k,v] of Object.entries({ correo: "prueba@slepb.gob.cl", nombre: "", rol,
+        activo: "true", version: "0", sedeId })) f.set(k,v);
+      const local = ["encargado", "consulta_sede"].includes(rol);
+      assert.equal(Boolean(validarUsuario(f).datos), local ? sedeId.length === 36 : sedeId === "");
+    }
+  }
+});
+
+test("sesión usa la sede actual de la base e ignora el alcance insertado en el token", async () => {
+  const e = await entorno();
+  const { opcionesAuth } = await e.importar("@/lib/opciones-auth");
+  const sedeId = randomUUID();
+  const token = { sub: "ficticio", correoInstitucional: perfil.email, rol: "administrador", sedeId: randomUUID() };
+  e.roles.set(perfil.email, { rol: "encargado", sedeId, sedeNombre: "Sede ficticia" });
+  const primera = await opcionesAuth.callbacks.session({ session: {}, token });
+  assert.equal(primera.user.rol, "encargado");
+  assert.equal(primera.user.sedeId, sedeId);
+  e.roles.set(perfil.email, { rol: "consulta_sede", sedeId: null });
+  assert.equal((await opcionesAuth.callbacks.session({ session: {}, token })).accesoDenegado, true);
 });

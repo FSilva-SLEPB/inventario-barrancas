@@ -6,7 +6,8 @@ import type { UsuarioAcceso } from "@/lib/validacion-usuarios";
 export async function listarUsuarios(): Promise<UsuarioAcceso[]> {
   await exigirAdministrador();
   const { rows } = await obtenerBaseDatos().query<UsuarioAcceso>(
-    "SELECT correo, nombre, rol, activo, version FROM public.usuarios_acceso ORDER BY correo",
+    `SELECT u.correo, u.nombre, u.rol, u.activo, u.version, u.sede_id AS "sedeId"
+     FROM public.usuarios_acceso u ORDER BY u.correo`,
   );
   return rows;
 }

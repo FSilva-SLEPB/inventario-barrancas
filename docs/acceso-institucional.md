@@ -4,11 +4,18 @@ La web requiere sesión para ver los módulos y los catálogos, incluso en desar
 Solo pueden entrar cuentas expresamente autorizadas en `public.usuarios_acceso`.
 La migración inicial autoriza a `felipe.silva@slepb.gob.cl` como administrador.
 
-| Rol | Consultar módulos y catálogos | Crear/editar/activar catálogos |
+| Perfil | Alcance de consulta actual | Modificación actual |
 | --- | --- | --- |
-| administrador | Sí | Sí |
-| consulta | Sí | No |
-| Sin autorización o cuenta inactiva | No | No |
+| Administrador del sistema (`administrador`) | Todos los catálogos | Catálogos y todos los accesos |
+| Administrador de gestión (`administrador_gestion`) | Todos los catálogos | Catálogos y cuentas operativas; no cuentas ni perfiles administrativos |
+| Encargado de EE/JI (`encargado`) | Su única sede, sus dependencias y categorías de referencia | Dependencias de su propia sede |
+| Consulta general / Auditor (`consulta`) | Todos los catálogos | Ninguna |
+| Consulta de establecimiento (`consulta_sede`) | Su única sede, sus dependencias y categorías de referencia | Ninguna |
+| Sin autorización, cuenta inactiva o sede local inactiva | Sin acceso | Ninguna |
+
+Esta etapa implementa perfiles, alcance y mantenedores existentes. Inventario,
+actas, solicitudes, incidentes y funcionarios siguen pendientes; sus facultades
+futuras se describen en la [matriz funcional](matriz-perfiles.md).
 
 La aplicación conserva solo SELECT sobre la tabla de accesos. Los administradores
 gestionan cuentas desde **Mantenedores → Usuarios y perfiles**, mediante una función
@@ -22,7 +29,8 @@ La sesión está cifrada en una cookie HttpOnly, SameSite=Lax, Secure con HTTPS,
 con duración máxima de ocho horas. No se guardan tokens OAuth de Google.
 
 Cada consulta/acción vuelve a comprobar el permiso vigente del usuario.
-Desactivar una cuenta o cambiar su rol afecta la siguiente petición; no es
+Desactivar una cuenta, cambiar su rol o sede, o desactivar la sede local afecta
+la siguiente petición; no es
 necesario esperar a que caduque la cookie. Una operación ya iniciada puede
 terminar. Si la consulta de permisos falla, se rechaza el acceso.
 La autorización se basa en el correo institucional: si Workspace reasigna ese
@@ -90,13 +98,18 @@ productivo certificado.
 
 Como administrador del inventario, abrir **Mantenedores → Usuarios y perfiles**.
 Registrar el correo institucional, un nombre opcional, el perfil y el estado.
-Consulta permite ver catálogos; Administrador también modifica catálogos y accesos.
-Editar permite cambiar nombre, perfil o estado; el correo identifica la cuenta
+Encargado y Consulta de establecimiento exigen exactamente una sede EE/JI activa.
+Los perfiles generales se guardan sin sede. Nivel Central no es una opción para
+un perfil local. Varias cuentas personales pueden pertenecer a la misma sede.
+Editar permite cambiar nombre, perfil, sede o estado; el correo identifica la cuenta
 y permanece fijo. No se eliminan usuarios: se desactivan para conservar su historia.
 
 El formulario valida en el servidor el dominio, el perfil y el estado, rechaza
 campos repetidos o archivos, y detecta ediciones obsoletas. No permite retirar al
-último administrador activo ni que un administrador retire su propio permiso.
+último administrador del sistema activo ni que retire su propio permiso.
+El Administrador de gestión no puede crear, editar, activar o desactivar cuentas
+con perfiles administrativos, ni conceder esos perfiles a una cuenta operativa.
+La función SQL comprueba estas restricciones incluso si se manipula el formulario.
 Si un administrador debe dejar el sistema, otro administrador realiza el cambio.
 Los registros anteriores se conservan después de aplicar la nueva migración.
 
@@ -128,8 +141,8 @@ WHERE correo = 'persona.autorizada@slepb.gob.cl';
 
 Reservar el SQL directo para recuperación y mantenimiento controlado; puede
 evitar las protecciones y el historial del formulario. No conceder el rol
-administrador a toda la organización. Esta etapa no implementa asignaciones
-por sede ni roles para módulos todavía pendientes.
+administrador a toda la organización. Los accesos locales se asignan desde el formulario; el SQL directo no es
+el mecanismo ordinario para vincular cuentas a sedes.
 
 ## Portada y acceso
 
@@ -137,7 +150,7 @@ Sin sesión, `/` presenta la bienvenida institucional y un enlace a `/ingresar`.
 Ambas páginas conservan identidad, accesibilidad y contacto de UTIC, sin menú
 lateral ni botón de cierre de sesión. La portada no muestra datos de catálogos.
 Después de ingresar, `/` presenta el panel y la navegación de la cuenta.
-Usuarios y perfiles solo aparece en el menú del administrador; el servidor
+Usuarios y perfiles solo aparece en el menú de los perfiles administrativos; el servidor
 también protege sus consultas y acciones ante peticiones directas.
 Las cuentas rechazadas por falta de autorización y las sesiones cuyo permiso
 fue retirado se dirigen a `/acceso-denegado`, con el mensaje **No tienes acceso
@@ -145,8 +158,11 @@ al sistema**, sin menú ni datos privados. Allí se puede usar otra cuenta,
 contactar a UTIC o cerrar la sesión para volver a la bienvenida.
 Las sesiones ausentes o vencidas siguen dirigiéndose al ingreso normal.
 Los fallos técnicos al comprobar permisos no se clasifican como una baja de la cuenta.
-Establecimientos, jardines y Nivel Central son por ahora ámbitos informativos
-de la portada; todavía no conceden ni restringen acceso a datos por sede.
+Los listados de sedes y dependencias se filtran en el servidor según el alcance
+vigente. Cambiar un identificador de edición en la URL no muestra otra sede.
+Un encargado no puede cambiar la sede de una dependencia ajena ni trasladar una
+propia a otra sede. Los catálogos globales son de referencia para perfiles locales
+y solo los perfiles administrativos pueden modificarlos.
 
 ## Comprobación real en CentOS
 
@@ -179,8 +195,44 @@ El runner `node tests/ejecutar-acceso-http.mjs` requiere DATABASE_URL de aplicac
 y TEST_ADMIN_DATABASE_URL de una base **de prueba**; crea y retira una cuenta
 ficticia de consulta. No ejecutarlo contra una base institucional compartida.
 El proceso web no recibe la conexión administrativa del runner.
-También crea cuentas ficticias y categorías, prueba acciones de usuarios reales
-del servidor y revocaciones concurrentes; retira los datos al terminar.
+También crea cuentas, sedes, dependencias y categorías ficticias; prueba acciones
+reales del servidor, revocaciones concurrentes, aislamiento EE/JI/NC, restricciones
+de gestión, cambios inmediatos de sede e historial. Retira los datos al terminar.
 `database/verificar-usuarios.sql` prueba en una transacción reversible los perfiles,
 los correos duplicados, la edición obsoleta y la conservación del último administrador.
 Está diseñado para una base temporal con un solo administrador inicial.
+
+
+## Actualización de perfiles y sede en una instalación existente
+
+La migración `1793491200000_perfiles-por-sede` conserva las cuentas actuales:
+`administrador` pasa a mostrarse como Administrador del sistema y `consulta`
+como Consulta general / Auditor, manteniendo sus alcances generales. No asigna
+sedes ni concede Administrador de gestión a ninguna persona por su cargo o correo.
+Los perfiles locales se asignarán expresamente desde el mantenedor.
+
+Después de revisar y fusionar el cambio, detener web, actualizar main y aplicar
+las migraciones antes de iniciar de nuevo la web. No cambian las dependencias npm
+ni los secretos OAuth en esta etapa:
+
+```bash
+cd ~/inventario-barrancas &&
+docker compose stop web &&
+git switch main &&
+git pull --ff-only origin main &&
+docker compose run --build --rm migrar &&
+docker compose up -d --wait web
+```
+
+Comprobar primero que Felipe conserva su acceso y ve los cinco perfiles.
+Antes de probar un perfil local debe existir una sede EE/JI activa. La importación
+del listado maestro de 78 sedes y los datos de directores es una tarea separada;
+esta migración no la ejecuta. No es necesario registrar las sedes manualmente para
+preparar el sistema; las pruebas automáticas ya usan sedes ficticias temporales.
+
+Cuando se pruebe con sedes reales, usar cuentas expresamente autorizadas y revisar
+que el encargado solo vea la sede asignada y edite únicamente sus dependencias;
+Consulta de establecimiento debe ver la misma sede sin edición. El gestor puede
+administrar usuarios operativos, pero sus propias cuentas administrativas y la
+cuenta del administrador del sistema estarán reservadas. No asignar perfiles
+administrativos a las cuentas de prueba por defecto.

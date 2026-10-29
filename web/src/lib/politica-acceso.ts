@@ -1,5 +1,24 @@
 export const DOMINIO_INSTITUCIONAL = "slepb.gob.cl";
-export type RolAcceso = "administrador" | "consulta";
+export const PERFILES = {
+  administrador: "Administrador del sistema",
+  administrador_gestion: "Administrador de gestión",
+  encargado: "Encargado de EE/JI",
+  consulta: "Consulta general / Auditor",
+  consulta_sede: "Consulta de establecimiento",
+} as const;
+export type RolAcceso = keyof typeof PERFILES;
+
+export function requiereSede(rol: unknown): boolean {
+  return rol === "encargado" || rol === "consulta_sede";
+}
+
+export function puedeGestionarDependencias(rol: unknown): boolean {
+  return puedeAdministrar(rol) || rol === "encargado";
+}
+
+export function perfilReservado(rol: unknown): boolean {
+  return rol === "administrador" || rol === "administrador_gestion";
+}
 
 export function correoInstitucional(perfil: {
   email?: unknown; email_verified?: unknown; hd?: unknown; sub?: unknown;
@@ -13,9 +32,9 @@ export function correoInstitucional(perfil: {
 }
 
 export function rolValido(rol: unknown): rol is RolAcceso {
-  return rol === "administrador" || rol === "consulta";
+  return typeof rol === "string" && Object.hasOwn(PERFILES, rol);
 }
 
 export function puedeAdministrar(rol: unknown): boolean {
-  return rol === "administrador";
+  return rol === "administrador" || rol === "administrador_gestion";
 }

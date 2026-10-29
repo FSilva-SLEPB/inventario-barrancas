@@ -3,10 +3,13 @@
 Acuerdo funcional con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance y plan](alcance-y-plan.md).
 
-**Estado: diseño acordado, pendiente de implementación.** La aplicación actual
-conserva únicamente los perfiles Administrador y Consulta. Este documento no
-modifica cuentas existentes, no concede accesos y no convierte todavía esos
-perfiles en los descritos a continuación.
+**Estado: primera implementación de perfiles y alcance disponible en esta rama;
+pendiente de integrar y comprobar en CentOS.** Se implementan los cinco perfiles,
+la vinculación local a una única sede EE/JI, los filtros de sedes/dependencias y
+la administración delegada de usuarios. Inventarios, actas, solicitudes,
+incidentes y funcionarios siguen pendientes: sus permisos de esta matriz son
+el diseño para esas etapas. La migración conserva los accesos generales previos;
+no crea perfiles de gestión ni importa sedes automáticamente.
 
 ## 1. Tres dimensiones independientes
 
@@ -199,8 +202,8 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
   incorporación inmediata sin aprobación UTIC ya están acordadas.
 - Precisar la participación de la sede en las actas de recepción y los préstamos
   a terceros, su devolución, vencimiento y documentación.
-- Revisar la correspondencia de las cuentas existentes al implementar la migración;
-  los alcances de Consulta general y Consulta de establecimiento ya están acordados.
+- Asignar expresamente los nuevos perfiles y sedes a las cuentas que Felipe
+  autorice; la migración mantiene los accesos generales anteriores.
 - Definir el acceso a antecedentes sensibles sin ampliar por defecto las facultades
   de auditor ni de los encargados.
 

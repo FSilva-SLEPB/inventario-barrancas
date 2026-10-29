@@ -152,7 +152,7 @@ try {
   const pantallaUsuarios = await pedir('/mantenedores/usuarios', admin);
   assert.equal(pantallaUsuarios.status, 200);
   const accionUsuario = camposAccion(await pantallaUsuarios.text());
-  const valores = { correo: usuarioGestion, nombre: 'Persona ficticia', rol: 'consulta', activo: 'true', version: '0' };
+  const valores = { correo: usuarioGestion, nombre: 'Persona ficticia', rol: 'consulta', activo: 'true', version: '0', sedeId: '' };
   for (const [sesion, destino] of [[null, '/ingresar'], [consulta, '/sin-permiso']]) {
     const denegado = await guardar('/mantenedores/usuarios', accionUsuario, valores, sesion);
     assert.equal(denegado.status, 303);

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { opcionesAuth } from "@/lib/opciones-auth";
 import { autenticacionConfigurada } from "@/lib/configuracion-auth";
-import { puedeAdministrar } from "@/lib/politica-acceso";
+import { puedeAdministrar, puedeGestionarDependencias } from "@/lib/politica-acceso";
 
 // React cache dura una petición de renderizado; no conserva permisos entre usuarios.
 export const obtenerSesion = cache(async () => {
@@ -29,5 +29,11 @@ export async function exigirAcceso() {
 export async function exigirAdministrador() {
   const acceso = await exigirAcceso();
   if (!puedeAdministrar(acceso.rol)) redirect("/sin-permiso");
+  return acceso;
+}
+
+export async function exigirGestionDependencias() {
+  const acceso = await exigirAcceso();
+  if (!puedeGestionarDependencias(acceso.rol)) redirect("/sin-permiso");
   return acceso;
 }

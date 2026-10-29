@@ -17,8 +17,8 @@ export async function guardarUsuario(_anterior: EstadoUsuario, formulario: FormD
   if (!datos) return fallo;
   try {
     await obtenerBaseDatos().query(
-      "SELECT public.guardar_usuario_acceso($1, $2, $3, $4, $5, $6)",
-      [actor.email, datos.correo, datos.nombre, datos.rol, datos.activo, datos.version],
+      "SELECT public.guardar_usuario_acceso($1, $2, $3, $4, $5, $6, $7::uuid)",
+      [actor.email, datos.correo, datos.nombre, datos.rol, datos.activo, datos.version, datos.sedeId],
     );
   } catch (error) {
     const codigo = (error as { code?: string } | null)?.code;
@@ -27,6 +27,8 @@ export async function guardarUsuario(_anterior: EstadoUsuario, formulario: FormD
       "P1001": "Debe quedar al menos un administrador activo.",
       "P1002": "Otro administrador debe cambiar tu perfil o desactivar tu cuenta.",
       "P1003": "La cuenta fue modificada. Recarga la página antes de guardar.",
+      "P1004": "Solo el Administrador del sistema puede gestionar perfiles administrativos.",
+      "P1005": "Selecciona una sede EE/JI activa para un perfil local; deja sin sede los perfiles generales.",
       "42501": "Tu permiso de administración cambió. Vuelve a ingresar.",
     };
     if (!codigo || !mensajes[codigo]) console.error("No se pudo guardar el acceso del usuario.");

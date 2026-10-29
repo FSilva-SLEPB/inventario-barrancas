@@ -1,17 +1,41 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { guardarUsuario } from "@/app/mantenedores/usuarios/acciones";
 import { PERFILES, valoresUsuario, type UsuarioAcceso, type EstadoUsuario } from "@/lib/validacion-usuarios";
+import { perfilReservado, requiereSede } from "@/lib/politica-acceso";
+import type { Sede } from "@/lib/validacion-sedes";
 
-export default function FormularioUsuario({ usuario }: { usuario?: UsuarioAcceso }) {
+export default function FormularioUsuario({ usuario, sedes, sistema }: {
+  usuario?: UsuarioAcceso; sedes: Sede[]; sistema: boolean;
+}) {
   const inicial: EstadoUsuario = { resultado: "inicial", mensaje: "", valores: valoresUsuario(usuario),
     errores: {}, revision: "inicial" };
   const [estado, accion, pendiente] = useActionState(guardarUsuario, inicial);
   return <form action={accion} className="formulario-catalogos" aria-busy={pendiente}>
     <input type="hidden" name="version" value={estado.valores.version} />
-    <div key={estado.revision}>
+    <CamposUsuario key={estado.revision} estado={estado} usuario={usuario} pendiente={pendiente}
+      sedes={sedes} sistema={sistema} />
+    <p role={estado.resultado === "error" ? "alert" : "status"} aria-atomic="true"
+      className={estado.resultado === "error" ? "error-catalogos" : undefined}>
+      {pendiente ? "Guardando acceso…" : estado.mensaje}
+    </p>
+    <div className="acciones-catalogos">
+      <button className="boton-catalogos" type="submit" disabled={pendiente}>
+        {pendiente ? "Guardando…" : usuario ? "Guardar cambios" : "Registrar usuario"}
+      </button>
+      {usuario && <Link href="/mantenedores/usuarios">Finalizar edición</Link>}
+    </div>
+  </form>;
+}
+
+function CamposUsuario({ estado, usuario, pendiente, sedes, sistema }: {
+  estado: EstadoUsuario; usuario?: UsuarioAcceso; pendiente: boolean; sedes: Sede[]; sistema: boolean;
+}) {
+  const [rol, setRol] = useState(estado.valores.rol);
+  const local = requiereSede(rol);
+  return <div>
       <div className="campo-catalogos">
         <label htmlFor="usuario-correo">Correo institucional (obligatorio)</label>
         <input id="usuario-correo" type="email" name="correo" maxLength={254} required
@@ -31,14 +55,31 @@ export default function FormularioUsuario({ usuario }: { usuario?: UsuarioAcceso
       </div>
       <div className="campo-catalogos">
         <label htmlFor="usuario-rol">Perfil (obligatorio)</label>
-        <select id="usuario-rol" name="rol" defaultValue={estado.valores.rol} disabled={pendiente}
+        <select id="usuario-rol" name="rol" value={rol} onChange={e => setRol(e.target.value)} disabled={pendiente}
           aria-invalid={Boolean(estado.errores.rol)} aria-describedby="usuario-perfil-ayuda">
-          {Object.entries(PERFILES).map(([valor, etiqueta]) => <option key={valor} value={valor}>{etiqueta}</option>)}
+          {Object.entries(PERFILES).filter(([valor]) => sistema || !perfilReservado(valor))
+            .map(([valor, etiqueta]) => <option key={valor} value={valor}>{etiqueta}</option>)}
         </select>
         <p id="usuario-perfil-ayuda" className="ayuda-catalogos">
-          {estado.errores.rol ?? "Administrador gestiona catálogos y accesos. Consulta solo permite ver catálogos."}
+          {estado.errores.rol ?? "Los perfiles locales se limitan a una sede. Solo el administrador del sistema concede perfiles administrativos."}
         </p>
       </div>
+      {local ? <div className="campo-catalogos">
+        <label htmlFor="usuario-sede">Establecimiento o jardín (obligatorio)</label>
+        <select id="usuario-sede" name="sedeId" required disabled={pendiente}
+          defaultValue={estado.valores.sedeId} aria-invalid={Boolean(estado.errores.sedeId)}
+          aria-describedby="usuario-sede-ayuda">
+          <option value="">Selecciona una sede</option>
+          {sedes.filter(s => (s.activo || s.id === estado.valores.sedeId) && s.tipo !== "nivel_central")
+            .map(s => <option key={s.id} value={s.id} disabled={!s.activo}>
+              {s.nombre}{s.rbd ? ` · ${s.rbd}` : ""}{!s.activo ? " (inactiva)" : ""}
+            </option>)}
+        </select>
+        <p id="usuario-sede-ayuda" className="ayuda-catalogos">
+          {estado.errores.sedeId ?? "La cuenta podrá acceder únicamente a esta sede. Se requiere una sede activa."}
+        </p>
+      </div> : <><input type="hidden" name="sedeId" value="" />
+        {estado.errores.sedeId && <p className="error-catalogos">{estado.errores.sedeId}</p>}</>}
       <div className="campo-catalogos">
         <label htmlFor="usuario-activo">Estado (obligatorio)</label>
         <select id="usuario-activo" name="activo" defaultValue={estado.valores.activo} disabled={pendiente}
@@ -49,16 +90,5 @@ export default function FormularioUsuario({ usuario }: { usuario?: UsuarioAcceso
           {estado.errores.activo ?? "Desactivar revoca el acceso desde la próxima petición y conserva el registro."}
         </p>
       </div>
-    </div>
-    <p role={estado.resultado === "error" ? "alert" : "status"} aria-atomic="true"
-      className={estado.resultado === "error" ? "error-catalogos" : undefined}>
-      {pendiente ? "Guardando acceso…" : estado.mensaje}
-    </p>
-    <div className="acciones-catalogos">
-      <button className="boton-catalogos" type="submit" disabled={pendiente}>
-        {pendiente ? "Guardando…" : usuario ? "Guardar cambios" : "Registrar usuario"}
-      </button>
-      {usuario && <Link href="/mantenedores/usuarios">Finalizar edición</Link>}
-    </div>
-  </form>;
+    </div>;
 }
