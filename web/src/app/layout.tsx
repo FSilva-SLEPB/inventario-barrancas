@@ -6,6 +6,8 @@ import localFont from "next/font/local";
 import logoBarrancas from "../../public/identidad/barrancas-blanco.png";
 import Accesibilidad from "@/components/accesibilidad";
 import Navegacion from "@/components/navegacion";
+import { BotonSalir } from "@/components/botones-sesion";
+import { obtenerAcceso } from "@/lib/acceso";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
@@ -40,7 +42,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+// La sesión y los permisos deben comprobarse en cada petición, también si la
+// configuración OAuth se incorpora después de compilar la imagen.
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const acceso = await obtenerAcceso();
   return (
     <html lang="es-CL" className={gobCl.variable}>
       <body className={gobCl.className}>
@@ -78,6 +85,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="estructura-app">
           <Navegacion />
           <div id="contenido-principal" className="contenido-app" tabIndex={-1}>
+            {acceso && <div className="sesion-institucional">
+              <span>{acceso.email} · {acceso.rol === "administrador" ? "Administración" : "Consulta"}</span>
+              <BotonSalir />
+            </div>}
             {children}
           </div>
         </div>

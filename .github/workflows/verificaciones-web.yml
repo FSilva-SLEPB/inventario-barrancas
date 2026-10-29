@@ -67,6 +67,12 @@ jobs:
       - name: Probar validación de dependencias
         run: node --test tests/validacion-dependencias.test.mjs
 
+      - name: Probar identidad y permisos de acceso
+        run: node --experimental-vm-modules --test tests/acceso.test.mjs
+
+      - name: Probar preparación privada del acceso
+        run: python3 ../tests/acceso/probar-preparacion.py
+
       - name: Comprobar sintaxis de scripts de respaldo
         run: |
           for archivo in \
@@ -130,6 +136,10 @@ jobs:
             await cliente.query(
               await readFile("../database/verificar-catalogos.sql", "utf8")
             );
+            await cliente.query(
+              await readFile("../database/verificar-acceso.sql", "utf8")
+                .replace(/^\\set.*$/gm, "")
+            );
             if (await contar() !== antes) {
               throw new Error("Las pruebas alteraron la cantidad de registros.");
             }
@@ -153,3 +163,9 @@ jobs:
 
       - name: Compilar aplicación
         run: npm run build
+
+      - name: Probar acceso HTTP con sesiones ficticias y base temporal
+        env:
+          DATABASE_URL: "postgresql://inventario_app:ci_app_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+          TEST_ADMIN_DATABASE_URL: "postgresql://inventario_admin:ci_admin_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+        run: node tests/ejecutar-acceso-http.mjs

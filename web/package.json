@@ -12,6 +12,7 @@
   "dependencies": {
     "bootstrap": "5.3.8",
     "next": "16.4.3",
+    "next-auth": "4.24.15",
     "pg": "8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",

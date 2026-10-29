@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { obtenerBaseDatos } from "@/lib/db";
+import { exigirAdministrador } from "@/lib/acceso";
 
 export type EstadoCategoria = {
   resultado: "inicial" | "error" | "guardado";
@@ -16,14 +17,7 @@ export async function guardarCategoria(
   _estadoAnterior: EstadoCategoria,
   datos: FormData,
 ): Promise<EstadoCategoria> {
-  if (process.env.NODE_ENV !== "development") {
-    return {
-      resultado: "error",
-      mensaje: "El guardado no está disponible.",
-      nombre: "",
-      activo: "true",
-    };
-  }
+  await exigirAdministrador();
 
   const id = datos.get("id");
   const nombreRecibido = datos.get("nombre");

@@ -7,6 +7,8 @@ import { connection } from "next/server";
 import FormularioDependencia from "@/components/formulario-dependencia";
 import { listarDependencias } from "@/lib/dependencias";
 import { listarSedes } from "@/lib/sedes";
+import { exigirAcceso } from "@/lib/acceso";
+import { puedeAdministrar } from "@/lib/politica-acceso";
 import { esIdDependencia } from "@/lib/validacion-dependencias";
 import { TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./dependencias.module.css";
@@ -23,9 +25,10 @@ type Propiedades = {
 
 export default async function Dependencias({ searchParams }: Propiedades) {
   await connection();
+  const acceso = await exigirAcceso();
   const parametros = await searchParams;
   const [dependencias, sedes] = await Promise.all([listarDependencias(), listarSedes()]);
-  const puedeEditar = process.env.NODE_ENV === "development";
+  const puedeEditar = puedeAdministrar(acceso.rol);
   const pideEdicion = parametros.editar !== undefined;
   const id = typeof parametros.editar === "string" && esIdDependencia(parametros.editar)
     ? parametros.editar.toLowerCase() : null;

@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
+import { exigirAcceso } from "@/lib/acceso";
 
 export default async function CatalogosAnterior({
   searchParams,
 }: {
   searchParams: Promise<{ editar?: string | string[] }>;
 }) {
+  await exigirAcceso();
   const { editar } = await searchParams;
   const destino = "/mantenedores/categorias";
 

@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { obtenerBaseDatos } from "@/lib/db";
+import { exigirAdministrador } from "@/lib/acceso";
 import {
   validarSede,
   valoresInicialesSede,
@@ -14,6 +15,7 @@ export async function guardarSede(
   _anterior: EstadoSede,
   formulario: FormData,
 ): Promise<EstadoSede> {
+  await exigirAdministrador();
   const revision = randomUUID();
   const { valores, errores, datos } = validarSede(formulario);
   const respuesta: EstadoSede = {
@@ -24,13 +26,6 @@ export async function guardarSede(
     errores,
   };
 
-  // Protección temporal, igual que en Categorías, hasta incorporar autenticación.
-  if (process.env.NODE_ENV !== "development") {
-    return {
-      ...respuesta,
-      mensaje: "El registro y la edición de sedes no están habilitados en este entorno.",
-    };
-  }
   if (!datos) {
     return { ...respuesta, mensaje: errores.id ?? respuesta.mensaje };
   }
