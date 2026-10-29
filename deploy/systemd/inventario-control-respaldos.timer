@@ -1,0 +1,10 @@
+[Unit]
+Description=Revision diaria de capacidad y antiguedad de respaldos
+
+[Timer]
+OnCalendar=*-*-* 09:00:00 America/Santiago
+Persistent=true
+Unit=inventario-control-respaldos.service
+
+[Install]
+WantedBy=timers.target

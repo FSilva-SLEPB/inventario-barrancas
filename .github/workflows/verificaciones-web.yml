@@ -80,6 +80,9 @@ jobs:
       - name: Probar control del envío a Drive sin credenciales reales
         run: python3 ../tests/respaldos/probar-envio-drive.py
 
+      - name: Probar medición, retención y avisos sin servicios reales
+        run: python3 ../tests/respaldos/probar-control-respaldos.py
+
       - name: Revisar código
         run: npm run lint
 
