@@ -88,6 +88,18 @@ con controles de duplicados. Los campos obligatorios y la plantilla se definirá
 antes de implementar. Esta facultad no permite registrar como propio un equipo
 que ya pertenece a otro inventario ni anticipar una entrega pendiente de UTIC.
 
+### Corrección de identificadores y conservación de registros
+
+El encargado de Enlaces podrá ingresar y corregir la serie y el número de
+inventario de los equipos de su única sede. Se conservarán el valor anterior,
+el nuevo, quién modificó, cuándo y el motivo; se comprobarán duplicados antes de
+aceptar el cambio. El equipo mantendrá su identidad interna y la vinculación de
+su historial y documentos previos, sin reescribir actas ya emitidas.
+
+El encargado no podrá eliminar registros ni historial. La edición de datos no
+habilita traspasos, validación de robos ni bajas, reservados a los perfiles
+administrativos según la matriz. Estas restricciones se comprobarán en el servidor.
+
 ### Traspasos entre inventarios
 
 Se permitirán traspasos de Nivel Central hacia EE/JI y en sentido inverso,
@@ -272,7 +284,7 @@ Las mejoras visuales podrán incorporarse sin alterar las reglas funcionales aco
 La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfiles.md).
 Antes de implementarla quedan por precisar, paso a paso:
 
-- ¿Qué campos puede corregir el encargado y qué datos mínimos exigirá el ingreso propio?
+- ¿Qué datos mínimos exigirá el ingreso propio y qué otros campos requerirán reglas de corrección?
 - ¿Qué información de equipos pendientes puede consultar el encargado de la sede,
   sin confundirla con equipos recibidos?
 
