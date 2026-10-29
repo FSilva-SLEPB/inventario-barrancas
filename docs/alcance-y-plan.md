@@ -127,6 +127,15 @@ el equipo al inventario recibido de la sede, sin quitarlo del consolidado.
 Los totales deberán distinguir pendientes y entregados, sin contar dos veces
 el mismo equipo. Un consolidado no equivale a existencias físicas de bodega.
 
+El encargado podrá consultar los equipos destinados a su única sede que aún
+permanecen en bodega TIC en una sección **Pendientes de entrega**, separada de
+su inventario recibido. Verlos no los incorporará al inventario recibido ni a
+sus totales; seguirán visibles en el consolidado EE/JI como pendientes, sin
+contarse dos veces. No podrá confirmar su entrega ni marcarlos como recibidos
+editando su estado. La confirmación corresponderá a UTIC, mediante los perfiles
+Administrador de gestión y Administrador del sistema y con fecha, receptor y
+acta. La consulta de pendientes también respetará el filtro de sede en el servidor.
+
 Se utilizará **Confirmar entrega**, en lugar de confundirla con una activación.
 Se distinguirán:
 
@@ -289,8 +298,7 @@ La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfil
 Antes de implementarla quedan por precisar, paso a paso:
 
 - ¿Qué datos mínimos exigirá el ingreso propio y qué otros campos requerirán reglas de corrección?
-- ¿Qué información de equipos pendientes puede consultar el encargado de la sede,
-  sin confundirla con equipos recibidos?
 
-La vinculación de cada encargado a una única sede ya está acordada.
+La vinculación de cada encargado a una única sede y su consulta separada de
+Pendientes de entrega ya están acordadas.
 Las preguntas restantes se resolverán en su etapa; no es necesario responderlas todas juntas.
