@@ -67,6 +67,15 @@ del inventario de Nivel Central.
 
 ## 4. Compra, carga masiva y entrega
 
+### Listado maestro de sedes y directores
+
+La hoja Directoresas de `INV_P02_v01 (3).xlsx` será la fuente maestra actualizada
+de EE/JI, según confirmación de Felipe. Los datos de directores se conservarán
+para asignaciones y entregas, separados de los datos de la sede. No otorgarán
+acceso automático al sistema. Las actas conservarán los datos de quien recibió
+en cada entrega, aunque después cambie el director. La preparación y los criterios
+de carga se documentan en [Sedes y directores](sedes-y-directores.md).
+
 ### Datos conocidos antes del ingreso
 
 Al registrar los equipos ya se conoce si se compraron para Nivel Central, EE o
