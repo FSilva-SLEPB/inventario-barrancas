@@ -120,9 +120,14 @@ interno y la entrega a funcionarios; no se aplicará por analogía sin revisión
 | Consultas e informes | Consolidado EE/JI, inventario de Nivel Central, bodega e incidentes según autorización |
 
 Las solicitudes por usuario de Nivel Central quedan para una ampliación posterior.
-El carrito representa una solicitud, no una entrega ya realizada. La propuesta
-es descontar stock al confirmar la entrega; antes de implementarlo deben
-acordarse reservas, aprobaciones, entregas parciales, cancelaciones y faltantes.
+El [flujo acordado de solicitudes de insumos](solicitudes-insumos.md) define:
+carrito de la sede, validación por TI, reserva al aprobar y una única entrega
+con acta por las cantidades aprobadas. No habrá entregas parciales ni saldos
+pendientes automáticos. Las reducciones requieren motivo y ajuste de aprobación.
+Al entregar se descuenta la existencia física y se consume la reserva; al cancelar
+antes de entregar se libera la reserva, conservando responsable, motivo e historial.
+El módulo todavía no está implementado. La conciliación de datos históricos,
+los ajustes, las unidades y los detalles de documentos requieren diseño previo.
 
 El formato de actas, numeración, responsables de firma, mecanismo de firma y
 custodia documental siguen pendientes de definición. No se presupone firma
