@@ -14,11 +14,32 @@ assert.ok(origen && secret && process.env.TEST_ADMIN_DATABASE_URL,
 const base = new pg.Client({ connectionString: process.env.TEST_ADMIN_DATABASE_URL });
 const correo = `consulta-prueba-${randomUUID()}@slepb.gob.cl`;
 const nombreCategoria = `Categoria ficticia ${randomUUID()}`;
+const usuarioGestion = `gestion-prueba-${randomUUID()}@slepb.gob.cl`;
+const administradoresPrueba = [0, 1].map(() => `admin-prueba-${randomUUID()}@slepb.gob.cl`);
 const cookie = async (email, extras = {}) => "next-auth.session-token=" + await encode({
   secret, token: { sub: "identidad-ficticia", correoInstitucional: email, ...extras }, maxAge: 600,
 });
 async function pedir(ruta, sesion) {
   return fetch(origen + ruta, { redirect: "manual", headers: sesion ? { Cookie: sesion } : {} });
+}
+function camposAccion(html) {
+  const decodificar = (s) => s.replaceAll('&quot;', '"').replaceAll('&#x27;', "'")
+    .replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&');
+  const campos = [];
+  for (const [input] of html.matchAll(/<input\b[^>]*>/g)) {
+    if (!input.includes('type="hidden"')) continue;
+    const nombre = /\bname="([^"]+)"/.exec(input)?.[1];
+    if (nombre?.startsWith('$ACTION')) campos.push([decodificar(nombre),
+      decodificar(/\bvalue="([^"]*)"/.exec(input)?.[1] ?? '')]);
+  }
+  assert.ok(campos.length, 'Se requiere una referencia real de acción.');
+  return campos;
+}
+async function guardar(ruta, campos, valores, sesion) {
+  const datos = new FormData();
+  for (const [nombre, valor] of [...campos, ...Object.entries(valores)]) datos.append(nombre, valor);
+  return fetch(origen + ruta, { method: 'POST', body: datos, redirect: 'manual',
+    headers: { Origin: new URL(origen).origin, ...(sesion ? { Cookie: sesion } : {}) } });
 }
 await base.connect();
 let verificaciones = 0;
@@ -27,12 +48,43 @@ try {
   const admin = await cookie("felipe.silva@slepb.gob.cl");
   const consulta = await cookie(correo, { rol: "administrador" });
   let formularioCategoria;
-  for (const ruta of ["/", "/inventario", "/solicitudes", "/mantenedores",
+  for (const ruta of ["/inventario", "/solicitudes", "/mantenedores",
     "/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
     const anonimo = await pedir(ruta);
     assert.equal(anonimo.status, 307, ruta);
     assert.equal(anonimo.headers.get("location"), "/ingresar", ruta);
     verificaciones++;
+  }
+  for (const ruta of ['/', '/ingresar']) {
+    const respuesta = await pedir(ruta);
+    assert.equal(respuesta.status, 200);
+    const html = await respuesta.text();
+    assert.ok(!html.includes('<nav'), 'El portal público no debe renderizar el menú.');
+    assert.ok(!html.includes('Cerrar sesión'));
+    verificaciones++;
+  }
+  const inicioAdmin = await (await pedir('/', admin)).text();
+  assert.ok(inicioAdmin.includes('href="/mantenedores/usuarios"'));
+  const inicioConsulta = await (await pedir('/', consulta)).text();
+  assert.ok(!inicioConsulta.includes('href="/mantenedores/usuarios"'));
+  verificaciones += 2;
+  // Dos administradores intentan revocarse entre sí al mismo tiempo. La función
+  // debe volver a comprobar al actor después de tomar el bloqueo compartido.
+  for (const email of administradoresPrueba) await base.query(
+    'SELECT public.guardar_usuario_acceso($1,$2,$3,$4,$5,$6)',
+    ['felipe.silva@slepb.gob.cl', email, 'Administrador ficticio', 'administrador', true, 0]);
+  const conexiones = [new pg.Client({ connectionString: process.env.DATABASE_URL }),
+    new pg.Client({ connectionString: process.env.DATABASE_URL })];
+  try {
+    await Promise.all(conexiones.map(c => c.connect()));
+    const carreras = await Promise.allSettled(conexiones.map((c, i) => c.query(
+      'SELECT public.guardar_usuario_acceso($1,$2,$3,$4,$5,$6)',
+      [administradoresPrueba[i], administradoresPrueba[1-i], '', 'administrador', false, 1])));
+    assert.equal(carreras.filter(c => c.status === 'fulfilled').length, 1);
+    assert.equal(carreras.filter(c => c.status === 'rejected' && c.reason.code === '42501').length, 1);
+    verificaciones++;
+  } finally {
+    await Promise.all(conexiones.map(c => c.end()));
   }
   for (const ruta of ["/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
     const respuestaAdmin = await pedir(ruta, admin);
@@ -90,6 +142,41 @@ try {
   assert.ok([200, 303].includes(guardado.status));
   assert.equal(await contarCategoria(), 1, 'La sesión de administración debe poder guardar en producción.');
   verificaciones += 2;
+  // Mantenedor real de usuarios: guardado, auditoría, denegación y edición obsoleta.
+  for (const [sesion, destino] of [[null, '/ingresar'], [consulta, '/sin-permiso']]) {
+    const denegado = await pedir('/mantenedores/usuarios', sesion);
+    assert.equal(denegado.status, 307);
+    assert.equal(denegado.headers.get('location'), destino);
+    verificaciones++;
+  }
+  const pantallaUsuarios = await pedir('/mantenedores/usuarios', admin);
+  assert.equal(pantallaUsuarios.status, 200);
+  const accionUsuario = camposAccion(await pantallaUsuarios.text());
+  const valores = { correo: usuarioGestion, nombre: 'Persona ficticia', rol: 'consulta', activo: 'true', version: '0' };
+  for (const [sesion, destino] of [[null, '/ingresar'], [consulta, '/sin-permiso']]) {
+    const denegado = await guardar('/mantenedores/usuarios', accionUsuario, valores, sesion);
+    assert.equal(denegado.status, 303);
+    assert.equal(new URL(denegado.headers.get('location'), origen).pathname, destino);
+    verificaciones++;
+  }
+  const creado = await guardar('/mantenedores/usuarios', accionUsuario, valores, admin);
+  assert.equal(creado.status, 200);
+  const leerGestion = async () => (await base.query('SELECT rol, activo, version FROM public.usuarios_acceso WHERE correo = $1', [usuarioGestion])).rows[0];
+  assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: true, version: 1 });
+  const historial = await base.query('SELECT actor, antes, despues FROM public.usuarios_acceso_historial WHERE correo = $1', [usuarioGestion]);
+  assert.equal(historial.rows.length, 1);
+  assert.equal(historial.rows[0].actor, 'felipe.silva@slepb.gob.cl');
+  assert.equal(historial.rows[0].antes, null);
+  assert.equal(historial.rows[0].despues.rol, 'consulta');
+  verificaciones += 2;
+  const editado = await guardar('/mantenedores/usuarios', accionUsuario,
+    { ...valores, version: '1', activo: 'false' }, admin);
+  assert.equal(editado.status, 200);
+  assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: false, version: 2 });
+  const obsoleto = await guardar('/mantenedores/usuarios', accionUsuario, { ...valores, version: '1' }, admin);
+  assert.equal(obsoleto.status, 200);
+  assert.equal((await leerGestion()).activo, false, 'Un formulario obsoleto no debe reactivar la cuenta.');
+  verificaciones += 2;
   await base.query("UPDATE public.usuarios_acceso SET activo = false WHERE correo = $1", [correo]);
   assert.equal((await pedir("/mantenedores/sedes", consulta)).status, 307);
   verificaciones++;
@@ -108,6 +195,10 @@ try {
   console.log(`${verificaciones} comprobaciones HTTP: anónimo, administrador, consulta, revocación, cookie alterada y CSRF.`);
   console.log("Se usaron identidades y cookies de prueba; el consentimiento real de Google queda pendiente.");
 } finally {
+  await base.query('DELETE FROM public.usuarios_acceso_historial WHERE correo = ANY($1)', [administradoresPrueba]);
+  await base.query('DELETE FROM public.usuarios_acceso WHERE correo = ANY($1)', [administradoresPrueba]);
+  await base.query('DELETE FROM public.usuarios_acceso_historial WHERE correo = $1', [usuarioGestion]);
+  await base.query('DELETE FROM public.usuarios_acceso WHERE correo = $1', [usuarioGestion]);
   await base.query("DELETE FROM public.categorias_bienes WHERE nombre = $1", [nombreCategoria]);
   await base.query("DELETE FROM public.usuarios_acceso WHERE correo = $1", [correo]);
   await base.end();

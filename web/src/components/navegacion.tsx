@@ -36,7 +36,7 @@ function Icono({ tipo }: { tipo: keyof typeof trazos }) {
   );
 }
 
-export default function Navegacion() {
+export default function Navegacion({ administrador = false }: { administrador?: boolean }) {
   const rutaActual = usePathname();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const esMantenedores = rutaActual === "/mantenedores"
@@ -99,6 +99,9 @@ export default function Navegacion() {
             <span className="indicador-menu" aria-hidden="true" />
           </summary>
           <ul className="submenu">
+            {administrador && <li><Link href="/mantenedores/usuarios"
+              aria-current={rutaActual === "/mantenedores/usuarios" ? "page" : undefined}
+              onClick={cerrarMenu}>Usuarios y perfiles</Link></li>}
             <li>
               <Link
                 href="/mantenedores"

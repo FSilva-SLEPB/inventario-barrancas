@@ -10,8 +10,10 @@ La migración inicial autoriza a `felipe.silva@slepb.gob.cl` como administrador.
 | consulta | Sí | No |
 | Sin autorización o cuenta inactiva | No | No |
 
-La aplicación solo tiene SELECT en la tabla de accesos: los permisos se gestionan
-por ahora mediante el administrador de PostgreSQL, no mediante formularios web.
+La aplicación conserva solo SELECT sobre la tabla de accesos. Los administradores
+gestionan cuentas desde **Mantenedores → Usuarios y perfiles**, mediante una función
+SQL controlada que vuelve a comprobar su autorización y registra cada cambio.
+No se concede INSERT, UPDATE ni DELETE directo a la cuenta web.
 El correo de Google debe estar verificado y el perfil debe declarar exactamente
 `hd=slepb.gob.cl`. El parámetro visual `hd` no se usa como prueba de identidad.
 NextAuth estable 4.24.15 verifica OIDC y utiliza PKCE, state, nonce y CSRF.
@@ -84,7 +86,32 @@ En despliegues HTTPS configurar TLS y origen canónico correctamente antes de
 abrir acceso externo. No usar esta configuración de desarrollo como despliegue
 productivo certificado.
 
-## Administración inicial de autorizaciones
+## Administración de autorizaciones
+
+Como administrador del inventario, abrir **Mantenedores → Usuarios y perfiles**.
+Registrar el correo institucional, un nombre opcional, el perfil y el estado.
+Consulta permite ver catálogos; Administrador también modifica catálogos y accesos.
+Editar permite cambiar nombre, perfil o estado; el correo identifica la cuenta
+y permanece fijo. No se eliminan usuarios: se desactivan para conservar su historia.
+
+El formulario valida en el servidor el dominio, el perfil y el estado, rechaza
+campos repetidos o archivos, y detecta ediciones obsoletas. No permite retirar al
+último administrador activo ni que un administrador retire su propio permiso.
+Si un administrador debe dejar el sistema, otro administrador realiza el cambio.
+Los registros anteriores se conservan después de aplicar la nueva migración.
+
+La función SQL serializa los cambios y revisa al actor dentro del mismo bloqueo;
+los cambios simultáneos no evitan esta protección. El actor procede de la sesión
+validada por el servidor, no del formulario. Los registros anteriores y posteriores
+quedan en `public.usuarios_acceso_historial`, sin acceso directo de escritura para
+la cuenta web. Esta función confía en la identidad que le pasa el servidor;
+las credenciales técnicas de PostgreSQL deben seguir protegidas.
+
+Registrar un usuario en el inventario no crea su cuenta de Google ni configura
+la asignación del conector de Microsoft Entra. Si el acceso institucional está
+federado con Microsoft, esa asignación se administra por separado.
+
+### Recuperación administrativa
 
 Como administrador de PostgreSQL, con `docker compose exec db psql -X -U
 inventario_admin -d inventario`, ejecutar SQL revisado. Ejemplo de cuenta ficticia
@@ -99,9 +126,21 @@ UPDATE public.usuarios_acceso SET activo = false
 WHERE correo = 'persona.autorizada@slepb.gob.cl';
 ```
 
-No conceder el rol administrador a toda la organización. Revisar también la
-auditoría y el futuro mantenedor de usuarios en una tarea posterior; esta etapa
-no implementa asignaciones por sede ni roles para módulos todavía pendientes.
+Reservar el SQL directo para recuperación y mantenimiento controlado; puede
+evitar las protecciones y el historial del formulario. No conceder el rol
+administrador a toda la organización. Esta etapa no implementa asignaciones
+por sede ni roles para módulos todavía pendientes.
+
+## Portada y acceso
+
+Sin sesión, `/` presenta la bienvenida institucional y un enlace a `/ingresar`.
+Ambas páginas conservan identidad, accesibilidad y contacto de UTIC, sin menú
+lateral ni botón de cierre de sesión. La portada no muestra datos de catálogos.
+Después de ingresar, `/` presenta el panel y la navegación de la cuenta.
+Usuarios y perfiles solo aparece en el menú del administrador; el servidor
+también protege sus consultas y acciones ante peticiones directas.
+Establecimientos, jardines y Nivel Central son por ahora ámbitos informativos
+de la portada; todavía no conceden ni restringen acceso a datos por sede.
 
 ## Comprobación real en CentOS
 
@@ -128,9 +167,14 @@ npm run lint
 npm run build
 ```
 
-CI comprueba además la migración repetida, los permisos SQL y 21 comprobaciones
+CI comprueba además la migración repetida, los permisos SQL y las comprobaciones
 HTTP con sesiones cifradas ficticias contra Next.js real y una base temporal.
 El runner `node tests/ejecutar-acceso-http.mjs` requiere DATABASE_URL de aplicación
 y TEST_ADMIN_DATABASE_URL de una base **de prueba**; crea y retira una cuenta
 ficticia de consulta. No ejecutarlo contra una base institucional compartida.
 El proceso web no recibe la conexión administrativa del runner.
+También crea cuentas ficticias y categorías, prueba acciones de usuarios reales
+del servidor y revocaciones concurrentes; retira los datos al terminar.
+`database/verificar-usuarios.sql` prueba en una transacción reversible los perfiles,
+los correos duplicados, la edición obsoleta y la conservación del último administrador.
+Está diseñado para una base temporal con un solo administrador inicial.

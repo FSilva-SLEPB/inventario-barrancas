@@ -138,6 +138,8 @@ jobs:
             );
             const verificarAcceso = await readFile("../database/verificar-acceso.sql", "utf8");
             await cliente.query(verificarAcceso.replace(/^\\set.*$/gm, ""));
+            const verificarUsuarios = await readFile("../database/verificar-usuarios.sql", "utf8");
+            await cliente.query(verificarUsuarios.replace(/^\\set.*$/gm, ""));
             if (await contar() !== antes) {
               throw new Error("Las pruebas alteraron la cantidad de registros.");
             }
