@@ -7,6 +7,11 @@ registrar inventario, generar actas y permitir su firma.
 
 ## Alcance inicial
 
+El [alcance funcional y plan de desarrollo](docs/alcance-y-plan.md) reúne los
+acuerdos vigentes, la separación entre Nivel Central y EE/JI, los flujos de
+entrega, funcionarios e incidentes, y las decisiones pendientes. Distingue
+lo implementado de lo previsto y será la referencia antes de ampliar módulos.
+
 - Gestión de usuarios y permisos.
 - Solicitudes de insumos.
 - Registro de bienes y movimientos de inventario.
@@ -114,7 +119,9 @@ una copia privada de `recuperacion-cifrado.json`, separada de los respaldos.
 Consultar los procedimientos de [autorización](docs/conexion-drive.md),
 [preparación del cifrado](docs/cifrado-drive.md) y
 [envío y recuperación](docs/respaldo-postgresql-drive.md).
-La periodicidad, la retención y los avisos de error se configurarán después.
+La programación semanal y el control diario fueron configurados en el CentOS
+de desarrollo. El borrado automático y el envío de avisos por correo siguen
+pendientes; consultar [Control de respaldos](docs/control-respaldos.md).
 
 ## Verificaciones automáticas
 
