@@ -26,12 +26,14 @@ try {
     await esperar(200);
   }
   assert.ok(listo, "El servidor de prueba no quedó listo.");
-  const pruebas = spawn(process.execPath, ["tests/acceso-http.mjs"], { stdio: "inherit", env: {
-    ...entornoServidor, TEST_ADMIN_DATABASE_URL: process.env.TEST_ADMIN_DATABASE_URL,
-    ACCESO_HTTP_URL: "http://127.0.0.1:3100",
-  } });
-  const codigo = await new Promise((resolve) => pruebas.once("exit", resolve));
-  assert.equal(codigo, 0, "Fallaron las comprobaciones HTTP de acceso.");
+  for (const archivo of ["tests/acceso-http.mjs", "tests/perfiles-http.mjs"]) {
+    const pruebas = spawn(process.execPath, [archivo], { stdio: "inherit", env: {
+      ...entornoServidor, TEST_ADMIN_DATABASE_URL: process.env.TEST_ADMIN_DATABASE_URL,
+      ACCESO_HTTP_URL: "http://127.0.0.1:3100",
+    } });
+    const codigo = await new Promise((resolve) => pruebas.once("exit", resolve));
+    assert.equal(codigo, 0, "Fallaron las comprobaciones HTTP: " + archivo);
+  }
 } finally {
   servidor.kill("SIGTERM");
   const limite = setTimeout(() => servidor.kill("SIGKILL"), 5000);

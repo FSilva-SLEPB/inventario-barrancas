@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { obtenerBaseDatos } from "@/lib/db";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirGestionDependencias } from "@/lib/acceso";
 import {
   validarDependencia,
   valoresInicialesDependencia,
@@ -15,7 +15,7 @@ export async function guardarDependencia(
   _anterior: EstadoDependencia,
   formulario: FormData,
 ): Promise<EstadoDependencia> {
-  await exigirAdministrador();
+  const actor = await exigirGestionDependencias();
   const revision = randomUUID();
 
   if (!(formulario instanceof FormData)) {
@@ -36,30 +36,15 @@ export async function guardarDependencia(
   }
 
   try {
-    const parametros = [datos.sedeId, datos.nombre, datos.activo];
     const base = obtenerBaseDatos();
-
-    if (datos.id) {
-      const resultado = await base.query(`
-        UPDATE public.dependencias
-        SET sede_id = $1::uuid, nombre = $2, activo = $3
-        WHERE id = $4::uuid
-      `, [...parametros, datos.id]);
-
-      if (resultado.rowCount !== 1) {
-        return {
-          ...respuesta,
-          mensaje: "La dependencia ya no está disponible. Vuelve al listado y selecciónala nuevamente.",
-        };
-      }
-    } else {
-      await base.query(`
-        INSERT INTO public.dependencias (sede_id, nombre, activo)
-        VALUES ($1::uuid, $2, $3)
-      `, parametros);
-    }
+    await base.query("SELECT public.guardar_dependencia_acceso($1,$2::uuid,$3::uuid,$4,$5)",
+      [actor.email, datos.id, datos.sedeId, datos.nombre, datos.activo]);
   } catch (error: unknown) {
     const errorBase = error as { code?: string; constraint?: string } | null;
+    if (errorBase?.code === "42501") return { ...respuesta,
+      mensaje: "No tienes permiso para modificar esta dependencia o sede." };
+    if (errorBase?.code === "P1006") return { ...respuesta,
+      mensaje: "La dependencia ya no está disponible. Recarga el listado." };
     if (errorBase?.code === "23505"
         && errorBase.constraint === "dependencias_sede_nombre_unico") {
       return {

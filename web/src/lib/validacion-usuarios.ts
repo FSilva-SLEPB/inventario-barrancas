@@ -1,14 +1,14 @@
-import { rolValido, type RolAcceso } from "@/lib/politica-acceso";
-
-export const PERFILES: Record<RolAcceso, string> = {
-  administrador: "Administrador", consulta: "Consulta",
-};
+import { rolValido, requiereSede, type RolAcceso } from "@/lib/politica-acceso";
+import { esIdSede } from "@/lib/validacion-sedes";
+export { PERFILES } from "@/lib/politica-acceso";
 
 export type UsuarioAcceso = {
   correo: string; nombre: string; rol: RolAcceso; activo: boolean; version: number;
+  sedeId: string | null;
 };
 export type ValoresUsuario = {
   correo: string; nombre: string; rol: string; activo: string; version: string;
+  sedeId: string;
 };
 export type EstadoUsuario = {
   resultado: "inicial" | "error" | "guardado";
@@ -18,7 +18,7 @@ export type EstadoUsuario = {
 export function valoresUsuario(usuario?: UsuarioAcceso): ValoresUsuario {
   return { correo: usuario?.correo ?? "", nombre: usuario?.nombre ?? "",
     rol: usuario?.rol ?? "consulta", activo: String(usuario?.activo ?? true),
-    version: String(usuario?.version ?? 0) };
+    version: String(usuario?.version ?? 0), sedeId: usuario?.sedeId ?? "" };
 }
 
 export function validarUsuario(formulario: FormData) {
@@ -39,6 +39,9 @@ export function validarUsuario(formulario: FormData) {
     errores.nombre = "Usa un nombre de hasta 120 caracteres, sin controles ni saltos de línea.";
   }
   if (!rolValido(valores.rol)) errores.rol = "Selecciona un perfil permitido.";
+  if (requiereSede(valores.rol)) {
+    if (!esIdSede(valores.sedeId)) errores.sedeId = "Selecciona una única sede EE o JI.";
+  } else if (valores.sedeId !== "") errores.sedeId = "Un perfil general debe quedar sin sede asignada.";
   if (!["true", "false"].includes(valores.activo)) errores.activo = "Selecciona un estado válido.";
   const version = Number(valores.version);
   if (!/^\d{1,10}$/.test(valores.version) || !Number.isSafeInteger(version) || version > 2147483646) {
@@ -46,6 +49,6 @@ export function validarUsuario(formulario: FormData) {
   }
   const datos: UsuarioAcceso | null = Object.keys(errores).length || !rolValido(valores.rol)
     ? null : { correo: valores.correo, nombre: valores.nombre, rol: valores.rol,
-      activo: valores.activo === "true", version };
+      activo: valores.activo === "true", version, sedeId: valores.sedeId || null };
   return { valores, errores, datos };
 }

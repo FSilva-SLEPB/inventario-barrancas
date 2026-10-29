@@ -520,6 +520,8 @@
 }
 .denegado-acciones { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .tabla-usuarios-contenedor { overflow-x: auto; }
+.tabla-usuarios-contenedor table { min-width: 48rem; }
+.tabla-usuarios-contenedor th:first-child { width: 30%; }
 .tabla-usuarios-contenedor th { overflow-wrap: anywhere; }
 .usuario-nombre { display: block; }
 .perfiles-ayuda { margin-top: 2rem; border-top: 1px solid var(--color-borde-suave); padding-top: 1.5rem; }
