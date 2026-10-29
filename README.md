@@ -79,6 +79,9 @@ Para detener ambos servicios conservando los datos: `docker compose stop`.
 
 ## Respaldos de PostgreSQL
 
+La medición de capacidad, el plan de retención sin borrado y los avisos
+del respaldo semanal se describen en [Control de respaldos](docs/control-respaldos.md).
+
 Crear una copia local y comprobar su recuperación:
 
 ```bash

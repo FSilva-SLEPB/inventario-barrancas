@@ -1,0 +1,15 @@
+[Unit]
+Description=Medicion diaria y avisos de respaldos de Inventario Barrancas
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=slepb
+WorkingDirectory=/home/slepb/inventario-barrancas
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+UMask=0077
+ExecStart=/usr/bin/python3 /home/slepb/inventario-barrancas/scripts/controlar-respaldos.py --solo-control
+SuccessExitStatus=2
+TimeoutStartSec=2h
