@@ -44,7 +44,7 @@ sobre módulos pendientes se habilitarán cuando esos módulos se implementen.
 | Operación | Administrador del sistema | Administrador de gestión | Encargado EE/JI | Auditor | Consulta |
 | --- | --- | --- | --- | --- | --- |
 | Consultar inventarios | Todos | Todos | Su sede | Todos | Alcance autorizado |
-| Registrar ingresos de equipos | Sí | Sí | Su inventario, con las reglas de ingreso por definir | No | No |
+| Registrar ingresos de equipos | Sí | Sí | Su sede; ingreso propio inmediato, sin aprobación UTIC | No | No |
 | Corregir datos permitidos de sus equipos | Sí | Sí | Sí | No | No |
 | Gestionar asignaciones, ubicaciones y préstamos | Sí | Sí | Su sede | No | No |
 | Gestionar ingresos, entregas y actas desde UTIC | Sí | Sí | Recepción y participación de su sede; facultades exactas pendientes | Solo consulta autorizada | Solo consulta autorizada |
@@ -63,8 +63,8 @@ La administración técnica no supone crear una pantalla que exponga claves ni
 ejecutar automáticamente cambios en servidores. El mecanismo y el acceso técnico
 correspondientes se mantendrán separados de la gestión operativa de inventario.
 
-Los detalles y documentos exigidos para un traspaso, una baja, una corrección o
-una recepción aún deben definirse. El permiso no sustituye esas validaciones.
+El traspaso requiere origen, destino, responsable, fecha y acta. El formato
+documental y los detalles de recepción, baja y corrección aún deben definirse. El permiso no sustituye esas validaciones.
 Ningún perfil operativo podrá borrar el historial para ocultar una corrección.
 
 ## 4. Administración delegada de usuarios
@@ -110,6 +110,15 @@ desde la que se conecte, por el nombre del correo ni por una sede elegida librem
 El encargado solo accederá a los equipos y movimientos de su sede, incluso si
 intenta cambiar un identificador en una URL, formulario, petición o exportación.
 
+El encargado podrá incorporar de inmediato equipos de compra propia, donación
+u otro origen a su sede y al consolidado EE/JI, sin validación previa de UTIC.
+Se conservarán procedencia, autor, fecha y respaldo disponible, con controles de
+duplicados. No podrá usar un ingreso nuevo para apropiarse de un equipo existente.
+
+Los traspasos NC hacia EE/JI, en sentido inverso y entre sedes quedan reservados
+al Administrador de gestión y al Administrador del sistema. Conservarán el mismo
+registro del equipo, su historial y el acta; ningún encargado podrá ejecutarlos.
+
 Administrar su inventario incluye las modificaciones permitidas, asignaciones,
 ubicaciones y préstamos. No incluye apropiarse de bienes destinados a otra sede,
 incorporar como recibido un equipo todavía pendiente de entrega en UTIC, moverlo
@@ -151,8 +160,8 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
 
 ## 8. Decisiones que aún requieren revisión
 
-- Precisar los campos que un encargado puede corregir y el procedimiento de
-  ingreso de equipos propios que no provengan de una entrega de UTIC.
+- Precisar los campos que un encargado puede corregir y los datos mínimos del
+  ingreso propio; su incorporación inmediata sin aprobación UTIC ya está acordada.
 - Precisar la participación de la sede en las actas de recepción y los préstamos
   a terceros, su devolución, vencimiento y documentación.
 - Precisar el alcance del perfil Consulta al migrar las cuentas existentes.

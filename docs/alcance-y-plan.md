@@ -78,6 +78,30 @@ antes de confirmar. La plantilla, los campos obligatorios, las excepciones de
 serie/número de inventario y el manejo de filas erróneas se definirán antes de
 implementar la importación. No habrá una importación silenciosa de datos ambiguos.
 
+### Ingresos propios de establecimientos y jardines
+
+El encargado podrá registrar equipos comprados por su sede, recibidos por
+donación u otro origen. El ingreso se incorporará de inmediato al inventario
+de su única sede y al consolidado de EE/JI, sin aprobación previa de UTIC.
+Se conservarán procedencia, autor del registro, fecha y respaldo disponible,
+con controles de duplicados. Los campos obligatorios y la plantilla se definirán
+antes de implementar. Esta facultad no permite registrar como propio un equipo
+que ya pertenece a otro inventario ni anticipar una entrega pendiente de UTIC.
+
+### Traspasos entre inventarios
+
+Se permitirán traspasos de Nivel Central hacia EE/JI y en sentido inverso,
+así como entre sedes. Los ejecutará el Administrador de gestión; el Administrador
+del sistema conserva esa facultad por su acceso completo. Los encargados de
+EE/JI no podrán ejecutarlos ni eludir esta restricción editando el destino.
+
+Al confirmar el traspaso, el mismo equipo cambiará de inventario de pertenencia,
+sin duplicarse ni perder su historial. Se conservarán origen, destino,
+responsable, fecha y acta. Dejará de contar en el inventario actual de origen
+y pasará al de destino; sus movimientos anteriores permanecerán en el historial.
+El formato del acta y los detalles de recepción se definirán antes de implementar.
+La custodia temporal por reparación seguirá sin constituir un traspaso.
+
 ### Destino, custodia y entrega son datos distintos
 
 | Situación de un equipo destinado a un EE o JI | Control de UTIC y consolidado EE/JI | Inventario recibido de la sede |
@@ -103,8 +127,9 @@ Se distinguirán:
 - Asignación a un responsable y sus fechas.
 
 Una reparación no cambiará la pertenencia del equipo. Una devolución definitiva,
-un traspaso y una baja requerirán movimientos propios, cuyas reglas y documentos
-deberán acordarse. Para Nivel Central falta precisar el paso de bodega a uso
+un traspaso y una baja requerirán movimientos propios. Los traspasos respetarán
+las reglas anteriores; los detalles documentales y el procedimiento de baja
+se definirán antes de implementar. Para Nivel Central falta precisar el paso de bodega a uso
 interno y la entrega a funcionarios; no se aplicará por analogía sin revisión.
 
 ## 5. Equipos, suministros, solicitudes y actas
@@ -247,7 +272,7 @@ Las mejoras visuales podrán incorporarse sin alterar las reglas funcionales aco
 La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfiles.md).
 Antes de implementarla quedan por precisar, paso a paso:
 
-- ¿Qué campos puede corregir el encargado y cómo registra equipos que no vienen de UTIC?
+- ¿Qué campos puede corregir el encargado y qué datos mínimos exigirá el ingreso propio?
 - ¿Qué información de equipos pendientes puede consultar el encargado de la sede,
   sin confundirla con equipos recibidos?
 
