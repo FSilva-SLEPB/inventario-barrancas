@@ -4,6 +4,8 @@ import { connection } from "next/server";
 
 import FormularioCategoria from "@/components/formulario-categoria";
 import { listarCategorias } from "@/lib/catalogos";
+import { exigirAcceso } from "@/lib/acceso";
+import { puedeAdministrar } from "@/lib/politica-acceso";
 
 export const metadata: Metadata = {
   title: "Categorías de bienes | Mantenedores | Inventario SLEP Barrancas",
@@ -17,10 +19,11 @@ export default async function Catalogos({
   searchParams: Promise<{ editar?: string | string[] }>;
 }) {
   await connection();
+  const acceso = await exigirAcceso();
 
   const categorias = await listarCategorias();
   const parametros = await searchParams;
-  const edicionHabilitada = process.env.NODE_ENV === "development";
+  const edicionHabilitada = puedeAdministrar(acceso.rol);
   const categoriaEditar = categorias.find(
     (categoria) => categoria.id === parametros.editar,
   );

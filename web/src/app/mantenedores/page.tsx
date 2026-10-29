@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { exigirAcceso } from "@/lib/acceso";
 
 export const metadata: Metadata = {
   title: "Mantenedores | Inventario SLEP Barrancas",
 };
 
-export default function Mantenedores() {
+export default async function Mantenedores() {
+  await exigirAcceso();
   return (
     <main>
       <header>

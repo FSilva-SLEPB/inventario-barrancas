@@ -1,9 +1,11 @@
 import "server-only";
 
 import { obtenerBaseDatos } from "@/lib/db";
+import { exigirAcceso } from "@/lib/acceso";
 import type { Sede } from "@/lib/validacion-sedes";
 
 export async function listarSedes(): Promise<Sede[]> {
+  await exigirAcceso();
   const resultado = await obtenerBaseDatos().query<Sede>(`
     SELECT id, tipo, nombre, rbd, direccion, comuna,
            correo_institucional AS "correoInstitucional", activo

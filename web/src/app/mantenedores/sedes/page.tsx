@@ -6,6 +6,8 @@ import { connection } from "next/server";
 
 import FormularioSede from "@/components/formulario-sede";
 import { listarSedes } from "@/lib/sedes";
+import { exigirAcceso } from "@/lib/acceso";
+import { puedeAdministrar } from "@/lib/politica-acceso";
 import { esIdSede, TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./sedes.module.css";
 
@@ -21,9 +23,10 @@ type Propiedades = {
 
 export default async function Sedes({ searchParams }: Propiedades) {
   await connection();
+  const acceso = await exigirAcceso();
   const parametros = await searchParams;
   const sedes = await listarSedes();
-  const puedeEditar = process.env.NODE_ENV === "development";
+  const puedeEditar = puedeAdministrar(acceso.rol);
   const pideEdicion = parametros.editar !== undefined;
   const id = typeof parametros.editar === "string" && esIdSede(parametros.editar)
     ? parametros.editar.toLowerCase() : null;

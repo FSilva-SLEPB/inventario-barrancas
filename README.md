@@ -133,9 +133,13 @@ Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`
 
 ## Catálogos y bodegas
 
+El acceso requiere una cuenta institucional expresamente autorizada. Consultar
+[Acceso con Google Workspace](docs/acceso-institucional.md) para configurar
+el cliente OAuth, el administrador inicial y las cuentas de consulta.
+
 La sección `/mantenedores/categorias` permite consultar las categorías de bienes.
-La creación, edición y activación o desactivación están habilitadas
-en desarrollo mientras se incorpora la autenticación con Google Workspace.
+La creación, edición y activación o desactivación requieren una sesión con
+permiso de administración, comprobado en el servidor.
 
 La web utiliza el usuario limitado `inventario_app` para acceder a PostgreSQL.
 

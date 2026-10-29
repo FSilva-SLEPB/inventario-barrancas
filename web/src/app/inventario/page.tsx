@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { exigirAcceso } from "@/lib/acceso";
 
 export const metadata: Metadata = {
   title: "Inventario | SLEP Barrancas",
 };
 
-export default function InventarioPage() {
+export default async function InventarioPage() {
+  await exigirAcceso();
   return (
     <main>
       <header>

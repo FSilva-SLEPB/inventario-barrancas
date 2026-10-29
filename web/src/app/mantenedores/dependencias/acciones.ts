@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 
 import { obtenerBaseDatos } from "@/lib/db";
+import { exigirAdministrador } from "@/lib/acceso";
 import {
   validarDependencia,
   valoresInicialesDependencia,
@@ -14,6 +15,7 @@ export async function guardarDependencia(
   _anterior: EstadoDependencia,
   formulario: FormData,
 ): Promise<EstadoDependencia> {
+  await exigirAdministrador();
   const revision = randomUUID();
 
   if (!(formulario instanceof FormData)) {
@@ -29,13 +31,6 @@ export async function guardarDependencia(
     revision, valores, errores,
   };
 
-  // Protección temporal, igual que en Sedes, hasta incorporar autenticación.
-  if (process.env.NODE_ENV !== "development") {
-    return {
-      ...respuesta,
-      mensaje: "El registro y la edición de dependencias no están habilitados en este entorno.",
-    };
-  }
   if (!datos) {
     return { ...respuesta, mensaje: errores.id ?? respuesta.mensaje };
   }

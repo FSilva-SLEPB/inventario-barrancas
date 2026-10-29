@@ -1,6 +1,7 @@
 import "server-only";
 
 import { obtenerBaseDatos } from "@/lib/db";
+import { exigirAcceso } from "@/lib/acceso";
 import type { Dependencia } from "@/lib/validacion-dependencias";
 import type { TipoSede } from "@/lib/validacion-sedes";
 
@@ -12,6 +13,7 @@ export type DependenciaListado = Dependencia & {
 };
 
 export async function listarDependencias(): Promise<DependenciaListado[]> {
+  await exigirAcceso();
   const resultado = await obtenerBaseDatos().query<DependenciaListado>(`
     SELECT d.id, d.sede_id AS "sedeId", d.nombre, d.activo,
            s.nombre AS "sedeNombre", s.tipo AS "sedeTipo",

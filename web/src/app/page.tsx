@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { exigirAcceso } from "@/lib/acceso";
 
 const accesos = [
   {
@@ -19,7 +20,8 @@ const accesos = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  await exigirAcceso();
   return (
     <main>
       <header>
