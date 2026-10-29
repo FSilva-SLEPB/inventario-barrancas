@@ -67,6 +67,19 @@ jobs:
       - name: Probar validación de dependencias
         run: node --test tests/validacion-dependencias.test.mjs
 
+      - name: Comprobar sintaxis de scripts de respaldo
+        run: |
+          for archivo in \
+            ../scripts/autorizar-drive-inventario.sh \
+            ../scripts/preparar-cifrado-drive.sh \
+            ../scripts/respaldar-postgresql-drive.sh \
+            ../scripts/verificar-cifrado-postgresql.sh; do
+            bash -n "$archivo"
+          done
+
+      - name: Probar control del envío a Drive sin credenciales reales
+        run: python3 ../tests/respaldos/probar-envio-drive.py
+
       - name: Revisar código
         run: npm run lint
 
@@ -123,7 +136,7 @@ jobs:
           }
           NODE
 
-      - name: Probar respaldo y restauración
+      - name: Probar respaldo, cifrado y restauración sin acceso a Drive
         env:
           RESPALDO_DB_CONTAINER: ${{ job.services.db.id }}
         run: |
@@ -133,7 +146,7 @@ jobs:
           directorio_ci="$(mktemp -d "$RUNNER_TEMP/respaldos-postgresql.XXXXXXXX")"
           trap 'rm -rf -- "$directorio_ci"' EXIT
           respaldo_ci="$(bash ../scripts/respaldar-postgresql.sh "$directorio_ci")"
-          bash ../scripts/verificar-respaldo-postgresql.sh "$respaldo_ci" --datos-ci
+          bash ../scripts/verificar-cifrado-postgresql.sh "$respaldo_ci" --datos-ci
 
       - name: Compilar aplicación
         run: npm run build

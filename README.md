@@ -92,15 +92,39 @@ del seguimiento de Git. La recuperación se prueba en un contenedor independient
 Consulta el alcance y los pasos pendientes en
 [Respaldos de PostgreSQL](docs/respaldos-postgresql.md).
 
+## Respaldos cifrados en Drive
+
+La conexión institucional cifra el contenido y los nombres de las copias antes
+del envío. Después descarga cada copia y prueba su restauración en un contenedor
+independiente de PostgreSQL. Al terminar guarda una constancia en `backups/drive/`.
+
+Con la autorización y el cifrado ya preparados, ejecutar desde la raíz:
+
+```bash
+bash scripts/respaldar-postgresql-drive.sh
+```
+
+Las credenciales y las claves permanecen en `~/.config/inventario-respaldos/`,
+fuera del repositorio. Antes del primer envío se debe guardar fuera de CentOS
+una copia privada de `recuperacion-cifrado.json`, separada de los respaldos.
+
+Consultar los procedimientos de [autorización](docs/conexion-drive.md),
+[preparación del cifrado](docs/cifrado-drive.md) y
+[envío y recuperación](docs/respaldo-postgresql-drive.md).
+La periodicidad, la retención y los avisos de error se configurarán después.
+
 ## Verificaciones automáticas
 
 GitHub Actions revisa dependencias, ESLint, migraciones, permisos,
-integridad de los catálogos y compilación en los pull requests hacia
+integridad de los catálogos, respaldo, cifrado y restauración, y compilación
+en los pull requests hacia
 `main` y al actualizar esa rama.
 
 Las pruebas utilizan una base temporal con credenciales de prueba.
 Las pruebas de catálogos revierten sus registros ficticios. La prueba de respaldo
 utiliza datos ficticios que se eliminan junto con la base temporal al terminar CI.
+El cifrado se prueba sin conexión a Drive, con claves temporales. También se
+comprueba el control del envío con Drive simulado; CI no utiliza credenciales de Google.
 
 Para verificar los catálogos localmente: `bash scripts/verificar-base-datos.sh`.
 
