@@ -127,7 +127,34 @@ los permisos sobre documentos y datos personales.
 La hoja de stock incluye varias filas para un mismo código y filas con entregas
 sin ingresos registrados que producen saldos negativos. No se asumirán como
 duplicados ni se sumarán como existencias independientes sin conciliarlas.
-Los saldos físicos iniciales deberán contrastarse con bodega y sus antecedentes.
+Felipe confirmó que la hoja está actualizada y representa el stock de bodega TIC.
+La carga inicial tomará los saldos disponibles revisados por producto, sin volver
+a sumar los ingresos ni descontar las entregas anteriores. La conciliación de
+filas repetidas o negativas seguirá siendo necesaria antes de importar.
+
+### Antecedentes históricos sin stock previo
+
+Según aclaración de Felipe, existen entregas registradas sin stock previo y sin
+información de quién las solicitó o a quién se entregaron. Se conservarán **solo
+como antecedentes históricos**, separados de las operaciones nuevas del sistema.
+
+- Se mantendrán producto, cantidad y demás datos que realmente existan, junto
+  con su procedencia (archivo, hoja y fila) para permitir su revisión.
+- Solicitante y destinatario desconocidos quedarán sin identificar. No se
+  deducirán de otros registros ni se inventarán sedes, personas o fechas.
+- La observación será: "Entrega registrada sin stock previo y sin información
+  del solicitante o destinatario".
+- No generarán solicitudes, aprobaciones, reservas ni actas retroactivas.
+- No volverán a descontar stock ni se cargarán como existencias negativas
+  disponibles. Tampoco se crearán ingresos ficticios para compensarlos.
+- Un saldo negativo histórico no prueba que el saldo físico actual sea cero.
+  Si no hay un saldo actual válido para ese producto, quedará pendiente de
+  confirmar antes de habilitar su disponibilidad.
+
+Los switches y puntos de acceso entregados como insumos conservarán ese
+tratamiento histórico, según confirmación de Felipe. No se convertirán
+automáticamente en equipos del inventario ni se crearán registros duplicados.
+El seguimiento individual de futuras compras se definirá por separado.
 
 Las solicitudes históricas incluyen identificadores anteriores al catálogo y
 algunas unidades vacías. Se preparará una correspondencia revisable, sin asignar
