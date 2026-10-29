@@ -45,7 +45,7 @@ sobre módulos pendientes se habilitarán cuando esos módulos se implementen.
 | --- | --- | --- | --- | --- | --- |
 | Consultar inventarios | Todos | Todos | Su sede | Todos | Alcance autorizado |
 | Registrar ingresos de equipos | Sí | Sí | Su sede; ingreso propio inmediato, sin aprobación UTIC | No | No |
-| Corregir datos permitidos de sus equipos | Sí | Sí | Sí | No | No |
+| Corregir datos permitidos, serie y número de inventario | Sí | Sí | Su sede, con motivo e historial | No | No |
 | Gestionar asignaciones, ubicaciones y préstamos | Sí | Sí | Su sede | No | No |
 | Gestionar ingresos, entregas y actas desde UTIC | Sí | Sí | Recepción y participación de su sede; facultades exactas pendientes | Solo consulta autorizada | Solo consulta autorizada |
 | Gestionar mantenedores globales, incluidas categorías y sedes | Sí | Sí | No | No modifica | No modifica |
@@ -115,6 +115,17 @@ u otro origen a su sede y al consolidado EE/JI, sin validación previa de UTIC.
 Se conservarán procedencia, autor, fecha y respaldo disponible, con controles de
 duplicados. No podrá usar un ingreso nuevo para apropiarse de un equipo existente.
 
+El encargado de Enlaces podrá ingresar y corregir el número de serie y el
+número de inventario de los equipos de su sede. Cada corrección conservará
+valor anterior, valor nuevo, autor, fecha y motivo, con controles para evitar
+duplicados. Se mantendrá una identidad interna estable del equipo para que
+corregir sus identificadores no rompa su historial ni sus actas anteriores.
+
+El encargado no podrá eliminar registros de equipos ni su historial. La
+restricción se aplicará en el servidor, aunque intente una petición directa.
+Corregir datos no permite ejecutar un traspaso, validar un robo ni dar de baja
+un equipo mediante la edición de otros campos.
+
 Los traspasos NC hacia EE/JI, en sentido inverso y entre sedes quedan reservados
 al Administrador de gestión y al Administrador del sistema. Conservarán el mismo
 registro del equipo, su historial y el acta; ningún encargado podrá ejecutarlos.
@@ -160,8 +171,9 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
 
 ## 8. Decisiones que aún requieren revisión
 
-- Precisar los campos que un encargado puede corregir y los datos mínimos del
-  ingreso propio; su incorporación inmediata sin aprobación UTIC ya está acordada.
+- Precisar los datos mínimos del ingreso propio y cualquier campo adicional
+  de corrección; la edición trazable de serie y número de inventario y la
+  incorporación inmediata sin aprobación UTIC ya están acordadas.
 - Precisar la participación de la sede en las actas de recepción y los préstamos
   a terceros, su devolución, vencimiento y documentación.
 - Precisar el alcance del perfil Consulta al migrar las cuentas existentes.
