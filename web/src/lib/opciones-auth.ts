@@ -8,9 +8,9 @@ import { autenticacionConfigurada } from "@/lib/configuracion-auth";
 
 async function consultarAcceso(correo: string) {
   const { rows } = await obtenerBaseDatos().query<{
-    rol: unknown; sedeId: string | null; sedeNombre: string | null;
+    rol: unknown; sedeId: string | null; sedeNombre: string | null; sedeRbd: string | null;
   }>(
-    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre"
+    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre", s.rbd AS "sedeRbd"
      FROM public.usuarios_acceso u LEFT JOIN public.sedes s ON s.id = u.sede_id
      WHERE u.correo = $1 AND u.activo
        AND (u.rol NOT IN ('encargado', 'consulta_sede')
@@ -19,7 +19,8 @@ async function consultarAcceso(correo: string) {
   );
   const fila = rows[0];
   if (!rolValido(fila?.rol) || (requiereSede(fila.rol) && !fila.sedeId)) return null;
-  return { rol: fila.rol, sedeId: fila.sedeId ?? null, sedeNombre: fila.sedeNombre ?? null };
+  return { rol: fila.rol, sedeId: fila.sedeId ?? null, sedeNombre: fila.sedeNombre ?? null,
+    sedeRbd: fila.sedeRbd ?? null };
 }
 
 export const opcionesAuth: NextAuthOptions = {

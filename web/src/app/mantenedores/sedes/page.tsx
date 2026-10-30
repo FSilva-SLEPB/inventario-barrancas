@@ -10,6 +10,7 @@ import { exigirAcceso } from "@/lib/acceso";
 import { puedeAdministrar } from "@/lib/politica-acceso";
 import { esIdSede, TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./sedes.module.css";
+import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 export const runtime = "nodejs";
 
@@ -65,9 +66,8 @@ export default async function Sedes({ searchParams }: Propiedades) {
               <caption>Sedes registradas: {sedes.length}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Nombre</th>
+                  <th scope="col">RBD - Nombre EE/JI</th>
                   <th scope="col">Tipo</th>
-                  <th scope="col">RBD</th>
                   <th scope="col">Comuna</th>
                   <th scope="col">Estado</th>
                   {puedeEditar && <th scope="col">Acciones</th>}
@@ -76,16 +76,15 @@ export default async function Sedes({ searchParams }: Propiedades) {
               <tbody>
                 {sedes.map((sede) => (
                   <tr key={sede.id}>
-                    <th scope="row">{sede.nombre}</th>
+                    <th scope="row">{etiquetaSede(sede)}</th>
                     <td>{TIPOS_SEDE[sede.tipo]}</td>
-                    <td>{sede.rbd ?? "—"}</td>
                     <td>{sede.comuna ?? "—"}</td>
                     <td>{sede.activo ? "Activa" : "Inactiva"}</td>
                     {puedeEditar && (
                       <td>
                         <Link
                           href={`/mantenedores/sedes?editar=${sede.id}#formulario-sede`}
-                          aria-label={`Editar sede ${sede.nombre}`}
+                          aria-label={`Editar sede ${etiquetaSede(sede)}`}
                         >
                           Editar
                         </Link>

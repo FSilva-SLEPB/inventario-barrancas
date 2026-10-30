@@ -28,6 +28,11 @@ Las dependencias o ubicaciones, como biblioteca, sala de Enlaces y bodega,
 pertenecen a una sede y no constituyen nuevos establecimientos. Nivel Central
 se conserva como ámbito separado; este listado maestro corresponde a EE/JI.
 
+En los selectores, listados y la identificación de la sede de la sesión se
+mostrará siempre **RBD - Nombre del EE/JI**, conservando guiones y dígitos del
+identificador. Nivel Central y cualquier sede sin RBD mostrarán solo su nombre.
+Esta presentación no modifica los nombres ni identificadores guardados.
+
 ## Datos de directores y acceso al sistema
 
 Los datos disponibles de los directores se conservarán para las asignaciones y
