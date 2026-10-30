@@ -66,20 +66,22 @@ export default async function Sedes({ searchParams }: Propiedades) {
               <caption>Sedes registradas: {sedes.length}</caption>
               <thead>
                 <tr>
-                  <th scope="col">RBD - Nombre EE/JI</th>
+                  <th scope="col">RBD</th>
+                  <th scope="col">Nombre EE/JI</th>
                   <th scope="col">Tipo</th>
+                  <th scope="col">Dirección</th>
                   <th scope="col">Comuna</th>
-                  <th scope="col">Estado</th>
                   {puedeEditar && <th scope="col">Acciones</th>}
                 </tr>
               </thead>
               <tbody>
                 {sedes.map((sede) => (
                   <tr key={sede.id}>
-                    <th scope="row">{etiquetaSede(sede)}</th>
+                    <td>{sede.rbd ?? "—"}</td>
+                    <th scope="row">{sede.nombre}{!sede.activo && <small> (inactiva)</small>}</th>
                     <td>{TIPOS_SEDE[sede.tipo]}</td>
+                    <td>{sede.direccion ?? "—"}</td>
                     <td>{sede.comuna ?? "—"}</td>
-                    <td>{sede.activo ? "Activa" : "Inactiva"}</td>
                     {puedeEditar && (
                       <td>
                         <Link
