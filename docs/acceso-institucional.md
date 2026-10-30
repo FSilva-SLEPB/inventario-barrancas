@@ -13,8 +13,9 @@ La migración inicial autoriza a `felipe.silva@slepb.gob.cl` como administrador.
 | Consulta de establecimiento (`consulta_sede`) | Su única sede, sus dependencias y categorías de referencia | Ninguna |
 | Sin autorización, cuenta inactiva o sede local inactiva | Sin acceso | Ninguna |
 
-Esta etapa implementa perfiles, alcance y mantenedores existentes. Inventario,
-actas, solicitudes, incidentes y funcionarios siguen pendientes; sus facultades
+Esta etapa implementa perfiles, alcance y mantenedores existentes. La rama de
+inventario incorpora ficha, registro, historial y carga histórica de equipos.
+Entregas, actas, solicitudes, incidentes y funcionarios siguen pendientes; sus facultades
 futuras se describen en la [matriz funcional](matriz-perfiles.md).
 
 La aplicación conserva solo SELECT sobre la tabla de accesos. Los administradores
@@ -236,3 +237,9 @@ Consulta de establecimiento debe ver la misma sede sin edición. El gestor puede
 administrar usuarios operativos, pero sus propias cuentas administrativas y la
 cuenta del administrador del sistema estarán reservadas. No asignar perfiles
 administrativos a las cuentas de prueba por defecto.
+
+
+La [ficha y carga de equipos](inventario-equipos.md) mantiene estos alcances en
+listados, fichas, historial y acciones. Consulta no escribe; el encargado no
+edita pendientes de entrega y solo registra/corrige equipos de su propia sede.
+La carga histórica de varios ámbitos corresponde a los perfiles administrativos.

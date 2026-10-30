@@ -1,7 +1,7 @@
 # Alcance y plan de Inventario 2.0 EE y TI
 
 Acuerdos de trabajo con Felipe Silva, UTIC del SLEP Barrancas.
-Fecha de corte: 29 de octubre de 2026, hora de Chile.
+Fecha de corte: 30 de octubre de 2026, hora de Chile.
 
 Este documento reúne las reglas acordadas y el orden propuesto de desarrollo.
 No significa que los módulos descritos estén implementados. Cada cambio deberá
@@ -23,12 +23,13 @@ Central, asignaciones, entregas, actas e incidentes con trazabilidad.
 
 ## 2. Estado de partida
 
-Referencia revisada: `main`, commit `bb4a3eb`.
+Referencia de partida revisada: `main`, commit `7b19ffd`. El módulo de equipos
+de esta rama está pendiente de revisión e instalación.
 
 | Capacidad | Estado al corte |
 | --- | --- |
 | Acceso institucional de Google Workspace y lista de cuentas autorizadas | Implementado; probado en CentOS |
-| Perfiles y alcance | Administrador y Consulta probados en CentOS; ampliación a cinco perfiles y sede única preparada en esta rama, pendiente de integración e instalación |
+| Perfiles y alcance | Cinco perfiles instalados y comprobados por Felipe en CentOS |
 | Mantenedor de usuarios y perfiles; activación/desactivación e historial | Implementado y probado por el usuario |
 | Protección del último administrador activo y control de ediciones obsoletas | Implementado; probado automáticamente |
 | Portada, portal sin menú y pantalla de acceso denegado | Implementados y comprobados en CentOS |
@@ -36,8 +37,9 @@ Referencia revisada: `main`, commit `bb4a3eb`.
 | Respaldo cifrado semanal en Drive con restauración de prueba | Configurado y probado en el CentOS de desarrollo |
 | Control diario de capacidad y plan de retención | Configurado; borrado automático desactivado |
 | Avisos por correo | Pendientes de configurar y probar el transporte |
-| Inventario operativo, movimientos, actas y solicitudes | Pendientes; las páginas actuales son bases de interfaz |
-| Permisos y filtrado de datos por sede | Preparados para sedes/dependencias y gestión de usuarios; pendientes de instalación. Inventarios y demás módulos se comprobarán al implementarlos |
+| Ficha e ingreso de equipos, historial y carga histórica CSV | Preparados en la rama de inventario, pendientes de integrar e instalar; ver inventario-equipos.md |
+| Entregas, movimientos, actas y solicitudes | Pendientes |
+| Permisos y filtrado de datos por sede | Instalados y comprobados para usuarios, sedes y dependencias; ampliación a equipos preparada en esta rama |
 | Funcionarios y habilitación tecnológica de Nivel Central | Pendientes |
 | Reportes y validación de incidentes de robo | Pendientes |
 
@@ -251,8 +253,9 @@ Los documentos y antecedentes sensibles tendrán acceso restringido.
 
 ## 8. Permisos y trazabilidad transversales
 
-La primera implementación de perfiles y alcance está preparada en la rama de
-desarrollo, pendiente de integrar y probar en CentOS. La migración conserva
+Los perfiles y el alcance por sede fueron instalados y comprobados por Felipe
+en CentOS. La ampliación a fichas, historial y carga de equipos está preparada
+en la rama de inventario, pendiente de revisión e instalación. La migración conserva
 Administrador como Administrador del sistema y Consulta como Consulta general /
 Auditor, con su alcance global anterior.
 La [matriz de perfiles y acceso por sede](matriz-perfiles.md) documenta el diseño
@@ -286,7 +289,9 @@ No se registrarán contraseñas, tokens ni PIN en bitácoras.
 
 ## 9. Orden propuesto de desarrollo
 
-La etapa 1 está preparada para revisión; las demás siguen pendientes. El orden es una propuesta para
+La etapa 1 fue instalada y comprobada por Felipe con las 78 sedes. La ficha,
+historial y carga CSV de la etapa 2 están preparados para revisión en esta rama;
+las demás etapas siguen pendientes. El orden es una propuesta para
 revisar con Felipe; no representa una fecha comprometida ni aprobación de los
 detalles técnicos que aún faltan.
 
@@ -309,7 +314,7 @@ Las mejoras visuales podrán incorporarse sin alterar las reglas funcionales aco
 La matriz funcional está recogida en [Perfiles y acceso por sede](matriz-perfiles.md).
 Antes de implementarla quedan por precisar, paso a paso:
 
-- ¿Qué datos mínimos exigirá el ingreso propio y qué otros campos requerirán reglas de corrección?
+- La primera ficha y carga están documentadas en [Ficha y carga de equipos](inventario-equipos.md); se permiten identificadores pendientes con motivo y trazabilidad.
 
 La vinculación de cada encargado a una única sede y su consulta separada de
 Pendientes de entrega ya están acordadas.

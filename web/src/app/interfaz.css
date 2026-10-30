@@ -524,6 +524,11 @@
 .tabla-usuarios-contenedor th:first-child { width: 30%; }
 .tabla-usuarios-contenedor th { overflow-wrap: anywhere; }
 .usuario-nombre { display: block; }
+.carga-equipos { max-width: 100%; }
+.carga-equipos input[type="file"] { max-width: 42rem; }
+.filtros-inventario { display: grid; gap: 0.5rem; max-width: 44rem; margin: 1rem 0; }
+.filtros-inventario input, .filtros-inventario select { width: 100%; min-width: 0; padding: 0.5rem; }
+.filtros-inventario button { justify-self: start; }
 .perfiles-ayuda { margin-top: 2rem; border-top: 1px solid var(--color-borde-suave); padding-top: 1.5rem; }
 
 @media (max-width: 767.98px) {

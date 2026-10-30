@@ -149,7 +149,9 @@ registro, asignación de perfil/sede y activación o desactivación, con histori
 Los perfiles locales se limitan a una sede EE/JI; Consulta general / Auditor mantiene
 lectura global. Administrador de gestión administra cuentas operativas, mientras
 los perfiles administrativos quedan reservados al Administrador del sistema.
-Los módulos de inventario y solicitudes siguen pendientes de implementación.
+El inventario incorpora ficha, historial y carga CSV con vista previa; las
+entregas con actas y las solicitudes siguen pendientes. Ver
+[Ficha y carga de equipos](docs/inventario-equipos.md).
 Antes de ingresar se muestra una portada institucional y un portal de acceso sin menú lateral.
 
 La sección `/mantenedores/categorias` permite consultar las categorías de bienes.

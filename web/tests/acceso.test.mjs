@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { SourceTextModule, SyntheticModule } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
@@ -32,7 +32,7 @@ async function entorno() {
     "next-auth/providers/google": { default: (opciones) => opciones },
     "next/navigation": { redirect: redirigir },
     "next/cache": { revalidatePath() {} },
-    "node:crypto": { randomUUID },
+    "node:crypto": { randomUUID, createHash },
     "@/lib/db": { obtenerBaseDatos: () => ({ query }) },
   };
   async function cargar(nombre) {
@@ -236,3 +236,62 @@ test("sesión usa la sede actual de la base e ignora el alcance insertado en el 
   e.roles.set(perfil.email, { rol: "consulta_sede", sedeId: null });
   assert.equal((await opcionesAuth.callbacks.session({ session: {}, token })).accesoDenegado, true);
 });
+
+
+test("equipos permiten identificadores pendientes con motivo y conservan ceros/guiones", async () => {
+  const e=await entorno();const {validarEquipo,valoresEquipo}=await e.importar("@/lib/validacion-equipos");
+  const preparar=(cambios={})=>{const f=new FormData();for(const [k,v] of Object.entries({...valoresEquipo(),sedeId:randomUUID(),categoriaId:randomUUID(),marca:"Marca ficticia",modelo:"Modelo ficticio",serie:"001-ABC",inventario:"00012-9",...cambios}))f.set(k,v);return f;};
+  assert.equal(validarEquipo(preparar()).datos.serie,"001-ABC");
+  for(const campo of ["serie","inventario"]){
+    assert.equal(validarEquipo(preparar({[campo]:""})).datos,null);
+    assert.ok(validarEquipo(preparar({[campo]:"",motivoIdentificacion:"Etiqueta no legible"})).datos);
+  }
+  for(const cambio of [{serie:"S/N"},{inventario:"N/A"},{marca:""},{modelo:""},{origen:"traspaso"},{condicionTecnica:"robado"},
+    {sedeId:"invalida"},{categoriaId:"invalida"},{version:"-1"},{marca:"a".repeat(121)},{id:randomUUID(),version:"1",motivoCambio:""}])
+    assert.equal(validarEquipo(preparar(cambio)).datos,null);
+  const repetido=preparar();repetido.append("sedeId",randomUUID());assert.equal(validarEquipo(repetido).datos,null);
+});
+
+test("CSV soporta BOM, separadores, comillas, tildes y rechaza estructuras inválidas",async()=>{
+  const e=await entorno();const {leerCsv}=await e.importar("@/lib/csv-equipos");
+  assert.deepEqual(leerCsv('\uFEFFa;b\r\n1;"texto; con ""comillas"""\r\n'),[["a","b"],["1",'texto; con "comillas"']]);
+  assert.deepEqual(leerCsv('a,b\n1,"línea\nsegunda"'),[["a","b"],["1","línea\nsegunda"]]);
+  for(const texto of ['a;b\n1','a;b\n1;"sin cerrar','a;b\n1;"cerrado"otro','a;b']) assert.throws(()=>leerCsv(texto));
+});
+
+test("vista previa histórica conserva faltantes y rechaza duplicados, sedes y fechas inválidas",async()=>{
+  const e=await entorno();const {prepararCargaEquipos}=await e.importar("@/lib/preparar-carga-equipos");
+  const sedes=[{id:randomUUID(),rbd:"00123-4",tipo:"establecimiento",activo:true}];
+  const categorias=[{id:randomUUID(),nombre:"Laptop",activo:true}];
+  const header='rbd;categoria;marca;modelo;serie;inventario;estado;fechaEntrega;enlaceActa;cantidad;anioEntrega';
+  const linea='00123-4;Laptop;Marca;Modelo;S-01;I-01;Activo;;;1;2024';
+  const correcto=prepararCargaEquipos(header+'\n'+linea,sedes,categorias);
+  assert.equal(correcto.errores.length,0);assert.equal(correcto.avisos.length,2);
+  assert.equal(correcto.datos[0].fechaEntrega,"");assert.equal(correcto.datos[0].compra.anioEntrega,"2024");
+  assert.equal(correcto.datos[0].condicionTecnica,"sin_verificar");
+  assert.ok(prepararCargaEquipos(header+'\n'+linea+'\n'+linea,sedes,categorias).errores.length);
+  assert.ok(prepararCargaEquipos(header+'\n'+linea.replace('00123-4','desconocido'),sedes,categorias).errores.length);
+  assert.ok(prepararCargaEquipos(header+'\n'+linea.replace('Activo;;','Activo;30/02/2024;'),sedes,categorias).errores.length);
+  assert.ok(prepararCargaEquipos(header+'\n'+linea.replace(';;;1;',';;javascript:alert(1);1;'),sedes,categorias).errores.length);
+});
+
+
+for(const rol of ["consulta","consulta_sede","encargado"]) {
+ test(`carga rechaza ${rol} antes de leer archivos o consultar catálogos`,async()=>{
+  const e=await entorno();const original={...process.env};
+  try{
+   Object.assign(process.env,{NEXTAUTH_URL:"http://localhost:3000",NEXTAUTH_SECRET:"x".repeat(32),GOOGLE_CLIENT_ID:"id-ficticio",GOOGLE_CLIENT_SECRET:"secreto-ficticio"});
+   e.sesion({user:{email:perfil.email,rol,sedeId:randomUUID()}});
+   await e.importar("@/lib/acceso");
+   await e.importar("@/lib/sedes");
+   await e.importar("@/lib/catalogos");
+   const modulo=await e.importar(path.join(raiz,"app/inventario/carga/acciones.ts"));
+   await assert.rejects(modulo.procesarCarga({},new FormData()),{message:"REDIRECT:/sin-permiso"});
+   assert.equal(e.consultas.length,0);
+  }finally{
+   for(const n of ["NEXTAUTH_URL","NEXTAUTH_SECRET","GOOGLE_CLIENT_ID","GOOGLE_CLIENT_SECRET"]){
+    if(original[n]===undefined)delete process.env[n];else process.env[n]=original[n];
+   }
+  }
+ });
+}
