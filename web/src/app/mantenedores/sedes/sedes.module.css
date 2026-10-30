@@ -6,7 +6,7 @@
 
 .tabla {
   width: 100%;
-  min-width: 44rem;
+  min-width: 64rem;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.9375rem;
@@ -34,7 +34,27 @@
 }
 
 .tabla thead th:first-child {
+  width: 7rem;
+}
+
+.tabla thead th:nth-child(2) {
   width: 28%;
+}
+
+.tabla thead th:nth-child(3) {
+  width: 10rem;
+}
+
+.tabla thead th:nth-child(4) {
+  width: 26%;
+}
+
+.tabla thead th:nth-child(5) {
+  width: 8rem;
+}
+
+.tabla thead th:nth-child(6) {
+  width: 6rem;
 }
 
 .tabla th[scope="row"] {
