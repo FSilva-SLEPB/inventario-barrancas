@@ -3,12 +3,13 @@
 Acuerdo funcional con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance y plan](alcance-y-plan.md).
 
-**Estado: primera implementación de perfiles y alcance disponible en esta rama;
-pendiente de integrar y comprobar en CentOS.** Se implementan los cinco perfiles,
+**Estado: perfiles y alcance instalados y comprobados por Felipe en CentOS.**
+Se implementan los cinco perfiles,
 la vinculación local a una única sede EE/JI, los filtros de sedes/dependencias y
-la administración delegada de usuarios. Inventarios, actas, solicitudes,
-incidentes y funcionarios siguen pendientes: sus permisos de esta matriz son
-el diseño para esas etapas. La migración conserva los accesos generales previos;
+la administración delegada de usuarios. La ficha, registro, historial y carga
+histórica de equipos se incorporan en la rama de inventario con comprobaciones
+de alcance. Entregas, actas, préstamos, incidentes y funcionarios siguen
+pendientes: sus permisos de esta matriz son el diseño para esas etapas. La migración conserva los accesos generales previos;
 no crea perfiles de gestión ni importa sedes automáticamente.
 
 ## 1. Tres dimensiones independientes

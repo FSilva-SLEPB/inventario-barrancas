@@ -4,8 +4,10 @@ Acuerdos con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance y plan](alcance-y-plan.md) y la
 [matriz de perfiles](matriz-perfiles.md).
 
-**Estado: diseño acordado; carga inicial y gestión de directores pendientes de
-implementación.** No se han importado datos ni modificado accesos.
+**Estado: sedes cargadas y comprobadas por Felipe en CentOS:** 54 establecimientos,
+23 jardines/salas cuna y la sede existente de Nivel Central. La gestión de
+directores y sus datos de recepción siguen pendientes. No se concedieron accesos
+a partir de los correos de la planilla.
 
 ## Fuente maestra y revisión inicial
 

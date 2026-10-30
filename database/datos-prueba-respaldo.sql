@@ -20,4 +20,18 @@ VALUES (
   'Equipos de prueba de respaldo', true
 );
 
+-- La recuperación del módulo nuevo también debe conservar un equipo y su historia.
+DO $equipo_ci$
+BEGIN
+  IF to_regclass('public.equipos') IS NOT NULL THEN
+    PERFORM public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object(
+      'id','','sedeId','10000000-0000-4000-8000-000000000001',
+      'categoriaId','30000000-0000-4000-8000-000000000001',
+      'marca','Marca ficticia de recuperación','modelo','Modelo ficticio de recuperación',
+      'serie','CI-RECUPERACION-SERIE-001','inventario','CI-RECUPERACION-INV-001',
+      'origen','compra_utic','condicionTecnica','sin_verificar'),0,'Equipo ficticio para comprobar recuperación');
+  END IF;
+END;
+$equipo_ci$;
+
 COMMIT;

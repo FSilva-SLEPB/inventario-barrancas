@@ -58,11 +58,11 @@ export default async function Usuarios({ searchParams }: {
       <h2 id="perfiles-titulo">Perfiles disponibles</h2>
       <dl><dt>Administrador del sistema</dt><dd>Administra todos los accesos, incluidos los perfiles administrativos.</dd>
         <dt>Administrador de gestión</dt><dd>Gestiona catálogos y usuarios operativos de todos los ámbitos.</dd>
-        <dt>Encargado de EE/JI</dt><dd>Accede a una única sede y gestiona sus dependencias.</dd>
+        <dt>Encargado de EE/JI</dt><dd>Registra y corrige equipos recibidos y dependencias de su única sede.</dd>
         <dt>Consulta general / Auditor</dt><dd>Consulta todos los ámbitos, sin modificar registros.</dd>
         <dt>Consulta de establecimiento</dt><dd>Consulta únicamente su sede, sin modificar registros.</dd></dl>
       <p>Debe permanecer al menos un administrador del sistema activo. Los cambios de acceso y sede quedan registrados.</p>
-      <p>Inventario, actas y solicitudes siguen en desarrollo; asignar un perfil no habilita esas funciones todavía.</p>
+      <p>Las entregas con actas, préstamos, incidentes y solicitudes se habilitarán en sus próximas etapas.</p>
     </section>
   </main>;
 }

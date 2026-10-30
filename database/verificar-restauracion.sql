@@ -9,6 +9,21 @@ BEGIN
   IF current_user <> 'inventario_app' THEN
     RAISE EXCEPTION 'La verificación debe ejecutarse como inventario_app.';
   END IF;
+  IF to_regclass('public.equipos') IS NOT NULL THEN
+    FOREACH tabla IN ARRAY ARRAY['equipos','equipos_historial','cargas_equipos'] LOOP
+      IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT')
+        OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT')
+        OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE')
+        OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE')
+        OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN
+        RAISE EXCEPTION 'Permisos incorrectos en las tablas de equipos restauradas';
+      END IF;
+    END LOOP;
+    IF NOT has_function_privilege(current_user,'public.guardar_equipo_acceso(text,jsonb,integer,text,uuid)','EXECUTE')
+      OR NOT has_function_privilege(current_user,'public.cargar_equipos_acceso(text,jsonb,text,text)','EXECUTE') THEN
+      RAISE EXCEPTION 'Falta una función controlada del inventario restaurado';
+    END IF;
+  END IF;
   IF EXISTS (
     SELECT 1 FROM pg_roles
     WHERE rolname = current_user
@@ -64,6 +79,17 @@ $verificar$;
 \if :validar_datos_ci
 DO $datos_ci$
 BEGIN
+  IF to_regclass('public.equipos') IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.equipos e JOIN public.equipos_historial h ON h.equipo_id=e.id
+      WHERE e.serie='CI-RECUPERACION-SERIE-001' AND e.numero_inventario='CI-RECUPERACION-INV-001'
+        AND e.sede_id='10000000-0000-4000-8000-000000000001'
+        AND h.actor='felipe.silva@slepb.gob.cl' AND h.antes IS NULL
+        AND h.despues->>'serie'=e.serie
+    ) THEN
+      RAISE EXCEPTION 'No se recuperó el equipo ficticio y su historial';
+    END IF;
+  END IF;
   IF NOT EXISTS (
     SELECT 1 FROM public.sedes
     WHERE id = '10000000-0000-4000-8000-000000000001'
