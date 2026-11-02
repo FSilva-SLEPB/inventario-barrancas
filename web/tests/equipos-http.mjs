@@ -82,7 +82,7 @@ try {
  assert.equal(new URL(denegado.headers.get('location'),origen).pathname,'/sin-permiso');pruebas++;
  const recibidos=await(await pedir('/inventario/p02',enc)).text();assert.ok(!recibidos.includes('/inventario/'+pendiente));
  const pendientes=await(await pedir('/inventario/p02?vista=pendientes',enc)).text();assert.ok(pendientes.includes('/inventario/'+pendiente));assert.ok(!pendientes.includes('/inventario/'+id));pruebas++;
- const nc=await(await pedir('/inventario/nivel-central',gestion)).text();assert.ok(nc.includes('Central ficticia '+sufijo));assert.ok(!nc.includes('Escuela ficticia '+sufijo));pruebas++;
+ const nc=await(await pedir('/inventario/nivel-central',gestion)).text();assert.ok(nc.includes('/inventario/'+central));assert.ok(!nc.includes('/inventario/'+id));pruebas++;
  assert.equal((await pedir('/inventario/nivel-central',enc)).headers.get('location'),'/sin-permiso');pruebas++;
  const entrada=await(await pedir('/inventario',gestion)).text();assert.ok(entrada.includes('href="/inventario/nivel-central"'));assert.ok(entrada.includes('href="/inventario/p02"'));pruebas++;
  const jardines=await(await pedir('/inventario/p02?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('/inventario/'+ajeno));assert.ok(!jardines.includes('/inventario/'+id));pruebas++;
