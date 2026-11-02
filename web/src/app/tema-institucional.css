@@ -106,3 +106,13 @@
   .formulario-equipo > fieldset { grid-template-columns: minmax(0, 1fr); }
   .registro-individual { padding: 1rem; }
 }
+.seleccion-entregas { margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-borde-suave); border-radius: 1rem; background: var(--color-seleccion); }
+.seleccion-entregas p { font-size: 0.9rem; }
+.seleccion-entregas a { font-size: 0.875rem; }
+.datos-entrega { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.datos-entrega > :last-child { grid-column: 1 / -1; }
+.confirmacion-entrega { display: block; margin: 1.5rem 0 1rem; font-weight: 700; }
+.confirmacion-entrega input, input[form="seleccion-entregas"] { width: 1.25rem; height: 1.25rem; vertical-align: middle; accent-color: var(--color-primario); }
+.nota-movimientos { margin-top: 1rem; color: var(--color-parrafo); }
+.tabla-movimientos { min-width: 65rem; table-layout: auto; }
+@media (max-width: 767.98px) { .datos-entrega { grid-template-columns: minmax(0, 1fr); } }

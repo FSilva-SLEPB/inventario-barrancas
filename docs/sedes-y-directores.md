@@ -61,8 +61,13 @@ entrega. Un cambio posterior de director no reescribirá las actas anteriores;
 las nuevas utilizarán los datos vigentes. El historial permitirá distinguir a
 quien recibió en cada momento.
 
-El director registrado no se presumirá receptor de toda entrega: al confirmar
-se identificará al receptor real, conforme al flujo acordado. El contenido,
+Para las entregas a jardines infantiles, Felipe confirmó que la receptora será
+la directora del jardín. Al regularizar las entregas de octubre de 2026 se
+registrará su nombre una vez por jardín y se conservará como dato histórico,
+con el cargo fijo Directora del jardín infantil. No se sustituye por la directora
+actual si cambia posteriormente. Los nombres aún no se cargan desde la fuente
+maestra: el administrador los completa al revisar cada grupo.
+Para otros tipos de entrega se identificará al receptor real en su etapa. El contenido,
 numeración, firma y custodia de actas se definirán en su etapa.
 
 ## Criterios para la implementación

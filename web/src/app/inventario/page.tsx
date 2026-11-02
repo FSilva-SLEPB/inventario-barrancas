@@ -41,6 +41,10 @@ export default async function Inventario({ searchParams }: ParametrosInventario)
           <span className={styles.accesoIcono} aria-hidden="true">TI</span>
           <h2>Bodega TI</h2><p>Consultar equipos pendientes de entrega a establecimientos, jardines infantiles y salas cunas.</p><strong>Entrar a Bodega TI →</strong>
         </Link>
+        <Link className={styles.acceso} href="/inventario/movimientos">
+          <span className={styles.accesoIcono} aria-hidden="true">↔</span>
+          <h2>Movimientos y actas</h2><p>Consultar entregas y sus antecedentes, con fecha, receptora e historial.</p><strong>Ver movimientos →</strong>
+        </Link>
       </>}
     </div></section>
   </main>;

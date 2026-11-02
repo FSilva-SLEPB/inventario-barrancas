@@ -47,3 +47,7 @@
   .herramientas { width: 100%; }
   .tabla th, .tabla td { padding: 0.55rem 0.65rem; }
 }
+.tablaSeleccion td:first-child { min-width: 3rem; width: 3rem; }
+.tablaSeleccion td:nth-child(2) { min-width: 4.5rem; max-width: none; font-weight: 400; }
+.tablaSeleccion td:nth-child(3) { min-width: 13rem; max-width: 21rem; font-weight: 700; }
+.accionEntrega { display: block; margin-top: 0.5rem; font-size: 0.875rem; font-weight: 700; white-space: nowrap; }

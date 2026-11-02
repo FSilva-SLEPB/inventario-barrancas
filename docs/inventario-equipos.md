@@ -48,7 +48,7 @@ El menú Inventario ofrece páginas independientes: **Inventario Nivel Central**
 (`/inventario/nivel-central`) e **Inventario P02** (`/inventario/p02`). No hay
 pestañas para alternarlas dentro de una misma página. La entrada `/inventario`
 es una portada explicativa con accesos a Nivel Central, P02, Registro de equipos
-y Bodega TI para Administrador del sistema y Administrador de gestión.
+y Bodega TI, además de Movimientos y actas, para Administrador del sistema y Administrador de gestión.
 Consulta general conserva los dos accesos de lectura; los perfiles locales
 continúan en su inventario de P02.
 P02 reúne establecimientos educacionales, jardines infantiles y salas cunas;
@@ -173,3 +173,48 @@ requiere una revisión posterior y se hará paso a paso con Felipe.
 Las pruebas automáticas usan datos sintéticos y verifican funciones SQL, páginas
 Next.js reales, cookies de prueba, alcance, versiones, auditoría, concurrencia,
 idempotencia y cancelación completa de una carga fallida.
+
+
+## Regularización de entregas de jardines
+
+Primera operación disponible en Movimientos y actas: registrar como recibidos
+los equipos de jardines que ya fueron entregados y siguen pendientes en Bodega TI.
+No representa una entrega física nueva ni genera documentos o folios ficticios.
+
+Bodega TI permite elegir un equipo, varios de la página o todos los jardines
+que coincidan con los filtros (hasta 2.500 equipos). La revisión los agrupa por
+jardín, muestra sus identificadores y conserva la versión de cada equipo.
+El administrador identifica a la directora receptora una sola vez por jardín.
+Su cargo queda fijo y su nombre se conserva con esa entrega aunque después cambie.
+Las fechas sugeridas corresponden al antecedente confirmado por Felipe:
+Pudahuel 26/10/2026, Lo Prado 27/10/2026 y Cerro Navia 28/10/2026. Se revisan antes
+de confirmar; una comuna desconocida no recibe una fecha inventada.
+
+Se admite el antecedente Acta existente sin folio informado para esta
+regularización histórica. El enlace es opcional; no se crea un número ni se
+reemplaza un acta anterior. La generación de actas nuevas sigue pendiente.
+Esta excepción documental corresponde al antecedente histórico confirmado,
+no define las reglas de emisión de entregas nuevas.
+
+Al confirmar, todos los equipos pasan de pendiente_entrega a recibido en una
+única transacción. Se conserva su sede, identidad y condición técnica; se registra
+la fecha real de entrega separada del momento de regularización, actor, directora,
+sede/RBD/comuna de ese momento y valores anteriores/posteriores. Cualquier
+versión obsoleta, equipo ya entregado o dato inválido cancela la operación entera.
+El identificador de solicitud impide duplicar entregas por reintentos y rechaza
+reutilizar la misma solicitud con otros datos. Los permisos se comprueban tanto
+en servidor como en la función SQL, también después de revisar la selección.
+
+Solo los dos perfiles administrativos pueden regularizar o consultar Movimientos
+y actas. El historial de cada equipo conserva el vínculo a su entrega; las consultas
+de fichas siguen respetando el alcance por sede. La consulta de Movimientos muestra
+las últimas 100 entregas, una por jardín, con sus detalles históricos.
+
+### Instalación de esta etapa
+
+Esta funcionalidad **sí requiere una migración nueva**. Crear y verificar un
+respaldo antes de instalar; detener web, actualizar main, aplicar las migraciones
+con el servicio migrar y luego iniciar web. No ejecutar la regularización de los
+23 equipos hasta que Felipe revise fechas, nombres y selección en CentOS.
+La migración crea tablas vacías y una columna de vínculo en el historial;
+no marca equipos como entregados ni modifica registros existentes por sí sola.
