@@ -113,6 +113,7 @@ export default function Navegacion({ administrador = false, soloLectura = false 
                 Panel de mantenedores
               </Link>
             </li>
+            {administrador && <li><Link href="/mantenedores/directores" aria-current={rutaActual==="/mantenedores/directores"?"page":undefined} onClick={cerrarMenu}>Directorio de directores</Link></li>}
             <li>
               <Link
                 href="/mantenedores/categorias"

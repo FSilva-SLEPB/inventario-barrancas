@@ -5,7 +5,7 @@ import { listarEquipos } from "@/lib/equipos";
 import { listarSedes } from "@/lib/sedes";
 import { puedeAdministrar, puedeGestionarDependencias, requiereSede } from "@/lib/politica-acceso";
 import { CONDICIONES, SITUACIONES } from "@/lib/validacion-equipos";
-import SeleccionEntregas from "@/components/seleccion-entregas";
+import SeleccionEntregas, { SeleccionarTodos } from "@/components/seleccion-entregas";
 import FiltrosInventario, { RegistrosPorPagina } from "@/components/filtros-inventario";
 import { esIdSede } from "@/lib/validacion-sedes";
 import styles from "@/app/inventario/inventario.module.css";
@@ -45,38 +45,38 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
       </div>
       <div className={styles.herramientas}>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
+        <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
         {puedeGestionarDependencias(actor.rol) && <Link className="btn btn-outline-primary btn-sm" href="/inventario/registro">Ir al registro</Link>}
       </div>
     </div>
     {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están destinados a la sede y aún no forman parte de su inventario recibido.</p>}
     <FiltrosInventario key={JSON.stringify([ambito, vista, tipo, sedeId, rbd, q, limite])}
       {...{ ambito, vista, local, tipo, rbd, q, limite, bodega }} sedeId={sedeId ?? ""} sedes={sedesFiltro} />
-    {bodega && <SeleccionEntregas todosHref={`/inventario/movimientos/regularizar?${new URLSearchParams({todos:"si",tipo,sede:sedeId??"",rbd,q})}`} />}
     <section className={styles.resultados} aria-label="Equipos del inventario">
     <div className={styles.resumen}>
       <p><strong>{total.toLocaleString("es-CL")}</strong> equipos {vista === "pendientes" ? "pendientes de entrega" : "registrados / recibidos"}</p>
-      <RegistrosPorPagina key={limite} ruta={ruta} limite={limite} filtros={{ vista, tipo, sede: sedeId ?? "", rbd, q }} />
+      <div className="acciones-resumen">{bodega&&<SeleccionEntregas pagina={equipos.map(e=>e.id).join(",")}/>}<RegistrosPorPagina key={limite} ruta={ruta} limite={limite} filtros={{ vista, tipo, sede: sedeId ?? "", rbd, q }} /></div>
     </div>
     <div className={styles.contenedorTabla} role="region" aria-label="Resultados del inventario" tabIndex={0}>
       <table className={`${styles.tabla} ${ambito === "eeji" ? styles.tablaP02 : styles.tablaCentral} ${bodega ? styles.tablaSeleccion : ""}`}>
         <caption className="visually-hidden">{titulo}: {vista === "pendientes" ? "pendientes de entrega" : "equipos registrados / recibidos"}</caption>
         <thead><tr>
-          {bodega && <th scope="col">Seleccionar</th>}
+          {bodega && <th scope="col"><SeleccionarTodos pagina={equipos.map(e=>e.id).join(",")}/></th>}
           {ambito === "eeji" && <><th scope="col">RBD</th><th scope="col">Establecimiento / JISC</th></>}
           <th scope="col">Equipo</th><th scope="col">Modelo</th><th scope="col">N.º de serie</th>
           <th scope="col">N.º de inventario</th><th scope="col">Estado</th><th scope="col">{bodega ? "Acciones" : "Historial"}</th>
         </tr></thead>
         <tbody>{equipos.map(e => <tr key={e.id}>
-          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"}
+          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"||Boolean(e.roboEstado)}
             aria-label={`Seleccionar ${e.inventario || e.serie || e.modelo} de ${e.sedeNombre}`} /></td>}
           {ambito === "eeji" && <><td>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
           <td>{e.categoriaNombre}</td><td><span>{e.modelo}</span><small>{e.marca}</small></td>
           <td className={styles.identificador}>{e.serie || "Pendiente"}</td><td className={styles.identificador}>{e.inventario || "Pendiente"}</td>
           <td><span className={`${styles.estado} ${e.situacion === "pendiente_entrega" ? styles.pendiente : styles.recibido}`}>{e.situacion === "recibido_historico" ? "Recibido (histórico)" : SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</span>
-            <small>Condición: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><Link className={styles.historial} href={`/inventario/${e.id}#historial`}
+            {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
+            <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
+          <td><Link className={styles.historial} href={`/inventario/${e.id}`}
             aria-label={`Ver historial del equipo ${e.inventario || e.serie || e.modelo}`}>Ver historial</Link>
-            {bodega && e.sedeTipo==="jardin_infantil" && <Link className={styles.accionEntrega} href={`/inventario/movimientos/regularizar?equipo=${e.id}`}>Regularizar entrega</Link>}
           </td>
         </tr>)}
           {!equipos.length && <tr><td colSpan={bodega ? 9 : ambito === "eeji" ? 8 : 6} className={styles.vacio}>No hay equipos que coincidan con los filtros seleccionados.</td></tr>}

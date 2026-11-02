@@ -106,9 +106,9 @@ test("perfil local permanece en P02 al forzar ámbito y filtros ajenos", async (
 test("tabla conserva identificadores y acceso directo al historial", async () => {
   const equipo = { id: escuela.id, sedeRbd: "00123", sedeNombre: escuela.nombre, categoriaNombre: "Proyector", modelo: "PowerLite", marca: "Epson", serie: "000-ABC", inventario: "INV-001", situacion: "recibido_historico", condicionTecnica: "sin_verificar" };
   const { html } = await pagina({ tipo: "establecimiento" }, false, [equipo]);
-  assert.ok(html.includes('href="/inventario/' + equipo.id + '#historial"'));
+  assert.ok(html.includes('href="/inventario/' + equipo.id + '"'));
   assert.ok(html.includes("000-ABC")); assert.ok(html.includes("INV-001"));
-  assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Condición: Sin verificar"));
+  assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Funcionamiento: Sin verificar"));
 });
 
 

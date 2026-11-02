@@ -5,8 +5,9 @@ Complementa el [alcance y plan](alcance-y-plan.md) y la
 [matriz de perfiles](matriz-perfiles.md).
 
 **Estado: sedes cargadas y comprobadas por Felipe en CentOS:** 54 establecimientos,
-23 jardines/salas cuna y la sede existente de Nivel Central. La gestión de
-directores y sus datos de recepción siguen pendientes. No se concedieron accesos
+23 jardines/salas cuna y la sede existente de Nivel Central. El directorio editable
+y su importación CSV están preparados; la carga de los nombres reales se revisará
+a partir de la fuente maestra antes de confirmar entregas. No se concedieron accesos
 a partir de los correos de la planilla.
 
 ## Fuente maestra y revisión inicial
@@ -65,8 +66,9 @@ Para las entregas a jardines infantiles, Felipe confirmó que la receptora será
 la directora del jardín. Al regularizar las entregas de octubre de 2026 se
 registrará su nombre una vez por jardín y se conservará como dato histórico,
 con el cargo fijo Directora del jardín infantil. No se sustituye por la directora
-actual si cambia posteriormente. Los nombres aún no se cargan desde la fuente
-maestra: el administrador los completa al revisar cada grupo.
+actual si cambia posteriormente. Los nombres se incorporan al directorio desde la fuente maestra con revisión previa;
+la entrega los propone automáticamente. El lápiz permite ajustar al receptor
+histórico de una entrega sin cambiar el directorio ni las entregas anteriores.
 Para otros tipos de entrega se identificará al receptor real en su etapa. El contenido,
 numeración, firma y custodia de actas se definirán en su etapa.
 
@@ -80,3 +82,20 @@ numeración, firma y custodia de actas se definirán en su etapa.
   los datos conservados en actas ya emitidas.
 - Las consultas y documentos respetan el alcance por sede y los permisos sobre
   datos personales; se verifica también el acceso por petición directa.
+
+
+## Directorio editable
+
+Mantenedores → Directorio de directores y directoras reúne una persona responsable
+por sede EE/JISC. Los dos perfiles administrativos pueden actualizar el nombre
+mediante el lápiz; se conserva versión, actor, fecha, motivo y antes/después.
+Una edición obsoleta se rechaza. No se conceden accesos al sistema al registrar
+un nombre y no se importan RUN ni contactos en esta etapa.
+
+La carga CSV UTF-8 usa RBD exacto y Nombre, mantiene ceros/guiones y muestra la
+correspondencia y el nombre anterior/nuevo antes de confirmar. Rechaza sedes
+inactivas, desconocidas, duplicadas y encabezados ambiguos. La confirmación
+revalida archivo, versiones y permisos y es transaccional; un error cancela todo.
+Los reintentos del mismo archivo no duplican cambios. El original se conserva
+fuera de Git bajo custodia institucional; el código no contiene nombres reales.
+La migración crea un directorio vacío: no supone que los nombres ya estén cargados.

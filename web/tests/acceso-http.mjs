@@ -48,7 +48,7 @@ try {
   const admin = await cookie("felipe.silva@slepb.gob.cl");
   const consulta = await cookie(correo, { rol: "administrador" });
   let formularioCategoria;
-  for (const ruta of ["/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/solicitudes", "/mantenedores",
+  for (const ruta of ["/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/mantenedores/directores", "/inventario/robos", "/inventario/robos/reportar", "/solicitudes", "/mantenedores",
     "/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
     const anonimo = await pedir(ruta);
     assert.equal(anonimo.status, 307, ruta);
