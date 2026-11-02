@@ -179,3 +179,4 @@
 @media(max-width:900px){.filtros-robos,.resumen-robos{grid-template-columns:repeat(2,minmax(0,1fr))}.filtro-robo-busqueda{grid-column:span 2}}
 @media(max-width:600px){.filtros-robos,.resumen-robos,.datos-reporte-robo{grid-template-columns:minmax(0,1fr)}.filtro-robo-busqueda{grid-column:auto}}
 .alerta-incidente{color:var(--color-error)!important;font-weight:700}
+.formulario-seguimiento-robo>fieldset{min-width:0}.formulario-seguimiento-robo>fieldset>legend{float:none;width:100%;margin-block:1rem}.formulario-seguimiento-robo .campo-catalogos{min-width:0}
