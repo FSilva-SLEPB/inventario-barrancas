@@ -85,3 +85,24 @@
 }
 :root[data-contraste="alto"] .navegacion-principal a[aria-current] { background: var(--color-primario); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+
+/* Registro único y controles de consulta. */
+.ayuda-tipo { margin: 0.75rem 0 0; color: var(--color-parrafo); font-size: 0.875rem; }
+.filtros-inventario select:disabled { background: var(--color-superficie-suave); cursor: not-allowed; opacity: 0.65; }
+.registros-por-pagina { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0; font-size: 0.875rem; }
+.registros-por-pagina select { min-height: 2.5rem; min-width: 5rem; border: 1px solid var(--color-borde); border-radius: 0.5rem; padding: 0.4rem 0.6rem; background: var(--color-superficie); color: var(--color-texto); font: inherit; }
+.registro-individual { padding: 1.25rem; border: 1px solid var(--color-borde-suave); border-radius: 1rem; background: var(--color-superficie-alterna); }
+.selector-destino { max-width: 42rem; }
+.formulario-equipo { max-width: 100%; }
+.formulario-equipo > fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; row-gap: 0.75rem; min-width: 0; }
+.formulario-equipo > fieldset > legend, .formulario-equipo > fieldset > details, .formulario-equipo > fieldset > p { grid-column: 1 / -1; }
+.formulario-equipo .campo-catalogos { margin-bottom: 0; min-width: 0; }
+.formulario-equipo textarea { min-height: 6rem; }
+.formulario-equipo > fieldset > button { justify-self: start; }
+.registro-carga { margin-top: 1.25rem; }
+.instrucciones-carga { margin-block: 1rem; }
+.instrucciones-carga summary { color: var(--color-primario); font-weight: 700; cursor: pointer; margin-bottom: 0.75rem; }
+@media (max-width: 767.98px) {
+  .formulario-equipo > fieldset { grid-template-columns: minmax(0, 1fr); }
+  .registro-individual { padding: 1rem; }
+}

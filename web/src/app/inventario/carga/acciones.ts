@@ -34,7 +34,7 @@ export async function procesarCarga(_anterior:EstadoCarga,f:FormData):Promise<Es
     if(f.getAll("aceptarAvisos").length!==1 || f.get("aceptarAvisos")!=="si")return {...estado,mensaje:"Confirma que revisaste los datos y avisos antes de cargar."};
     const nombre=archivo.name.split(/[\\/]/).pop()!.replace(/[\p{Cc}]/gu,"").slice(0,200)||"equipos.csv";
     const {rows}=await db.query("SELECT public.cargar_equipos_acceso($1,$2::jsonb,$3,$4) AS resultado",[actor.email,JSON.stringify(preparado.datos),nombre,hash]);
-    revalidatePath("/inventario");return {...base,estado:"guardado",hash,mensaje:`Carga confirmada: ${rows[0].resultado.cantidad} equipos con historial.`,total:rows[0].resultado.cantidad};
+    revalidatePath("/inventario", "layout");return {...base,estado:"guardado",hash,mensaje:`Carga confirmada: ${rows[0].resultado.cantidad} equipos con historial.`,total:rows[0].resultado.cantidad};
   } catch(error) {
     const codigo=(error as {code?:string})?.code;
     if(codigo) return {...base,mensaje:codigo==="23505" ? "Un identificador se registró durante la revisión. Se canceló toda la carga sin cambios parciales."

@@ -18,11 +18,11 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false}:
       defaultValue={v[nombre]} aria-invalid={Boolean(estado.errores[nombre])} aria-describedby={`error-${nombre}`} />
     <p id={`error-${nombre}`} className="error-catalogos">{estado.errores[nombre]}</p>
   </div>;
-  return <form action={accion} aria-busy={pendiente} className="formulario-catalogos">
+  return <form action={accion} aria-busy={pendiente} className="formulario-catalogos formulario-equipo">
     <input type="hidden" name="id" value={v.id}/><input type="hidden" name="version" value={v.version}/>
     <fieldset key={estado.revision} disabled={pendiente} className="border-0 p-0 m-0">
       <legend>Datos del equipo</legend>
-      <div className="campo-catalogos"><label htmlFor="equipo-sedeId">Sede (obligatoria)</label>
+      <div className="campo-catalogos"><label htmlFor="equipo-sedeId">Sede de destino (obligatoria)</label>
         {v.id ? <><input type="hidden" name="sedeId" value={v.sedeId}/><p>{sedes.find(s=>s.id===v.sedeId)?etiquetaSede(sedes.find(s=>s.id===v.sedeId)!):"Sede no disponible"}</p></>
           : <select id="equipo-sedeId" name="sedeId" required defaultValue={v.sedeId}>
             <option value="">Selecciona una sede</option>{sedes.filter(s=>s.activo).map(s=><option key={s.id} value={s.id}>{etiquetaSede(s)}</option>)}</select>}
