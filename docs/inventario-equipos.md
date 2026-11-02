@@ -42,6 +42,24 @@ La ficha no permite cambiar sede, origen, situación o entrega mediante una
 corrección. No hay eliminación, baja ni validación de robo en esta etapa.
 Fuera de servicio es una condición técnica y no equivale a baja formal.
 
+## Vistas y filtros de consulta
+
+El menú Inventario ofrece **Inventario Nivel Central** e **Inventario P02**.
+P02 reúne establecimientos educacionales, jardines infantiles y salas cunas;
+conserva las consultas separadas de equipos recibidos y pendientes de entrega.
+Los perfiles limitados a una sede solo acceden a P02 dentro de su alcance.
+
+El primer filtro de P02 es Tipo. Cambiarlo actualiza los resultados y las opciones
+de establecimiento/JISC y RBD, y descarta la selección del tipo anterior. Nombre
+y RBD son selectores separados; pueden combinarse con la búsqueda general.
+La paginación y el cambio entre recibidos y pendientes conservan los filtros.
+Limpiar mantiene el ámbito y la vista, y elimina los filtros de búsqueda.
+
+La tabla separa RBD, establecimiento/JISC, equipo, modelo (con marca), serie,
+número de inventario, estado e historial. Estado distingue la recepción de la
+condición técnica. El enlace Historial abre la sección de historial de la ficha.
+Este ajuste no requiere migraciones ni modifica equipos, cargas o historial.
+
 ## Carga con vista previa
 
 La carga histórica está reservada a los dos perfiles administrativos. Desde

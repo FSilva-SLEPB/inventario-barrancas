@@ -25,7 +25,7 @@ export default async function FichaEquipo({params}:{params:Promise<{id:string}>}
     if(k==="datos_compra"&&typeof v==="object")return Object.entries(v).filter(([,dato])=>dato).map(([c,dato])=>`${CAMPOS_COMPRA[c as keyof typeof CAMPOS_COMPRA]??c}: ${dato}`).join("; ")||"Sin datos informados";
     return String(v);
   };
-  return <main><h1>Ficha del equipo</h1><p><Link href="/inventario">Volver al inventario</Link></p>
+  return <main><h1>Ficha del equipo</h1><p><Link href={`/inventario?ambito=${e.sedeTipo==="nivel_central"?"nc":"eeji"}&vista=${e.situacion==="pendiente_entrega"?"pendientes":"inventario"}`}>Volver al inventario</Link></p>
     <dl><dt>Sede</dt><dd>{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</dd>
       <dt>Equipo</dt><dd>{e.categoriaNombre} · {e.marca} {e.modelo}</dd>
       <dt>Serie</dt><dd>{e.serie||"Pendiente"}</dd><dt>Número de inventario</dt><dd>{e.inventario||"Pendiente"}</dd>
@@ -39,7 +39,7 @@ export default async function FichaEquipo({params}:{params:Promise<{id:string}>}
     {e.archivoOrigen&&<p>Registro de origen: {e.archivoOrigen} · fila {e.filaOrigen}.</p>}
     {editable&&<section id="formulario-equipo" className="panel-catalogos"><h2>Corregir datos</h2>
       <FormularioEquipo inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></section>}
-    <section><h2>Historial del equipo</h2>{historial.map((h,i)=><article key={i} className="panel-catalogos">
+    <section id="historial"><h2>Historial del equipo</h2>{historial.map((h,i)=><article key={i} className="panel-catalogos">
       <p>{new Intl.DateTimeFormat("es-CL",{dateStyle:"short",timeStyle:"short",timeZone:"America/Santiago"}).format(new Date(h.registradoEn))} · {h.actor}</p><p>{h.motivo}</p>
       <dl>{Object.entries(etiquetas).filter(([k])=>!h.antes||JSON.stringify(h.despues[k])!==JSON.stringify(h.antes[k])).map(([k,label])=><div key={k}>
         <dt>{label}</dt><dd>{h.antes?`${representar(k,h.antes[k])} → `:""}{representar(k,h.despues[k])}</dd></div>)}</dl>

@@ -84,6 +84,17 @@ try {
  const pendientes=await(await pedir('/inventario?vista=pendientes',enc)).text();assert.ok(pendientes.includes('/inventario/'+pendiente));assert.ok(!pendientes.includes('/inventario/'+id));pruebas++;
  const nc=await(await pedir('/inventario?ambito=nc',gestion)).text();assert.ok(nc.includes('Central ficticia '+sufijo));assert.ok(!nc.includes('Escuela ficticia '+sufijo));pruebas++;
  const jardines=await(await pedir('/inventario?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('/inventario/'+ajeno));assert.ok(!jardines.includes('/inventario/'+id));pruebas++;
+ // Los filtros de nombre (ID), RBD y tipo se combinan y conservan el alcance.
+ const rbdEscuela='RBD-A-'+sufijo;
+ const porRbd=await(await pedir('/inventario?ambito=eeji&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
+ assert.ok(porRbd.includes('/inventario/'+id));assert.ok(!porRbd.includes('/inventario/'+ajeno));pruebas++;
+ const porNombre=await(await pedir('/inventario?ambito=eeji&sede='+sedes[1],gestion)).text();
+ assert.ok(porNombre.includes('/inventario/'+ajeno));assert.ok(!porNombre.includes('/inventario/'+id));pruebas++;
+ const cruzados=await(await pedir('/inventario?tipo=jardin_infantil&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
+ assert.ok(!cruzados.includes('/inventario/'+id));assert.ok(!cruzados.includes('/inventario/'+ajeno));
+ assert.ok(cruzados.includes('No hay equipos que coincidan'));pruebas++;
+ const ataqueRbd=await(await pedir('/inventario?ambito=nc&tipo=jardin_infantil&rbd='+encodeURIComponent('RBD-B-'+sufijo)+'&sede='+sedes[1],enc)).text();
+ assert.ok(ataqueRbd.includes('/inventario/'+id));assert.ok(!ataqueRbd.includes('/inventario/'+ajeno));assert.ok(!ataqueRbd.includes('/inventario/'+central));pruebas++;
  assert.equal((await pedir('/inventario/carga',enc)).headers.get('location'),'/sin-permiso');
  assert.equal((await pedir('/inventario/carga',consulta)).headers.get('location'),'/sin-permiso');pruebas+=2;
  // La carga es atómica e idempotente; los faltantes no inventan fecha ni acta.

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const trazos = {
@@ -36,11 +36,14 @@ function Icono({ tipo }: { tipo: keyof typeof trazos }) {
   );
 }
 
-export default function Navegacion({ administrador = false }: { administrador?: boolean }) {
+export default function Navegacion({ administrador = false, local = false }: { administrador?: boolean; local?: boolean }) {
   const rutaActual = usePathname();
+  const parametros = useSearchParams();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const esMantenedores = rutaActual === "/mantenedores"
     || rutaActual.startsWith("/mantenedores/");
+  const esInventario = rutaActual === "/inventario" || rutaActual.startsWith("/inventario/");
+  const esCentral = !local && parametros.get("ambito") === "nc";
   const cerrarMenu = () => setMenuAbierto(false);
 
   return (
@@ -68,6 +71,22 @@ export default function Navegacion({ administrador = false }: { administrador?: 
         <p className="seccion-menu">Gestión</p>
         <ul>
           {enlaces.map((enlace) => {
+            if (enlace.href === "/inventario") return <li key={enlace.href}>
+              <details className="grupo-mantenedores" open={esInventario}>
+                <summary className={esInventario ? "grupo-activo" : undefined}>
+                  <span className="icono-menu"><Icono tipo="inventario" /></span>
+                  <span>Inventario</span><span className="indicador-menu" aria-hidden="true" />
+                </summary>
+                <ul className="submenu">
+                  {!local && <li><Link href="/inventario?ambito=nc"
+                    aria-current={rutaActual === "/inventario" && esCentral ? "page" : undefined}
+                    onClick={cerrarMenu}>Inventario Nivel Central</Link></li>}
+                  <li><Link href="/inventario?ambito=eeji"
+                    aria-current={rutaActual === "/inventario" && !esCentral ? "page" : undefined}
+                    onClick={cerrarMenu}>Inventario P02</Link></li>
+                </ul>
+              </details>
+            </li>;
             const esPagina = rutaActual === enlace.href;
             const esSeccion = enlace.href !== "/"
               && rutaActual.startsWith(enlace.href + "/");
