@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import pg from 'pg';
 const {encode}=createRequire(import.meta.url)('next-auth/jwt');
+const {encodeReply}=createRequire(import.meta.url)('next/dist/compiled/react-server-dom-webpack/client.node');
 const origen=process.env.ACCESO_HTTP_URL;assert.ok(origen&&process.env.TEST_ADMIN_DATABASE_URL&&process.env.DATABASE_URL);
 const db=new pg.Client({connectionString:process.env.TEST_ADMIN_DATABASE_URL}),app=new pg.Client({connectionString:process.env.DATABASE_URL});
 const sufijo=randomUUID(),sedes=[randomUUID(),randomUUID()],cat=randomUUID(),equipos=[],hashes=[];
@@ -18,8 +19,8 @@ const datos=s=>({nombre:'Responsable ficticia',rut:'12345678-5',correo:'responsa
 const guardar=(actor,id,d,v,sv)=>app.query('SELECT public.guardar_ficha_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5,$6)',[actor,id,JSON.stringify(d),v,sv,'Actualización ficticia']);
 const manifiesto=JSON.parse(await readFile('.next/server/server-reference-manifest.json','utf8'));
 const idAccion=Object.entries(manifiesto.node).find(([,a])=>a.exportedName==='cargarDirectorio'&&a.filename?.includes('/mantenedores/directores/'))?.[0];assert.ok(idAccion);
-// Codificación multipart de React: argumento 0 y FormData referenciada por $K1.
-async function cargarHTTP(c,listado,operacion,previa){const f=new FormData();f.set('0',JSON.stringify([{},'$K1']));f.set('1_listado',listado);f.set('1_operacion',operacion);if(previa){f.set('1_hash',previa.hash);f.set('1_versiones',previa.versiones);f.set('1_confirmo','si');}const r=await fetch(origen+'/mantenedores/directores',{method:'POST',redirect:'manual',headers:{Cookie:c,Origin:new URL(origen).origin,'Next-Action':idAccion},body:f}),texto=await r.text();for(const linea of texto.split('\n')){try{const obj=JSON.parse(linea.replace(/^[0-9a-f]+:/,''));if(obj&&typeof obj==='object'&&['previa','error','guardado'].includes(obj.estado))return obj;}catch{}}return {estado:'sin-estado',status:r.status};}
+// Usa la misma codificación multipart de React que la aplicación.
+async function cargarHTTP(c,listado,operacion,previa){const f=new FormData();f.set('listado',listado);f.set('operacion',operacion);if(previa){f.set('hash',previa.hash);f.set('versiones',previa.versiones);f.set('confirmo','si');}const r=await fetch(origen+'/mantenedores/directores',{method:'POST',redirect:'manual',headers:{Cookie:c,Origin:new URL(origen).origin,'Next-Action':idAccion},body:await encodeReply([{},f])}),texto=await r.text();for(const linea of texto.split('\n')){try{const obj=JSON.parse(linea.replace(/^[0-9a-f]+:/,''));if(obj&&typeof obj==='object'&&['previa','error','guardado'].includes(obj.estado))return obj;}catch{}}return {estado:'sin-estado',status:r.status};}
 let pruebas=0;await db.connect();await app.connect();
 try{
  for(let i=0;i<2;i++)await db.query('INSERT INTO public.sedes(id,tipo,nombre,rbd,comuna) VALUES($1,$2,$3,$4,$5)',[sedes[i],i?'establecimiento':'jardin_infantil','Establecimiento directorio completo '+i+' '+sufijo,'DC-'+i+'-'+sufijo,'Pudahuel']);
