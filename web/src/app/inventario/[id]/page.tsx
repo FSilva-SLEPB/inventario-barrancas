@@ -25,7 +25,7 @@ export default async function FichaEquipo({params}:{params:Promise<{id:string}>}
     if(k==="datos_compra"&&typeof v==="object")return Object.entries(v).filter(([,dato])=>dato).map(([c,dato])=>`${CAMPOS_COMPRA[c as keyof typeof CAMPOS_COMPRA]??c}: ${dato}`).join("; ")||"Sin datos informados";
     return String(v);
   };
-  return <main><h1>Ficha del equipo</h1><p><Link href={`/inventario?ambito=${e.sedeTipo==="nivel_central"?"nc":"eeji"}&vista=${e.situacion==="pendiente_entrega"?"pendientes":"inventario"}`}>Volver al inventario</Link></p>
+  return <main><h1>Ficha del equipo</h1><p><Link href={`/inventario/${e.sedeTipo==="nivel_central"?"nivel-central":"p02"}?vista=${e.situacion==="pendiente_entrega"?"pendientes":"inventario"}`}>Volver al inventario</Link></p>
     <dl><dt>Sede</dt><dd>{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</dd>
       <dt>Equipo</dt><dd>{e.categoriaNombre} · {e.marca} {e.modelo}</dd>
       <dt>Serie</dt><dd>{e.serie||"Pendiente"}</dd><dt>Número de inventario</dt><dd>{e.inventario||"Pendiente"}</dd>

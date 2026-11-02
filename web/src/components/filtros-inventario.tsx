@@ -12,28 +12,31 @@ export default function FiltrosInventario({ ambito, vista, local, tipo, sedeId, 
 }) {
   const router = useRouter();
   const [pendiente, iniciarTransicion] = useTransition();
-  const base = `/inventario?${new URLSearchParams({ ambito, vista })}`;
+  const ruta = ambito === "nc" ? "/inventario/nivel-central" : "/inventario/p02";
   const rbds = [...new Set(sedes.flatMap(s => s.rbd ? [s.rbd] : []))]
     .sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  function actualizar(formulario: HTMLFormElement, cambiarTipo = false) {
+    const parametros = new URLSearchParams();
+    new FormData(formulario).forEach((valor, clave) => {
+      if (typeof valor === "string") parametros.set(clave, valor);
+    });
+    if (cambiarTipo) {
+      parametros.delete("sede");
+      parametros.delete("rbd");
+    }
+    iniciarTransicion(() => router.push(`${ruta}?${parametros}`, { scroll: false }));
+  }
 
-  return <form method="get" className="filtros-inventario" aria-label="Filtrar inventario" aria-busy={pendiente}>
-    <input type="hidden" name="ambito" value={ambito} />
-    <input type="hidden" name="vista" value={vista} />
+  return <form action={ruta} method="get" className="filtros-inventario" aria-label="Filtrar inventario" aria-busy={pendiente}>
+    <div className="titulo-filtros">Filtrar equipos</div>
+    {ambito === "nc" && <input type="hidden" name="vista" value="inventario" />}
     <fieldset disabled={pendiente}>
       <legend className="visually-hidden">Filtros de inventario</legend>
       {!local && ambito === "eeji" && <>
         <div className="filtro-inventario-tipo">
           <label htmlFor="filtro-tipo">Tipo</label>
-          <select id="filtro-tipo" name="tipo" defaultValue={tipo} onChange={evento => {
-            const parametros = new URLSearchParams();
-            new FormData(evento.currentTarget.form!).forEach((valor, clave) => {
-              if (typeof valor === "string") parametros.set(clave, valor);
-            });
-            // No conservar una selección perteneciente al tipo anterior.
-            parametros.delete("sede");
-            parametros.delete("rbd");
-            iniciarTransicion(() => router.push(`/inventario?${parametros}`));
-          }}>
+          <select id="filtro-tipo" name="tipo" defaultValue={tipo}
+            onChange={evento => actualizar(evento.currentTarget.form!, true)}>
             <option value="">Todos los tipos</option>
             <option value="establecimiento">Establecimientos</option>
             <option value="jardin_infantil">Jardines infantiles y salas cunas</option>
@@ -42,11 +45,11 @@ export default function FiltrosInventario({ ambito, vista, local, tipo, sedeId, 
         <div className="filtro-inventario-sede">
           <label htmlFor="filtro-sede">Establecimiento / JISC</label>
           <select id="filtro-sede" name="sede" defaultValue={sedeId}>
-            <option value="">Todos</option>
+            <option value="">Todos los establecimientos / JISC</option>
             {sedes.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
           </select>
         </div>
-        <div>
+        <div className="filtro-inventario-rbd">
           <label htmlFor="filtro-rbd">RBD</label>
           <select id="filtro-rbd" name="rbd" defaultValue={rbd}>
             <option value="">Todos</option>
@@ -54,14 +57,22 @@ export default function FiltrosInventario({ ambito, vista, local, tipo, sedeId, 
           </select>
         </div>
       </>}
-      <div className="filtro-inventario-busqueda">
+      {ambito === "eeji" && <div className="filtro-inventario-vista">
+        <label htmlFor="filtro-vista">Mostrar</label>
+        <select id="filtro-vista" name="vista" defaultValue={vista}
+          onChange={evento => actualizar(evento.currentTarget.form!)}>
+          <option value="inventario">Equipos recibidos</option>
+          <option value="pendientes">Pendientes de entrega</option>
+        </select>
+      </div>}
+      <div className={`filtro-inventario-busqueda${local ? " filtro-local" : ""}`}>
         <label htmlFor="buscar-equipo">Búsqueda general</label>
         <input id="buscar-equipo" name="q" type="search" maxLength={120} defaultValue={q}
-          placeholder="Equipo, marca, modelo, serie o inventario…" />
+          placeholder="Buscar por equipo, marca, modelo, serie o número de inventario" />
       </div>
       <div className="filtro-inventario-acciones">
         <button className="btn btn-primary" type="submit">Buscar</button>
-        <Link href={base}>Limpiar</Link>
+        <Link className="btn btn-outline-primary" href={`${ruta}?vista=${vista}`}>Limpiar</Link>
       </div>
     </fieldset>
     <span className="visually-hidden" role="status">{pendiente ? "Actualizando inventario…" : ""}</span>

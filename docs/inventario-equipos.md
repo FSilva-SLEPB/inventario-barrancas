@@ -44,16 +44,27 @@ Fuera de servicio es una condición técnica y no equivale a baja formal.
 
 ## Vistas y filtros de consulta
 
-El menú Inventario ofrece **Inventario Nivel Central** e **Inventario P02**.
+El menú Inventario ofrece páginas independientes: **Inventario Nivel Central**
+(`/inventario/nivel-central`) e **Inventario P02** (`/inventario/p02`). No hay
+pestañas para alternarlas dentro de una misma página. La entrada `/inventario`
+ofrece los dos accesos a los perfiles globales y dirige a P02 a los perfiles locales.
 P02 reúne establecimientos educacionales, jardines infantiles y salas cunas;
-conserva las consultas separadas de equipos recibidos y pendientes de entrega.
+conserva las consultas separadas de equipos recibidos y pendientes de entrega,
+seleccionables en el filtro Mostrar.
 Los perfiles limitados a una sede solo acceden a P02 dentro de su alcance.
 
 El primer filtro de P02 es Tipo. Cambiarlo actualiza los resultados y las opciones
 de establecimiento/JISC y RBD, y descarta la selección del tipo anterior. Nombre
 y RBD son selectores separados; pueden combinarse con la búsqueda general.
 La paginación y el cambio entre recibidos y pendientes conservan los filtros.
-Limpiar mantiene el ámbito y la vista, y elimina los filtros de búsqueda.
+Limpiar mantiene la página y el estado de entrega, y elimina los filtros de búsqueda.
+Los enlaces anteriores con parámetros se redirigen a la página correspondiente.
+El acceso directo a Nivel Central se deniega a perfiles limitados a una sede.
+
+La presentación adapta los estilos institucionales compartidos: cabecera azul,
+tarjetas redondeadas, menú con iconos, tabla compacta con estados destacados
+y pie de página con el crédito de la Unidad de Tecnologías de la Información
+y Comunicaciones. Se conserva la tipografía local gobCL y el alto contraste.
 
 La tabla separa RBD, establecimiento/JISC, equipo, modelo (con marca), serie,
 número de inventario, estado e historial. Estado distingue la recepción de la
