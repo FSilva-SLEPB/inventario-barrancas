@@ -16,7 +16,7 @@ DECLARE anterior public.directorio_sedes%ROWTYPE; posterior public.directorio_se
  situacion text; observaciones text; cargo_asignado text; k text; suma integer; digito integer; esperado text;
 BEGIN
  PERFORM pg_advisory_xact_lock(1793750400000);
- PERFORM 1 FROM public.usuarios_acceso WHERE correo=p_actor AND activo AND rol IN ('administrador','administrador_gestion') FOR SHARE;
+ PERFORM 1 FROM public.usuarios_acceso u WHERE u.correo=p_actor AND u.activo AND u.rol IN ('administrador','administrador_gestion') FOR SHARE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Sin autorización' USING ERRCODE='42501'; END IF;
  SELECT * INTO sede FROM public.sedes WHERE id=p_sede AND activo AND tipo IN ('establecimiento','jardin_infantil') FOR UPDATE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Sede no disponible' USING ERRCODE='P2202'; END IF;
@@ -78,7 +78,7 @@ RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_te
 DECLARE fila jsonb;n integer;
 BEGIN
  PERFORM pg_advisory_xact_lock(1793750400000);
- PERFORM 1 FROM public.usuarios_acceso WHERE correo=p_actor AND activo AND rol IN ('administrador','administrador_gestion') FOR SHARE;
+ PERFORM 1 FROM public.usuarios_acceso u WHERE u.correo=p_actor AND u.activo AND u.rol IN ('administrador','administrador_gestion') FOR SHARE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Sin autorización' USING ERRCODE='42501'; END IF;
  IF jsonb_typeof(p_filas) IS DISTINCT FROM 'array' OR p_sha IS NULL OR p_sha !~ '^[a-f0-9]{64}$'
   OR p_archivo IS NULL OR length(p_archivo) NOT BETWEEN 1 AND 200 THEN RAISE EXCEPTION 'Carga inválida' USING ERRCODE='22023'; END IF;
