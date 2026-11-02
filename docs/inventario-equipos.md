@@ -271,3 +271,15 @@ abiertos. No se cargan incidentes reales con la migración.
 
 El dashboard de establecimientos y los movimientos de devolución/asignación a
 funcionarios/reparación de Nivel Central siguen para sus etapas siguientes.
+
+
+### Directorio completo para datos de recepción
+
+La ampliación `1793923200000_directorio-establecimientos` permite consultar y
+editar los datos del establecimiento y del responsable vigente en la misma ficha.
+Se carga directamente el listado maestro CSV/TSV/TXT o pegado, con revisión de
+RBD, RUN, contactos, cargos pendientes y subrogancias. Ver sedes-y-directores.md.
+La recepción propone nombre, RUN y correo sin pedir transcribirlos por equipo;
+la edición opcional identifica al receptor histórico. Las entregas conservan una
+instantánea de receptor y datos del establecimiento para futuras actas. Los datos
+no informados en entregas antiguas no se completan con contactos actuales.

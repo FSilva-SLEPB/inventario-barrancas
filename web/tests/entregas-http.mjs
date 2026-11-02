@@ -48,7 +48,7 @@ try{
  await falla(correos.gestion,grupos,'P2102');
  const historia=(await db.query('SELECT antes,despues,entrega_id,actor FROM public.equipos_historial WHERE equipo_id=$1 AND entrega_id IS NOT NULL',[ids[0]])).rows;
  assert.equal(historia.length,1);assert.equal(historia[0].antes.situacion,'pendiente_entrega');assert.equal(historia[0].despues.situacion,'recibido');assert.equal(historia[0].actor,correos.gestion);pruebas++;
- const detalle=await(await pedir('/inventario/movimientos/entregas/'+historia[0].entrega_id,gestion)).text();assert.ok(detalle.includes(grupos[0].receptora));assert.ok(detalle.includes('Sin folio informado'));pruebas++;
+ const detalle=await(await pedir('/inventario/movimientos/entregas/'+historia[0].entrega_id,gestion)).text();assert.ok(detalle.includes(grupos[0].receptora));assert.match(detalle,/sin folio informado/i);pruebas++;
  await assert.rejects(app.query('UPDATE public.entregas_equipos SET receptor_nombre=$1',['Alteración ficticia']),e=>e.code==='42501');pruebas++;
  // Confirmación mediante la acción de la página Next.js real y posterior reintento.
  const quinto=await crear(sedes[0]);const html=await(await pedir('/inventario/movimientos/regularizar?equipo='+quinto,gestion)).text();

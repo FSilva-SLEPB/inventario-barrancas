@@ -9,7 +9,7 @@ export type EstadoRegularizacion = { estado: "inicial" | "error"; mensaje: strin
 export async function regularizarEntregas(_anterior: EstadoRegularizacion, f: FormData): Promise<EstadoRegularizacion> {
   const actor = await exigirAdministrador();
   const valores: Record<string,string> = {};
-  f.forEach((v,k) => { if (typeof v === "string" && /^(fecha|receptora|acta)-[a-f0-9-]{36}$/i.test(k)) valores[k]=v.slice(0,1500); });
+  f.forEach((v,k) => { if (typeof v === "string" && /^(fecha|receptora|acta|rut|correo)-[a-f0-9-]{36}$/i.test(k)) valores[k]=v.slice(0,1500); });
   let datos: ReturnType<typeof validarRegularizacion>;
   try { datos = validarRegularizacion(f); } catch (e) {
     return { estado: "error", mensaje: e instanceof Error ? e.message : "Revisa el formulario.", valores };

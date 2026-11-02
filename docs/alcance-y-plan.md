@@ -343,3 +343,14 @@ El reporte/validación/recuperación y consolidado de robos se incluyen en esta
 actualización. Devolución, asignación a funcionarios, reparación y dashboard
 siguen pendientes; requieren sus movimientos propios y no se simulan mediante
 ediciones del directorio ni del funcionamiento del equipo.
+
+
+### Ampliación del directorio de establecimientos (2 de noviembre)
+
+Tras recibir el listado maestro en texto, se prepara el directorio completo con
+RUN, correo del responsable, subrogancias/vacancias, observaciones y datos de la
+sede editables con auditoría. La carga de los datos reales queda separada del
+código y se revisa por RBD dentro de CentOS. Las entregas guardan sus datos de
+recepción, sin reescribirlas cuando cambia la dirección del establecimiento.
+Las asignaciones nuevas y la generación de actas seguirán su etapa usando este
+directorio; el cambio no simula esos movimientos mediante edición de personas.

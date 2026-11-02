@@ -4,7 +4,7 @@ import { obtenerBaseDatos } from "@/lib/db";
 import { esIdSede } from "@/lib/validacion-sedes";
 export class ErrorSeleccionEntrega extends Error {}
 export type EquipoEntrega = { id: string; version: number; sedeId: string; sedeNombre: string; rbd: string | null; comuna: string | null;
-  directoraNombre: string | null; marca: string; modelo: string; serie: string | null; inventario: string | null };
+  directoraNombre: string | null; directoraRut:string|null;directoraCorreo:string|null;direccion:string|null;correoInstitucional:string|null;sedeVersion:string; marca: string; modelo: string; serie: string | null; inventario: string | null };
 
 export async function seleccionarEntregas(p: Record<string,string|string[]|undefined>): Promise<EquipoEntrega[]> {
   await exigirAdministrador();
@@ -16,7 +16,8 @@ export async function seleccionarEntregas(p: Record<string,string|string[]|undef
   const sede = tipo && typeof p.sede === "string" && esIdSede(p.sede) ? p.sede : null;
   const rbd = tipo && typeof p.rbd === "string" ? p.rbd.trim().slice(0,120) : "";
   const q = typeof p.q === "string" ? p.q.trim().slice(0,120) : "";
-  const { rows } = await obtenerBaseDatos().query<EquipoEntrega>(`SELECT e.id,e.version,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,d.nombre AS "directoraNombre",e.marca,e.modelo,e.serie,e.numero_inventario AS inventario
+  const { rows } = await obtenerBaseDatos().query<EquipoEntrega>(`SELECT e.id,e.version,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,s.direccion,s.correo_institucional AS "correoInstitucional",jsonb_build_array(s.nombre,COALESCE(s.direccion,''),COALESCE(s.comuna,''),COALESCE(s.correo_institucional,''))::text AS "sedeVersion",
+    CASE WHEN d.situacion IN ('titular','subrogante') THEN d.nombre END AS "directoraNombre",d.rut AS "directoraRut",d.correo AS "directoraCorreo",e.marca,e.modelo,e.serie,e.numero_inventario AS inventario
     FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id LEFT JOIN public.directorio_sedes d ON d.sede_id=s.id
     WHERE e.situacion='pendiente_entrega' AND s.tipo='jardin_infantil' AND s.activo
       AND ($1::boolean OR e.id=ANY($2::uuid[]))
@@ -38,9 +39,9 @@ export async function listarEntregas() {
 export async function detalleEntrega(id: string) {
   await exigirAdministrador();
   if (!esIdSede(id)) return null;
-  const { rows } = await obtenerBaseDatos().query<{id:string;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;cargo:string;enlace:string|null;actor:string;registrado:string}>(`
+  const { rows } = await obtenerBaseDatos().query<{id:string;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;cargo:string;enlace:string|null;actor:string;registrado:string;receptorDatos:{rut?:string;correo?:string};sedeDatos:{direccion?:string;correoInstitucional?:string}}>(`
     SELECT g.id,g.sede_nombre AS "sedeNombre",g.sede_rbd AS rbd,g.comuna,g.fecha_entrega::text AS fecha,g.receptor_nombre AS receptora,
-      g.receptor_cargo AS cargo,g.enlace_acta AS enlace,l.actor,l.registrado_en::text AS registrado
+      g.receptor_cargo AS cargo,g.enlace_acta AS enlace,g.receptor_datos AS "receptorDatos",g.sede_datos AS "sedeDatos",l.actor,l.registrado_en::text AS registrado
     FROM public.entregas_equipos g JOIN public.entregas_lotes l ON l.id=g.lote_id WHERE g.id=$1::uuid`,[id]);
   if (!rows[0]) return null;
   const items = (await obtenerBaseDatos().query<{id:string;antes:Record<string,unknown>;despues:Record<string,unknown>}>("SELECT equipo_id AS id,antes,despues FROM public.entregas_detalle WHERE entrega_id=$1::uuid ORDER BY equipo_id",[id])).rows;

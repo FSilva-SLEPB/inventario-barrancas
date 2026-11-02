@@ -1,7 +1,8 @@
+import { normalizarRut } from "@/lib/validacion-directorio";
 import { esIdSede } from "@/lib/validacion-sedes";
 
 export type ItemEntrega = { id: string; version: number };
-export type GrupoEntrega = { sedeId: string; equipos: ItemEntrega[]; fecha: string; receptora: string; enlaceActa: string };
+export type GrupoEntrega = { sedeId: string; equipos: ItemEntrega[]; fecha: string; receptora: string; enlaceActa: string;receptoraRut?:string;receptoraCorreo?:string;sedeVersion?:string };
 export type BaseEntrega = Pick<GrupoEntrega, "sedeId" | "equipos">;
 
 export function fechaSugeridaEntrega(comuna: string | null): string {
@@ -46,7 +47,11 @@ export function validarRegularizacion(f: FormData, hoy = hoyChile()): { solicitu
       let url: URL; try { url = new URL(enlaceActa); } catch { throw new Error("El enlace del acta no es válido."); }
       if (!["https:","http:"].includes(url.protocol) || url.username || url.password || /\s/u.test(enlaceActa)) throw new Error("Usa un enlace HTTP o HTTPS sin credenciales para el acta.");
     }
-    grupos.push({ sedeId: g.sedeId.toLowerCase(), equipos: items, fecha, receptora, enlaceActa });
+    const adicionales:Pick<GrupoEntrega,'receptoraRut'|'receptoraCorreo'|'sedeVersion'>={};
+    if(f.has(`rut-${g.sedeId}`))adicionales.receptoraRut=normalizarRut(leer(`rut-${g.sedeId}`,12));
+    if(f.has(`correo-${g.sedeId}`)){const correo=leer(`correo-${g.sedeId}`,254);if(correo&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo))throw new Error('Revisa el correo de la directora receptora.');adicionales.receptoraCorreo=correo.toLowerCase();}
+    if(f.has(`sede-version-${g.sedeId}`)){const version=leer(`sede-version-${g.sedeId}`,2000);try{const v=JSON.parse(version);if(!Array.isArray(v)||v.length!==4||v.some(e=>typeof e!=='string'))throw new Error();}catch{throw new Error('Los datos del establecimiento no son válidos. Revisa nuevamente la entrega.');}adicionales.sedeVersion=version;}
+    grupos.push({ ...adicionales,sedeId: g.sedeId.toLowerCase(), equipos: items, fecha, receptora, enlaceActa });
   }
   return { solicitud: solicitud.toLowerCase(), grupos };
 }

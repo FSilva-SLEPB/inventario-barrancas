@@ -6,8 +6,8 @@ Complementa el [alcance y plan](alcance-y-plan.md) y la
 
 **Estado: sedes cargadas y comprobadas por Felipe en CentOS:** 54 establecimientos,
 23 jardines/salas cuna y la sede existente de Nivel Central. El directorio editable
-y su importación CSV están preparados; la carga de los nombres reales se revisará
-a partir de la fuente maestra antes de confirmar entregas. No se concedieron accesos
+y su importación están desplegados en su versión inicial. La ampliación de datos
+y la carga del listado completo se preparan a continuación, antes de confirmar entregas. No se concedieron accesos
 a partir de los correos de la planilla.
 
 ## Fuente maestra y revisión inicial
@@ -50,8 +50,9 @@ Registrar a un director o su correo no crea una cuenta autorizada ni concede
 un perfil. El acceso institucional continuará requiriendo autorización explícita
 en el mantenedor de usuarios y el alcance correspondiente.
 
-La definición de campos obligatorios, validación de RUN, contactos y tratamiento
-de reemplazos se realizará al implementar. No se copiarán los archivos originales
+El directorio ampliado valida RUN y correos opcionales; distingue titular,
+subrogante, cargo vacante y responsable pendiente. El nombre es obligatorio
+cuando existe una persona vigente. No se copiarán los archivos originales
 ni nombres, RUN o correos personales al repositorio. Los datos personales no
 quedarán expuestos por defecto por permitir consultar el listado de sedes.
 
@@ -84,18 +85,53 @@ numeración, firma y custodia de actas se definirán en su etapa.
   datos personales; se verifica también el acceso por petición directa.
 
 
-## Directorio editable
+## Directorio editable de establecimientos y JISC
 
-Mantenedores → Directorio de directores y directoras reúne una persona responsable
-por sede EE/JISC. Los dos perfiles administrativos pueden actualizar el nombre
-mediante el lápiz; se conserva versión, actor, fecha, motivo y antes/después.
-Una edición obsoleta se rechaza. No se conceden accesos al sistema al registrar
-un nombre y no se importan RUN ni contactos en esta etapa.
+Mantenedores → Directorio de establecimientos y JISC ofrece búsqueda por RBD,
+nombre, correo, comuna, tipo y situación del cargo. La ficha reúne nombre de sede,
+dirección, comuna y correo institucional, junto con nombre del responsable, RUN,
+correo de contacto, situación del cargo y observaciones de la fuente. El RBD y
+el tipo no se cambian desde esta ficha. El acceso y la edición siguen reservados
+a los dos perfiles administrativos.
 
-La carga CSV UTF-8 usa RBD exacto y Nombre, mantiene ceros/guiones y muestra la
-correspondencia y el nombre anterior/nuevo antes de confirmar. Rechaza sedes
-inactivas, desconocidas, duplicadas y encabezados ambiguos. La confirmación
-revalida archivo, versiones y permisos y es transaccional; un error cancela todo.
-Los reintentos del mismo archivo no duplican cambios. El original se conserva
-fuera de Git bajo custodia institucional; el código no contiene nombres reales.
-La migración crea un directorio vacío: no supone que los nombres ya estén cargados.
+La edición conserva versión de directorio y una huella de los datos de la sede,
+actor, fecha, motivo y valores anteriores/nuevos. Una edición concurrente de la
+sede o del responsable obliga a revisar de nuevo. Registrar una renuncia permite
+dejar el cargo vacante sin persona vigente; el historial conserva a la anterior.
+Reemplazar solo el nombre mediante las operaciones de compatibilidad no hereda
+el RUN ni el correo de otra persona. No se conceden accesos al sistema al
+registrar nombres o correos.
+
+El importador admite CSV, TSV/TXT con tabulaciones y tabla pegada desde Excel.
+Reconoce las diez columnas del listado maestro, compara por RBD exacto y muestra
+los cambios completos antes de confirmar. Distingue las filas de Nivel Central y
+las informa como excluidas de este directorio. Rechaza RBD desconocidos de EE/JISC,
+duplicados, encabezados ambiguos, RUN con dígito verificador incorrecto y correos
+inválidos. Las confirmaciones revalidan contenido, versiones y permisos; un error
+cancela toda la carga. Los reintentos no duplican historial.
+
+Las entregas a jardines proponen nombre, RUN y correo del responsable vigente.
+Se pueden ajustar para identificar a quien realmente recibió; modificar el nombre
+borra los contactos propuestos de la otra persona para evitar atribuciones falsas.
+La entrega guarda esos datos y la dirección/correo del establecimiento como una
+instantánea. Una modificación posterior del directorio no cambia las entregas ya
+registradas. Las entregas anteriores a esta ampliación conservan sus datos
+originales; no se rellenan con datos actuales que no se conocían al registrarlas.
+Las asignaciones y actas nuevas de EE/JISC usarán este directorio en su etapa.
+
+## Fuente recibida el 2 de noviembre de 2026
+
+Felipe volvió a proporcionar el listado en texto con diez columnas. La revisión
+de formato identifica 78 filas: 77 EE/JISC y una de Nivel Central. Para EE/JISC
+hay 65 titulares, 11 subrogantes y una fila sin persona, que Felipe confirmó dejar
+como Responsable pendiente. Los 76 RUN de responsables de EE/JISC informados
+pasan la validación del dígito verificador. La grafía de origen SUBDORGANCIA se
+presenta como Subrogante. Las fechas y observaciones originales se conservan como
+texto, sin inventar fechas de nombramiento.
+
+Esta revisión de formato no sustituye la correspondencia con la base de CentOS
+ni confirma que los datos estén cargados. La carga real se revisa en la vista
+previa de esa instalación. El archivo original y los nombres, RUN y correos no
+se copian al repositorio; los ejemplos y pruebas usan personas ficticias.
+La ampliación requiere `1793923200000_directorio-establecimientos` antes de
+iniciar la nueva versión de web.
