@@ -2,7 +2,7 @@
 
 Primera implementación preparada para revisión. No instala ni importa datos en
 el servidor por crear o fusionar el PR. Las entregas nuevas con actas, los
-traspasos, préstamos, asignaciones a funcionarios, incidentes y bajas corresponden
+traspasos, préstamos, asignaciones a funcionarios y bajas corresponden
 a las siguientes etapas del [plan](alcance-y-plan.md).
 
 ## Ficha e identificación
@@ -39,7 +39,7 @@ en la identidad comprobada por el servidor, igual que el mantenedor de usuarios.
   solo lee su sede. Los filtros también se aplican a fichas e historial por URL.
 
 La ficha no permite cambiar sede, origen, situación o entrega mediante una
-corrección. No hay eliminación, baja ni validación de robo en esta etapa.
+corrección. No hay eliminación ni baja. El seguimiento de robos se incorpora mediante incidentes separados; véase al final.
 Fuera de servicio es una condición técnica y no equivale a baja formal.
 
 ## Vistas y filtros de consulta
@@ -238,3 +238,36 @@ posteriores muestran los campos cambiados con sus valores anterior y nuevo.
 Esta etapa requiere la migración aditiva del directorio y una carga revisada
 de responsables antes de que las entregas puedan proponerse con nombres reales.
 No se modifica la recepción de ninguna entrega ya confirmada.
+
+
+## Robos, recuperación y consolidado
+
+La migración aditiva `1793836800000_incidentes-robos` incorpora incidentes para
+Nivel Central y EE/JISC. Un reporte contiene uno o varios equipos de una misma
+sede, la fecha y lugar del hecho, antecedentes y un enlace opcional a documentos.
+Conserva una instantánea de la sede y de la identificación de cada equipo.
+
+Los administradores y encargados pueden reportar; el encargado solo en su sede.
+Solo administradores y administradores de gestión validan/rechazan y registran
+recuperaciones. Una recuperación afecta a un equipo del incidente, permitiendo
+recuperaciones parciales. No elimina el bien ni modifica su pertenencia, entrega
+o funcionamiento. Los equipos con un incidente abierto no pueden incluirse en
+otro reporte activo ni regularizarse como entregados mientras siga abierto.
+
+`/inventario/robos` ofrece cantidades de equipos distintos por estado, cantidad
+de incidentes, agrupación por sede y detalle de equipos por incidente. Filtra por
+ámbito, sede, comuna, fechas del incidente, estado y búsqueda de identificación,
+categoría o establecimiento. La consulta local siempre queda restringida a su
+sede, incluso al alterar la URL. El detalle de antecedentes/documentos requiere
+perfil de gestión y alcance de sede; la consulta general solo recibe el informe.
+Un equipo puede aparecer en varios incidentes históricos; las cantidades por
+estado usan equipos distintos y no el número de filas históricas.
+
+Cada reporte, revisión y recuperación agrega historial de incidente y de equipo,
+con actor, fecha y motivo. Las escrituras son atómicas, verifican versiones y no
+permiten cambios directos con la cuenta de la aplicación. Repetir una solicitud
+de reporte no duplica eventos. La ficha y el inventario identifican los incidentes
+abiertos. No se cargan incidentes reales con la migración.
+
+El dashboard de establecimientos y los movimientos de devolución/asignación a
+funcionarios/reparación de Nivel Central siguen para sus etapas siguientes.

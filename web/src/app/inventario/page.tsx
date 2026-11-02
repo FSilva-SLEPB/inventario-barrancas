@@ -46,6 +46,7 @@ export default async function Inventario({ searchParams }: ParametrosInventario)
           <h2>Movimientos y actas</h2><p>Consultar entregas y sus antecedentes, con fecha, receptora e historial.</p><strong>Ver movimientos →</strong>
         </Link>
       </>}
+      <Link className={styles.acceso} href="/inventario/robos"><span className={styles.accesoIcono} aria-hidden="true">!</span><h2>Consolidado de robos</h2><p>Equipos reportados, robos validados y recuperaciones por sede.</p><strong>Consultar consolidado →</strong></Link>
     </div></section>
   </main>;
 }

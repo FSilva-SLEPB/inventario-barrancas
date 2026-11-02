@@ -45,6 +45,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
       </div>
       <div className={styles.herramientas}>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
+        <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
         {puedeGestionarDependencias(actor.rol) && <Link className="btn btn-outline-primary btn-sm" href="/inventario/registro">Ir al registro</Link>}
       </div>
     </div>
@@ -66,12 +67,13 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           <th scope="col">N.º de inventario</th><th scope="col">Estado</th><th scope="col">{bodega ? "Acciones" : "Historial"}</th>
         </tr></thead>
         <tbody>{equipos.map(e => <tr key={e.id}>
-          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"}
+          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"||Boolean(e.roboEstado)}
             aria-label={`Seleccionar ${e.inventario || e.serie || e.modelo} de ${e.sedeNombre}`} /></td>}
           {ambito === "eeji" && <><td>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
           <td>{e.categoriaNombre}</td><td><span>{e.modelo}</span><small>{e.marca}</small></td>
           <td className={styles.identificador}>{e.serie || "Pendiente"}</td><td className={styles.identificador}>{e.inventario || "Pendiente"}</td>
           <td><span className={`${styles.estado} ${e.situacion === "pendiente_entrega" ? styles.pendiente : styles.recibido}`}>{e.situacion === "recibido_historico" ? "Recibido (histórico)" : SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</span>
+            {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
           <td><Link className={styles.historial} href={`/inventario/${e.id}#historial`}
             aria-label={`Ver historial del equipo ${e.inventario || e.serie || e.modelo}`}>Ver historial</Link>
