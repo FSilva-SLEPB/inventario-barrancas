@@ -116,3 +116,57 @@
 .nota-movimientos { margin-top: 1rem; color: var(--color-parrafo); }
 .tabla-movimientos { min-width: 65rem; table-layout: auto; }
 @media (max-width: 767.98px) { .datos-entrega { grid-template-columns: minmax(0, 1fr); } }
+/* Selección compacta y ficha con lectura separada de edición. */
+.acciones-resumen { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; justify-content:flex-end; }
+.seleccion-entregas-compacta { display:flex; flex-wrap:wrap; align-items:center; gap:0.75rem; margin:0; }
+.seleccion-entregas-compacta > span { font-size:0.8125rem; }
+.seleccionar-todos { display:grid; gap:0.3rem; justify-items:center; margin:0; }
+.seleccionar-todos input { width:1.25rem; height:1.25rem; accent-color:var(--color-primario); }
+.entrega-resumen { border:1px solid var(--color-borde-suave); border-radius:0.875rem; padding:1rem; margin-block:0.75rem; background:var(--color-superficie); }
+.cabecera-entrega { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; }
+.cabecera-entrega h2 { margin:0; font-size:1.125rem; }
+.cabecera-entrega > span { font-size:0.875rem; color:var(--color-parrafo); }
+.datos-entrega-resumen { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0.75rem; margin:0.875rem 0; }
+.datos-entrega-resumen dt { font-size:0.8125rem; color:var(--color-parrafo); }
+.datos-entrega-resumen dd { margin:0.25rem 0 0; }
+.editar-entrega summary, .equipos-entrega summary { color:var(--color-primario); cursor:pointer; font-size:0.875rem; margin-top:0.75rem; }
+.editar-entrega[open] .datos-entrega { margin-top:1rem; }
+.tabla-entrega { table-layout:auto; }
+.ficha-cabecera { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; }
+.ficha-cabecera .descripcion-pagina { margin:0; }
+.etiqueta-ficha { margin:0 0 0.25rem; font-size:0.75rem; letter-spacing:0.04em; color:var(--color-primario); text-transform:uppercase; }
+.ficha-secciones { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.ficha-seccion { border:1px solid var(--color-borde-suave); border-radius:1rem; padding:1.25rem; background:var(--color-superficie-alterna); min-width:0; }
+.ficha-seccion h2 { font-size:1.125rem; }
+.ficha-adquisicion { grid-column:1/-1; }
+.ficha-datos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin:0; }
+.ficha-adquisicion .ficha-datos { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.ficha-datos dt { font-size:0.8125rem; color:var(--color-parrafo); }
+.ficha-datos dd { margin:0.25rem 0 0; font-size:1rem; overflow-wrap:anywhere; }
+.ficha-seccion .ayuda-catalogos { margin-top:1rem; }
+.historial-equipo { margin-top:1.75rem; scroll-margin-top:1rem; }
+.linea-historial { list-style:none; margin:1rem 0 0; padding:0 0 0 1rem; border-left:2px solid var(--color-borde-suave); }
+.linea-historial > li { margin-bottom:1rem; position:relative; }
+.linea-historial > li::before { content:''; position:absolute; left:-1.45rem; top:1.2rem; width:0.75rem; height:0.75rem; border-radius:50%; background:var(--color-primario); }
+.evento-historial { border:1px solid var(--color-borde-suave); border-radius:0.875rem; padding:1rem; }
+.evento-cabecera { display:flex; flex-wrap:wrap; justify-content:space-between; gap:0.5rem; }
+.evento-cabecera time, .evento-actor { color:var(--color-parrafo); font-size:0.8125rem; }
+.evento-actor { margin:0.25rem 0 0.75rem; }
+.evento-historial summary { color:var(--color-primario); cursor:pointer; font-size:0.875rem; }
+.tabla-historial { width:100%; min-width:35rem; border-collapse:collapse; font-size:0.9375rem; margin-top:0.75rem; }
+.tabla-historial th,.tabla-historial td { padding:0.625rem 0.75rem; border:1px solid var(--color-borde-suave); text-align:left; overflow-wrap:anywhere; }
+.tabla-historial thead { background:var(--color-superficie-suave); }
+.tabla-historial tbody th { font-weight:400; width:30%; }
+.tabla-directorio { min-width:55rem; table-layout:auto; }
+.tabla-directorio th:first-child { width:auto; }
+.confirmacion-directorio { margin-top:1rem; display:grid; gap:0.5rem; }
+@media(max-width:991.98px) { .ficha-secciones { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:575.98px) {
+ .ficha-datos,.ficha-adquisicion .ficha-datos,.datos-entrega-resumen { grid-template-columns:minmax(0,1fr); }
+ .acciones-resumen,.seleccion-entregas-compacta { justify-content:flex-start; }
+ .ficha-seccion { padding:1rem; }
+}
+.datos-entrega { align-items:start; }
+.campo-catalogos { align-content:start; }
+.formulario-equipo > fieldset { align-items:start; }
+.error-catalogos:empty, .regularizacion-formulario > p[role]:empty { display:none; }

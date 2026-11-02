@@ -8,43 +8,38 @@ import { obtenerEquipo,historialEquipo,equipoAFormulario } from "@/lib/equipos";
 import { listarSedes } from "@/lib/sedes";
 import { listarCategorias } from "@/lib/catalogos";
 import { CAMPOS_COMPRA,CONDICIONES,ORIGENES,SITUACIONES } from "@/lib/validacion-equipos";
+import { cambiosHistorial } from "@/lib/presentacion-historial";
 import FormularioEquipo from "@/components/formulario-equipo";
-export const metadata={title:"Ficha del equipo | Inventario"};
-const etiquetas:Record<string,string>={marca:"Marca",modelo:"Modelo",serie:"Serie",numero_inventario:"Número de inventario",
-  motivo_identificacion:"Motivo de identificación pendiente",categoria_id:"Categoría",condicion_tecnica:"Condición técnica",observaciones:"Observaciones",datos_compra:"Datos de adquisición",situacion:"Situación de entrega",fecha_entrega:"Fecha real de entrega",enlace_acta:"Enlace al acta"};
-export default async function FichaEquipo({params}:{params:Promise<{id:string}>}) {
-  const actor=await exigirAcceso();const {id}=await params;if(!esIdSede(id))notFound();
+export const metadata={title:'Ficha e historial del equipo | Inventario'};
+export default async function FichaEquipo({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{editar?:string|string[]}>}){
+  const actor=await exigirAcceso(),{id}=await params;if(!esIdSede(id))notFound();
   const e=await obtenerEquipo(id);if(!e)notFound();
-  const [historial,categorias]=await Promise.all([historialEquipo(id),listarCategorias()]);
-  const editable=puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.situacion!=="pendiente_entrega");
-  const sedes=editable?await listarSedes():[];
-  const representar=(k:string,v:unknown):string=>{
-    if(v===null||v===undefined||v==="")return "Sin dato";
-    if(k==="situacion")return SITUACIONES[v as keyof typeof SITUACIONES]??String(v);
-    if(k==="condicion_tecnica")return CONDICIONES[v as keyof typeof CONDICIONES]??String(v);
-    if(k==="categoria_id")return categorias.find(c=>c.id===v)?.nombre??"Categoría no disponible";
-    if(k==="datos_compra"&&typeof v==="object")return Object.entries(v).filter(([,dato])=>dato).map(([c,dato])=>`${CAMPOS_COMPRA[c as keyof typeof CAMPOS_COMPRA]??c}: ${dato}`).join("; ")||"Sin datos informados";
-    return String(v);
-  };
-  return <main><h1>Ficha del equipo</h1><p><Link href={`/inventario/${e.sedeTipo==="nivel_central"?"nivel-central":"p02"}?vista=${e.situacion==="pendiente_entrega"?"pendientes":"inventario"}`}>Volver al inventario</Link></p>
-    <dl><dt>Sede</dt><dd>{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</dd>
-      <dt>Equipo</dt><dd>{e.categoriaNombre} · {e.marca} {e.modelo}</dd>
-      <dt>Serie</dt><dd>{e.serie||"Pendiente"}</dd><dt>Número de inventario</dt><dd>{e.inventario||"Pendiente"}</dd>
-      {e.motivoIdentificacion&&<><dt>Identificación pendiente</dt><dd>{e.motivoIdentificacion}</dd></>}
-      <dt>Situación</dt><dd>{SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</dd>
-      <dt>Condición técnica</dt><dd>{CONDICIONES[e.condicionTecnica]}</dd><dt>Origen</dt><dd>{ORIGENES[e.origen]}</dd>
-      {Object.entries(CAMPOS_COMPRA).map(([k,label])=>e.compra[k as keyof typeof CAMPOS_COMPRA]&&<div key={k}><dt>{label}</dt><dd>{e.compra[k as keyof typeof CAMPOS_COMPRA]}</dd></div>)}
-      <dt>Fecha de entrega</dt><dd>{e.fechaEntrega??"No informada"}</dd>
-      <dt>Acta existente</dt><dd>{e.enlaceActa?<a href={e.enlaceActa} target="_blank" rel="noopener noreferrer">Consultar documento</a>:"Sin enlace informado"}</dd>
-      <dt>Observaciones</dt><dd>{e.observaciones||"Sin observaciones"}</dd></dl>
-    {e.archivoOrigen&&<p>Registro de origen: {e.archivoOrigen} · fila {e.filaOrigen}.</p>}
-    {editable&&<section id="formulario-equipo" className="panel-catalogos"><h2>Corregir datos</h2>
-      <FormularioEquipo inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></section>}
-    <section id="historial"><h2>Historial del equipo</h2>{historial.map((h,i)=><article key={i} className="panel-catalogos">
-      <p>{new Intl.DateTimeFormat("es-CL",{dateStyle:"short",timeStyle:"short",timeZone:"America/Santiago"}).format(new Date(h.registradoEn))} · {h.actor}</p><p>{h.motivo}</p>
-      {h.entregaId && puedeAdministrar(actor.rol) && <p><Link href={`/inventario/movimientos/entregas/${h.entregaId}`}>Ver entrega y directora receptora</Link></p>}
-      <dl>{Object.entries(etiquetas).filter(([k])=>!h.antes||JSON.stringify(h.despues[k])!==JSON.stringify(h.antes[k])).map(([k,label])=><div key={k}>
-        <dt>{label}</dt><dd>{h.antes?`${representar(k,h.antes[k])} → `:""}{representar(k,h.despues[k])}</dd></div>)}</dl>
-    </article>)}</section>
+  const [historial,categorias,p]=await Promise.all([historialEquipo(id),listarCategorias(),searchParams]);
+  const editable=puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.situacion!=='pendiente_entrega');
+  const editando=editable&&p.editar==='si';const sedes=editando?await listarSedes():[];
+  const compra=Object.entries(CAMPOS_COMPRA).filter(([k])=>e.compra[k as keyof typeof CAMPOS_COMPRA]);
+  const dato=(label:string,v:string|null|undefined)=><div key={label}><dt>{label}</dt><dd>{v||'Sin informar'}</dd></div>;
+  return <main className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Ficha e historial</p><h1>{e.categoriaNombre} · {e.marca} {e.modelo}</h1><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
+    <div className="acciones-catalogos">{editable&&!editando&&<Link className="btn btn-outline-primary" href={`/inventario/${id}?editar=si#editar-equipo`} aria-label="Editar información del equipo">✎ Editar información</Link>}
+      <Link href={`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.situacion==='pendiente_entrega'?'pendientes':'inventario'}`}>Volver al inventario</Link></div></header>
+    {editando?<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link href={`/inventario/${id}`}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></div></section>
+    :<div className="ficha-secciones"><section className="ficha-seccion"><h2>Identificación</h2><dl className="ficha-datos">{dato('Categoría',e.categoriaNombre)}{dato('Marca',e.marca)}{dato('Modelo',e.modelo)}{dato('Número de serie',e.serie||'Pendiente')}{dato('Número de inventario',e.inventario||'Pendiente')}
+      {(!e.serie||!e.inventario)&&e.motivoIdentificacion&&dato('Dato pendiente',e.motivoIdentificacion)}</dl></section>
+      <section className="ficha-seccion"><h2>Entrega y funcionamiento</h2><dl className="ficha-datos">{dato('Inventario / sede',etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd}))}{dato('Situación de entrega',SITUACIONES[e.situacion as keyof typeof SITUACIONES])}{dato('Origen',ORIGENES[e.origen])}{dato('Estado de funcionamiento',CONDICIONES[e.condicionTecnica])}
+        {e.fechaEntrega&&dato('Fecha de entrega',e.fechaEntrega.split('-').reverse().join('/'))}{e.enlaceActa&&<div><dt>Acta existente</dt><dd><a href={e.enlaceActa} target="_blank" rel="noopener noreferrer">Consultar documento</a></dd></div>}</dl>
+        <p className="ayuda-catalogos">El funcionamiento indica si está operativo o necesita reparación; no determina su entrega ni una baja.</p></section>
+      {compra.length>0&&<section className="ficha-seccion ficha-adquisicion"><h2>Adquisición</h2><dl className="ficha-datos">{compra.map(([k,label])=>dato(label,e.compra[k as keyof typeof CAMPOS_COMPRA]))}</dl></section>}
+      {(e.observaciones||e.archivoOrigen)&&<section className="ficha-seccion"><h2>Antecedentes</h2>{e.observaciones&&<p>{e.observaciones}</p>}{e.archivoOrigen&&<p>Archivo de origen: {e.archivoOrigen} · fila {e.filaOrigen}.</p>}</section>}
+    </div>}
+    <section id="historial" className="historial-equipo"><h2>Historial del equipo</h2><p className="ayuda-catalogos">Registro de ingresos, entregas y actualizaciones, con fecha y responsable. Las ediciones conservan el valor anterior y el nuevo.</p>
+      <ol className="linea-historial">{historial.map((h,i)=>{
+        const cambios=cambiosHistorial(h.antes,h.despues,categorias);
+        return <li key={i}><article className="evento-historial"><div className="evento-cabecera"><strong>{h.entregaId?'Entrega registrada':h.antes?'Información actualizada':'Registro inicial'}</strong><time>{new Intl.DateTimeFormat('es-CL',{dateStyle:'short',timeStyle:'short',timeZone:'America/Santiago'}).format(new Date(h.registradoEn))}</time></div>
+          <p className="evento-actor">{h.actor}</p><p>{h.motivo}</p>
+          {h.entregaId&&puedeAdministrar(actor.rol)&&<p><Link href={`/inventario/movimientos/entregas/${h.entregaId}`}>Ver entrega y receptora</Link></p>}
+          {cambios.length>0&&<details open={Boolean(h.antes)}><summary>{h.antes?`${cambios.length} datos actualizados`:'Ver datos del ingreso'}</summary><div className="tabla-usuarios-contenedor"><table className="tabla-historial"><thead><tr><th>Dato</th>{h.antes&&<th>Antes</th>}<th>{h.antes?'Después':'Valor registrado'}</th></tr></thead><tbody>{cambios.map(c=><tr key={c.campo}><th scope="row">{c.campo}</th>{h.antes&&<td>{c.antes}</td>}<td>{c.despues}</td></tr>)}</tbody></table></div></details>}
+        </article></li>;
+      })}</ol>
+    </section>
   </main>;
 }

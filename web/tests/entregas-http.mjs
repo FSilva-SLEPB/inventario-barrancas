@@ -24,6 +24,7 @@ try{
  for(let i=0;i<4;i++)await db.query('INSERT INTO public.sedes(id,tipo,nombre,rbd,comuna) VALUES($1,$2,$3,$4,$5)',[sedes[i],i===3?'establecimiento':'jardin_infantil',`Jardín ficticio ${i} ${sufijo}`,'ENT-'+i+'-'+sufijo,['Pudahuel','Lo Prado','Cerro Navia','Pudahuel'][i]]);
  await db.query('INSERT INTO public.categorias_bienes(id,nombre) VALUES($1,$2)',[cat,'Categoría entrega '+sufijo]);
  for(const[k,rol]of Object.entries({gestion:'administrador_gestion',consulta:'consulta',encargado:'encargado'}))await app.query('SELECT public.guardar_usuario_acceso($1,$2,$3,$4,true,0,$5::uuid)',['felipe.silva@slepb.gob.cl',correos[k],'Persona ficticia',rol,k==='encargado'?sedes[0]:null]);
+ for(let i=0;i<3;i++)await app.query('SELECT public.guardar_director_acceso($1,$2::uuid,$3,0,$4)',[correos.gestion,sedes[i],'Directora ficticia '+sufijo,'Registro de prueba']);
  const ids=[await crear(sedes[0]),await crear(sedes[0]),await crear(sedes[1]),await crear(sedes[2])];
  const grupos=[grupo(sedes[0],ids.slice(0,2)),grupo(sedes[1],[ids[2]],'2026-10-27'),grupo(sedes[2],[ids[3]],'2026-10-28')];
  await falla(correos.consulta,grupos,'42501');await falla(correos.encargado,grupos,'42501');
@@ -36,7 +37,7 @@ try{
  const ee=await crear(sedes[3]);await falla(correos.gestion,[grupo(sedes[3],[ee])],'P2101');
  const gestion=await cookie(correos.gestion),consulta=await cookie(correos.consulta),local=await cookie(correos.encargado);
  for(const sesion of [consulta,local])for(const ruta of ['/inventario/movimientos','/inventario/movimientos/regularizar?equipo='+ids[0],'/inventario/movimientos/entregas/'+randomUUID()]){assert.equal((await pedir(ruta,sesion)).headers.get('location'),'/sin-permiso');pruebas++;}
- const previa=await(await pedir('/inventario/movimientos/regularizar?equipo='+ids[0],gestion)).text();assert.ok(previa.includes('Directora del jardín infantil'));assert.ok(previa.includes('value="2026-10-26"'));pruebas++;
+ const previa=await(await pedir('/inventario/movimientos/regularizar?equipo='+ids[0],gestion)).text();assert.ok(previa.includes('Directora del jardín infantil'));assert.ok(previa.includes('value="2026-10-26"'));assert.ok(previa.includes('value="Directora ficticia '+sufijo+'"'));pruebas++;
  const todos=await(await pedir('/inventario/movimientos/regularizar?todos=si&tipo=jardin_infantil&sede='+sedes[0]+'&q=ENTREGA-'+sufijo,gestion)).text();
  assert.ok(todos.includes('Jardín ficticio 0 '+sufijo));assert.ok(!todos.includes('Jardín ficticio 1 '+sufijo));assert.ok(todos.includes('2 equipos'));pruebas++;
  const solicitud=randomUUID();const resultado=(await enviar(correos.gestion,solicitud,grupos)).rows[0].resultado;assert.equal(resultado.cantidad,4);
@@ -70,6 +71,7 @@ try{
  await db.query('DELETE FROM public.equipos WHERE sede_id=ANY($1::uuid[])',[sedes]);
  await db.query('DELETE FROM public.usuarios_acceso_historial WHERE correo=ANY($1)',[Object.values(correos)]);
  await db.query('DELETE FROM public.usuarios_acceso WHERE correo=ANY($1)',[Object.values(correos)]);
+ await db.query('DELETE FROM public.directorio_historial WHERE sede_id=ANY($1::uuid[])',[sedes]);await db.query('DELETE FROM public.directorio_sedes WHERE sede_id=ANY($1::uuid[])',[sedes]);
  await db.query('DELETE FROM public.sedes WHERE id=ANY($1::uuid[])',[sedes]);await db.query('DELETE FROM public.categorias_bienes WHERE id=$1',[cat]);
  await Promise.all([app.end(),db.end()]);
 }

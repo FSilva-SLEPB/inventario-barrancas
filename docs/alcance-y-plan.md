@@ -319,3 +319,25 @@ Antes de implementarla quedan por precisar, paso a paso:
 La vinculación de cada encargado a una única sede y su consulta separada de
 Pendientes de entrega ya están acordadas.
 Las preguntas restantes se resolverán en su etapa; no es necesario responderlas todas juntas.
+
+
+## Actualización de prioridades: ficha, directorio e incidentes
+
+Felipe solicitó simplificar la selección de Bodega TI y la ficha, y resolver la
+recepción automática desde un directorio editable de directores/as por sede.
+Estas mejoras se preparan primero, conservando el historial de las entregas.
+
+La siguiente etapa de incidentes deberá ofrecer un consolidado de equipos
+reportados/validados como robados, por ámbito NC o EE/JISC, establecimiento,
+comuna, fechas y categoría. Reportado, validado, rechazado y recuperado se
+conservarán como eventos distintos; reportar un robo no ejecuta una baja ni
+elimina el equipo. El consolidado distinguirá equipos afectados de cantidad
+de incidentes para no duplicar equipos. El dashboard de establecimientos vendrá
+después, basado en esos registros y con los filtros de acceso por sede.
+
+En Nivel Central, devolución, reasignación, daño/reparación y robo deberán
+registrarse como movimientos/incidentes vinculados al mismo equipo y, cuando
+corresponda, al funcionario. No se resolverán sobrescribiendo su responsable
+actual ni cambiando un campo de funcionamiento para simular un robo o una baja.
+La implementación de incidentes, consolidado y dashboard sigue pendiente de
+esa etapa; la presente mejora de interfaz no los presenta como operativos.

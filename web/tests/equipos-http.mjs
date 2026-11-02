@@ -74,10 +74,11 @@ try {
  const forzada=await(await pedir('/inventario/p02?sede='+sedes[1],enc)).text();assert.ok(!forzada.includes('/inventario/'+ajeno));pruebas++;
  assert.equal((await pedir('/inventario/'+ajeno,enc)).status,404);assert.equal((await pedir('/inventario/'+central,enc)).status,404);pruebas+=2;
  const ficha=await(await pedir('/inventario/'+id,enc)).text();assert.ok(ficha.includes('Corrección documentada'));assert.ok(ficha.includes(recibido.serie));
- assert.ok(ficha.includes('id="formulario-equipo"'));pruebas++;
+ assert.ok(ficha.includes('Editar información'));assert.ok(!ficha.includes('id="formulario-equipo"'));pruebas++;
+ const fichaEditar=await(await pedir('/inventario/'+id+'?editar=si',enc)).text();assert.ok(fichaEditar.includes('id="formulario-equipo"'));pruebas++;
  const pendienteHtml=await(await pedir('/inventario/'+pendiente,enc)).text();assert.ok(!pendienteHtml.includes('id="formulario-equipo"'));pruebas++;
  const soloLectura=await(await pedir('/inventario/'+id,consulta)).text();assert.ok(!soloLectura.includes('id="formulario-equipo"'));pruebas++;
- const accion=camposAccion(ficha);const f=new FormData();for(const[k,v]of accion)f.append(k,v);
+ const accion=camposAccion(fichaEditar);const f=new FormData();for(const[k,v]of accion)f.append(k,v);
  const denegado=await fetch(origen+'/inventario/'+id,{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:consulta},body:f});
  assert.equal(new URL(denegado.headers.get('location'),origen).pathname,'/sin-permiso');pruebas++;
  const recibidos=await(await pedir('/inventario/p02',enc)).text();assert.ok(!recibidos.includes('/inventario/'+pendiente));
@@ -108,7 +109,7 @@ try {
  const cargados=(await db.query('SELECT * FROM public.equipos WHERE carga_id=$1 ORDER BY fila_origen',[carga.id])).rows;
  equipos.push(...cargados.map(e=>e.id));assert.equal(cargados.length,2);assert.equal(cargados[0].situacion,'recibido_historico');assert.equal(cargados[0].fecha_entrega,null);assert.equal(cargados[0].enlace_acta,null);assert.equal(cargados[1].situacion,'pendiente_entrega');pruebas+=2;
  const fichaCargada=await(await pedir('/inventario/'+cargados[0].id,enc)).text();
- assert.ok(fichaCargada.includes('ficticio.csv'));assert.ok(fichaCargada.includes('id="formulario-equipo"'));pruebas++;
+ assert.ok(fichaCargada.includes('ficticio.csv'));assert.ok(fichaCargada.includes('Editar información'));assert.ok(!fichaCargada.includes('id="formulario-equipo"'));pruebas++;
  const fallido=createHash('sha256').update(randomUUID()).digest('hex');hashes.push(fallido);
  await assert.rejects(importar([datos({estadoHistorico:'Activo',filaOrigen:2}),datos({serie:corregido.serie,estadoHistorico:'Activo',filaOrigen:3})],fallido),e=>e.code==='23505');
  assert.equal(Number((await db.query('SELECT count(*) FROM public.cargas_equipos WHERE sha256=$1',[fallido])).rows[0].count),0);pruebas++;

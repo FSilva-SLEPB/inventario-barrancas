@@ -181,10 +181,13 @@ Primera operación disponible en Movimientos y actas: registrar como recibidos
 los equipos de jardines que ya fueron entregados y siguen pendientes en Bodega TI.
 No representa una entrega física nueva ni genera documentos o folios ficticios.
 
-Bodega TI permite elegir un equipo, varios de la página o todos los jardines
-que coincidan con los filtros (hasta 2.500 equipos). La revisión los agrupa por
+Bodega TI ofrece una casilla por fila y una casilla en el encabezado para
+seleccionar los equipos de jardines de la página; muestra un único botón
+Marcar como entregados. La selección sigue limitada a 2.500 equipos. La revisión los agrupa por
 jardín, muestra sus identificadores y conserva la versión de cada equipo.
-El administrador identifica a la directora receptora una sola vez por jardín.
+La directora receptora se propone automáticamente desde el directorio editable.
+Si falta un nombre, se indica qué directorio completar antes de confirmar.
+El lápiz permite ajustar los datos históricos de una entrega sin modificar el directorio.
 Su cargo queda fijo y su nombre se conserva con esa entrega aunque después cambie.
 Las fechas sugeridas corresponden al antecedente confirmado por Felipe:
 Pudahuel 26/10/2026, Lo Prado 27/10/2026 y Cerro Navia 28/10/2026. Se revisan antes
@@ -218,3 +221,20 @@ con el servicio migrar y luego iniciar web. No ejecutar la regularización de lo
 23 equipos hasta que Felipe revise fechas, nombres y selección en CentOS.
 La migración crea tablas vacías y una columna de vínculo en el historial;
 no marca equipos como entregados ni modifica registros existentes por sí sola.
+
+
+## Ficha y trazabilidad simplificadas
+
+La ficha presenta identificación, entrega/funcionamiento, adquisición y
+antecedentes en secciones. El lápiz abre la edición de esa información; no hay
+un formulario permanente Corregir datos. Se conservan los permisos, versiones,
+validaciones y el motivo del cambio; cada actualización registra antes/después.
+El estado de funcionamiento describe si el equipo opera o necesita reparación,
+y permanece separado de entrega, pertenencia, asignación, robo y baja.
+El motivo de identificación pendiente solo se pide si falta serie o inventario.
+El historial inicial oculta campos vacíos y separa los datos de compra; los eventos
+posteriores muestran los campos cambiados con sus valores anterior y nuevo.
+
+Esta etapa requiere la migración aditiva del directorio y una carga revisada
+de responsables antes de que las entregas puedan proponerse con nombres reales.
+No se modifica la recepción de ninguna entrega ya confirmada.

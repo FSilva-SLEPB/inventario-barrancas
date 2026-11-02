@@ -4,7 +4,7 @@ import { obtenerBaseDatos } from "@/lib/db";
 import { esIdSede } from "@/lib/validacion-sedes";
 export class ErrorSeleccionEntrega extends Error {}
 export type EquipoEntrega = { id: string; version: number; sedeId: string; sedeNombre: string; rbd: string | null; comuna: string | null;
-  marca: string; modelo: string; serie: string | null; inventario: string | null };
+  directoraNombre: string | null; marca: string; modelo: string; serie: string | null; inventario: string | null };
 
 export async function seleccionarEntregas(p: Record<string,string|string[]|undefined>): Promise<EquipoEntrega[]> {
   await exigirAdministrador();
@@ -16,8 +16,8 @@ export async function seleccionarEntregas(p: Record<string,string|string[]|undef
   const sede = tipo && typeof p.sede === "string" && esIdSede(p.sede) ? p.sede : null;
   const rbd = tipo && typeof p.rbd === "string" ? p.rbd.trim().slice(0,120) : "";
   const q = typeof p.q === "string" ? p.q.trim().slice(0,120) : "";
-  const { rows } = await obtenerBaseDatos().query<EquipoEntrega>(`SELECT e.id,e.version,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,e.marca,e.modelo,e.serie,e.numero_inventario AS inventario
-    FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id
+  const { rows } = await obtenerBaseDatos().query<EquipoEntrega>(`SELECT e.id,e.version,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,d.nombre AS "directoraNombre",e.marca,e.modelo,e.serie,e.numero_inventario AS inventario
+    FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id LEFT JOIN public.directorio_sedes d ON d.sede_id=s.id
     WHERE e.situacion='pendiente_entrega' AND s.tipo='jardin_infantil' AND s.activo
       AND ($1::boolean OR e.id=ANY($2::uuid[]))
       AND (NOT $1::boolean OR (($3='' OR s.tipo=$3) AND ($4::uuid IS NULL OR s.id=$4::uuid) AND ($5='' OR s.rbd=$5)
