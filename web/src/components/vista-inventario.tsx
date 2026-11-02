@@ -75,7 +75,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           <td><span className={`${styles.estado} ${e.situacion === "pendiente_entrega" ? styles.pendiente : styles.recibido}`}>{e.situacion === "recibido_historico" ? "Recibido (histórico)" : SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</span>
             {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><Link className={styles.historial} href={`/inventario/${e.id}#historial`}
+          <td><Link className={styles.historial} href={`/inventario/${e.id}`}
             aria-label={`Ver historial del equipo ${e.inventario || e.serie || e.modelo}`}>Ver historial</Link>
           </td>
         </tr>)}

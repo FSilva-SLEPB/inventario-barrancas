@@ -1,6 +1,6 @@
 import "server-only";
 import { exigirAcceso } from "@/lib/acceso";
-import { requiereSede } from "@/lib/politica-acceso";
+import { requiereSede,puedeGestionarDependencias } from "@/lib/politica-acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { CAMPOS_COMPRA, valoresEquipo, type ValoresEquipo, type DatosEquipo } from "@/lib/validacion-equipos";
 export type Equipo = DatosEquipo & { version:number; situacion:string; sedeNombre:string; sedeRbd:string|null;
@@ -43,9 +43,9 @@ export async function obtenerEquipo(id:string):Promise<Equipo|null> {
 }
 export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   const acceso=await exigirAcceso();
-  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,h.motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
+  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,CASE WHEN h.incidente_id IS NOT NULL AND NOT $4::boolean THEN 'Seguimiento de incidente de robo. Los antecedentes están disponibles para los perfiles de gestión autorizados.' ELSE h.motivo END AS motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
     FROM public.equipos_historial h JOIN public.equipos e ON e.id=h.equipo_id
-    WHERE e.id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId])).rows;
+    WHERE e.id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId,puedeGestionarDependencias(acceso.rol)])).rows;
 }
 export function equipoAFormulario(equipo:Equipo):ValoresEquipo {
   const valores=valoresEquipo();
