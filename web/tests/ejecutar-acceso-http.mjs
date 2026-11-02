@@ -26,7 +26,7 @@ try {
     await esperar(200);
   }
   assert.ok(listo, "El servidor de prueba no quedó listo.");
-  for (const archivo of ["tests/acceso-http.mjs", "tests/perfiles-http.mjs", "tests/equipos-http.mjs"]) {
+  for (const archivo of ["tests/acceso-http.mjs", "tests/perfiles-http.mjs", "tests/equipos-http.mjs", "tests/entregas-http.mjs"]) {
     const pruebas = spawn(process.execPath, [archivo], { stdio: "inherit", env: {
       ...entornoServidor, TEST_ADMIN_DATABASE_URL: process.env.TEST_ADMIN_DATABASE_URL,
       ACCESO_HTTP_URL: "http://127.0.0.1:3100",

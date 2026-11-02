@@ -162,10 +162,10 @@ test("el tamaño de página se valida y conserva en filtros y paginación", asyn
   }
 });
 
-test("portada administrativa ofrece cuatro accesos y consultas no ven gestión", async () => {
+test("portada administrativa ofrece accesos operativos y consultas no ven gestión", async () => {
   for (const rol of ["administrador", "administrador_gestion"]) {
     const { html } = await pagina({}, false, [], 0, "", rol);
-    for (const ruta of ["nivel-central", "p02", "registro", "bodega-ti"]) assert.ok(html.includes('href="/inventario/' + ruta + '"'));
+    for (const ruta of ["nivel-central", "p02", "registro", "bodega-ti", "movimientos"]) assert.ok(html.includes('href="/inventario/' + ruta + '"'));
     assert.ok(!html.includes("<table"));
   }
   const { html } = await pagina({}, false, [], 0, "", "consulta");

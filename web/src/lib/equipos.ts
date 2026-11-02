@@ -6,7 +6,7 @@ import { CAMPOS_COMPRA, valoresEquipo, type ValoresEquipo, type DatosEquipo } fr
 export type Equipo = DatosEquipo & { version:number; situacion:string; sedeNombre:string; sedeRbd:string|null;
   sedeTipo:string; categoriaNombre:string; fechaEntrega:string|null; enlaceActa:string|null; cargaId:string|null;
   archivoOrigen:string|null;filaOrigen:number|null };
-export type HistorialEquipo = { actor:string; motivo:string; registradoEn:string; antes:Record<string,unknown>|null; despues:Record<string,unknown> };
+export type HistorialEquipo = { actor:string; motivo:string; registradoEn:string; entregaId:string|null; antes:Record<string,unknown>|null; despues:Record<string,unknown> };
 const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaId",e.marca,e.modelo,
   COALESCE(e.serie,'') AS serie,COALESCE(e.numero_inventario,'') AS inventario,
   e.motivo_identificacion AS "motivoIdentificacion",e.origen,e.condicion_tecnica AS "condicionTecnica",
@@ -41,7 +41,7 @@ export async function obtenerEquipo(id:string):Promise<Equipo|null> {
 }
 export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   const acceso=await exigirAcceso();
-  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,h.motivo,h.registrado_en::text AS "registradoEn",h.antes,h.despues
+  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,h.motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.antes,h.despues
     FROM public.equipos_historial h JOIN public.equipos e ON e.id=h.equipo_id
     WHERE e.id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId])).rows;
 }
