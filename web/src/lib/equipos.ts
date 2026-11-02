@@ -16,19 +16,21 @@ const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaI
   s.nombre AS "sedeNombre",s.rbd AS "sedeRbd",s.tipo AS "sedeTipo",c.nombre AS "categoriaNombre"
   FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id JOIN public.categorias_bienes c ON c.id=e.categoria_id
   LEFT JOIN public.cargas_equipos l ON l.id=e.carga_id`;
-export async function listarEquipos(ambito:string,vista:string,pagina:number,busqueda:string,tipo:string,sedeId:string|null) {
+export async function listarEquipos(ambito:string,vista:string,pagina:number,busqueda:string,tipo:string,sedeId:string|null,rbd="") {
   const acceso=await exigirAcceso();const local=requiereSede(acceso.rol);
   const filtros=`WHERE ($1::boolean OR e.sede_id=$2::uuid)
     AND (($3='nc' AND s.tipo='nivel_central') OR ($3='eeji' AND s.tipo<>'nivel_central'))
     AND (($4='pendientes' AND e.situacion='pendiente_entrega') OR ($4='inventario' AND e.situacion<>'pendiente_entrega'))
     AND ($5='' OR e.marca ILIKE '%'||$5||'%' OR e.modelo ILIKE '%'||$5||'%'
-      OR e.serie ILIKE '%'||$5||'%' OR e.numero_inventario ILIKE '%'||$5||'%' OR s.nombre ILIKE '%'||$5||'%' OR s.rbd ILIKE '%'||$5||'%')
-    AND ($6='' OR s.tipo=$6) AND ($7::uuid IS NULL OR e.sede_id=$7::uuid)`;
-  const params=[!local,acceso.sedeId,local ? "eeji" : ambito,vista,busqueda,tipo,sedeId];
+      OR e.serie ILIKE '%'||$5||'%' OR e.numero_inventario ILIKE '%'||$5||'%' OR s.nombre ILIKE '%'||$5||'%' OR s.rbd ILIKE '%'||$5||'%'
+      OR EXISTS (SELECT 1 FROM public.categorias_bienes c WHERE c.id=e.categoria_id AND c.nombre ILIKE '%'||$5||'%'))
+    AND ($6='' OR s.tipo=$6) AND ($7::uuid IS NULL OR e.sede_id=$7::uuid)
+    AND ($8='' OR s.rbd=$8)`;
+  const params=[!local,acceso.sedeId,local ? "eeji" : ambito,vista,busqueda,tipo,sedeId,rbd];
   const db=obtenerBaseDatos();
   const total=Number((await db.query(`SELECT count(*) FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id ${filtros}`,params)).rows[0].count);
   const actual=Math.min(pagina,Math.max(1,Math.ceil(total/50)));
-  const {rows}=await db.query<Equipo>(`${seleccion} ${filtros} ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 50 OFFSET $8`,[...params,(actual-1)*50]);
+  const {rows}=await db.query<Equipo>(`${seleccion} ${filtros} ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 50 OFFSET $9`,[...params,(actual-1)*50]);
   return {equipos:rows,total,pagina:actual};
 }
 export async function obtenerEquipo(id:string):Promise<Equipo|null> {

@@ -8,7 +8,7 @@ import Accesibilidad from "@/components/accesibilidad";
 import Navegacion from "@/components/navegacion";
 import { BotonSalir } from "@/components/botones-sesion";
 import { obtenerAcceso } from "@/lib/acceso";
-import { PERFILES, puedeAdministrar } from "@/lib/politica-acceso";
+import { PERFILES, puedeAdministrar, requiereSede } from "@/lib/politica-acceso";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -85,7 +85,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
-          {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} />}
+          {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} local={requiereSede(acceso.rol)} />}
           <div id="contenido-principal" className="contenido-app" tabIndex={-1}>
             {acceso && <div className="sesion-institucional">
               <span>{acceso.email} · {PERFILES[acceso.rol]}{acceso.sedeNombre
