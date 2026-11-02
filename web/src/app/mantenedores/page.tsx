@@ -23,6 +23,7 @@ export default async function Mantenedores() {
           {puedeAdministrar(acceso.rol) && <li>
             <Link href="/mantenedores/usuarios">Usuarios y perfiles</Link>
           </li>}
+          {puedeAdministrar(acceso.rol) && <li><Link href="/mantenedores/directores">Directorio de establecimientos y JISC</Link></li>}
           <li>
             <Link href="/mantenedores/categorias">
               Categorías de bienes

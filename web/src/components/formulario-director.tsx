@@ -1,30 +1,32 @@
-"use client";
-import { useActionState, useState } from "react";
-import { guardarDirector, cargarDirectorio, type EstadoDirector, type EstadoCargaDirectorio } from "@/app/mantenedores/directores/acciones";
-import type { DirectorSede } from "@/lib/directorio";
-export default function FormularioDirector({ director }: {director:DirectorSede}) {
-  const [estado,accion,pendiente]=useActionState(guardarDirector,{estado:'inicial',mensaje:'',nombre:director.nombre??'',version:director.version} as EstadoDirector);
-  return <form action={accion} className="formulario-catalogos" aria-busy={pendiente}>
-    <input type="hidden" name="sede" value={director.sedeId}/><input type="hidden" name="version" value={estado.version}/>
-    <p><strong>{director.rbd} · {director.sedeNombre}</strong></p>
-    <div className="campo-catalogos"><label htmlFor="director-nombre">Nombre completo</label><input id="director-nombre" name="nombre" maxLength={200} required defaultValue={estado.nombre} disabled={pendiente}/></div>
-    <p>{director.tipo==='jardin_infantil'?'Directora del jardín infantil':'Director/a del establecimiento'}</p>
-    <div className="campo-catalogos"><label htmlFor="director-motivo">Motivo de la actualización</label><input id="director-motivo" name="motivo" maxLength={500} required defaultValue={director.version?'Actualización del directorio':'Registro inicial'} disabled={pendiente}/></div>
-    <button className="boton-catalogos" disabled={pendiente}>{pendiente?'Guardando…':'Guardar responsable'}</button><p role={estado.estado==='error'?'alert':'status'}>{estado.mensaje}</p>
-  </form>;
+'use client';
+import {useActionState,useState} from 'react';
+import {guardarDirector,cargarDirectorio,type EstadoDirector,type EstadoCargaDirectorio} from '@/app/mantenedores/directores/acciones';
+import {datosDesdeSede,versionSede,SITUACIONES_DIRECTOR,type DatosDirectorio} from '@/lib/validacion-directorio';
+import type {DirectorSede} from '@/lib/directorio';
+function CamposDirector({inicial}:{inicial:DatosDirectorio}){
+ const [v,setV]=useState(inicial),vigente=v.situacion==='titular'||v.situacion==='subrogante';
+ const campo=(k:keyof DatosDirectorio,label:string,maxLength:number,type='text',obligatorio=false)=><div className="campo-catalogos" key={k}><label htmlFor={'director-'+k}>{label}</label><input id={'director-'+k} name={k} type={type} maxLength={maxLength} required={obligatorio} value={v[k]} onChange={e=>{const valor=e.target.value;setV(a=>({...a,[k]:valor}));}}/></div>;
+ return <><section className="campos-directorio"><h3>Establecimiento / JISC</h3>{campo('sedeNombre','Nombre del establecimiento / JISC',200,'text',true)}{campo('comuna','Comuna',100)}{campo('direccion','Dirección',250)}{campo('correoInstitucional','Correo institucional del establecimiento',254,'email')}</section>
+ <section className="campos-directorio"><h3>Director o directora vigente</h3><div className="campo-catalogos"><label htmlFor="director-situacion">Situación del cargo</label><select id="director-situacion" name="situacion" value={v.situacion} onChange={e=>{const situacion=e.target.value as DatosDirectorio['situacion'];setV(a=>({...a,situacion,...(['vacante','pendiente'].includes(situacion)?{nombre:'',rut:'',correo:''}:{})}));}}>{Object.entries(SITUACIONES_DIRECTOR).map(([k,label])=><option key={k} value={k}>{label}</option>)}</select></div>
+ {vigente?<>{campo('nombre','Nombre completo',200,'text',true)}{campo('rut','RUN del responsable (opcional)',12)}{campo('correo','Correo de contacto del responsable (opcional)',254,'email')}</>:<><input type="hidden" name="nombre" value=""/><input type="hidden" name="rut" value=""/><input type="hidden" name="correo" value=""/><p>Sin persona vigente. Las personas anteriores se conservan en el historial y en sus entregas.</p></>}
+ <div className="campo-catalogos campo-directorio-ancho"><label htmlFor="director-observaciones">Actualización y observaciones del listado</label><input id="director-observaciones" name="observaciones" maxLength={2000} value={v.observaciones} onChange={e=>{const observaciones=e.target.value;setV(a=>({...a,observaciones}));}}/></div></section></>;
+}
+export default function FormularioDirector({director}:{director:DirectorSede}){
+ const [estado,accion,pendiente]=useActionState(guardarDirector,{estado:'inicial',mensaje:'',valores:datosDesdeSede(director),version:director.version,sedeVersion:versionSede(director),revision:'inicial'} as EstadoDirector);
+ return <form action={accion} className="formulario-directorio" aria-busy={pendiente}><input type="hidden" name="sede" value={director.sedeId}/><input type="hidden" name="version" value={estado.version}/><input type="hidden" name="sedeVersion" value={estado.sedeVersion}/><p><strong>RBD {director.rbd} · {director.sedeNombre}</strong></p>
+ <fieldset disabled={pendiente} className="border-0 p-0 m-0"><legend className="visually-hidden">Editar establecimiento y responsable</legend><CamposDirector key={estado.revision} inicial={estado.valores}/><div className="campo-catalogos"><label htmlFor="director-motivo">Motivo del cambio</label><input id="director-motivo" name="motivo" maxLength={500} required defaultValue={director.version?'Actualización del directorio':'Registro inicial'}/><p className="ayuda-catalogos">Por ejemplo: cambio de director/a, renuncia o subrogancia.</p></div><button className="boton-catalogos" disabled={pendiente}>{pendiente?'Guardando…':'Guardar cambios del directorio'}</button></fieldset><p role={estado.estado==='error'?'alert':'status'}>{estado.mensaje}</p></form>;
 }
 export function CargaDirectorio(){
-  const [archivo,setArchivo]=useState<File|null>(null),[revisado,setRevisado]=useState<File|null>(null);
-  const [estado,accion,pendiente]=useActionState(async(prev:EstadoCargaDirectorio,f:FormData)=>{
-    if(archivo)f.set('archivo',archivo);const resultado=await cargarDirectorio(prev,f);setRevisado(resultado.estado==='previa'?archivo:null);return resultado;
-  },{estado:'inicial',mensaje:'',hash:'',versiones:'',vista:[]} as EstadoCargaDirectorio);
-  return <form action={accion} aria-busy={pendiente}>
-    <div className="campo-catalogos"><label htmlFor="directorio-csv">CSV del directorio (hasta 1 MB)</label><input id="directorio-csv" type="file" name="archivo" accept=".csv,text/csv" disabled={pendiente} onChange={e=>{setArchivo(e.target.files?.[0]??null);setRevisado(null);}}/></div>
-    <input type="hidden" name="hash" value={estado.hash}/><input type="hidden" name="versiones" value={estado.versiones}/>
-    <button className="btn btn-outline-primary" type="submit" name="operacion" value="previa" disabled={pendiente||!archivo}>Revisar archivo</button>
-    <p role={estado.estado==='error'?'alert':'status'}>{estado.mensaje}</p>
-    {estado.vista.length>0&&<div className="tabla-usuarios-contenedor"><table className="tabla-catalogos tabla-directorio"><caption>Comparación antes de cargar</caption><thead><tr><th>RBD</th><th>Establecimiento/JISC</th><th>Actual</th><th>Desde el archivo</th></tr></thead>
-      <tbody>{estado.vista.map(v=><tr key={v.rbd}><td>{v.rbd}</td><td>{v.sede}</td><td>{v.anterior}</td><td>{v.nuevo}</td></tr>)}</tbody></table></div>}
-    {estado.estado==='previa'&&archivo===revisado&&<div className="confirmacion-directorio"><label><input type="checkbox" name="confirmo" value="si" required disabled={pendiente}/> Revisé la correspondencia de cada RBD y responsable.</label><button className="boton-catalogos" name="operacion" value="confirmar" disabled={pendiente}>Confirmar carga del directorio</button></div>}
-  </form>;
+ const [archivo,setArchivo]=useState<File|null>(null),[listado,setListado]=useState(''),[modo,setModo]=useState('archivo'),[revision,setRevision]=useState(0),[revisado,setRevisado]=useState<number|null>(null);
+ const [estado,accion,pendiente]=useActionState(async(prev:EstadoCargaDirectorio,f:FormData)=>{
+  f.delete('archivo');f.delete('listado');if(modo==='archivo'&&archivo)f.set('archivo',archivo);else if(modo==='texto')f.set('listado',listado);
+  const resultado=await cargarDirectorio(prev,f);setRevisado(resultado.estado==='previa'?revision:null);return resultado;
+ },{estado:'inicial',mensaje:'',hash:'',versiones:'',vista:[],omitidas:[]} as EstadoCargaDirectorio);
+ const cambiar=()=>{setRevision(v=>v+1);setRevisado(null);};
+ return <form action={accion} aria-busy={pendiente} className="carga-directorio"><fieldset disabled={pendiente} className="border-0 p-0 m-0"><legend className="visually-hidden">Cargar listado de establecimientos</legend><div className="campo-catalogos"><label htmlFor="directorio-fuente">Cómo cargar el listado</label><select id="directorio-fuente" value={modo} onChange={e=>{setModo(e.target.value);cambiar();}}><option value="archivo">Seleccionar archivo CSV, TSV o TXT</option><option value="texto">Pegar tabla desde Excel o el listado</option></select></div>
+ {modo==='archivo'?<div className="campo-catalogos"><label htmlFor="directorio-csv">Archivo del directorio (hasta 1 MB)</label><input id="directorio-csv" type="file" name="archivo" accept=".csv,.tsv,.txt,text/csv,text/plain,text/tab-separated-values" onChange={e=>{setArchivo(e.target.files?.[0]??null);cambiar();}}/>{archivo&&<p className="ayuda-catalogos">Seleccionado: {archivo.name}</p>}</div>:<div className="campo-catalogos"><label htmlFor="directorio-listado">Listado con la fila de encabezados</label><textarea id="directorio-listado" name="listado" rows={8} value={listado} onChange={e=>{setListado(e.target.value);cambiar();}}/></div>}
+ <input type="hidden" name="hash" value={estado.hash}/><input type="hidden" name="versiones" value={estado.versiones}/><button className="btn btn-outline-primary" type="submit" name="operacion" value="previa" formNoValidate disabled={pendiente||(modo==='archivo'?!archivo:!listado.trim())}>Revisar listado</button><p role={estado.estado==='error'?'alert':'status'}>{estado.mensaje}</p>
+ {estado.omitidas.length>0&&<div className="aviso-directorio"><strong>Filas que no se cargarán en este directorio</strong><ul>{estado.omitidas.map(o=><li key={o.fila}>Fila {o.fila} · {o.sede}: {o.motivo}</li>)}</ul></div>}
+ {estado.vista.length>0&&<div className="tabla-usuarios-contenedor"><table className="tabla-catalogos tabla-directorio"><caption>Correspondencias y cambios antes de cargar</caption><thead><tr><th>RBD / Establecimiento</th><th>Responsable actual</th><th>Responsable del listado</th><th>Datos que cambiarán</th></tr></thead><tbody>{estado.vista.map(v=><tr key={v.rbd}><td>{v.rbd} · {v.sede}</td><td>{v.anterior}</td><td>{v.nuevo}</td><td><details><summary>{v.cambios.length} cambios</summary><ul>{v.cambios.map(c=><li key={c.campo}><strong>{c.campo}:</strong> {c.antes} → {c.despues}</li>)}</ul></details></td></tr>)}</tbody></table></div>}
+ {estado.estado==='previa'&&revision===revisado&&<div className="confirmacion-directorio"><label><input key={estado.hash+'-'+revision} type="checkbox" name="confirmo" value="si" required/> Revisé los establecimientos, responsables, contactos y filas excluidas.</label><button className="boton-catalogos" name="operacion" value="confirmar" disabled={pendiente}>Confirmar carga del directorio</button></div>}</fieldset></form>;
 }

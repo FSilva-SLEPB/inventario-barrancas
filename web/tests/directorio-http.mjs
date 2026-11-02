@@ -27,7 +27,7 @@ try{
  const f=new FormData(),dec=s=>s.replaceAll('&quot;','"').replaceAll('&#x27;',"'").replaceAll('&amp;','&');
  for(const[input]of html.matchAll(/<input\b[^>]*>/g)){const n=/\bname="([^"]+)"/.exec(input)?.[1];if(input.includes('type="hidden"')&&n?.startsWith('$ACTION'))f.append(dec(n),dec(/\bvalue="([^"]*)"/.exec(input)?.[1]??''));}
  assert.ok([...f.keys()].some(n=>n.startsWith('$ACTION')));
- for(const[k,v]of Object.entries({sede:sedes[0],nombre:'Directora actualizada',version:'1',motivo:'Cambio ficticio'}))f.set(k,v);
+ for(const[k,v]of Object.entries({sede:sedes[0],nombre:'Directora actualizada',version:'1',motivo:'Cambio ficticio',sedeVersion:JSON.stringify(['Sede directorio 0 '+sufijo,'','Pudahuel','']),rut:'',correo:'',situacion:'titular',observaciones:'',sedeNombre:'Sede directorio 0 '+sufijo,direccion:'',comuna:'Pudahuel',correoInstitucional:''}))f.set(k,v);
  const respuesta=await fetch(origen+'/mantenedores/directores?editar='+sedes[0],{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:gestion},body:f});assert.equal(respuesta.status,200);assert.equal((await leer(sedes[0])).nombre,'Directora actualizada');assert.equal((await leer(sedes[0])).version,2);pruebas++;
  const sha=createHash('sha256').update(randomUUID()).digest('hex');hashes.push(sha);
  const fallo=[{sedeId:sedes[0],nombre:'No debe guardarse',version:2},{sedeId:sedes[2],nombre:'No corresponde',version:0}];

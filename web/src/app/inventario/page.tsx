@@ -33,6 +33,7 @@ export default async function Inventario({ searchParams }: ParametrosInventario)
         <h2>Inventario P02</h2><p>Establecimientos educacionales, jardines infantiles y salas cunas.</p><strong>Entrar al inventario →</strong>
       </Link>
       {gestionar && <>
+        <Link className={styles.acceso} href="/mantenedores/directores"><span className={styles.accesoIcono} aria-hidden="true">EE</span><h2>Directorio de establecimientos</h2><p>Directores/as y contactos vigentes para entregas a EE/JISC.</p><strong>Consultar directorio →</strong></Link>
         <Link className={styles.acceso} href="/inventario/registro">
           <span className={styles.accesoIcono} aria-hidden="true">+</span>
           <h2>Registro de equipos</h2><p>Registrar equipos para Nivel Central o establecimientos/JISC y revisar la carga masiva.</p><strong>Ir al registro →</strong>
