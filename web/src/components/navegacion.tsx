@@ -36,13 +36,11 @@ function Icono({ tipo }: { tipo: keyof typeof trazos }) {
   );
 }
 
-export default function Navegacion({ administrador = false, local = false, soloLectura = false }: { administrador?: boolean; local?: boolean; soloLectura?: boolean }) {
+export default function Navegacion({ administrador = false, soloLectura = false }: { administrador?: boolean; soloLectura?: boolean }) {
   const rutaActual = usePathname();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const esMantenedores = rutaActual === "/mantenedores"
     || rutaActual.startsWith("/mantenedores/");
-  const esInventario = rutaActual === "/inventario" || rutaActual.startsWith("/inventario/");
-  const esCentral = rutaActual === "/inventario/nivel-central";
   const cerrarMenu = () => setMenuAbierto(false);
 
   return (
@@ -72,22 +70,6 @@ export default function Navegacion({ administrador = false, local = false, soloL
         <p className="seccion-menu">Gestión</p>
         <ul>
           {enlaces.map((enlace) => {
-            if (enlace.href === "/inventario") return <li key={enlace.href}>
-              <details className="grupo-mantenedores" open={esInventario}>
-                <summary className={esInventario ? "grupo-activo" : undefined}>
-                  <span className="icono-menu"><Icono tipo="inventario" /></span>
-                  <span>Inventario</span><span className="indicador-menu" aria-hidden="true" />
-                </summary>
-                <ul className="submenu">
-                  {!local && <li><Link href="/inventario/nivel-central"
-                    aria-current={esCentral ? "page" : undefined}
-                    onClick={cerrarMenu}>Inventario Nivel Central</Link></li>}
-                  <li><Link href="/inventario/p02"
-                    aria-current={rutaActual === "/inventario/p02" ? "page" : undefined}
-                    onClick={cerrarMenu}>Inventario P02</Link></li>
-                </ul>
-              </details>
-            </li>;
             const esPagina = rutaActual === enlace.href;
             const esSeccion = enlace.href !== "/"
               && rutaActual.startsWith(enlace.href + "/");

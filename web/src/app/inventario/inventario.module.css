@@ -10,24 +10,24 @@
 .resumen p { margin: 0; }
 .resumen strong { display: inline-block; margin-right: 0.35rem; padding: 0.25rem 0.625rem; border-radius: 999px; background: var(--color-seleccion); color: var(--color-primario); font-size: 0.9rem; }
 .contenedorTabla { max-width: 100%; overflow-x: auto; }
-.tabla { width: 100%; min-width: 64rem; border-collapse: collapse; table-layout: auto; font-size: 0.85rem; line-height: 1.4; }
-.tablaCentral { min-width: 45rem; }
+.tabla { width: 100%; min-width: 70rem; border-collapse: collapse; table-layout: auto; font-size: 1rem; line-height: 1.4; }
+.tablaCentral { min-width: 50rem; }
 .tabla th, .tabla td { padding: 0.65rem 0.8rem; text-align: left; vertical-align: middle; }
-.tabla th { background: var(--color-superficie-suave); color: var(--color-parrafo); text-transform: uppercase; letter-spacing: 0.025em; font-size: 0.7rem; white-space: nowrap; }
+.tabla th { background: var(--color-superficie-suave); color: var(--color-parrafo); text-transform: uppercase; letter-spacing: 0.025em; font-size: 0.8125rem; white-space: nowrap; }
 .tabla td { border-top: 1px solid var(--color-borde-suave); overflow-wrap: anywhere; }
 .tabla tbody tr:nth-child(even) { background: var(--color-superficie-alterna); }
 .tabla tbody tr:hover { background: var(--color-seleccion); }
 .tablaP02 td:nth-child(1) { min-width: 4.5rem; white-space: nowrap; }
 .tablaP02 td:nth-child(2) { min-width: 13rem; max-width: 21rem; font-weight: 700; }
 .tablaP02 td:nth-child(3) { min-width: 6rem; }
-.tabla small { display: block; margin-top: 0.3rem; color: var(--color-parrafo); font-size: 0.75rem; }
-.identificador { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.78rem; min-width: 8rem; }
-.estado { display: inline-flex; align-items: center; padding: 0.25rem 0.55rem; border: 1px solid; border-radius: 999px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.tabla small { display: block; margin-top: 0.3rem; color: var(--color-parrafo); font-size: 0.875rem; }
+.identificador { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.9375rem; min-width: 8rem; }
+.estado { display: inline-flex; align-items: center; padding: 0.25rem 0.55rem; border: 1px solid; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; white-space: nowrap; }
 .recibido { background: var(--color-recibido-fondo); color: var(--color-recibido-texto); border-color: var(--color-recibido-borde); }
 .pendiente { background: var(--color-pendiente-fondo); color: var(--color-pendiente-texto); border-color: var(--color-pendiente-borde); }
 .tabla th:last-child, .tabla td:last-child { position: sticky; right: 0; text-align: center; background: var(--color-superficie); box-shadow: -6px 0 12px rgb(15 23 42 / 4%); }
 .tabla th:last-child { background: var(--color-superficie-suave); }
-.historial { display: inline-flex; align-items: center; justify-content: center; padding: 0.4rem 0.65rem; min-height: 2.25rem; border: 1px solid var(--color-borde-suave); border-radius: 0.625rem; background: var(--color-superficie); color: var(--color-primario); font-size: 0.78rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.historial { display: inline-flex; align-items: center; justify-content: center; padding: 0.4rem 0.65rem; min-height: 2.25rem; border: 1px solid var(--color-borde-suave); border-radius: 0.625rem; background: var(--color-superficie); color: var(--color-primario); font-size: 0.875rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .historial:hover { background: var(--color-seleccion); border-color: var(--color-primario); }
 .vacio { text-align: center !important; padding: 2rem 1rem !important; color: var(--color-parrafo); }
 .paginacion { border-top: 1px solid var(--color-borde-suave); }

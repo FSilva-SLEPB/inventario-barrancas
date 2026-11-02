@@ -16,8 +16,9 @@ const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaI
   s.nombre AS "sedeNombre",s.rbd AS "sedeRbd",s.tipo AS "sedeTipo",c.nombre AS "categoriaNombre"
   FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id JOIN public.categorias_bienes c ON c.id=e.categoria_id
   LEFT JOIN public.cargas_equipos l ON l.id=e.carga_id`;
-export async function listarEquipos(ambito:string,vista:string,pagina:number,busqueda:string,tipo:string,sedeId:string|null,rbd="") {
+export async function listarEquipos(ambito:string,vista:string,pagina:number,busqueda:string,tipo:string,sedeId:string|null,rbd="",tamano=50) {
   const acceso=await exigirAcceso();const local=requiereSede(acceso.rol);
+  const limite=[50,100,150].includes(tamano)?tamano:50;
   const filtros=`WHERE ($1::boolean OR e.sede_id=$2::uuid)
     AND (($3='nc' AND s.tipo='nivel_central') OR ($3='eeji' AND s.tipo<>'nivel_central'))
     AND (($4='pendientes' AND e.situacion='pendiente_entrega') OR ($4='inventario' AND e.situacion<>'pendiente_entrega'))
@@ -29,8 +30,8 @@ export async function listarEquipos(ambito:string,vista:string,pagina:number,bus
   const params=[!local,acceso.sedeId,local ? "eeji" : ambito,vista,busqueda,tipo,sedeId,rbd];
   const db=obtenerBaseDatos();
   const total=Number((await db.query(`SELECT count(*) FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id ${filtros}`,params)).rows[0].count);
-  const actual=Math.min(pagina,Math.max(1,Math.ceil(total/50)));
-  const {rows}=await db.query<Equipo>(`${seleccion} ${filtros} ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 50 OFFSET $9`,[...params,(actual-1)*50]);
+  const actual=Math.min(pagina,Math.max(1,Math.ceil(total/limite)));
+  const {rows}=await db.query<Equipo>(`${seleccion} ${filtros} ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT $9 OFFSET $10`,[...params,limite,(actual-1)*limite]);
   return {equipos:rows,total,pagina:actual};
 }
 export async function obtenerEquipo(id:string):Promise<Equipo|null> {

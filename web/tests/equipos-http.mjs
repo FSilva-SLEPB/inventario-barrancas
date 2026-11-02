@@ -88,9 +88,9 @@ try {
  const jardines=await(await pedir('/inventario/p02?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('/inventario/'+ajeno));assert.ok(!jardines.includes('/inventario/'+id));pruebas++;
  // Los filtros de nombre (ID), RBD y tipo se combinan y conservan el alcance.
  const rbdEscuela='RBD-A-'+sufijo;
- const porRbd=await(await pedir('/inventario/p02?ambito=eeji&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
+ const porRbd=await(await pedir('/inventario/p02?tipo=establecimiento&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
  assert.ok(porRbd.includes('/inventario/'+id));assert.ok(!porRbd.includes('/inventario/'+ajeno));pruebas++;
- const porNombre=await(await pedir('/inventario/p02?ambito=eeji&sede='+sedes[1],gestion)).text();
+ const porNombre=await(await pedir('/inventario/p02?tipo=jardin_infantil&sede='+sedes[1],gestion)).text();
  assert.ok(porNombre.includes('/inventario/'+ajeno));assert.ok(!porNombre.includes('/inventario/'+id));pruebas++;
  const cruzados=await(await pedir('/inventario/p02?tipo=jardin_infantil&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
  assert.ok(!cruzados.includes('/inventario/'+id));assert.ok(!cruzados.includes('/inventario/'+ajeno));
@@ -120,6 +120,26 @@ try {
   assert.equal(resultados.filter(r=>r.status==='fulfilled').length,1);assert.equal(resultados.filter(r=>r.status==='rejected'&&r.reason.code==='23505').length,1);
   equipos.push(...resultados.filter(r=>r.status==='fulfilled').map(r=>r.value.rows[0].id));pruebas++;
  }finally{await Promise.all(clientes.map(c=>c.end()));}
+ // Paginación real: los tres tamaños usan el límite SQL y conservan la búsqueda.
+ const lotePaginacion=Array.from({length:151},()=>datos({modelo:'PAGINACION-'+sufijo}));
+ await app.query("SELECT public.guardar_equipo_acceso($1,value,0,'Prueba de paginación') FROM jsonb_array_elements($2::jsonb)",[correos.gestion,JSON.stringify(lotePaginacion)]);
+ for(const limite of [50,100,150]){
+  const html=await(await pedir('/inventario/p02?tipo=establecimiento&limite='+limite+'&q=PAGINACION-'+sufijo,gestion)).text();
+  const cuerpo=/<tbody>([\s\S]*?)<\/tbody>/.exec(html)?.[1]??'';
+  assert.equal((cuerpo.match(/<tr\b/g)??[]).length,limite);pruebas++;
+  const segunda=await(await pedir('/inventario/p02?tipo=establecimiento&limite='+limite+'&pagina=2&q=PAGINACION-'+sufijo,gestion)).text();
+  const filas=/<tbody>([\s\S]*?)<\/tbody>/.exec(segunda)?.[1]??'';
+  assert.equal((filas.match(/<tr\b/g)??[]).length,Math.min(limite,151-limite));pruebas++;
+ }
+ const bodega=await(await pedir('/inventario/bodega-ti?vista=inventario',gestion)).text();
+ assert.ok(bodega.includes('/inventario/'+pendiente));assert.ok(!bodega.includes('/inventario/'+id));pruebas++;
+ for(const sesion of [enc,consulta,await cookies(correos.general)]){
+  assert.equal((await pedir('/inventario/bodega-ti',sesion)).headers.get('location'),'/sin-permiso');pruebas++;
+ }
+ const registro=await(await pedir('/inventario/registro',gestion)).text();
+ assert.ok(registro.includes('id="inventario-destino"'));assert.ok(registro.includes('id="carga-masiva"'));pruebas++;
+ assert.equal((await pedir('/inventario/registro',consulta)).headers.get('location'),'/sin-permiso');pruebas++;
+ assert.equal((await pedir('/inventario/carga',gestion)).headers.get('location'),'/inventario/registro#carga-masiva');pruebas++;
  console.log(`${pruebas} comprobaciones de equipos: aislamiento NC/EE/JI, historial, pendientes, solo lectura, duplicados, concurrencia y carga atómica.`);
 }finally{
  await db.query('DELETE FROM public.equipos_historial WHERE equipo_id IN(SELECT id FROM public.equipos WHERE sede_id=ANY($1::uuid[]))',[sedes]);

@@ -47,14 +47,19 @@ Fuera de servicio es una condición técnica y no equivale a baja formal.
 El menú Inventario ofrece páginas independientes: **Inventario Nivel Central**
 (`/inventario/nivel-central`) e **Inventario P02** (`/inventario/p02`). No hay
 pestañas para alternarlas dentro de una misma página. La entrada `/inventario`
-ofrece los dos accesos a los perfiles globales y dirige a P02 a los perfiles locales.
+es una portada explicativa con accesos a Nivel Central, P02, Registro de equipos
+y Bodega TI para Administrador del sistema y Administrador de gestión.
+Consulta general conserva los dos accesos de lectura; los perfiles locales
+continúan en su inventario de P02.
 P02 reúne establecimientos educacionales, jardines infantiles y salas cunas;
 conserva las consultas separadas de equipos recibidos y pendientes de entrega,
 seleccionables en el filtro Mostrar.
 Los perfiles limitados a una sede solo acceden a P02 dentro de su alcance.
 
 El primer filtro de P02 es Tipo. Cambiarlo actualiza los resultados y las opciones
-de establecimiento/JISC y RBD, y descarta la selección del tipo anterior. Nombre
+de establecimiento/JISC y RBD, y descarta la selección del tipo anterior.
+Los selectores de establecimiento/JISC y RBD permanecen bloqueados y vacíos
+hasta elegir un tipo; los parámetros enviados sin tipo no aplican esos filtros. Nombre
 y RBD son selectores separados; pueden combinarse con la búsqueda general.
 La paginación y el cambio entre recibidos y pendientes conservan los filtros.
 Limpiar mantiene la página y el estado de entrega, y elimina los filtros de búsqueda.
@@ -69,7 +74,32 @@ y Comunicaciones. Se conserva la tipografía local gobCL y el alto contraste.
 La tabla separa RBD, establecimiento/JISC, equipo, modelo (con marca), serie,
 número de inventario, estado e historial. Estado distingue la recepción de la
 condición técnica. El enlace Historial abre la sección de historial de la ficha.
-Este ajuste no requiere migraciones ni modifica equipos, cargas o historial.
+El tamaño de página permite 50, 100 o 150 registros, con 50 por defecto. El servidor
+valida el límite y lo aplica en SQL; los filtros y enlaces de paginación conservan
+la selección. Cambiar el tamaño vuelve a la primera página. La letra de la tabla,
+identificadores y estados se amplía para facilitar su lectura.
+
+## Registro único y Bodega TI
+
+Las consultas de Nivel Central y P02 ya no contienen formularios de alta.
+`/inventario/registro` reúne el registro individual y la carga masiva. En el alta,
+los administradores eligen primero Nivel Central o Establecimiento/JISC (P02);
+el selector de sede solo muestra destinos de ese ámbito. Se conserva un único
+formulario y la pertenencia se resuelve por la sede validada en el servidor.
+Los encargados conservan el registro propio de su única sede, sin acceso a
+Nivel Central ni a la carga masiva.
+
+La carga masiva mantiene CSV, plantilla, vista previa, hash, validación,
+idempotencia y transacción completa. Cada fila indica RBD o NC; puede contener
+los distintos destinos ya admitidos. El enlace anterior `/inventario/carga`
+redirige a la sección de carga del registro, manteniendo su restricción administrativa.
+
+`/inventario/bodega-ti` está reservada a los dos perfiles administrativos y
+consulta los equipos existentes pendientes de entrega a EE/JISC. Forzar otro
+estado por URL no mezcla los recibidos. No duplica equipos ni introduce un
+modelo de existencias, insumos o movimientos nuevos.
+
+Estos ajustes no requieren migraciones ni modifican equipos, cargas o historial.
 
 ## Carga con vista previa
 
