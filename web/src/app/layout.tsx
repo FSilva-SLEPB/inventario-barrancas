@@ -14,6 +14,7 @@ import { etiquetaSede } from "@/lib/etiqueta-sede";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import "./interfaz.css";
+import "./tema-institucional.css";
 
 const gobCl = localFont({
   src: [
@@ -50,64 +51,39 @@ export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const acceso = await obtenerAcceso();
-  return (
-    <html lang="es-CL" className={gobCl.variable}>
-      <body className={gobCl.className}>
-        <a className="saltar-contenido" href="#contenido-principal">
-          Saltar al contenido
-        </a>
-
-        <header className="cabecera-institucional">
-          <div className="interior-cabecera">
-            <Link
-              href="/"
-              className="marca-institucional"
-              aria-label="Ir al inicio de Inventario SLEP Barrancas"
-            >
-              <Image
-                src={logoBarrancas}
-                alt="SLEP Barrancas"
-                className="logo-institucional"
-                loading="eager"
-                unoptimized
-              />
-            </Link>
-
-            <div className="identidad-sistema">
-              <p className="titulo-sistema">Inventario 2.0 EE y TI</p>
-              <p className="subtitulo-sistema">
-                Servicio Local de Educación Pública Barrancas
-              </p>
-            </div>
-
-            <Accesibilidad />
+  return <html lang="es-CL" className={gobCl.variable}>
+    <body className={gobCl.className}>
+      <a className="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
+      <header className="cabecera-institucional">
+        <div className="interior-cabecera">
+          <Link href="/" className="marca-institucional" aria-label="Ir al inicio de Inventario SLEP Barrancas">
+            <Image src={logoBarrancas} alt="SLEP Barrancas" className="logo-institucional" loading="eager" unoptimized />
+          </Link>
+          <div className="identidad-sistema">
+            <p className="titulo-sistema">Inventario 2.0 EE y TI</p>
+            <p className="subtitulo-sistema">Servicio Local de Educación Pública Barrancas</p>
           </div>
-        </header>
-
-        <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
-          {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} local={requiereSede(acceso.rol)} />}
-          <div id="contenido-principal" className="contenido-app" tabIndex={-1}>
+          <div className="acciones-cabecera">
             {acceso && <div className="sesion-institucional">
-              <span>{acceso.email} · {PERFILES[acceso.rol]}{acceso.sedeNombre
-                ? ` · ${etiquetaSede({ nombre: acceso.sedeNombre, rbd: acceso.sedeRbd })}` : ""}</span>
+              <div className="sesion-datos">
+                <span className="sesion-etiqueta">Sesión institucional</span>
+                <span className="sesion-correo">{acceso.email}</span>
+                <span className="sesion-perfil">{PERFILES[acceso.rol]}</span>
+                {acceso.sedeNombre && <span className="sesion-sede">{etiquetaSede({ nombre: acceso.sedeNombre, rbd: acceso.sedeRbd })}</span>}
+              </div>
               <BotonSalir />
             </div>}
-            {children}
+            <Accesibilidad />
           </div>
         </div>
-
-        <footer className="pie-institucional">
-          <div className="interior-pie">
-            <div>
-              <p className="nombre-institucion">
-                Servicio Local de Educación Pública Barrancas
-              </p>
-              <p>Inventario 2.0 EE y TI · UTIC</p>
-            </div>
-            <a href="https://soporteti.slepb.gob.cl/">Mesa de ayuda UTIC</a>
-          </div>
-        </footer>
-      </body>
-    </html>
-  );
+      </header>
+      <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
+        {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} local={requiereSede(acceso.rol)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
+        <div id="contenido-principal" className="contenido-app" tabIndex={-1}>{children}</div>
+      </div>
+      <footer className="app-footer">
+        <p>© 2026 SLEP Barrancas · Gobierno de Chile · <strong>Creado por la Unidad de Tecnologías de la Información y Comunicaciones</strong></p>
+      </footer>
+    </body>
+  </html>;
 }

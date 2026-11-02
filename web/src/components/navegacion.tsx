@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const trazos = {
@@ -36,19 +36,19 @@ function Icono({ tipo }: { tipo: keyof typeof trazos }) {
   );
 }
 
-export default function Navegacion({ administrador = false, local = false }: { administrador?: boolean; local?: boolean }) {
+export default function Navegacion({ administrador = false, local = false, soloLectura = false }: { administrador?: boolean; local?: boolean; soloLectura?: boolean }) {
   const rutaActual = usePathname();
-  const parametros = useSearchParams();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const esMantenedores = rutaActual === "/mantenedores"
     || rutaActual.startsWith("/mantenedores/");
   const esInventario = rutaActual === "/inventario" || rutaActual.startsWith("/inventario/");
-  const esCentral = !local && parametros.get("ambito") === "nc";
+  const esCentral = rutaActual === "/inventario/nivel-central";
   const cerrarMenu = () => setMenuAbierto(false);
 
   return (
     <nav className="navegacion-principal" aria-label="Principal">
       <div className="cabecera-menu">
+        <span className="insignia-menu" aria-hidden="true"><Icono tipo="inventario" /></span>
         <div>
           <p className="titulo-menu">Menú del sistema</p>
           <p className="subtitulo-menu">Navegación institucional</p>
@@ -68,6 +68,7 @@ export default function Navegacion({ administrador = false, local = false }: { a
         id="contenido-menu"
         className={"menu-contenido" + (menuAbierto ? " abierto" : "")}
       >
+        {soloLectura && <p className="menu-solo-lectura">Modo solo lectura</p>}
         <p className="seccion-menu">Gestión</p>
         <ul>
           {enlaces.map((enlace) => {
@@ -78,11 +79,11 @@ export default function Navegacion({ administrador = false, local = false }: { a
                   <span>Inventario</span><span className="indicador-menu" aria-hidden="true" />
                 </summary>
                 <ul className="submenu">
-                  {!local && <li><Link href="/inventario?ambito=nc"
-                    aria-current={rutaActual === "/inventario" && esCentral ? "page" : undefined}
+                  {!local && <li><Link href="/inventario/nivel-central"
+                    aria-current={esCentral ? "page" : undefined}
                     onClick={cerrarMenu}>Inventario Nivel Central</Link></li>}
-                  <li><Link href="/inventario?ambito=eeji"
-                    aria-current={rutaActual === "/inventario" && !esCentral ? "page" : undefined}
+                  <li><Link href="/inventario/p02"
+                    aria-current={rutaActual === "/inventario/p02" ? "page" : undefined}
                     onClick={cerrarMenu}>Inventario P02</Link></li>
                 </ul>
               </details>
@@ -160,7 +161,7 @@ export default function Navegacion({ administrador = false, local = false }: { a
           </ul>
         </details>
 
-        <p className="pie-menu">SLEP Barrancas · UTIC</p>
+        <p className="pie-menu">Los accesos se muestran según el perfil autorizado.</p>
       </div>
     </nav>
   );
