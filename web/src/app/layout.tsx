@@ -15,6 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import "./interfaz.css";
 import "./tema-institucional.css";
+import "./experiencia.css";
 
 const gobCl = localFont({
   src: [
@@ -51,7 +52,7 @@ export const dynamic = "force-dynamic";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const acceso = await obtenerAcceso();
-  return <html lang="es-CL" className={gobCl.variable}>
+  return <html lang="es-CL" data-scroll-behavior="smooth" className={gobCl.variable}>
     <body className={gobCl.className}>
       <a className="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
       <header className="cabecera-institucional">
@@ -78,7 +79,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </div>
       </header>
       <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
-        {acceso && <Navegacion administrador={puedeAdministrar(acceso.rol)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
+        {acceso && <Navegacion rol={acceso.rol} administrador={puedeAdministrar(acceso.rol)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
         <div id="contenido-principal" className="contenido-app" tabIndex={-1}>{children}</div>
       </div>
       <footer className="app-footer">

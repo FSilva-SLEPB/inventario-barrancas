@@ -43,7 +43,7 @@ export default async function Catalogos({
         {categorias.length === 0 ? (
           <p>Todavía no hay categorías registradas.</p>
         ) : (
-          <table className="tabla-catalogos">
+          <table className="tabla-datos tabla-catalogos">
             <caption>Categorías registradas</caption>
             <thead>
               <tr>

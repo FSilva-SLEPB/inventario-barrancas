@@ -4,7 +4,7 @@ import { requiereSede } from '@/lib/politica-acceso';
 import { obtenerBaseDatos } from '@/lib/db';
 export type FiltrosRobos={ambito:string;sede:string;comuna:string;estado:string;desde:string;hasta:string;q:string;pagina:number};
 export type FilaRobo={incidenteId:string;equipoId:string;sedeNombre:string;rbd:string|null;sedeTipo:string;comuna:string|null;fecha:string;estado:keyof typeof import('./validacion-robos').ESTADOS_ROBO;marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};
-export type EquipoRobo={id:string;version:number;marca:string;modelo:string;serie:string|null;inventario:string|null;incidenteAbierto:boolean};
+export type EquipoRobo={id:string;version:number;marca:string;modelo:string;serie:string|null;inventario:string|null;incidenteAbierto:boolean;sedeId:string;sedeNombre:string;rbd:string|null;comuna:string|null};
 const estado="CASE WHEN d.recuperado_fecha IS NOT NULL THEN 'recuperado' ELSE i.estado END";
 const filtros=`WHERE ($1::boolean OR i.sede_id=$2::uuid) AND ($3='' OR ($3='nc' AND i.sede_tipo='nivel_central') OR ($3='eeji' AND i.sede_tipo<>'nivel_central'))
  AND ($4::uuid IS NULL OR i.sede_id=$4::uuid) AND ($5='' OR i.comuna=$5) AND ($6='' OR ${estado}=$6)
@@ -33,13 +33,13 @@ export async function consolidadoRobos(f:FiltrosRobos){
    ${base} ${filtros} ORDER BY i.fecha DESC,i.id,d.equipo_id LIMIT 50 OFFSET $10`,[...parametros,(pagina-1)*50]);
  return {filas:rows,resumen:resumen.rows[0],grupos:grupos.rows,pagina,paginas:Math.max(1,Math.ceil(total/50))};
 }
-export async function equiposParaRobo(sede:string,q:string){
+export async function equiposParaRobo(sede:string|null,q:string,equipo:string|null=null){
  const actor=await exigirGestionDependencias();
- return(await obtenerBaseDatos().query<EquipoRobo>(`SELECT e.id,e.version,e.marca,e.modelo,e.serie,e.numero_inventario AS inventario,
+ return(await obtenerBaseDatos().query<EquipoRobo>(`SELECT e.id,e.version,e.marca,e.modelo,e.serie,e.numero_inventario AS inventario,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,
  EXISTS(SELECT 1 FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id WHERE d.equipo_id=e.id AND i.estado IN ('reportado','validado') AND d.recuperado_fecha IS NULL) AS "incidenteAbierto"
- FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id WHERE e.sede_id=$1::uuid AND s.activo AND ($2::boolean OR e.sede_id=$3::uuid)
+ FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id WHERE ($1::uuid IS NULL OR e.sede_id=$1::uuid) AND s.activo AND ($2::boolean OR e.sede_id=$3::uuid)
  AND ($4='' OR e.marca ILIKE '%'||$4||'%' OR e.modelo ILIKE '%'||$4||'%' OR e.serie ILIKE '%'||$4||'%' OR e.numero_inventario ILIKE '%'||$4||'%')
- ORDER BY e.numero_inventario NULLS LAST,e.id LIMIT 201`,[sede,!requiereSede(actor.rol),actor.sedeId,q])).rows;
+ AND ($5::uuid IS NULL OR e.id=$5::uuid) ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 51`,[sede,!requiereSede(actor.rol),actor.sedeId,q,equipo])).rows;
 }
 export type IncidenteRobo={id:string;sedeId:string;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;lugar:string;descripcion:string;enlace:string|null;estado:string;version:number;reportadoPor:string};
 export type DetalleRobo={equipoId:string;identificacion:{marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};recuperadoFecha:string|null;recuperadoPor:string|null;motivo:string|null};

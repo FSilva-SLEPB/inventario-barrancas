@@ -41,7 +41,7 @@ export default async function FichaEquipo({params,searchParams}:{params:Promise<
           <p className="evento-actor">{h.actor}</p><p>{h.motivo}</p>
           {h.entregaId&&puedeAdministrar(actor.rol)&&<p><Link href={`/inventario/movimientos/entregas/${h.entregaId}`}>Ver entrega y receptora</Link></p>}
           {h.incidenteId&&puedeGestionarDependencias(actor.rol)&&<p><Link href={'/inventario/robos/'+h.incidenteId}>Ver incidente y seguimiento</Link></p>}
-          {cambios.length>0&&<details open={Boolean(h.antes)}><summary>{h.antes?`${cambios.length} datos actualizados`:'Ver datos del ingreso'}</summary><div className="tabla-usuarios-contenedor"><table className="tabla-historial"><thead><tr><th>Dato</th>{h.antes&&<th>Antes</th>}<th>{h.antes?'Después':'Valor registrado'}</th></tr></thead><tbody>{cambios.map(c=><tr key={c.campo}><th scope="row">{c.campo}</th>{h.antes&&<td>{c.antes}</td>}<td>{c.despues}</td></tr>)}</tbody></table></div></details>}
+          {cambios.length>0&&<details open={Boolean(h.antes)}><summary>{h.antes?`${cambios.length} datos actualizados`:'Ver datos del ingreso'}</summary><div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-historial"><thead><tr><th>Dato</th>{h.antes&&<th>Antes</th>}<th>{h.antes?'Después':'Valor registrado'}</th></tr></thead><tbody>{cambios.map(c=><tr key={c.campo}><th scope="row">{c.campo}</th>{h.antes&&<td>{c.antes}</td>}<td>{c.despues}</td></tr>)}</tbody></table></div></details>}
         </article></li>;
       })}</ol>
     </section>

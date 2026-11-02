@@ -32,7 +32,7 @@ export default function FormularioRegularizacion({ equipos, solicitud, hoy }: { 
             <div className="campo-catalogos"><label htmlFor={`acta-${g.sedeId}`}>Enlace al acta existente (opcional)</label><input id={`acta-${g.sedeId}`} name={`acta-${g.sedeId}`} type="url" maxLength={1500} defaultValue={estado.valores[`acta-${g.sedeId}`]??''}/></div>
           </div></details>
           {(g.direccion||g.correoInstitucional)&&<details><summary>Datos del establecimiento para la entrega</summary><p>{g.direccion||'Dirección sin informar'}{g.correoInstitucional?' · '+g.correoInstitucional:''}</p></details>}
-          <details className="equipos-entrega"><summary>Ver los equipos seleccionados</summary><div className="tabla-usuarios-contenedor"><table className="tabla-catalogos tabla-entrega"><thead><tr><th>Equipo</th><th>Serie</th><th>Inventario</th></tr></thead><tbody>{g.equipos.map(e=><tr key={e.id}><td>{e.marca} {e.modelo}</td><td>{e.serie||'Pendiente'}</td><td>{e.inventario||'Pendiente'}</td></tr>)}</tbody></table></div></details>
+          <details className="equipos-entrega"><summary>Ver los equipos seleccionados</summary><div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos tabla-entrega"><thead><tr><th>Equipo</th><th>Serie</th><th>Inventario</th></tr></thead><tbody>{g.equipos.map(e=><tr key={e.id}><td>{e.marca} {e.modelo}</td><td>{e.serie||'Pendiente'}</td><td>{e.inventario||'Pendiente'}</td></tr>)}</tbody></table></div></details>
         </section>;
       })}
       <label className="confirmacion-entrega"><input type="checkbox" name="confirmo" value="si" required/> Confirmo que estos equipos ya fueron entregados y revisé sus responsables y fechas.</label>

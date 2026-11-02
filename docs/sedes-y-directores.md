@@ -135,3 +135,31 @@ previa de esa instalación. El archivo original y los nombres, RUN y correos no
 se copian al repositorio; los ejemplos y pruebas usan personas ficticias.
 La ampliación requiere `1793923200000_directorio-establecimientos` antes de
 iniciar la nueva versión de web.
+
+## Consulta y carga en la interfaz unificada
+
+El listado abre la ficha completa; la edición se ofrece dentro de ella. El acceso
+al directorio se mantiene en Mantenedores y se retira de la portada de Inventario.
+La carga se abre en `/mantenedores/directores/cargar`; distingue fichas sin cargar
+de cargos expresamente pendientes o vacantes.
+
+La instalación del código no incorpora por sí sola el archivo personal recibido
+en el chat. Ese listado debe cargarse en la instancia de CentOS, desde el navegador
+o mediante la herramienta privada siguiente. No debe añadirse el original a Git.
+
+Si el TXT ya está en el servidor, desde la raíz del proyecto:
+
+```bash
+docker compose exec -T web node scripts/cargar-directorio.mjs --actor correo@slepb.gob.cl < /ruta/privada/listado.txt
+```
+
+La revisión imprime cantidades y situaciones, sin nombres, RUN ni contactos.
+Después de comprobar la correspondencia, la misma orden con `--confirmar` ejecuta
+la carga atómica con la cuenta administrativa indicada. Usa el usuario de base de
+la aplicación y las mismas funciones y validadores del navegador; no concede
+cuentas ni permisos. Si el archivo ya estaba cargado, no duplica el historial.
+
+La cuenta indicada debe estar activa con perfil administrativo. No se incluyen
+contraseñas de PostgreSQL en la orden: se usa la configuración del contenedor.
+Si el archivo solo está en el computador del usuario, se selecciona directamente
+en la página de carga; no hace falta transferirlo previamente al servidor.

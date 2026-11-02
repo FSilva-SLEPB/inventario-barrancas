@@ -167,6 +167,7 @@ test("portada administrativa ofrece accesos operativos y consultas no ven gesti√
     const { html } = await pagina({}, false, [], 0, "", rol);
     for (const ruta of ["nivel-central", "p02", "registro", "bodega-ti", "movimientos"]) assert.ok(html.includes('href="/inventario/' + ruta + '"'));
     assert.ok(!html.includes("<table"));
+    assert.ok(!html.includes('href="/mantenedores/directores"'));
   }
   const { html } = await pagina({}, false, [], 0, "", "consulta");
   assert.ok(!html.includes('href="/inventario/registro"'));
