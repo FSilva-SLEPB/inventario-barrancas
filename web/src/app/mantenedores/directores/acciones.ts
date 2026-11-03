@@ -18,7 +18,7 @@ export async function guardarDirector(_anterior:EstadoDirector,f:FormData):Promi
  const motivo=f.get('motivo');if(typeof motivo!=='string'||!motivo.trim()||motivo.length>500||/\p{Cc}/u.test(motivo))return fallo('Indica brevemente el motivo de la actualización.');
  try{
   await obtenerBaseDatos().query<{version:number}>('SELECT public.guardar_ficha_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5,$6) AS version',[actor.email,sede,JSON.stringify(datos),version,sedeVersion,motivo.trim()]);
-  revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
+  revalidatePath('/directorio','layout');revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
 
  }catch(e){return fallo((e as {code?:string}).code==='P2201'?'El directorio o la sede cambiaron. Recarga antes de guardar.':'No se pudo actualizar el directorio. Revisa permisos y datos.');}
  redirect('/mantenedores/directores?ver='+sede);
@@ -37,7 +37,7 @@ export async function cargarDirectorio(_anterior:EstadoCargaDirectorio,f:FormDat
   if(f.getAll('hash').length!==1||f.get('hash')!==hash||f.getAll('versiones').length!==1||f.get('versiones')!==versiones||f.getAll('confirmo').length!==1||f.get('confirmo')!=='si')return {...base,mensaje:'El listado, el directorio o la sede cambiaron. Prepara nuevamente la vista previa y confirma su revisión.'};
   const nombre=esArchivo?(archivo as File).name.split(/[\\/]/).pop()!.replace(/[\p{Cc}]/gu,'').slice(0,200):'listado-pegado.txt';
   const {rows}=await obtenerBaseDatos().query<{resultado:{repetida:boolean}}>('SELECT public.cargar_directorio_acceso($1,$2::jsonb,$3,$4) AS resultado',[actor.email,JSON.stringify(datos),hash,nombre||'directorio.csv']);
-  revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
+  revalidatePath('/directorio','layout');revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
   return {...base,estado:'guardado',mensaje:rows[0].resultado.repetida?'El listado ya había sido cargado. No se duplicó el historial.':`Directorio cargado: ${datos.length} establecimientos/JISC, con historial.`,omitidas};
  }catch(e){const code=(e as {code?:string})?.code;if(code)return {...base,mensaje:code==='P2201'?'El directorio o una sede cambiaron durante la revisión. No se guardaron cambios parciales.':'No se pudo confirmar la carga; no se guardaron cambios parciales.'};return {...base,mensaje:e instanceof TypeError?'El archivo debe ser texto UTF-8.':e instanceof Error?e.message:'No se pudo revisar el listado.'};}
 }

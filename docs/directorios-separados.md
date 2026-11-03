@@ -1,6 +1,7 @@
 # Directorios separados y cierre de edición
 
-La consulta se divide en cuatro accesos de Mantenedores. Las vistas comparten
+La sección **Directorio** tiene su propio acceso en Inicio y en el menú lateral,
+fuera de Mantenedores. Al entrar o desplegarla se muestran las cuatro consultas. Las vistas comparten
 las mismas sedes y personas vigentes; no duplican registros ni mantienen cuatro
 copias que puedan divergir.
 
@@ -33,6 +34,8 @@ identificador de EE.EE. no abre la ficha en la sección de JI/SC, ni al revés.
 Los perfiles locales y de consulta siguen sin acceder al directorio privado.
 
 Las cuatro pantallas comparten tabla, ficha, filtros, estados, botones e historial.
+En el listado el nombre es texto normal y cada fila tiene una sola acción:
+**Ver ficha**. Dentro de la ficha se encuentra **Editar ficha**.
 El correo de directoras JI/SC ya conservado en la base no se elimina al instalar.
 No se presenta como columna ni campo de esa ficha; se conserva para las entregas
 si sigue siendo la misma persona y se limpia si cambia la directora.
@@ -85,10 +88,19 @@ al migrar, cuatro tablas y ámbitos, edición solo desde la ficha, permisos,
 validación, cierre al guardar, cambios concurrentes, contactos e historial,
 compatibilidad con importaciones y respaldo/restauración con nombres y apellidos.
 
-Verificación de esta revisión: 96 pruebas unitarias, 311 comprobaciones HTTP y
+Verificación de esta revisión: 96 pruebas unitarias, 319 comprobaciones HTTP y
 navegador Chromium real con guardar/cancelar/validar, escritorio, móvil y movimiento
 reducido. El ensayo de respaldo/restauración incluye la pareja nombres/apellidos.
-Dependencias permaneció abierta 45 segundos con `next dev` sin recargas espontáneas
-en el entorno aislado; la causa del síntoma observado en CentOS sigue pendiente de
-los registros de esa instalación. Esta revisión no se presenta como solución
-confirmada de ese incidente.
+El 3 de noviembre se cambió la web de CentOS al servidor compilado y se comprobó
+su estado saludable, HTTP 200 y estabilidad del navegador. La causa exacta del
+bucle de recompilación en desarrollo no se identificó; el acceso operativo usa
+ahora la imagen compilada. Los cambios de navegación se incorporan reconstruyendo
+esa imagen, con las instrucciones de operación actualizadas.
+
+## Rutas de Directorio
+
+Las consultas están en `/directorio/establecimientos`, `/directorio/directores`,
+`/directorio/jardines` y `/directorio/directoras`. La carga está en
+`/directorio/cargar`. Las direcciones anteriores de Mantenedores redirigen a
+estas páginas después de comprobar el permiso y conservan los filtros y la ficha
+seleccionada. Mantenedores mantiene sus catálogos, usuarios y funcionarios NC.

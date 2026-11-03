@@ -76,6 +76,8 @@ export async function guardarSede(
   }
 
   revalidatePath("/mantenedores/sedes");
+  revalidatePath("/directorio", "layout");
+  revalidatePath("/inventario", "layout");
   if (datos.id) redirect("/mantenedores/sedes?guardado=1");
 
   return {
