@@ -11,7 +11,7 @@
 .controles-modelo{display:flex;flex-wrap:wrap;gap:1rem;align-items:end;margin-block:1.5rem}.controles-modelo .campo-catalogos{margin:0;flex:1 1 13rem}.control-zoom{display:grid;gap:.5rem;flex:1 1 10rem}.control-zoom label{font-size:.875rem;font-weight:700}.control-zoom input{accent-color:var(--color-primario);width:100%}.er-lienzo{overflow:auto;height:min(65vh,42rem);border:1px solid var(--color-borde-suave);border-radius:1rem;margin-block:1rem;background:var(--color-superficie)}.er-nodo{cursor:pointer;outline:none}.er-nodo:focus>rect{stroke:var(--color-primario);stroke-width:4}.detalle-tabla{margin-block:1.5rem}.detalle-tabla h2{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:1.125rem;overflow-wrap:anywhere}.catalogo-tablas{margin-top:1.5rem}.enlace-tabla{border:0;background:transparent;color:var(--color-primario);font:inherit;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.875rem;padding:0;text-align:left;text-decoration:underline;overflow-wrap:anywhere;cursor:pointer}.tabla-datos code{color:var(--color-texto);font-size:.8125rem;white-space:normal}.catalogo-tablas details{margin-top:.5rem;font-size:.875rem}.catalogo-tablas summary{color:var(--color-primario);cursor:pointer}.catalogo-tablas li{overflow-wrap:anywhere}
 
 /* Anchuras de lectura: desplazar la tabla sin partir nombres cortos o claves. */
-.tabla-listado-directorio{min-width:72rem}
+table.tabla-listado-directorio{min-width:72rem}
 table.tabla-listado-directorio th,table.tabla-listado-directorio td{overflow-wrap:normal;word-break:normal}
 table.tabla-listado-directorio th:first-child{width:30%}
 table.tabla-listado-directorio td:nth-child(2){min-width:8rem;white-space:nowrap}
@@ -20,7 +20,7 @@ table.tabla-listado-directorio td:nth-child(4){min-width:10rem}
 table.tabla-listado-directorio td:nth-child(5){min-width:18rem;overflow-wrap:anywhere}
 table.tabla-listado-directorio td:last-child{min-width:7rem;white-space:nowrap}
 table.tabla-datos thead th{white-space:nowrap}
-.tabla-modelo-uso{min-width:66rem}
+table.tabla-modelo-uso{min-width:66rem}
 table.tabla-modelo-uso th:first-child{width:22%}
 table.tabla-modelo-uso td:nth-child(2),table.tabla-modelo-uso td:nth-child(3){min-width:8rem;white-space:nowrap}
 table.tabla-modelo-uso td:last-child{min-width:28rem}
