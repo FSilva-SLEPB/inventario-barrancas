@@ -67,6 +67,11 @@ no despliega automáticamente CentOS. Esta rama añade [dashboard de robos](docs
 Compose se ensayan con datos ficticios; la instalación definitiva en CentOS
 y OAuth/HTTPS reales siguen pendientes.
 
+Los [directorios separados](docs/directorios-separados.md) organizan los datos de
+EE.EE., JI/SC y sus responsables en cuatro consultas. La edición termina al guardar.
+El modelo permanece como documentación técnica fuera del menú de Mantenedores;
+Inventario de celulares queda como acceso pendiente de desarrollo.
+
 ## Desarrollo local
 
 Requisitos: Git, Docker Engine y Docker Compose.

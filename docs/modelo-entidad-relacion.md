@@ -1,7 +1,7 @@
 # Modelo entidad relación del inventario
 
 Este documento se genera desde una base con las migraciones del repositorio.
-La página Mantenedores → Modelo de datos consulta la estructura y los recuentos de la instalación actual.
+El modelo es documentación técnica para administradores, fuera del menú operativo de Mantenedores, en /documentacion/modelo-datos.
 
 ```mermaid
 erDiagram
@@ -53,6 +53,8 @@ erDiagram
     text correo
     text situacion
     text observaciones
+    text nombres
+    text apellidos
   }
   entregas_detalle {
     uuid entrega_id PK, FK

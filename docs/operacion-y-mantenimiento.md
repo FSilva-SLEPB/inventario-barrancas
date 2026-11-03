@@ -178,3 +178,11 @@ separadas de las copias cifradas.
   [informe de avance](informe-avance-jefatura.md) y [material para reunión](jefatura/README.md).
 - Los recuentos de equipos y movimientos de una instalación solo se informan como
   actuales después de consultarla. Una tabla vacía puede estar en uso funcional.
+
+## Actualización de rutas de documentación
+
+El modelo de datos está disponible solo para administradores en
+`/documentacion/modelo-datos`, fuera del menú operativo de Mantenedores.
+Los directorios y el cierre de edición se describen en
+[Directorios separados](directorios-separados.md). La migración de esta revisión
+es `1794096000000_directorios-separados`; no separa automáticamente nombres legados.

@@ -13,7 +13,7 @@ import { ESTADOS_ROBO } from "@/lib/validacion-robos";
 import { cambiosHistorial } from "@/lib/presentacion-historial";
 import FormularioEquipo from "@/components/formulario-equipo";
 export const metadata={title:'Ficha e historial del equipo | Inventario'};
-export default async function FichaEquipo({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{editar?:string|string[]}>}){
+export default async function FichaEquipo({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{editar?:string|string[];guardado?:string|string[]}>}){
   const actor=await exigirAcceso(),{id}=await params;if(!esIdSede(id))notFound();
   const e=await obtenerEquipo(id);if(!e)notFound();
   const [historial,categorias,p,robos]=await Promise.all([historialEquipo(id),listarCategorias(),searchParams,robosEquipo(id)]);
@@ -24,6 +24,7 @@ export default async function FichaEquipo({params,searchParams}:{params:Promise<
   return <main className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Ficha e historial</p><h1>{e.categoriaNombre} · {e.marca} {e.modelo}</h1><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
     <div className="acciones-catalogos">{editable&&!editando&&<Link className="btn btn-outline-primary" href={`/inventario/${id}?editar=si#editar-equipo`} aria-label="Editar información del equipo">✎ Editar información</Link>}
       <Link href={`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.situacion==='pendiente_entrega'?'pendientes':'inventario'}`}>Volver al inventario</Link></div></header>
+    {p.guardado==='1'&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
     {editando?<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link href={`/inventario/${id}`}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></div></section>
     :<div className="ficha-secciones"><section className="ficha-seccion"><h2>Identificación</h2><dl className="ficha-datos">{dato('Categoría',e.categoriaNombre)}{dato('Marca',e.marca)}{dato('Modelo',e.modelo)}{dato('Número de serie',e.serie||'Pendiente')}{dato('Número de inventario',e.inventario||'Pendiente')}
       {(!e.serie||!e.inventario)&&e.motivoIdentificacion&&dato('Dato pendiente',e.motivoIdentificacion)}</dl></section>

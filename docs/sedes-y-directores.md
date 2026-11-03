@@ -1,3 +1,7 @@
+> Navegación actual: consulta [Directorios separados](directorios-separados.md).
+> El modelo técnico salió del menú de Mantenedores. Las secciones siguientes
+> describen también el flujo combinado anterior y su compatibilidad de carga.
+
 # Sedes, directores y datos de recepción
 
 Acuerdos con Felipe Silva, 29 de octubre de 2026, hora de Chile.

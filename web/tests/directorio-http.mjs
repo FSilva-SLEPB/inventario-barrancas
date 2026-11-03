@@ -23,12 +23,12 @@ try{
  await assert.rejects(guardar(sedes[0],'Cambio obsoleto',0),e=>e.code==='P2201');assert.equal((await leer(sedes[0])).nombre,'Directora primera');pruebas++;
  const gestion=await cookie(correo),soloConsulta=await cookie(consulta);
  assert.equal((await pedir('/mantenedores/directores',soloConsulta)).headers.get('location'),'/sin-permiso');pruebas++;
- const html=await(await pedir('/mantenedores/directores?editar='+sedes[0],gestion)).text();assert.ok(html.includes('Directora primera'));
+ const html=await(await pedir('/mantenedores/directoras-jardines?editar='+sedes[0],gestion)).text();assert.ok(html.includes('Directora primera'));
  const f=new FormData(),dec=s=>s.replaceAll('&quot;','"').replaceAll('&#x27;',"'").replaceAll('&amp;','&');
  for(const[input]of html.matchAll(/<input\b[^>]*>/g)){const n=/\bname="([^"]+)"/.exec(input)?.[1];if(input.includes('type="hidden"')&&n?.startsWith('$ACTION'))f.append(dec(n),dec(/\bvalue="([^"]*)"/.exec(input)?.[1]??''));}
  assert.ok([...f.keys()].some(n=>n.startsWith('$ACTION')));
- for(const[k,v]of Object.entries({sede:sedes[0],nombre:'Directora actualizada',version:'1',motivo:'Cambio ficticio',sedeVersion:JSON.stringify(['Sede directorio 0 '+sufijo,'','Pudahuel','']),rut:'',correo:'',situacion:'titular',observaciones:'',sedeNombre:'Sede directorio 0 '+sufijo,direccion:'',comuna:'Pudahuel',correoInstitucional:''}))f.set(k,v);
- const respuesta=await fetch(origen+'/mantenedores/directores?editar='+sedes[0],{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:gestion},body:f});assert.equal(respuesta.status,200);assert.equal((await leer(sedes[0])).nombre,'Directora actualizada');assert.equal((await leer(sedes[0])).version,2);pruebas++;
+ for(const[k,v]of Object.entries({seccion:'directoras',filtros:'',sede:sedes[0],nombres:'Directora',apellidos:'actualizada',version:'1',motivo:'Cambio ficticio',sedeVersion:JSON.stringify(['Sede directorio 0 '+sufijo,'','Pudahuel','']),rut:'',situacion:'titular'}))f.set(k,v);
+ const respuesta=await fetch(origen+'/mantenedores/directoras-jardines?editar='+sedes[0],{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:gestion},body:f});assert.equal(respuesta.status,303);assert.equal((await leer(sedes[0])).nombre,'Directora actualizada');assert.equal((await leer(sedes[0])).version,2);pruebas++;
  const sha=createHash('sha256').update(randomUUID()).digest('hex');hashes.push(sha);
  const fallo=[{sedeId:sedes[0],nombre:'No debe guardarse',version:2},{sedeId:sedes[2],nombre:'No corresponde',version:0}];
  await assert.rejects(cargar(fallo,sha),e=>e.code==='P2202');assert.equal((await leer(sedes[0])).nombre,'Directora actualizada');assert.equal((await db.query('SELECT count(*) FROM public.directorio_cargas WHERE sha256=$1',[sha])).rows[0].count,'0');pruebas++;

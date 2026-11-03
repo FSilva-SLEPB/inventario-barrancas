@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { obtenerBaseDatos } from "@/lib/db";
 import { exigirAdministrador } from "@/lib/acceso";
@@ -81,6 +82,7 @@ export async function guardarCategoria(
   }
 
   revalidatePath("/mantenedores/categorias");
+  if (id) redirect("/mantenedores/categorias?guardado=1");
 
   return {
     resultado: "guardado",

@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { obtenerBaseDatos } from "@/lib/db";
 import { exigirAdministrador } from "@/lib/acceso";
@@ -75,6 +76,7 @@ export async function guardarSede(
   }
 
   revalidatePath("/mantenedores/sedes");
+  if (datos.id) redirect("/mantenedores/sedes?guardado=1");
 
   return {
     resultado: "guardado",

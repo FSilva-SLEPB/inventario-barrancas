@@ -1,6 +1,7 @@
 'use server';
 import {createHash,randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
+import {redirect} from 'next/navigation';
 import {exigirAdministrador} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {listarDirectorio} from '@/lib/directorio';
@@ -16,10 +17,11 @@ export async function guardarDirector(_anterior:EstadoDirector,f:FormData):Promi
  let datos:DatosDirectorio;try{datos=validarDatosDirectorio(crudos);}catch(e){return fallo(e instanceof Error?e.message:'Revisa los datos.');}
  const motivo=f.get('motivo');if(typeof motivo!=='string'||!motivo.trim()||motivo.length>500||/\p{Cc}/u.test(motivo))return fallo('Indica brevemente el motivo de la actualización.');
  try{
-  const {rows}=await obtenerBaseDatos().query<{version:number}>('SELECT public.guardar_ficha_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5,$6) AS version',[actor.email,sede,JSON.stringify(datos),version,sedeVersion,motivo.trim()]);
+  await obtenerBaseDatos().query<{version:number}>('SELECT public.guardar_ficha_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5,$6) AS version',[actor.email,sede,JSON.stringify(datos),version,sedeVersion,motivo.trim()]);
   revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
-  return {estado:'guardado',mensaje:'Directorio actualizado. Las entregas anteriores conservan los datos de quien recibió.',valores:datos,version:rows[0].version,sedeVersion:JSON.stringify([datos.sedeNombre,datos.direccion,datos.comuna,datos.correoInstitucional]),revision};
+
  }catch(e){return fallo((e as {code?:string}).code==='P2201'?'El directorio o la sede cambiaron. Recarga antes de guardar.':'No se pudo actualizar el directorio. Revisa permisos y datos.');}
+ redirect('/mantenedores/directores?ver='+sede);
 }
 export type EstadoCargaDirectorio={estado:'inicial'|'error'|'previa'|'guardado';mensaje:string;hash:string;versiones:string;vista:VistaDirectorio[];omitidas:{fila:number;rbd:string;sede:string;motivo:string}[]};
 export async function cargarDirectorio(_anterior:EstadoCargaDirectorio,f:FormData):Promise<EstadoCargaDirectorio>{

@@ -2,6 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { exigirAdministrador } from "@/lib/acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { validarUsuario, valoresUsuario, type EstadoUsuario } from "@/lib/validacion-usuarios";
@@ -35,6 +36,7 @@ export async function guardarUsuario(_anterior: EstadoUsuario, formulario: FormD
     return { ...fallo, mensaje: mensajes[codigo ?? ""] ?? "No se pudo guardar. Inténtalo nuevamente." };
   }
   revalidatePath("/mantenedores/usuarios");
+  if (datos.version > 0) redirect("/mantenedores/usuarios?guardado=1");
   return { resultado: "guardado", mensaje: "Acceso guardado correctamente.", errores: {}, revision,
     valores: datos.version === 0 ? valoresUsuario() : { ...valores, version: String(datos.version + 1) } };
 }

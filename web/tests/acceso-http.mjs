@@ -48,7 +48,7 @@ try {
   const admin = await cookie("felipe.silva@slepb.gob.cl");
   const consulta = await cookie(correo, { rol: "administrador" });
   let formularioCategoria;
-  for (const ruta of ["/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/mantenedores/funcionarios", "/mantenedores/directores", "/mantenedores/directores/cargar", "/mantenedores/modelo-datos", "/inventario/robos", "/inventario/robos/dashboard", "/inventario/robos/dashboard/exportar", "/inventario/robos/reportar", "/solicitudes", "/mantenedores",
+  for (const ruta of ["/inventario/celulares", "/documentacion/modelo-datos", "/mantenedores/directorio-establecimientos", "/mantenedores/directores-establecimientos", "/mantenedores/directorio-jardines", "/mantenedores/directoras-jardines", "/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/mantenedores/funcionarios", "/mantenedores/directores", "/mantenedores/directores/cargar", "/mantenedores/modelo-datos", "/inventario/robos", "/inventario/robos/dashboard", "/inventario/robos/dashboard/exportar", "/inventario/robos/reportar", "/solicitudes", "/mantenedores",
     "/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
     const anonimo = await pedir(ruta);
     assert.equal(anonimo.status, 307, ruta);
@@ -171,7 +171,8 @@ try {
   verificaciones += 2;
   const editado = await guardar('/mantenedores/usuarios', accionUsuario,
     { ...valores, version: '1', activo: 'false' }, admin);
-  assert.equal(editado.status, 200);
+  assert.equal(editado.status, 303);
+  assert.equal(editado.headers.get('location'),'/mantenedores/usuarios?guardado=1');
   assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: false, version: 2 });
   const obsoleto = await guardar('/mantenedores/usuarios', accionUsuario, { ...valores, version: '1' }, admin);
   assert.equal(obsoleto.status, 200);
