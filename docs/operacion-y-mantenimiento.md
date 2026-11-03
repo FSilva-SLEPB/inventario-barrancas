@@ -195,3 +195,11 @@ El modelo de datos está disponible solo para administradores en
 Los directorios y el cierre de edición se describen en
 [Directorios separados](directorios-separados.md). La migración de esta revisión
 es `1794096000000_directorios-separados`; no separa automáticamente nombres legados.
+
+## Inventario de celulares
+
+El [inventario de celulares](inventario-celulares.md) requiere la migración
+`1794182400000_inventario-celulares`, además de reconstruir la web compilada.
+Cada número identifica una línea vigente asociada a un equipo. Cambios de sede,
+número y vigencia conservan historial; archivar no constituye una baja.
+El dashboard de robos fue retirado; permanece el consolidado operativo.

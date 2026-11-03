@@ -9,8 +9,7 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   ...(gestion?[{href:'/inventario/registro',titulo:'Registro de equipos',descripcion:admin?'Ingreso individual y carga masiva de equipos.':'Registrar equipos propios de la sede.',icono:'+'}]:[]),
   ...(admin?[{href:'/inventario/bodega-ti',titulo:'Bodega TI',descripcion:'Equipos destinados a establecimientos y pendientes de entrega.',icono:'TI'},
    {href:'/inventario/movimientos',titulo:'Movimientos y actas',descripcion:'Entregas registradas, personas receptoras y antecedentes.',icono:'↔'}]:[]),
-  {href:'/inventario/celulares',titulo:'Inventario de celulares',descripcion:'Espacio reservado; gestión de celulares pendiente de definir.',icono:'CEL'},
-  {href:'/inventario/robos/dashboard',titulo:'Dashboard de robos',descripcion:'Indicadores y gráficos por sede, comuna, categoría y período.',icono:'▥'},
+  {href:'/inventario/celulares',titulo:'Inventario de celulares',descripcion:'Equipos celulares y números asociados de establecimientos, jardines y Nivel Central.',icono:'CEL'},
   {href:'/inventario/robos',titulo:'Consolidado de robos',descripcion:'Equipos reportados, robos validados y recuperaciones.',icono:'!'}
  ]},...(admin?[{id:'directorio' as const,titulo:'Directorio',href:'/directorio',descripcion:'Establecimientos, jardines y salas cuna, con los datos de sus directores y directoras.',accesos:[
   {href:'/directorio/establecimientos',titulo:'Directorio de establecimientos',descripcion:'RBD, nombre, dirección, comuna y correo del establecimiento.',icono:'EE'},

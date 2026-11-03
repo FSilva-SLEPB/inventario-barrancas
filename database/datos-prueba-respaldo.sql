@@ -57,4 +57,13 @@ BEGIN
 END;
 $directorio_ci$;
 
+DO $celular_ci$
+BEGIN
+ IF to_regclass('public.celulares') IS NOT NULL THEN
+  PERFORM public.guardar_celular_acceso('felipe.silva@slepb.gob.cl','60000000-0000-4000-8000-000000000001',
+   jsonb_build_object('sedeId','10000000-0000-4000-8000-000000000001','telefono','+56900000001','marca','Marca ficticia','modelo','Modelo ficticio','imei','','inventario','CI-CELULAR-001','condicionTecnica','sin_verificar','responsable','Uso de recuperación ficticio','observaciones','','activo',true),0,'Celular ficticio para recuperación');
+ END IF;
+END;
+$celular_ci$;
+
 COMMIT;

@@ -57,38 +57,3 @@ export async function robosEquipo(id:string){
  return(await obtenerBaseDatos().query<{id:string;estado:string;fecha:string;recuperadoFecha:string|null}>(`SELECT i.id,i.estado,i.fecha::text,d.recuperado_fecha::text AS "recuperadoFecha" ${base}
  JOIN public.equipos e ON e.id=d.equipo_id WHERE d.equipo_id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY i.fecha DESC,i.id`,[id,!requiereSede(actor.rol),actor.sedeId])).rows;
 }
-
-export async function dashboardRobos(f:FiltrosRobos){
- const {periodosDashboard}=await import('@/lib/dashboard-robos');
- const {unidad,periodos}=periodosDashboard(f),actor=await exigirAcceso();
- const parametros=[!requiereSede(actor.rol),actor.sedeId,f.ambito,f.sede||null,f.comuna,f.estado,f.desde||null,f.hasta||null,f.q,unidad,unidad==='month'?'YYYY-MM':'YYYY'];
- // Una sola instantánea de lectura para que tarjetas y gráficos describan el mismo conjunto.
- const contar=`count(DISTINCT equipo_id)::int AS equipos,count(DISTINCT incidente_id)::int AS incidentes,
- count(DISTINCT equipo_id) FILTER(WHERE estado='validado')::int AS robados,
- count(DISTINCT equipo_id) FILTER(WHERE estado='reportado')::int AS reportados,
- count(DISTINCT equipo_id) FILTER(WHERE estado='recuperado')::int AS recuperados,
- count(DISTINCT equipo_id) FILTER(WHERE estado='rechazado')::int AS rechazados`;
- const {rows}=await obtenerBaseDatos().query<{datos:Omit<import('./dashboard-robos').DatosDashboardRobos,'unidad'|'consultado'|'serie'>&{serie:{periodo:string;incidentes:number;equipos:number}[]}}>(`WITH filtrados AS MATERIALIZED (
- SELECT i.id AS incidente_id,d.equipo_id,i.sede_id,i.sede_nombre,i.sede_rbd,i.comuna,i.fecha,i.registrado_en,${estado} AS estado,
- COALESCE(NULLIF(d.identificacion->>'categoria',''),'Sin categoría informada') AS categoria ${base} ${filtros}
- ),por_sede AS (
- SELECT sede_id::text AS clave,(array_agg(sede_nombre ORDER BY fecha DESC,registrado_en DESC,incidente_id DESC))[1] AS nombre,
- (array_agg(sede_rbd ORDER BY fecha DESC,registrado_en DESC,incidente_id DESC))[1] AS rbd,
- string_agg(DISTINCT comuna,', ' ORDER BY comuna) AS comunas,${contar} FROM filtrados GROUP BY sede_id
- ),por_comuna AS (
- SELECT COALESCE(NULLIF(comuna,''),'Sin comuna informada') AS clave,COALESCE(NULLIF(comuna,''),'Sin comuna informada') AS nombre,${contar}
- FROM filtrados GROUP BY COALESCE(NULLIF(comuna,''),'Sin comuna informada')
- ),por_categoria AS (
- SELECT categoria AS clave,categoria AS nombre,${contar} FROM filtrados GROUP BY categoria
- ),por_periodo AS (
- SELECT to_char(date_trunc($10::text,fecha),$11::text) AS periodo,count(DISTINCT incidente_id)::int AS incidentes,count(DISTINCT equipo_id)::int AS equipos
- FROM filtrados GROUP BY periodo
- ) SELECT jsonb_build_object(
- 'resumen',(SELECT to_jsonb(t) FROM (SELECT ${contar} FROM filtrados)t),
- 'sedes',COALESCE((SELECT jsonb_agg(t ORDER BY robados DESC,reportados DESC,recuperados DESC,nombre,clave) FROM por_sede t),'[]'::jsonb),
- 'comunas',COALESCE((SELECT jsonb_agg(t ORDER BY nombre) FROM por_comuna t),'[]'::jsonb),
- 'categorias',COALESCE((SELECT jsonb_agg(t ORDER BY nombre) FROM por_categoria t),'[]'::jsonb),
- 'serie',COALESCE((SELECT jsonb_agg(t ORDER BY periodo) FROM por_periodo t),'[]'::jsonb)) AS datos`,parametros);
- const datos=rows[0].datos,porPeriodo=new Map(datos.serie.map(p=>[p.periodo,p]));
- return {...datos,serie:periodos.map(p=>({...p,incidentes:porPeriodo.get(p.periodo)?.incidentes??0,equipos:porPeriodo.get(p.periodo)?.equipos??0})),unidad,consultado:new Date().toISOString()};
-}
