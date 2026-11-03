@@ -58,3 +58,21 @@ El gráfico distingue las relaciones uno a uno y uno a varios, permite filtrar p
 no se representan como FK al directorio vigente. El documento
 [modelo-entidad-relacion.md](modelo-entidad-relacion.md) se genera con las mismas
 consultas y su gráfico se compara con la base temporal durante las pruebas HTTP.
+
+## Ajustes de lectura y navegación
+
+La ficha del directorio conserva búsqueda, tipo, comuna y situación al abrir,
+editar y cerrar. El formulario permite volver a la ficha de lectura. El filtro
+«Sin cargar» separa las fichas aún no incorporadas de los cargos guardados como
+«Responsable pendiente». Si cambia la fuente durante la carga, la vista previa
+anterior se oculta y se pide revisarla de nuevo antes de confirmar.
+
+Las columnas de comuna, situación, contacto y claves del modelo tienen anchuras
+de lectura; la tabla se desplaza horizontalmente sin cortar palabras cortas ni
+identificadores. En móvil, Escape cierra el menú y devuelve el foco al botón.
+
+El modelo se abre sin una tabla seleccionada. Elegir una entidad centra ese nodo
+dentro del lienzo, sin desplazar la página. Si está fuera del área filtrada, se
+restablece la vista completa. Los recuentos describen las entidades y relaciones
+visibles. Las tablas técnicas se identifican como tales y no atenúan el gráfico
+de negocio al examinarlas.
