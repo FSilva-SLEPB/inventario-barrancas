@@ -1,5 +1,6 @@
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["tabpanel", "region"] }] */
 // El contenedor de la tabla recibe foco para permitir su desplazamiento con teclado.
+import VentanaEdicion from '@/components/ventana-edicion';
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -86,7 +87,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
                     {puedeEditar && (
                       <td>
                         <Link
-                          href={`/mantenedores/sedes?editar=${sede.id}#formulario-sede`}
+                          href={`/mantenedores/sedes?editar=${sede.id}`}
                           aria-label={`Editar sede ${etiquetaSede(sede)}`}
                         >
                           Editar
@@ -102,11 +103,11 @@ export default async function Sedes({ searchParams }: Propiedades) {
       </section>
 
       {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
-        <section id="formulario-sede" className="panel-catalogos" aria-labelledby="titulo-formulario-sede">
+        <VentanaEdicion activa={Boolean(seleccionada)} titulo="Editar sede" cerrarHref="/mantenedores/sedes"><section id="formulario-sede" className="panel-catalogos" aria-labelledby="titulo-formulario-sede">
           <h2 id="titulo-formulario-sede">{seleccionada ? "Editar sede" : "Registrar sede"}</h2>
           <p>El tipo y el nombre son obligatorios. El RBD y los datos de contacto son opcionales.</p>
           <FormularioSede key={seleccionada?.id ?? "nueva"} sede={seleccionada} />
-        </section>
+        </section></VentanaEdicion>
       )}
     </main>
   );

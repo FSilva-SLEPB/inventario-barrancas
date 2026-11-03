@@ -181,7 +181,7 @@ separadas de las copias cifradas.
 
 ## 9. Cómo ver tablas y avances
 
-- En el sistema, como administrador: **Mantenedores → Modelo de datos**. Muestra
+- En el sistema, como administrador: `/documentacion/modelo-datos` (fuera del menú operativo). Muestra
   estructura, relaciones, uso y recuentos de esa instalación; permite descargar SVG.
 - En GitHub, sin entrar a CentOS: [modelo detallado](modelo-entidad-relacion.md),
   [informe de avance](informe-avance-jefatura.md) y [material para reunión](jefatura/README.md).

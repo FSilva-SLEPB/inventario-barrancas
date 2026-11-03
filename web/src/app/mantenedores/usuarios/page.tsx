@@ -1,4 +1,5 @@
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["region"] }] */
+import VentanaEdicion from '@/components/ventana-edicion';
 import Link from "next/link";
 import { exigirAdministrador } from "@/lib/acceso";
 import { listarUsuarios } from "@/lib/usuarios";
@@ -41,7 +42,7 @@ export default async function Usuarios({ searchParams }: {
               {u.correo === actor.email && <small className="usuario-nombre">Tu cuenta</small>}</th>
             <td>{PERFILES[u.rol]}</td><td>{u.sedeId ? sede ? etiquetaSede(sede) : "Sede no disponible" : "Todos los ámbitos"}</td>
             <td>{u.activo ? "Activo" : "Inactivo"}</td>
-            <td>{sistema || !perfilReservado(u.rol) ? <Link href={`/mantenedores/usuarios?editar=${encodeURIComponent(u.correo)}#formulario-usuario`}
+            <td>{sistema || !perfilReservado(u.rol) ? <Link href={`/mantenedores/usuarios?editar=${encodeURIComponent(u.correo)}`}
               aria-label={`Editar acceso de ${u.correo}`}>Editar</Link> : "Reservado al administrador del sistema"}</td>
           </tr>; })}</tbody>
         </table>
@@ -50,12 +51,12 @@ export default async function Usuarios({ searchParams }: {
     {edicionInvalida ? <p role="alert" className="error-catalogos">
       No se encontró la cuenta. Selecciona Editar desde el listado.
     </p> : reservado ? <p role="alert">Solo el Administrador del sistema puede editar esta cuenta.</p>
-      : guardado==="1" ? null : <section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
+      : guardado==="1" ? null : <VentanaEdicion activa={Boolean(seleccionado)} titulo="Editar acceso de usuario" cerrarHref="/mantenedores/usuarios"><section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
       <h2 id="usuario-titulo">{seleccionado ? "Editar acceso" : "Registrar usuario"}</h2>
       <p>La cuenta debe pertenecer a slepb.gob.cl. No se crean cuentas ni contraseñas de Google desde este formulario.</p>
       {seleccionado?.correo === actor.email && <p>Otro administrador deberá retirar tu permiso o desactivar tu cuenta.</p>}
       <FormularioUsuario key={seleccionado?.correo ?? "nuevo"} usuario={seleccionado} sedes={sedes} sistema={sistema} />
-    </section>}
+    </section></VentanaEdicion>}
     <section aria-labelledby="perfiles-titulo" className="perfiles-ayuda">
       <h2 id="perfiles-titulo">Perfiles disponibles</h2>
       <dl><dt>Administrador del sistema</dt><dd>Administra todos los accesos, incluidos los perfiles administrativos.</dd>

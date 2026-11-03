@@ -172,7 +172,7 @@ try {
   const editado = await guardar('/mantenedores/usuarios', accionUsuario,
     { ...valores, version: '1', activo: 'false' }, admin);
   assert.equal(editado.status, 303);
-  assert.equal(editado.headers.get('location'),'/mantenedores/usuarios?guardado=1');
+  assert.equal(new URL(editado.headers.get('location'),origen).pathname,'/mantenedores/usuarios');assert.equal(new URL(editado.headers.get('location'),origen).searchParams.get('guardado'),'1');assert.ok(new URL(editado.headers.get('location'),origen).searchParams.get('aviso'));
   assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: false, version: 2 });
   const obsoleto = await guardar('/mantenedores/usuarios', accionUsuario, { ...valores, version: '1' }, admin);
   assert.equal(obsoleto.status, 200);

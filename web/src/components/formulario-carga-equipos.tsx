@@ -1,4 +1,5 @@
 "use client";
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 import { useActionState,useState } from "react";
 import { procesarCarga,type EstadoCarga } from "@/app/inventario/carga/acciones";
 export default function FormularioCargaEquipos() {
@@ -11,6 +12,7 @@ export default function FormularioCargaEquipos() {
     setArchivoRevisado(resultado.estado==="previa"?archivo:null);
     return resultado;
   },base);
+ useResultadoGuardado(estado);
   return <form action={accion} aria-busy={pendiente} className="formulario-catalogos carga-equipos">
     <div className="campo-catalogos"><label htmlFor="carga-archivo">Archivo CSV UTF-8 (hasta 2 MB)</label>
       <input id="carga-archivo" name="archivo" type="file" accept=".csv,text/csv" disabled={pendiente}

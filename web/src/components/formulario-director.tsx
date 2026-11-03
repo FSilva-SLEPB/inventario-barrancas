@@ -1,4 +1,5 @@
 'use client';
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 import {useActionState,useState} from 'react';
 import Link from 'next/link';
 import {guardarDirector,cargarDirectorio,type EstadoDirector,type EstadoCargaDirectorio} from '@/app/mantenedores/directores/acciones';
@@ -14,6 +15,7 @@ function CamposDirector({inicial}:{inicial:DatosDirectorio}){
 }
 export default function FormularioDirector({director,cancelarHref}:{director:DirectorSede;cancelarHref?:string}){
  const [estado,accion,pendiente]=useActionState(guardarDirector,{estado:'inicial',mensaje:'',valores:datosDesdeSede(director),version:director.version,sedeVersion:versionSede(director),revision:'inicial'} as EstadoDirector);
+ useResultadoGuardado(estado);
  return <form action={accion} className="formulario-directorio" aria-busy={pendiente}><input type="hidden" name="sede" value={director.sedeId}/><input type="hidden" name="version" value={estado.version}/><input type="hidden" name="sedeVersion" value={estado.sedeVersion}/><p><strong>RBD {director.rbd} · {director.sedeNombre}</strong></p>
  <fieldset disabled={pendiente} className="border-0 p-0 m-0"><legend className="visually-hidden">Editar establecimiento y responsable</legend><CamposDirector key={estado.revision} inicial={estado.valores}/><div className="campo-catalogos"><label htmlFor="director-motivo">Motivo del cambio</label><input id="director-motivo" name="motivo" maxLength={500} required defaultValue={director.version?'Actualización del directorio':'Registro inicial'}/><p className="ayuda-catalogos">Por ejemplo: cambio de director/a, renuncia o subrogancia.</p></div><div className="acciones-catalogos"><button className="boton-catalogos" disabled={pendiente}>{pendiente?'Guardando…':'Guardar cambios del directorio'}</button>{!pendiente&&<Link href={cancelarHref??`/mantenedores/directores?ver=${director.sedeId}#ficha-directorio`}>Volver a la ficha</Link>}</div></fieldset><p role={estado.estado==='error'?'alert':'status'}>{estado.mensaje}</p></form>;
 }
@@ -23,6 +25,7 @@ export function CargaDirectorio(){
   f.delete('archivo');f.delete('listado');if(modo==='archivo'&&archivo)f.set('archivo',archivo);else if(modo==='texto')f.set('listado',listado);
   const resultado=await cargarDirectorio(prev,f);setRevisado(resultado.estado==='previa'?revision:null);return resultado;
  },{estado:'inicial',mensaje:'',hash:'',versiones:'',vista:[],omitidas:[]} as EstadoCargaDirectorio);
+ useResultadoGuardado(estado);
  const cambiar=()=>{setRevision(v=>v+1);setRevisado(null);};
  const vistaVigente=estado.estado==='previa'&&revision===revisado,cambioFuente=estado.estado==='previa'&&!vistaVigente;
  return <form action={accion} aria-busy={pendiente} className="carga-directorio"><fieldset disabled={pendiente} className="border-0 p-0 m-0"><legend className="visually-hidden">Cargar listado de establecimientos</legend><div className="campo-catalogos"><label htmlFor="directorio-fuente">Cómo cargar el listado</label><select id="directorio-fuente" value={modo} onChange={e=>{setModo(e.target.value);cambiar();}}><option value="archivo">Seleccionar archivo CSV, TSV o TXT</option><option value="texto">Pegar tabla desde Excel o el listado</option></select></div>

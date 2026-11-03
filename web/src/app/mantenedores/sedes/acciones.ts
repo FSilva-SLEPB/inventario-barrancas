@@ -1,4 +1,5 @@
 "use server";
+import {destinoConExito} from '@/lib/aviso-exito';
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -78,7 +79,7 @@ export async function guardarSede(
   revalidatePath("/mantenedores/sedes");
   revalidatePath("/directorio", "layout");
   revalidatePath("/inventario", "layout");
-  if (datos.id) redirect("/mantenedores/sedes?guardado=1");
+  if (datos.id) redirect(destinoConExito("/mantenedores/sedes?guardado=1"));
 
   return {
     resultado: "guardado",

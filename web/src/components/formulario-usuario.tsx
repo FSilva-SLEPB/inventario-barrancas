@@ -1,4 +1,5 @@
 "use client";
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 
 import Link from "next/link";
 import { useActionState, useState } from "react";
@@ -14,6 +15,7 @@ export default function FormularioUsuario({ usuario, sedes, sistema }: {
   const inicial: EstadoUsuario = { resultado: "inicial", mensaje: "", valores: valoresUsuario(usuario),
     errores: {}, revision: "inicial" };
   const [estado, accion, pendiente] = useActionState(guardarUsuario, inicial);
+ useResultadoGuardado(estado);
   return <form action={accion} className="formulario-catalogos" aria-busy={pendiente}>
     <input type="hidden" name="version" value={estado.valores.version} />
     <CamposUsuario key={estado.revision} estado={estado} usuario={usuario} pendiente={pendiente}

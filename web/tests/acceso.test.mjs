@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { randomUUID, createHash } from "node:crypto";
+import { randomUUID, createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { SourceTextModule, SyntheticModule } from "node:vm";
 import test from "node:test";
 import ts from "typescript";
@@ -32,7 +32,7 @@ async function entorno() {
     "next-auth/providers/google": { default: (opciones) => opciones },
     "next/navigation": { redirect: redirigir },
     "next/cache": { revalidatePath() {} },
-    "node:crypto": { randomUUID, createHash },
+    "node:crypto": { randomUUID, createHash, createHmac, timingSafeEqual },
     "@/lib/db": { obtenerBaseDatos: () => ({ query }) },
   };
   async function cargar(nombre) {

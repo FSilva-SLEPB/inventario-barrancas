@@ -1,4 +1,5 @@
 "use client";
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 
 import Link from "next/link";
 import { useActionState } from "react";
@@ -92,6 +93,7 @@ export default function FormularioDependencia({ dependencia, sedes }: {
     valores: valoresInicialesDependencia(dependencia), errores: {},
   };
   const [estado, accion, pendiente] = useActionState(guardarDependencia, inicial);
+ useResultadoGuardado(estado);
 
   return (
     <form action={accion} className="formulario-catalogos" autoComplete="off" aria-busy={pendiente}>

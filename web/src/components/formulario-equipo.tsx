@@ -1,4 +1,5 @@
 "use client";
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 import { useActionState, useState } from "react";
 import { guardarEquipo } from "@/app/inventario/acciones";
 import { CAMPOS_COMPRA,CONDICIONES,ORIGENES,valoresEquipo,type ValoresEquipo,type EstadoEquipo } from "@/lib/validacion-equipos";
@@ -11,6 +12,7 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false}:
   const valores=inicial??{...valoresEquipo(),origen:local?"compra_sede":"compra_utic",sedeId:local?sedes[0]?.id??"":""};
   const base:EstadoEquipo={resultado:"inicial",mensaje:"",valores,errores:{},revision:"inicial"};
   const [estado,accion,pendiente]=useActionState(guardarEquipo,base);
+ useResultadoGuardado(estado);
   const v=estado.valores;
   const [identificacion,setIdentificacion]=useState({serie:valores.serie,inventario:valores.inventario});
   const campo=(nombre:keyof ValoresEquipo,etiqueta:string,obligatorio=false,maxLength=120)=><div className="campo-catalogos" key={nombre}>

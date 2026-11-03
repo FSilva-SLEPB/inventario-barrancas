@@ -1,4 +1,5 @@
 "use server";
+import {destinoConExito} from '@/lib/aviso-exito';
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -22,7 +23,7 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
     return {...fallo,mensaje:mensajes[codigo]??"No se pudo guardar el equipo. Revisa los datos e inténtalo nuevamente."};
   }
   revalidatePath("/inventario", "layout");
-  if(datos.id) redirect(`/inventario/${datos.id}?guardado=1`);
+  if(datos.id) redirect(destinoConExito(`/inventario/${datos.id}?guardado=1`));
   return {resultado:"guardado",mensaje:"Equipo guardado con su historial.",errores:{},revision,
     valores:datos.id ? {...valores,version:String(Number(valores.version)+1),motivoCambio:""}
       : {...valoresEquipo(),sedeId:actor.rol==="encargado"?actor.sedeId??"":"",origen:actor.rol==="encargado"?"compra_sede":"compra_utic"}};

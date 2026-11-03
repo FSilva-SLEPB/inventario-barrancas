@@ -1,4 +1,5 @@
 "use server";
+import {destinoConExito} from '@/lib/aviso-exito';
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { exigirAdministrador } from "@/lib/acceso";
@@ -26,5 +27,5 @@ export async function regularizarEntregas(_anterior: EstadoRegularizacion, f: Fo
     return { estado: "error", mensaje: mensajes[codigo??""] ?? "No se pudo confirmar la regularización. No se guardaron cambios parciales.", valores };
   }
   revalidatePath("/inventario", "layout");
-  redirect(`/inventario/movimientos?lote=${datos.solicitud}`);
+  redirect(destinoConExito(`/inventario/movimientos?lote=${datos.solicitud}`, 'entrega'));
 }
