@@ -18,7 +18,7 @@ lo implementado de lo previsto y será la referencia antes de ampliar módulos.
 - Generación de actas.
 - Firma y consulta de documentos.
 
-## Base tecnológica prevista
+## Base tecnológica actual
 
 - React y Next.js con TypeScript.
 - Node.js.
@@ -49,7 +49,19 @@ Las contraseñas, credenciales y respaldos quedarán fuera del repositorio.
 
 ## Estado
 
-Base de Next.js funcionando con Docker Compose. ESLint, TypeScript y compilación de producción verificados.
+El código integrado hasta el PR #38 incorpora acceso institucional, catálogos,
+inventario NC/P02, ficha e historial, carga de equipos, regularización histórica
+de entregas a jardines, directorio y seguimiento/consolidado de robos. Las
+solicitudes, asignaciones completas y nuevas actas siguen en desarrollo.
+
+El [informe de avance para jefatura](docs/informe-avance-jefatura.md), el
+[material de presentación](docs/jefatura/README.md) y la
+[guía de operación y mantenimiento](docs/operacion-y-mantenimiento.md) reúnen el
+estado revisado, los gráficos y la forma de mantener el proyecto.
+
+La configuración actual de Compose es de desarrollo; integrar código en GitHub
+no despliega automáticamente CentOS. El servicio de producción definitivo sigue
+pendiente de preparar y comprobar.
 
 ## Desarrollo local
 
@@ -150,7 +162,9 @@ Los perfiles locales se limitan a una sede EE/JI; Consulta general / Auditor man
 lectura global. Administrador de gestión administra cuentas operativas, mientras
 los perfiles administrativos quedan reservados al Administrador del sistema.
 El inventario incorpora ficha, historial y carga CSV con vista previa; las
-entregas con actas y las solicitudes siguen pendientes. Ver
+regularizaciones históricas a jardines conservan la persona receptora y enlaces
+a actas existentes. La generación/firma de actas nuevas y las solicitudes siguen
+pendientes. Ver
 [Ficha y carga de equipos](docs/inventario-equipos.md).
 Antes de ingresar se muestra una portada institucional y un portal de acceso sin menú lateral.
 
@@ -160,8 +174,8 @@ permiso de administración, comprobado en el servidor.
 
 La web utiliza el usuario limitado `inventario_app` para acceder a PostgreSQL.
 
-La organización prevista es reunir los catálogos y la consulta de
-existencias dentro de Mantenedores, con dos bodegas:
+Inventario reúne las consultas y operaciones de equipos; Mantenedores reúne
+catálogos, directorio, accesos y modelo de datos. La ampliación prevé dos bodegas:
 
 - Equipos: registros individuales con cantidad 1, identificación por serie
   e inventario, asignaciones y devoluciones.
