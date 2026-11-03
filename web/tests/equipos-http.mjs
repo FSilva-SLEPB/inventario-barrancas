@@ -28,6 +28,13 @@ function camposAccion(html){
   if(input.includes('type="hidden"')&&nombre?.startsWith('$ACTION'))campos.push([dec(nombre),dec(/\bvalue="([^"]*)"/.exec(input)?.[1]??'')]);
  }assert.ok(campos.length);return campos;
 }
+function formularioEquipo(html){
+ const bloque=[...html.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/g)].map(m=>m[0]).find(m=>m.includes('formulario-equipo'));assert.ok(bloque);
+ const dec=s=>s.replaceAll('&quot;','"').replaceAll('&#x27;',"'").replaceAll('&amp;','&');const f=new FormData();
+ for(const [input] of bloque.matchAll(/<input\b[^>]*>/g)){const nombre=/\bname="([^"]+)"/.exec(input)?.[1];if(nombre&&!/type="(?:file|checkbox|radio)"/.test(input))f.append(dec(nombre),dec(/\bvalue="([^"]*)"/.exec(input)?.[1]??''));}
+ for(const [,nombre,contenido] of bloque.matchAll(/<select\b[^>]*name="([^"]+)"[^>]*>([\s\S]*?)<\/select>/g)){const opciones=[...contenido.matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/g)],e=opciones.find(e=>/\bselected\b/.test(e[1]))??opciones[0];if(e)f.append(dec(nombre),dec(/\bvalue="([^"]*)"/.exec(e[1])?.[1]??e[2]));}
+ for(const [,nombre,contenido] of bloque.matchAll(/<textarea\b[^>]*name="([^"]+)"[^>]*>([\s\S]*?)<\/textarea>/g))f.append(dec(nombre),dec(contenido));return f;
+}
 await db.connect();await app.connect();
 try {
  await db.query(`INSERT INTO public.sedes(id,tipo,nombre,rbd) VALUES ($1,'establecimiento',$4,$7),($2,'jardin_infantil',$5,$8),($3,'nivel_central',$6,NULL)`,
@@ -71,7 +78,7 @@ try {
  const lista=await(await pedir('/inventario/p02?ambito=nc',enc)).text();
  assert.ok(lista.includes('Inventario de mi sede'));assert.ok(lista.includes('Escuela ficticia '+sufijo));
  assert.ok(!lista.includes('Jardin ficticio '+sufijo));assert.ok(!lista.includes('Central ficticia '+sufijo));pruebas++;
- const forzada=await(await pedir('/inventario/p02?sede='+sedes[1],enc)).text();assert.ok(!forzada.includes('/inventario/'+ajeno));pruebas++;
+ const forzada=await(await pedir('/inventario/p02?sede='+sedes[1],enc)).text();assert.ok(!forzada.includes('ver='+ajeno));pruebas++;
  assert.equal((await pedir('/inventario/'+ajeno,enc)).status,404);assert.equal((await pedir('/inventario/'+central,enc)).status,404);pruebas+=2;
  const ficha=await(await pedir('/inventario/'+id,enc)).text();assert.ok(ficha.includes('Corrección documentada'));assert.ok(ficha.includes(recibido.serie));
  assert.ok(ficha.includes('Editar información'));assert.ok(!ficha.includes('id="formulario-equipo"'));pruebas++;
@@ -81,23 +88,23 @@ try {
  const accion=camposAccion(fichaEditar);const f=new FormData();for(const[k,v]of accion)f.append(k,v);
  const denegado=await fetch(origen+'/inventario/'+id,{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:consulta},body:f});
  assert.equal(new URL(denegado.headers.get('location'),origen).pathname,'/sin-permiso');pruebas++;
- const recibidos=await(await pedir('/inventario/p02',enc)).text();assert.ok(!recibidos.includes('/inventario/'+pendiente));
- const pendientes=await(await pedir('/inventario/p02?vista=pendientes',enc)).text();assert.ok(pendientes.includes('/inventario/'+pendiente));assert.ok(!pendientes.includes('/inventario/'+id));pruebas++;
- const nc=await(await pedir('/inventario/nivel-central',gestion)).text();assert.ok(nc.includes('/inventario/'+central));assert.ok(!nc.includes('/inventario/'+id));pruebas++;
+ const recibidos=await(await pedir('/inventario/p02',enc)).text();assert.ok(!recibidos.includes('ver='+pendiente));
+ const pendientes=await(await pedir('/inventario/p02?vista=pendientes',enc)).text();assert.ok(pendientes.includes('ver='+pendiente));assert.ok(!pendientes.includes('ver='+id));pruebas++;
+ const nc=await(await pedir('/inventario/nivel-central',gestion)).text();assert.ok(nc.includes('ver='+central));assert.ok(!nc.includes('ver='+id));pruebas++;
  assert.equal((await pedir('/inventario/nivel-central',enc)).headers.get('location'),'/sin-permiso');pruebas++;
  const entrada=await(await pedir('/inventario',gestion)).text();assert.ok(entrada.includes('href="/inventario/nivel-central"'));assert.ok(entrada.includes('href="/inventario/p02"'));pruebas++;
- const jardines=await(await pedir('/inventario/p02?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('/inventario/'+ajeno));assert.ok(!jardines.includes('/inventario/'+id));pruebas++;
+ const jardines=await(await pedir('/inventario/p02?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('ver='+ajeno));assert.ok(!jardines.includes('ver='+id));pruebas++;
  // Los filtros de nombre (ID), RBD y tipo se combinan y conservan el alcance.
  const rbdEscuela='RBD-A-'+sufijo;
  const porRbd=await(await pedir('/inventario/p02?tipo=establecimiento&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
- assert.ok(porRbd.includes('/inventario/'+id));assert.ok(!porRbd.includes('/inventario/'+ajeno));pruebas++;
+ assert.ok(porRbd.includes('ver='+id));assert.ok(!porRbd.includes('ver='+ajeno));pruebas++;
  const porNombre=await(await pedir('/inventario/p02?tipo=jardin_infantil&sede='+sedes[1],gestion)).text();
- assert.ok(porNombre.includes('/inventario/'+ajeno));assert.ok(!porNombre.includes('/inventario/'+id));pruebas++;
+ assert.ok(porNombre.includes('ver='+ajeno));assert.ok(!porNombre.includes('ver='+id));pruebas++;
  const cruzados=await(await pedir('/inventario/p02?tipo=jardin_infantil&rbd='+encodeURIComponent(rbdEscuela),gestion)).text();
- assert.ok(!cruzados.includes('/inventario/'+id));assert.ok(!cruzados.includes('/inventario/'+ajeno));
+ assert.ok(!cruzados.includes('ver='+id));assert.ok(!cruzados.includes('ver='+ajeno));
  assert.ok(cruzados.includes('No hay equipos que coincidan'));pruebas++;
  const ataqueRbd=await(await pedir('/inventario/p02?ambito=nc&tipo=jardin_infantil&rbd='+encodeURIComponent('RBD-B-'+sufijo)+'&sede='+sedes[1],enc)).text();
- assert.ok(ataqueRbd.includes('/inventario/'+id));assert.ok(!ataqueRbd.includes('/inventario/'+ajeno));assert.ok(!ataqueRbd.includes('/inventario/'+central));pruebas++;
+ assert.ok(ataqueRbd.includes('ver='+id));assert.ok(!ataqueRbd.includes('ver='+ajeno));assert.ok(!ataqueRbd.includes('ver='+central));pruebas++;
  assert.equal((await pedir('/inventario/carga',enc)).headers.get('location'),'/sin-permiso');
  assert.equal((await pedir('/inventario/carga',consulta)).headers.get('location'),'/sin-permiso');pruebas+=2;
  // La carga es atómica e idempotente; los faltantes no inventan fecha ni acta.
@@ -133,15 +140,29 @@ try {
   assert.equal((filas.match(/<tr\b/g)??[]).length,Math.min(limite,151-limite));pruebas++;
  }
  const bodega=await(await pedir('/inventario/bodega-ti?vista=inventario',gestion)).text();
- assert.ok(bodega.includes('/inventario/'+pendiente));assert.ok(!bodega.includes('/inventario/'+id));pruebas++;
+ assert.ok(bodega.includes('ver='+pendiente));assert.ok(!bodega.includes('ver='+id));pruebas++;
  for(const sesion of [enc,consulta,await cookies(correos.general)]){
   assert.equal((await pedir('/inventario/bodega-ti',sesion)).headers.get('location'),'/sin-permiso');pruebas++;
  }
+ // Ficha y edición sobre el listado: filtros, ámbitos, datos, errores y cierre.
+ const volver='/inventario/p02?'+new URLSearchParams({vista:'inventario',q:sufijo,pagina:'1',tipo:'establecimiento',sede:sedes[0],rbd:rbdEscuela,limite:'100'});
+ const urlFicha=volver+'&ver='+id,urlEditar=volver+'&editar='+id;
+ const lectura=await(await pedir(urlFicha,enc)).text();assert.ok(lectura.includes('<dialog'));assert.ok(lectura.includes('Corrección documentada'));assert.ok(!lectura.includes('id="formulario-equipo"'));assert.ok(lectura.includes('Editar información'));pruebas++;
+ for(const [ruta,equipo,sesion]of [['/inventario/p02',central,gestion],['/inventario/nivel-central',id,gestion],['/inventario/bodega-ti',id,gestion],['/inventario/p02',ajeno,enc],['/inventario/p02',pendiente,gestion]]){const r=await pedir(ruta+'?ver='+equipo,sesion);assert.equal(r.status,404);pruebas++;}
+ const soloLecturaModal=await(await pedir(volver+'&editar='+id,consulta)).text();assert.ok(!soloLecturaModal.includes('id="formulario-equipo"'));assert.ok(!soloLecturaModal.includes('aria-label="Editar información del equipo"'));pruebas++;
+ const pendienteModal=await(await pedir('/inventario/p02?vista=pendientes&editar='+pendiente,enc)).text();assert.ok(!pendienteModal.includes('id="formulario-equipo"'));pruebas++;
+ const editarHtml=await(await pedir(urlEditar,gestion)).text(),formularioModal=formularioEquipo(editarHtml);assert.equal(formularioModal.get('modelo'),(await leer(id)).modelo);assert.equal(formularioModal.get('volver'),volver);pruebas++;
+ const enviarModal=f=>fetch(origen+urlEditar,{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:gestion},body:f});
+ const versionModal=(await leer(id)).version;formularioModal.set('volver','https://ajeno.invalid');formularioModal.set('motivoCambio','Edición modal ficticia');const retornoMalo=await enviarModal(formularioModal);assert.equal(retornoMalo.status,200);assert.equal((await leer(id)).version,versionModal);pruebas++;
+ formularioModal.set('volver',volver);formularioModal.set('modelo','');const invalidoModal=await enviarModal(formularioModal);assert.equal(invalidoModal.status,200);assert.ok((await invalidoModal.text()).includes('Este dato es obligatorio.'));assert.equal((await leer(id)).version,versionModal);pruebas++;
+ formularioModal.set('modelo','Modelo desde ventana '+sufijo);const actualizadoModal=await enviarModal(formularioModal);assert.equal(actualizadoModal.status,303);const destinoModal=new URL(actualizadoModal.headers.get('location'),origen);assert.equal(destinoModal.pathname,'/inventario/p02');assert.ok(destinoModal.searchParams.get('aviso'));for(const [k,v]of new URL(volver,origen).searchParams)assert.equal(destinoModal.searchParams.get(k),v);assert.ok(!destinoModal.searchParams.has('editar'));assert.ok(!destinoModal.searchParams.has('ver'));const cerradoModal=await(await pedir(destinoModal.pathname+destinoModal.search,gestion)).text();assert.ok(!cerradoModal.includes('<dialog'));assert.equal((await leer(id)).version,versionModal+1);pruebas++;
+ // Doble envío con versión antigua: no duplica el historial ni confirma éxito.
+ const nAntes=(await db.query('SELECT count(*) AS n FROM public.equipos_historial WHERE equipo_id=$1',[id])).rows[0].n;const repetidoModal=await enviarModal(formularioModal);assert.equal(repetidoModal.status,200);assert.ok((await repetidoModal.text()).includes('El equipo cambió.'));assert.equal((await db.query('SELECT count(*) AS n FROM public.equipos_historial WHERE equipo_id=$1',[id])).rows[0].n,nAntes);pruebas++;
  const registro=await(await pedir('/inventario/registro',gestion)).text();
  assert.ok(registro.includes('id="inventario-destino"'));assert.ok(registro.includes('id="carga-masiva"'));pruebas++;
  assert.equal((await pedir('/inventario/registro',consulta)).headers.get('location'),'/sin-permiso');pruebas++;
  assert.equal((await pedir('/inventario/carga',gestion)).headers.get('location'),'/inventario/registro#carga-masiva');pruebas++;
- console.log(`${pruebas} comprobaciones de equipos: aislamiento NC/EE/JI, historial, pendientes, solo lectura, duplicados, concurrencia y carga atómica.`);
+ console.log(`${pruebas} comprobaciones de equipos: aislamiento NC/EE/JI, historial, pendientes, solo lectura, duplicados, concurrencia, carga atómica, ventanas, filtros y cierre del guardado.`);
 }finally{
  await db.query('DELETE FROM public.equipos_historial WHERE equipo_id IN(SELECT id FROM public.equipos WHERE sede_id=ANY($1::uuid[]))',[sedes]);
  await db.query('DELETE FROM public.equipos WHERE sede_id=ANY($1::uuid[])',[sedes]);

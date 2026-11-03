@@ -283,3 +283,33 @@ La recepción propone nombre, RUN y correo sin pedir transcribirlos por equipo;
 la edición opcional identifica al receptor histórico. Las entregas conservan una
 instantánea de receptor y datos del establecimiento para futuras actas. Los datos
 no informados en entregas antiguas no se completan con contactos actuales.
+
+## Consulta y edición con el mismo criterio del Directorio
+
+Los listados de Nivel Central, P02 y Bodega TI tienen una sola acción por equipo:
+**Ver ficha**. Abre una ventana modal sobre el listado con la identificación,
+funcionamiento, adquisición, antecedentes y el historial desplegable. Dentro de
+la ficha aparece **Editar información**, si el perfil y la situación del equipo
+lo permiten. Los datos llegan rellenos y se utiliza la misma ventana al editar.
+
+Cancelar edición vuelve a la consulta sin guardar; cerrar o pulsar Escape vuelve
+al listado. Un guardado correcto cierra la ventana y muestra una confirmación
+SweetAlert. Se conservan búsqueda, tipo, sede, RBD, estado de entrega, tamaño de
+página y página actual. Bodega conserva además los equipos marcados para entrega
+al abrir, cerrar o guardar una ficha. Las series, RBD y números de inventario
+se muestran completos; en pantallas pequeñas se desplaza únicamente la tabla.
+
+Los errores y las versiones obsoletas mantienen el formulario sin confirmar
+éxito. El regreso admite únicamente los tres listados y sus filtros conocidos;
+no permite direcciones externas. La consulta comprueba sede, ámbito y separación
+entre pendientes y recibidos. Las restricciones de escritura permanecen en el
+servidor y PostgreSQL. Los enlaces directos `/inventario/[id]` siguen disponibles.
+
+La interfaz comparte ventana, teclado, foco, contraste y confirmaciones con los
+directorios. La actualización no añade migraciones ni cambia registros al
+instalarse; se incorpora reconstruyendo la imagen compilada de la web.
+
+Validación: 102 pruebas unitarias, 336 comprobaciones HTTP con PostgreSQL temporal
+y Chromium real en NC/P02/Bodega, incluyendo filtros, página 2, selección para
+entregas, errores, cierre al guardar, solo lectura, móvil, teclado, contraste,
+texto ampliado y movimiento reducido. Se utilizan datos exclusivamente ficticios.

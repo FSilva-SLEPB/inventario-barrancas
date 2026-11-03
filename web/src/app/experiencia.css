@@ -69,3 +69,7 @@ table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child
 @media(max-width:1000px){.filtros-directorio-ordenado {grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:600px){.filtros-directorio-ordenado {grid-template-columns:minmax(0,1fr);}.modal-ficha {width:calc(100vw - 1rem);max-width:calc(100vw - 1rem);max-height:95svh;}.modal-ficha-cabecera,.modal-ficha-contenido {padding:1rem;}.modal-ficha .campos-directorio,.modal-ficha .ficha-datos {grid-template-columns:minmax(0,1fr);}}
 @media(prefers-reduced-motion:reduce){.modal-ficha[open],.confirmacion-guardado {animation:none!important;transition:none!important;}.modal-ficha::backdrop{backdrop-filter:none;}}
+
+.modal-ficha #editar-equipo {border:0;padding:0;background:transparent;margin-block:1rem;}
+.modal-ficha .ficha-equipo .historial-equipo {margin-top:1.25rem;}
+.modal-ficha .ficha-equipo .historial-equipo>summary {font-weight:700;color:var(--color-primario);cursor:pointer;}

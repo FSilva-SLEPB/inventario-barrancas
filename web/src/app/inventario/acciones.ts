@@ -1,4 +1,5 @@
 "use server";
+import {retornoInventario} from '@/lib/ficha-inventario';
 import {destinoConExito} from '@/lib/aviso-exito';
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -11,6 +12,9 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
   const {datos,valores,errores}=validarEquipo(formulario);
   const fallo:EstadoEquipo={resultado:"error",mensaje:"Revisa los campos indicados.",valores,errores,revision};
   if(!datos)return fallo;
+  const entradasRetorno=formulario.getAll('volver');
+  const volver=entradasRetorno.length===1?retornoInventario(entradasRetorno[0]):null;
+  if(entradasRetorno.length&&(!datos.id||!volver||entradasRetorno.length!==1))return {...fallo,mensaje:'La dirección de regreso no es válida. Vuelve a abrir la ficha.'};
   try {
     await obtenerBaseDatos().query("SELECT public.guardar_equipo_acceso($1,$2::jsonb,$3,$4)",
       [actor.email,JSON.stringify(datos),Number(valores.version),datos.id ? valores.motivoCambio : "Registro inicial"]);
@@ -23,7 +27,7 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
     return {...fallo,mensaje:mensajes[codigo]??"No se pudo guardar el equipo. Revisa los datos e inténtalo nuevamente."};
   }
   revalidatePath("/inventario", "layout");
-  if(datos.id) redirect(destinoConExito(`/inventario/${datos.id}?guardado=1`));
+  if(datos.id) redirect(destinoConExito(volver??`/inventario/${datos.id}?guardado=1`));
   return {resultado:"guardado",mensaje:"Equipo guardado con su historial.",errores:{},revision,
     valores:datos.id ? {...valores,version:String(Number(valores.version)+1),motivoCambio:""}
       : {...valoresEquipo(),sedeId:actor.rol==="encargado"?actor.sedeId??"":"",origen:actor.rol==="encargado"?"compra_sede":"compra_utic"}};
