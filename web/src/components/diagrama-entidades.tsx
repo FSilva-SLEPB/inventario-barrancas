@@ -19,7 +19,7 @@ export default function DiagramaEntidades({modelo,actualizado}:{modelo:ModeloDat
  const tabla=modelo.tablas.find(t=>t.nombre===seleccion),vecinas=new Set([resaltada,...modelo.relaciones.filter(r=>r.origen===resaltada||r.destino===resaltada).flatMap(r=>[r.origen,r.destino])]);
  useEffect(()=>{
   const contenedor=lienzo.current,nodo=grafo.nodos.find(n=>n.tabla.nombre===seleccion);
-  if(contenedor&&nodo)contenedor.scrollTo({left:Math.max(0,(nodo.x+grafo.anchoNodo/2)*zoom/100-contenedor.clientWidth/2),top:Math.max(0,(nodo.y+nodo.alto/2)*zoom/100-contenedor.clientHeight/2),behavior:'auto'});
+  if(contenedor)contenedor.scrollTo({left:nodo?Math.max(0,(nodo.x+grafo.anchoNodo/2)*zoom/100-contenedor.clientWidth/2):0,top:nodo?Math.max(0,(nodo.y+nodo.alto/2)*zoom/100-contenedor.clientHeight/2):0,behavior:'auto'});
  },[grafo,seleccion,zoom]);
  function elegirTabla(nombre:string){
   if(nombre&&modulo!=='Todos'&&!grafo.nodos.some(n=>n.tabla.nombre===nombre))setModulo('Todos');
