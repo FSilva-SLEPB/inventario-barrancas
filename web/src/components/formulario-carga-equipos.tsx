@@ -22,7 +22,7 @@ export default function FormularioCargaEquipos() {
     {estado.total>0&&<p>Total: {estado.total} equipos. Avisos: {estado.cantidadAvisos}.</p>}
     {estado.errores.length>0&&<ul>{estado.errores.map((s,i)=><li key={i}>{s}</li>)}</ul>}
     {estado.avisos.length>0&&<details><summary>Avisos de información pendiente (primeros 30)</summary><ul>{estado.avisos.map((s,i)=><li key={i}>{s}</li>)}</ul></details>}
-    {estado.vistas.length>0&&<div className="tabla-usuarios-contenedor"><table className="tabla-catalogos"><caption>Primeras 20 filas</caption>
+    {estado.vistas.length>0&&<div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos"><caption>Primeras 20 filas</caption>
       <thead><tr><th>Fila / RBD</th><th>Equipo</th><th>Serie / inventario</th><th>Situación de origen</th></tr></thead>
       <tbody>{estado.vistas.map(v=><tr key={v.fila}><td>{v.fila} / {v.rbd}</td><td>{v.categoria} · {v.marca} {v.modelo}</td><td>{v.serie||"Pendiente"} / {v.inventario||"Pendiente"}</td><td>{v.estado}</td></tr>)}</tbody>
     </table></div>}

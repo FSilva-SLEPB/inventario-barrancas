@@ -16,5 +16,6 @@ export function validarReporteRobo(f:FormData,hoy:string){
  if(new Set(equipos.map(e=>e.id)).size!==equipos.length)throw new Error('Hay equipos repetidos en la selección.');
  const enlace=f.get('enlace');if(typeof enlace!=='string'||enlace.length>1500||(enlace&&!/^https?:\/\/\S+$/i.test(enlace)))throw new Error('El enlace debe comenzar con https:// o http://.');
  if(enlace){let url:URL;try{url=new URL(enlace);}catch{throw new Error('Revisa el enlace a los antecedentes.');}if(url.username||url.password)throw new Error('El enlace no debe incluir credenciales.');}
- return {id,datos:{sedeId,fecha:fechaRobo(f.get('fecha'),hoy),lugar:textoRobo(f.get('lugar'),'el lugar',300),descripcion:textoRobo(f.get('descripcion'),'la descripción',3000,true),enlace,equipos}};
+ const lugar=f.get('lugar');if(typeof lugar!=='string')throw new Error('Revisa el lugar del incidente.');
+ return {id,datos:{sedeId,fecha:fechaRobo(f.get('fecha'),hoy),lugar:lugar.trim()?textoRobo(lugar,'el lugar',300):'No informado',descripcion:textoRobo(f.get('descripcion'),'la descripción',3000,true),enlace,equipos}};
 }

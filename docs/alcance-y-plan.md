@@ -354,3 +354,17 @@ código y se revisa por RBD dentro de CentOS. Las entregas guardan sus datos de
 recepción, sin reescribirlas cuando cambia la dirección del establecimiento.
 Las asignaciones nuevas y la generación de actas seguirán su etapa usando este
 directorio; el cambio no simula esos movimientos mediante edición de personas.
+
+### Unificación visual y revisión de tablas
+
+Las portadas y los submenús de Inventario y Mantenedores comparten un catálogo
+filtrado por perfil. Directorio se consulta y edita desde Mantenedores; la carga
+real de responsables sigue siendo un proceso separado de instalar el código.
+Las tablas comparten presentación y las animaciones respetan movimiento reducido.
+Solicitudes seguirá este patrón cuando se implementen sus operaciones.
+
+El reporte de robo se reduce a selección, fecha y descripción, con lugar/denuncia
+opcionales. El modelo entidad relación de Mantenedores se obtiene de PostgreSQL,
+con recuentos, columnas, claves, filtro por área y exportación SVG. El catálogo de
+uso distingue las tablas de negocio del control técnico de migraciones, sin
+inferir desuso solo porque una tabla esté vacía.

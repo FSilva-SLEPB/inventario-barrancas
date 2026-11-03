@@ -28,7 +28,7 @@ export default async function Usuarios({ searchParams }: {
     <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
     <section aria-labelledby="usuarios-listado"><h2 id="usuarios-listado">Usuarios registrados</h2>
       <div className="tabla-usuarios-contenedor" role="region" aria-labelledby="usuarios-listado" tabIndex={0}>
-        <table className="tabla-catalogos">
+        <table className="tabla-datos tabla-catalogos">
           <caption>Cuentas autorizadas y desactivadas</caption>
           <thead><tr><th scope="col">Usuario</th><th scope="col">Perfil</th><th scope="col">Sede / alcance</th><th scope="col">Estado</th>
             <th scope="col">Acciones</th></tr></thead>

@@ -59,10 +59,10 @@ export default async function Sedes({ searchParams }: Propiedades) {
         <h2 id="titulo-listado-sedes">Listado de sedes</h2>
         {sedes.length === 0 ? <p>Todavía no hay sedes registradas.</p> : (
           <div
-            className={estilos.contenedorTabla} role="region"
+            className={`${estilos.contenedorTabla} tabla-contenedor`} role="region"
             aria-labelledby="titulo-listado-sedes" tabIndex={0}
           >
-            <table className={estilos.tabla}>
+            <table className={`tabla-datos ${estilos.tabla}`}>
               <caption>Sedes registradas: {sedes.length}</caption>
               <thead>
                 <tr>

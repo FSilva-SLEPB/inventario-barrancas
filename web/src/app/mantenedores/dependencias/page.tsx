@@ -61,10 +61,10 @@ export default async function Dependencias({ searchParams }: Propiedades) {
         <h2 id="titulo-listado-dependencias">Listado de dependencias</h2>
         {dependencias.length === 0 ? <p>Todavía no hay dependencias registradas.</p> : (
           <div
-            className={estilos.contenedorTabla} role="region"
+            className={`${estilos.contenedorTabla} tabla-contenedor`} role="region"
             aria-labelledby="titulo-listado-dependencias" tabIndex={0}
           >
-            <table className={estilos.tabla}>
+            <table className={`tabla-datos ${estilos.tabla}`}>
               <caption>Dependencias registradas: {dependencias.length}</caption>
               <thead>
                 <tr>

@@ -57,8 +57,8 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
       <p><strong>{total.toLocaleString("es-CL")}</strong> equipos {vista === "pendientes" ? "pendientes de entrega" : "registrados / recibidos"}</p>
       <div className="acciones-resumen">{bodega&&<SeleccionEntregas pagina={equipos.map(e=>e.id).join(",")}/>}<RegistrosPorPagina key={limite} ruta={ruta} limite={limite} filtros={{ vista, tipo, sede: sedeId ?? "", rbd, q }} /></div>
     </div>
-    <div className={styles.contenedorTabla} role="region" aria-label="Resultados del inventario" tabIndex={0}>
-      <table className={`${styles.tabla} ${ambito === "eeji" ? styles.tablaP02 : styles.tablaCentral} ${bodega ? styles.tablaSeleccion : ""}`}>
+    <div className={`${styles.contenedorTabla} tabla-contenedor tabla-inventario-contenedor`} role="region" aria-label="Resultados del inventario" tabIndex={0}>
+      <table className={`tabla-datos ${styles.tabla} ${ambito === "eeji" ? styles.tablaP02 : styles.tablaCentral} ${bodega ? styles.tablaSeleccion : ""}`}>
         <caption className="visually-hidden">{titulo}: {vista === "pendientes" ? "pendientes de entrega" : "equipos registrados / recibidos"}</caption>
         <thead><tr>
           {bodega && <th scope="col"><SeleccionarTodos pagina={equipos.map(e=>e.id).join(",")}/></th>}
