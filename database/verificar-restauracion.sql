@@ -24,6 +24,23 @@ BEGIN
       RAISE EXCEPTION 'Falta una función controlada del inventario restaurado';
     END IF;
   END IF;
+  IF to_regclass('public.funcionarios_nc') IS NOT NULL THEN
+    FOREACH tabla IN ARRAY ARRAY['funcionarios_nc','funcionarios_nc_historial'] LOOP
+      IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN
+        RAISE EXCEPTION 'Permisos incorrectos en funcionarios restaurados';
+      END IF;
+    END LOOP;
+    IF NOT has_function_privilege(current_user,'public.guardar_funcionario_nc_acceso(text,uuid,jsonb,integer,text)','EXECUTE') THEN
+      RAISE EXCEPTION 'Falta la función controlada de funcionarios restaurada';
+    END IF;
+    IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.funcionarios_nc_historial'::regclass AND contype='f' AND convalidated AND confrelid='public.funcionarios_nc'::regclass) THEN
+      RAISE EXCEPTION 'Falta la relación de funcionarios e historial';
+    END IF;
+  END IF;
   IF EXISTS (
     SELECT 1 FROM pg_roles
     WHERE rolname = current_user
@@ -88,6 +105,14 @@ BEGIN
         AND h.despues->>'serie'=e.serie
     ) THEN
       RAISE EXCEPTION 'No se recuperó el equipo ficticio y su historial';
+    END IF;
+  END IF;
+  IF to_regclass('public.funcionarios_nc') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.funcionarios_nc f JOIN public.funcionarios_nc_historial h ON h.funcionario_id=f.id
+     WHERE f.id='40000000-0000-4000-8000-000000000001' AND f.nombre='Persona ficticia O''Higgins'
+      AND NOT f.activo AND f.fecha_ingreso=DATE '2026-10-30' AND f.rut IS NULL AND f.correo IS NULL
+      AND h.antes IS NULL AND h.despues->>'nombre'=f.nombre AND h.actor='felipe.silva@slepb.gob.cl') THEN
+      RAISE EXCEPTION 'No se recuperó la ficha ficticia y su historial';
     END IF;
   END IF;
   IF NOT EXISTS (

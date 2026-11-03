@@ -34,4 +34,14 @@ BEGIN
 END;
 $equipo_ci$;
 
+DO $funcionario_ci$
+BEGIN
+ IF to_regclass('public.funcionarios_nc') IS NOT NULL THEN
+  PERFORM public.guardar_funcionario_nc_acceso('felipe.silva@slepb.gob.cl','40000000-0000-4000-8000-000000000001',
+   jsonb_build_object('nombre','Persona ficticia O''Higgins','rut','','correo','','unidad','Unidad de recuperación',
+    'subdireccion','Subdirección de prueba','cargo','Cargo ficticio','fechaIngreso','2026-10-30','activo',false),0,'Ficha ficticia para recuperación');
+ END IF;
+END;
+$funcionario_ci$;
+
 COMMIT;

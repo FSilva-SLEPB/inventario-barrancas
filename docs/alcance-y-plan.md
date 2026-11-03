@@ -336,15 +336,15 @@ reportados/validados como robados, por ámbito NC o EE/JISC, establecimiento,
 comuna, fechas y categoría. Reportado, validado, rechazado y recuperado se
 conservan como eventos distintos; reportar un robo no ejecuta una baja ni
 elimina el equipo. El consolidado distingue equipos afectados de cantidad
-de incidentes para no duplicar equipos. El dashboard de establecimientos vendrá
-después, basado en esos registros y con los filtros de acceso por sede.
+de incidentes para no duplicar equipos. El dashboard de esta rama usa esos registros y conserva los filtros de acceso
+por sede; distingue incidentes y equipos y exporta un resumen sin datos personales.
 
 En Nivel Central, devolución, reasignación, daño/reparación y robo deberán
 registrarse como movimientos/incidentes vinculados al mismo equipo y, cuando
 corresponda, al funcionario. No se resolverán sobrescribiendo su responsable
 actual ni cambiando un campo de funcionamiento para simular un robo o una baja.
 El reporte/validación/recuperación y consolidado de robos se incluyen en esta
-actualización. Devolución, asignación a funcionarios, reparación y dashboard
+actualización. Devolución, asignación a funcionarios y reparación
 siguen pendientes; requieren sus movimientos propios y no se simulan mediante
 ediciones del directorio ni del funcionamiento del equipo.
 
@@ -372,3 +372,13 @@ opcionales. El modelo entidad relación de Mantenedores se obtiene de PostgreSQL
 con recuentos, columnas, claves, filtro por área y exportación SVG. El catálogo de
 uso distingue las tablas de negocio del control técnico de migraciones, sin
 inferir desuso solo porque una tabla esté vacía.
+
+### Avance nocturno del 3 de noviembre (UTC)
+
+Se incorporan dashboard de robos, fichas administrativas de funcionarios NC con
+historial, modelo actualizado a 19 tablas funcionales y paquete de producción
+ensayado localmente. La ficha no crea cuentas ni asigna equipos. Habilitación,
+asignaciones/devoluciones, nuevas actas y solicitudes mantienen sus etapas
+pendientes. La revisión de seguridad y sus límites están en
+[auditoría del 3 de noviembre](auditoria-seguridad-2026-11-03.md).
+No se ha desplegado esta rama en CentOS ni cargado el listado real de responsables.

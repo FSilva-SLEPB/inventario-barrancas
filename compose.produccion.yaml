@@ -1,0 +1,71 @@
+# Archivo completo de producción. Usar por separado de compose.yaml, no superponerlos.
+services:
+  web:
+    image: "${INVENTARIO_WEB_IMAGE:-inventario-barrancas-web:local}"
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        APP_REVISION: "${APP_REVISION:-local}"
+    user: "1000:1000"
+    init: true
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:uid=1000,gid=1000,mode=1777
+      - /app/.next/cache:uid=1000,gid=1000,mode=0750
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXTAUTH_URL: "${NEXTAUTH_URL:?Falta NEXTAUTH_URL canónica}"
+      NEXTAUTH_SECRET: "${NEXTAUTH_SECRET:?Falta NEXTAUTH_SECRET}"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:?Falta GOOGLE_CLIENT_ID}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:?Falta GOOGLE_CLIENT_SECRET}"
+      DATABASE_URL: "postgresql://inventario_app:${APP_DB_PASSWORD:?Falta APP_DB_PASSWORD}@db:5432/inventario"
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: &registro_acotado
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inventario
+      POSTGRES_USER: inventario_admin
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD}"
+      APP_DB_PASSWORD: "${APP_DB_PASSWORD:?Falta APP_DB_PASSWORD}"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    logging: *registro_acotado
+
+  migrar:
+    profiles: [tools]
+    image: "${INVENTARIO_MIGRACION_IMAGE:-inventario-barrancas-migrar:local}"
+    build:
+      context: .
+      dockerfile: Dockerfile.migraciones
+    init: true
+    environment:
+      DATABASE_URL: "postgresql://inventario_admin:${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD}@db:5432/inventario"
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *registro_acotado
+
+volumes:
+  postgres_data:

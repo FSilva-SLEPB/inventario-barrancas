@@ -4,6 +4,11 @@
 Base revisada: `86e11add01ce6f76a361e0eb34b6d1d31b7363e4`, con PR #38 integrado.
 Documento de avance: implementación, validación y despliegue son estados distintos.
 
+Este informe y sus PDF/SVG conservan el corte indicado. El
+[modelo actual del repositorio](modelo-entidad-relacion.md) puede incorporar
+etapas posteriores; la fuente de este corte permanece en
+[modelo fijado del PR #39](fuentes/modelo-corte-pr39.md).
+
 ## Propósito
 
 Reunir la identificación de equipos de Nivel Central y de EE/JISC, su historial,

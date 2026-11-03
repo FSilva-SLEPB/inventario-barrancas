@@ -6,3 +6,6 @@
 **/*.log
 backups
 storage
+
+# Herramientas, capturas y fixtures locales de trabajo
+/work

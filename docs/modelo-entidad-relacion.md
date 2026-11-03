@@ -117,6 +117,31 @@ erDiagram
     uuid entrega_id FK
     uuid incidente_id FK
   }
+  funcionarios_nc {
+    uuid id PK
+    text nombre
+    text rut
+    text correo
+    text unidad
+    text subdireccion
+    text cargo
+    date fecha_ingreso
+    boolean activo
+    integer version
+    text creado_por
+    timestamp_with_time_zone creado_en
+    text actualizado_por
+    timestamp_with_time_zone actualizado_en
+  }
+  funcionarios_nc_historial {
+    bigint id PK
+    uuid funcionario_id FK
+    text actor
+    text motivo
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   incidentes_robos {
     uuid id PK
     uuid sede_id FK
@@ -194,6 +219,7 @@ erDiagram
   entregas_equipos |o--o{ equipos_historial : "entrega_id"
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
+  funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
   sedes ||--o{ incidentes_robos : "sede_id"
   equipos ||--o{ incidentes_robos_equipos : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_equipos : "incidente_id"
@@ -217,6 +243,8 @@ erDiagram
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
 | equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
+| funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
+| funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
@@ -234,7 +262,7 @@ erDiagram
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.
 - Los nombres, RUN y contactos conservados en instantáneas no son FK al directorio actual.
 - Dependencias pertenece a sedes; todavía no existe una FK de equipos a dependencias.
-- Asignaciones a funcionarios y solicitudes siguen pendientes; no hay tablas de esas etapas que puedan presentarse como implementadas.
+- Funcionarios de Nivel Central tiene ficha e historial propios. Las asignaciones de equipos y las solicitudes siguen pendientes; no se representan como relaciones ya implementadas.
 - pgmigrations es infraestructura de migraciones y se excluye del gráfico de negocio.
 
 El número de filas no prueba por sí solo el uso de una tabla. El catálogo anterior registra sus funciones actuales; una tabla vacía puede pertenecer a un flujo que todavía no tiene movimientos.
