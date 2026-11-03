@@ -21,7 +21,7 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "react": React,
     "react/jsx-runtime": jsx,
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children) },
-    "next/navigation": { useRouter: () => ({ push() {} }), redirect: destino => { throw new Error("REDIRECT:" + destino); } },
+    "next/navigation": { notFound:()=>{throw new Error("NOT_FOUND");}, useRouter: () => ({ push() {} }), redirect: destino => { throw new Error("REDIRECT:" + destino); } },
     "@/lib/acceso": {
       exigirAcceso: async () => ({ rol, sedeId: local ? escuela.id : null }),
       exigirGestionDependencias: async () => {
@@ -31,7 +31,8 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     },
     "@/lib/sedes": { listarSedes: async () => local ? [escuela] : [escuela, jardin, central] },
     "@/lib/catalogos": { listarCategorias: async () => [] },
-    "@/lib/equipos": { listarEquipos: async (...args) => { consulta = args; return { equipos, total, pagina: 1 }; } },
+    "@/lib/equipos": { obtenerEquipo: async () => null, listarEquipos: async (...args) => { consulta = args; return { equipos, total, pagina: 1 }; } },
+    "@/components/ficha-equipo": {default:()=>null},
     "@/components/formulario-equipo": { default: () => null },
     "@/components/formulario-carga-equipos": { default: () => React.createElement("form", { "aria-label": "Carga masiva" }) },
     "./inventario.module.css": { default: {} },
@@ -73,7 +74,7 @@ test("P02 separa columnas y limita selectores al tipo elegido", async () => {
   assert.ok(!filtros.includes(escuela.nombre)); assert.ok(!filtros.includes(escuela.rbd));
   assert.ok(!filtros.includes(central.nombre));
   assert.deepEqual([...html.matchAll(/<th scope="col">([^<]+)<\/th>/g)].map(x => x[1]),
-    ["RBD", "Establecimiento / JISC", "Equipo", "Modelo", "N.º de serie", "N.º de inventario", "Estado", "Historial"]);
+    ["RBD", "Establecimiento / JISC", "Equipo", "Modelo", "N.º de serie", "N.º de inventario", "Estado", "Ficha"]);
 });
 
 test("nombre, RBD y búsqueda se conservan en paginación y cambio de estado", async () => {
@@ -103,10 +104,10 @@ test("perfil local permanece en P02 al forzar ámbito y filtros ajenos", async (
   assert.ok(!html.includes(jardin.nombre));
 });
 
-test("tabla conserva identificadores y acceso directo al historial", async () => {
+test("tabla conserva identificadores y una sola acción para abrir ficha e historial", async () => {
   const equipo = { id: escuela.id, sedeRbd: "00123", sedeNombre: escuela.nombre, categoriaNombre: "Proyector", modelo: "PowerLite", marca: "Epson", serie: "000-ABC", inventario: "INV-001", situacion: "recibido_historico", condicionTecnica: "sin_verificar" };
   const { html } = await pagina({ tipo: "establecimiento" }, false, [equipo]);
-  assert.ok(html.includes('href="/inventario/' + equipo.id + '"'));
+  assert.ok(html.includes('ver=' + equipo.id));assert.ok(html.includes('>Ver ficha</a>'));assert.ok(!html.includes('>Ver historial</a>'));assert.ok(!html.includes('editar='));
   assert.ok(html.includes("000-ABC")); assert.ok(html.includes("INV-001"));
   assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Funcionamiento: Sin verificar"));
 });

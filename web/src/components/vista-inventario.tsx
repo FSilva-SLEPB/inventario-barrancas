@@ -1,7 +1,11 @@
 import Link from "next/link";
+import {notFound} from 'next/navigation';
+import ModalFicha from '@/components/modal-ficha';
+import FichaEquipo from '@/components/ficha-equipo';
+import {enlaceFichaInventario,equipoEnVista} from '@/lib/ficha-inventario';
 import { redirect } from "next/navigation";
 import { exigirAcceso } from "@/lib/acceso";
-import { listarEquipos } from "@/lib/equipos";
+import { listarEquipos,obtenerEquipo } from "@/lib/equipos";
 import { listarSedes } from "@/lib/sedes";
 import { puedeAdministrar, puedeGestionarDependencias, requiereSede } from "@/lib/politica-acceso";
 import { CONDICIONES, SITUACIONES } from "@/lib/validacion-equipos";
@@ -35,6 +39,12 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
   const url = (v: string, n = 1) => `${ruta}?${new URLSearchParams({
     vista: v, q, pagina: String(n), tipo, sede: sedeId ?? "", rbd, limite: String(limite),
   })}`;
+  const volver=url(vista,pagina);
+  const editar=typeof p.editar==='string'?p.editar:'',seleccionado=editar||(typeof p.ver==='string'?p.ver:'');
+  if(seleccionado&&!esIdSede(seleccionado))notFound();
+  const equipoSeleccionado=seleccionado?await obtenerEquipo(seleccionado):null;
+  if(seleccionado&&(!equipoSeleccionado||!equipoEnVista(equipoSeleccionado,ambito,vista)))notFound();
+  const editando=Boolean(editar&&equipoSeleccionado&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.situacion!=='pendiente_entrega'));
   const titulo = bodega ? "Bodega TI" : ambito === "nc" ? "Inventario Nivel Central" : "Inventario P02";
   const paginas = Math.max(1, Math.ceil(total / limite));
 
@@ -64,19 +74,19 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           {bodega && <th scope="col"><SeleccionarTodos pagina={equipos.map(e=>e.id).join(",")}/></th>}
           {ambito === "eeji" && <><th scope="col">RBD</th><th scope="col">Establecimiento / JISC</th></>}
           <th scope="col">Equipo</th><th scope="col">Modelo</th><th scope="col">N.º de serie</th>
-          <th scope="col">N.º de inventario</th><th scope="col">Estado</th><th scope="col">{bodega ? "Acciones" : "Historial"}</th>
+          <th scope="col">N.º de inventario</th><th scope="col">Estado</th><th scope="col">Ficha</th>
         </tr></thead>
         <tbody>{equipos.map(e => <tr key={e.id}>
           {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"||Boolean(e.roboEstado)}
             aria-label={`Seleccionar ${e.inventario || e.serie || e.modelo} de ${e.sedeNombre}`} /></td>}
-          {ambito === "eeji" && <><td>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
+          {ambito === "eeji" && <><td className={styles.rbd}>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
           <td>{e.categoriaNombre}</td><td><span>{e.modelo}</span><small>{e.marca}</small></td>
           <td className={styles.identificador}>{e.serie || "Pendiente"}</td><td className={styles.identificador}>{e.inventario || "Pendiente"}</td>
           <td><span className={`${styles.estado} ${e.situacion === "pendiente_entrega" ? styles.pendiente : styles.recibido}`}>{e.situacion === "recibido_historico" ? "Recibido (histórico)" : SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</span>
             {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><Link className={styles.historial} href={`/inventario/${e.id}`}
-            aria-label={`Ver historial del equipo ${e.inventario || e.serie || e.modelo}`}>Ver historial</Link>
+          <td><Link className={styles.historial} scroll={false} data-ficha-id={e.id} href={enlaceFichaInventario(volver,'ver',e.id)}
+            aria-label={`Ver ficha del equipo ${e.inventario || e.serie || e.modelo}`}>Ver ficha</Link>
           </td>
         </tr>)}
           {!equipos.length && <tr><td colSpan={bodega ? 9 : ambito === "eeji" ? 8 : 6} className={styles.vacio}>No hay equipos que coincidan con los filtros seleccionados.</td></tr>}
@@ -89,5 +99,8 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
         {pagina < paginas && <Link href={url(vista, pagina + 1)}>Siguiente</Link>}</div>
     </nav>
     </section>
+    {seleccionado&&<ModalFicha titulo={editando?'Editar equipo':'Ficha del equipo'} cerrarHref={volver} editando={editando} focoId={seleccionado}>
+      <FichaEquipo equipo={equipoSeleccionado??undefined} id={seleccionado} editar={editando} contexto={{volver,ambito,vista,verHref:enlaceFichaInventario(volver,'ver',seleccionado),editarHref:enlaceFichaInventario(volver,'editar',seleccionado)}}/>
+    </ModalFicha>}
   </main>;
 }

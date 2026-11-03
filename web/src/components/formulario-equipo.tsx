@@ -6,8 +6,8 @@ import { CAMPOS_COMPRA,CONDICIONES,ORIGENES,valoresEquipo,type ValoresEquipo,typ
 import type { Sede } from "@/lib/validacion-sedes";
 import type { CategoriaBien } from "@/lib/catalogos";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
-export default function FormularioEquipo({inicial,sedes,categorias,local=false}:{
-  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;
+export default function FormularioEquipo({inicial,sedes,categorias,local=false,volver}:{
+  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;volver?:string;
 }) {
   const valores=inicial??{...valoresEquipo(),origen:local?"compra_sede":"compra_utic",sedeId:local?sedes[0]?.id??"":""};
   const base:EstadoEquipo={resultado:"inicial",mensaje:"",valores,errores:{},revision:"inicial"};
@@ -22,6 +22,7 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false}:
     <p id={`error-${nombre}`} className="error-catalogos">{estado.errores[nombre]}</p>
   </div>;
   return <form action={accion} aria-busy={pendiente} className="formulario-catalogos formulario-equipo">
+    {volver&&<input type="hidden" name="volver" value={volver}/>}
     <input type="hidden" name="id" value={v.id}/><input type="hidden" name="version" value={v.version}/>
     <fieldset key={estado.revision} disabled={pendiente} className="border-0 p-0 m-0">
       <legend>Datos del equipo</legend>
