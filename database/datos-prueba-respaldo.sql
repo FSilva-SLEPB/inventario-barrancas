@@ -66,4 +66,16 @@ BEGIN
 END;
 $celular_ci$;
 
+DO $movimientos_ci$
+DECLARE bien uuid;
+BEGIN
+ IF to_regclass('public.movimientos_inventario') IS NOT NULL THEN
+  SELECT id INTO bien FROM public.equipos WHERE serie='CI-RECUPERACION-SERIE-001';
+  PERFORM public.mover_bien_acceso('felipe.silva@slepb.gob.cl','70000000-0000-4000-8000-000000000001',
+   jsonb_build_object('tipo','equipo','bienId',bien,'accion','devolucion','destino','','fecha','2026-11-01','receptor','UTIC ficticio','motivo','Devolución ficticia de recuperación','version',1));
+  PERFORM public.mover_bien_acceso('felipe.silva@slepb.gob.cl','70000000-0000-4000-8000-000000000002',
+   jsonb_build_object('tipo','celular','bienId','60000000-0000-4000-8000-000000000001','accion','devolucion','destino','','fecha','2026-11-01','receptor','UTIC ficticio','motivo','Devolución ficticia de recuperación','version',1));
+ END IF;
+END;
+$movimientos_ci$;
 COMMIT;

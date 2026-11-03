@@ -207,3 +207,7 @@ en paneles blancos, con adaptación a pantallas pequeñas y navegación por tecl
 
 Bootstrap se incorpora mediante npm, con versión fijada y recursos
 servidos desde la aplicación. Las interacciones se implementarán con React.
+
+## Homologación y custodia compartida
+
+Filtros, resultados, fichas y confirmaciones siguen el mismo patrón en todos los módulos. Equipos y celulares comparten devolución a Bodega TI y asignación, confirmadas solo por UTIC. Las ubicaciones físicas se definirán después. Consultar [la guía de homologación y Bodega TI](docs/homologacion-y-bodega-ti.md).

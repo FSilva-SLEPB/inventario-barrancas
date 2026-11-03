@@ -20,9 +20,9 @@ export function validarCelular(v:Record<string,unknown>):DatosCelular{
  if(!Object.hasOwn(CONDICIONES,r.condicionTecnica)||typeof v.activo!=='boolean')throw new Error('Selecciona un funcionamiento y una vigencia válidos.');r.activo=v.activo;return r;
 }
 export function filtrosCelulares(fuente:string){
- const p=new URLSearchParams(fuente),r=new URLSearchParams();for(const[k,max]of [['q',150],['tipo',30],['sede',36],['estado',10],['pagina',7],['limite',3]] as const){const v=p.get(k);if(v!==null)r.set(k,v.slice(0,max));}return r;
+ const p=new URLSearchParams(fuente),r=new URLSearchParams();for(const[k,max]of [['q',150],['rbd',120],['vista',20],['tipo',30],['sede',36],['estado',10],['pagina',7],['limite',3]] as const){const v=p.get(k);if(v!==null)r.set(k,v.slice(0,max));}return r;
 }
 export function enlaceCelulares(filtros='',accion?:'ver'|'editar'|'nuevo',id?:string){
  const p=filtrosCelulares(filtros);if(accion==='nuevo')p.set('nuevo','1');else if(accion&&id&&esIdSede(id))p.set(accion,id);return '/inventario/celulares'+(p.size?'?'+p:'');
 }
-export const ETIQUETAS_CELULAR:Record<string,string>={sedeNombre:'Sede',rbd:'RBD',telefono:'Número de teléfono',marca:'Marca',modelo:'Modelo',imei:'IMEI',inventario:'Número de inventario',condicionTecnica:'Funcionamiento',responsable:'Responsable o uso',observaciones:'Observaciones',activo:'Vigencia'};
+export const ETIQUETAS_CELULAR:Record<string,string>={custodia:'Estado',sedeNombre:'Sede',rbd:'RBD',telefono:'Número de teléfono',marca:'Marca',modelo:'Modelo',imei:'IMEI',inventario:'Número de inventario',condicionTecnica:'Funcionamiento',responsable:'Responsable o uso',observaciones:'Observaciones',activo:'Vigencia'};

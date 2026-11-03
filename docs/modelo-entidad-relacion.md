@@ -36,6 +36,7 @@ erDiagram
     timestamp_with_time_zone creado_en
     text actualizado_por
     timestamp_with_time_zone actualizado_en
+    text custodia
   }
   celulares_historial {
     bigint id PK
@@ -45,6 +46,7 @@ erDiagram
     jsonb antes
     jsonb despues
     timestamp_with_time_zone registrado_en
+    uuid movimiento_id FK
   }
   dependencias {
     uuid id PK
@@ -134,6 +136,7 @@ erDiagram
     text creado_por
     timestamp_with_time_zone creado_en
     timestamp_with_time_zone actualizado_en
+    text custodia
   }
   equipos_historial {
     bigint id PK
@@ -145,6 +148,7 @@ erDiagram
     timestamp_with_time_zone registrado_en
     uuid entrega_id FK
     uuid incidente_id FK
+    uuid movimiento_id FK
   }
   funcionarios_nc {
     uuid id PK
@@ -206,6 +210,22 @@ erDiagram
     jsonb datos
     timestamp_with_time_zone registrado_en
   }
+  movimientos_inventario {
+    uuid id PK
+    uuid equipo_id FK
+    uuid celular_id FK
+    text accion
+    date fecha
+    text receptor
+    uuid origen_sede_id FK
+    uuid destino_sede_id FK
+    text actor
+    text motivo
+    jsonb solicitud
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   sedes {
     uuid id PK
     text tipo
@@ -237,6 +257,7 @@ erDiagram
   }
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
+  movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
   sedes ||--o{ dependencias : "sede_id"
   sedes ||--o{ directorio_historial : "sede_id"
   sedes ||--o| directorio_sedes : "sede_id"
@@ -250,12 +271,17 @@ erDiagram
   entregas_equipos |o--o{ equipos_historial : "entrega_id"
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
+  movimientos_inventario |o--o{ equipos_historial : "movimiento_id"
   funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
   sedes ||--o{ incidentes_robos : "sede_id"
   equipos ||--o{ incidentes_robos_equipos : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_equipos : "incidente_id"
   equipos |o--o{ incidentes_robos_historial : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_historial : "incidente_id"
+  celulares |o--o{ movimientos_inventario : "celular_id"
+  sedes |o--o{ movimientos_inventario : "destino_sede_id"
+  equipos |o--o{ movimientos_inventario : "equipo_id"
+  sedes |o--o{ movimientos_inventario : "origen_sede_id"
   sedes |o--o{ usuarios_acceso : "sede_id"
 ```
 
@@ -274,13 +300,14 @@ erDiagram
 | entregas_detalle | Entregas | Equipos de cada entrega, con instantáneas anteriores y posteriores. |
 | entregas_equipos | Entregas | Cabecera de entrega por sede, fecha y persona receptora; conserva sus datos históricos. |
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
-| equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento y situación de entrega. |
+| equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
 | funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
 | funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
+| movimientos_inventario | Movimientos | Devoluciones a Bodega TI y asignaciones de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
 | usuarios_acceso | Acceso | Cuentas autorizadas, perfil, vigencia y sede permitida. |
@@ -292,6 +319,7 @@ erDiagram
 - Equipos: cada bien conserva su UUID, sede y categoría. Las cargas masivas se identifican en cargas_equipos.
 - Entregas: un lote agrupa entregas por sede; cada entrega tiene varios equipos en entregas_detalle.
 - Celulares: inventario dedicado con sede y un número móvil por equipo; celulares_historial conserva números anteriores, cambios de sede y vigencia. Dos por EE/JI es una referencia, no una restricción.
+- Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las ubicaciones físicas de Bodega TI se definirán después.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.
 - Los nombres, RUN y contactos conservados en instantáneas no son FK al directorio actual.

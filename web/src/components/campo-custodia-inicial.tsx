@@ -1,0 +1,2 @@
+'use client';
+export default function CampoCustodiaInicial({local,valor="en_bodega"}:{local:boolean;valor?:string}){return local?<input type="hidden" name="custodiaInicial" value="asignado"/>:<div className="campo-catalogos"><label htmlFor="bien-custodiaInicial">Estado al ingresar</label><select id="bien-custodiaInicial" name="custodiaInicial" defaultValue={valor}><option value="en_bodega">En Bodega TI</option><option value="asignado">Asignado / recibido en sede (registro existente)</option></select></div>;}

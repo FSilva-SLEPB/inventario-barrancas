@@ -72,7 +72,7 @@ jobs:
         run: node --test tests/validacion-dependencias.test.mjs
 
       - name: Probar identidad, permisos y vistas de inventario
-        run: node --experimental-vm-modules --test tests/acceso.test.mjs tests/inventario-vistas.test.mjs tests/entregas.test.mjs tests/directorio.test.mjs tests/robos.test.mjs tests/funcionarios.test.mjs tests/guardado-y-nombres.test.mjs tests/ficha-inventario.test.mjs tests/celulares.test.mjs
+        run: node --experimental-vm-modules --test tests/acceso.test.mjs tests/inventario-vistas.test.mjs tests/entregas.test.mjs tests/directorio.test.mjs tests/robos.test.mjs tests/funcionarios.test.mjs tests/guardado-y-nombres.test.mjs tests/ficha-inventario.test.mjs tests/celulares.test.mjs tests/movimientos-inventario.test.mjs
 
       - name: Probar preparación privada del acceso
         run: python3 ../tests/acceso/probar-preparacion.py

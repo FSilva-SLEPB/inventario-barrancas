@@ -3,14 +3,14 @@ import { exigirAcceso } from "@/lib/acceso";
 import { requiereSede,puedeGestionarDependencias } from "@/lib/politica-acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { CAMPOS_COMPRA, valoresEquipo, type ValoresEquipo, type DatosEquipo } from "@/lib/validacion-equipos";
-export type Equipo = DatosEquipo & { version:number; situacion:string; sedeNombre:string; sedeRbd:string|null;
+export type Equipo = DatosEquipo & { version:number; situacion:string; custodia:string; sedeNombre:string; sedeRbd:string|null;
   sedeTipo:string; categoriaNombre:string; fechaEntrega:string|null; enlaceActa:string|null; cargaId:string|null;
   archivoOrigen:string|null;filaOrigen:number|null;roboEstado:string|null };
 export type HistorialEquipo = { actor:string; motivo:string; registradoEn:string; entregaId:string|null; incidenteId:string|null; antes:Record<string,unknown>|null; despues:Record<string,unknown> };
 const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaId",e.marca,e.modelo,
   COALESCE(e.serie,'') AS serie,COALESCE(e.numero_inventario,'') AS inventario,
   e.motivo_identificacion AS "motivoIdentificacion",e.origen,e.condicion_tecnica AS "condicionTecnica",
-  e.datos_compra AS compra,e.observaciones,e.version,e.situacion,
+  e.datos_compra AS compra,e.observaciones,e.version,e.situacion,e.custodia,
   e.fecha_entrega::text AS "fechaEntrega",e.enlace_acta AS "enlaceActa",e.carga_id AS "cargaId",
   e.fila_origen AS "filaOrigen",l.archivo AS "archivoOrigen",
   (SELECT i.estado FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id
@@ -23,7 +23,7 @@ export async function listarEquipos(ambito:string,vista:string,pagina:number,bus
   const limite=[50,100,150].includes(tamano)?tamano:50;
   const filtros=`WHERE ($1::boolean OR e.sede_id=$2::uuid)
     AND (($3='nc' AND s.tipo='nivel_central') OR ($3='eeji' AND s.tipo<>'nivel_central'))
-    AND (($4='pendientes' AND e.situacion='pendiente_entrega') OR ($4='inventario' AND e.situacion<>'pendiente_entrega'))
+    AND (($4='pendientes' AND e.custodia='en_bodega') OR ($4='inventario' AND e.custodia='asignado'))
     AND ($5='' OR e.marca ILIKE '%'||$5||'%' OR e.modelo ILIKE '%'||$5||'%'
       OR e.serie ILIKE '%'||$5||'%' OR e.numero_inventario ILIKE '%'||$5||'%' OR s.nombre ILIKE '%'||$5||'%' OR s.rbd ILIKE '%'||$5||'%'
       OR EXISTS (SELECT 1 FROM public.categorias_bienes c WHERE c.id=e.categoria_id AND c.nombre ILIKE '%'||$5||'%'))
@@ -45,7 +45,7 @@ export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   const acceso=await exigirAcceso();
   return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,CASE WHEN h.incidente_id IS NOT NULL AND NOT $4::boolean THEN 'Seguimiento de incidente de robo. Los antecedentes están disponibles para los perfiles de gestión autorizados.' ELSE h.motivo END AS motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
     FROM public.equipos_historial h JOIN public.equipos e ON e.id=h.equipo_id
-    WHERE e.id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId,puedeGestionarDependencias(acceso.rol)])).rows;
+    WHERE e.id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND h.despues->>'sede_id'=$3::text AND (h.antes IS NULL OR h.antes->>'sede_id'=$3::text))) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId,puedeGestionarDependencias(acceso.rol)])).rows;
 }
 export function equipoAFormulario(equipo:Equipo):ValoresEquipo {
   const valores=valoresEquipo();

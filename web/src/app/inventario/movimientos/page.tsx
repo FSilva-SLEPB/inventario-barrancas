@@ -1,21 +1,17 @@
-import Link from "next/link";
-import { listarEntregas, resumenLote } from "@/lib/entregas";
-export const metadata = { title: "Movimientos y actas | Inventario" };
-export default async function Movimientos({ searchParams }: {searchParams:Promise<Record<string,string|string[]|undefined>>}) {
-  const entregas = await listarEntregas();
-  const p = await searchParams;
-  const lote = typeof p.lote === "string" ? await resumenLote(p.lote) : null;
-  return <main><header><h1>Movimientos y actas</h1>
-    <p className="descripcion-pagina">Consulta las entregas registradas y sus antecedentes. Cada jardín conserva su fecha real, directora receptora y equipos asociados.</p>
-    <p><Link href="/inventario">Volver a Inventario</Link></p></header>
-    {lote && <p role="status" className="panel-catalogos">Regularización registrada: {lote.cantidad} equipos incorporados como recibidos en P02, con historial. Los reintentos de esta operación no duplican las entregas.</p>}
-    <div className="acciones-catalogos"><Link className="btn btn-primary" href="/inventario/bodega-ti">Seleccionar equipos para regularizar</Link></div>
-    <p className="nota-movimientos">Los antecedentes de las actas existentes se conservan con la entrega. La generación de actas nuevas se incorporará en su siguiente etapa.</p>
-    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos tabla-movimientos"><caption>Últimas 100 entregas regularizadas, agrupadas por jardín</caption>
-      <thead><tr><th scope="col">Jardín / RBD</th><th scope="col">Comuna</th><th scope="col">Fecha de entrega</th><th scope="col">Directora receptora</th><th scope="col">Equipos</th><th scope="col">Detalle</th></tr></thead>
-      <tbody>{entregas.map(e=><tr key={e.id}><td>{e.rbd ? `${e.rbd} · ` : ""}{e.sedeNombre}</td><td>{e.comuna||"Sin informar"}</td>
-        <td>{e.fecha.split("-").reverse().join("/")}</td><td>{e.receptora}</td><td>{e.cantidad}</td><td><Link href={`/inventario/movimientos/entregas/${e.id}`}>Ver entrega</Link></td></tr>)}
-        {!entregas.length && <tr><td colSpan={6}>Todavía no hay entregas regularizadas.</td></tr>}</tbody>
-    </table></div>
-  </main>;
+import Link from 'next/link';
+import {listarEntregas,resumenLote} from '@/lib/entregas';
+import {listarMovimientosInventario} from '@/lib/inventario-bodega';
+import PanelFiltros from '@/components/panel-filtros';
+import PanelResultados from '@/components/panel-resultados';
+export const metadata={title:'Movimientos y actas | Inventario'};
+export default async function Movimientos({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
+ const p=await searchParams,v=(k:string)=>typeof p[k]==='string'?p[k].trim():'',q=v('q').slice(0,150),accion=['asignacion','devolucion'].includes(v('accion'))?v('accion'):'',limite=[50,100,150].includes(Number(v('limite')))?Number(v('limite')):50,pagina=/^[1-9]\d{0,6}$/.test(v('pagina'))?Number(v('pagina')):1;
+ const [datos,entregas,lote]=await Promise.all([listarMovimientosInventario({q,accion,limite,pagina}),listarEntregas(),v('lote')?resumenLote(v('lote')):null]);
+ const texto=(d:Record<string,unknown>,k:string)=>typeof d[k]==='string'?d[k] as string:'';
+ return <main><header><h1>Movimientos y actas</h1><p className="descripcion-pagina">Devoluciones y asignaciones confirmadas por UTIC para equipos y celulares. Las entregas históricas conservan sus antecedentes.</p><p><Link href="/inventario">Volver a Inventario</Link></p></header>
+ {lote&&<p role="status" className="panel-catalogos">Regularización registrada: {lote.cantidad} equipos incorporados como recibidos en P02, con historial. Los reintentos no duplican las entregas.</p>}
+ <div className="acciones-catalogos"><Link className="btn btn-outline-primary" href="/inventario/bodega-ti">Ir a Bodega TI</Link></div>
+ <PanelFiltros ruta="/inventario/movimientos" titulo="Filtrar movimientos" busqueda={{valor:q,placeholder:'Buscar por receptor, sede, teléfono, inventario o motivo'}} ocultos={{limite:String(limite)}}><div className="campo-catalogos"><label htmlFor="filtro-accion">Movimiento</label><select id="filtro-accion" name="accion" defaultValue={accion}><option value="">Todos</option><option value="asignacion">Asignación</option><option value="devolucion">Devolución</option></select></div></PanelFiltros>
+ <PanelResultados total={datos.total} descripcion="movimientos registrados" ruta="/inventario/movimientos" limite={limite} filtros={{q,accion}} pagina={datos.pagina} paginas={datos.paginas}><div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos tabla-movimientos"><caption className="visually-hidden">Asignaciones y devoluciones de equipos y celulares</caption><thead><tr><th scope="col">Fecha</th><th scope="col">Bien</th><th scope="col">Movimiento</th><th scope="col">Origen</th><th scope="col">Destino</th><th scope="col">Recibe</th><th scope="col">Motivo / registro</th></tr></thead><tbody>{datos.filas.map(m=><tr key={m.id}><td className="dato-identificador">{m.fecha.split('-').reverse().join('/')}</td><td>{m.clase==='celular'?'Celular':'Equipo'}<span className="dato-secundario">{texto(m.despues,'numero_inventario')||texto(m.despues,'inventario')||texto(m.despues,'telefono')||texto(m.despues,'serie')||texto(m.despues,'modelo')||'Sin identificación adicional'}</span></td><td>{m.accion==='devolucion'?'Devolución':'Asignación'}</td><td>{m.accion==='devolucion'?texto(m.antes,'sedeNombre'):'Bodega TI'}</td><td>{m.accion==='asignacion'?texto(m.despues,'sedeNombre'):'Bodega TI'}</td><td>{m.receptor}</td><td>{m.motivo}<span className="dato-secundario">Registrado por {m.actor}</span></td></tr>)}{!datos.filas.length&&<tr><td colSpan={7}>No hay movimientos para estos filtros.</td></tr>}</tbody></table></div></PanelResultados>
+ <h2>Entregas históricas y antecedentes de actas</h2><p className="nota-movimientos">Los antecedentes de las actas existentes se conservan con la entrega. La generación de actas nuevas se incorporará en su siguiente etapa.</p><div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos tabla-movimientos"><caption>Últimas 100 entregas regularizadas, agrupadas por jardín</caption><thead><tr><th scope="col">Jardín / RBD</th><th scope="col">Comuna</th><th scope="col">Fecha de entrega</th><th scope="col">Directora receptora</th><th scope="col">Equipos</th><th scope="col">Detalle</th></tr></thead><tbody>{entregas.map(e=><tr key={e.id}><td>{e.rbd?`${e.rbd} · `:''}{e.sedeNombre}</td><td>{e.comuna||'Sin informar'}</td><td>{e.fecha.split('-').reverse().join('/')}</td><td>{e.receptora}</td><td>{e.cantidad}</td><td><Link href={`/inventario/movimientos/entregas/${e.id}`}>Ver entrega</Link></td></tr>)}{!entregas.length&&<tr><td colSpan={6}>Todavía no hay entregas regularizadas.</td></tr>}</tbody></table></div></main>;
 }

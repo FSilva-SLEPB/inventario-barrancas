@@ -1,4 +1,5 @@
 "use client";
+import CampoCustodiaInicial from '@/components/campo-custodia-inicial';
 import {useResultadoGuardado} from '@/components/avisos-guardado';
 import { useActionState, useState } from "react";
 import { guardarEquipo } from "@/app/inventario/acciones";
@@ -25,7 +26,7 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false,v
     {volver&&<input type="hidden" name="volver" value={volver}/>}
     <input type="hidden" name="id" value={v.id}/><input type="hidden" name="version" value={v.version}/>
     <fieldset key={estado.revision} disabled={pendiente} className="border-0 p-0 m-0">
-      <legend>Datos del equipo</legend>
+      <legend>Datos del equipo</legend>{!v.id&&<CampoCustodiaInicial local={local} valor={estado.custodiaInicial}/>}
       <div className="campo-catalogos"><label htmlFor="equipo-sedeId">Sede de destino (obligatoria)</label>
         {v.id ? <><input type="hidden" name="sedeId" value={v.sedeId}/><p>{sedes.find(s=>s.id===v.sedeId)?etiquetaSede(sedes.find(s=>s.id===v.sedeId)!):"Sede no disponible"}</p></>
           : <select id="equipo-sedeId" name="sedeId" required defaultValue={v.sedeId}>

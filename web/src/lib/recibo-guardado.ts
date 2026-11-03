@@ -1,5 +1,7 @@
 import {createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 export const MENSAJES_EXITO={
+ devolucion:{titulo:'Devolución registrada',texto:'El bien quedó en Bodega TI para una nueva asignación.'},
+ asignacion:{titulo:'Asignación registrada',texto:'El bien quedó asignado a la sede seleccionada.'},
  guardado:{titulo:'Cambios guardados',texto:'La actualización se realizó correctamente.'},
  contacto:{titulo:'Contacto actualizado',texto:'La actualización del contacto se realizó correctamente.'},
  entrega:{titulo:'Entrega registrada',texto:'Los datos de la entrega se guardaron correctamente.'},

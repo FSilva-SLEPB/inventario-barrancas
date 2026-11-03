@@ -9,7 +9,7 @@ export type SeccionDirectorio=keyof typeof SECCIONES_DIRECTORIO;
 export function esSeccionDirectorio(v:unknown):v is SeccionDirectorio{return typeof v==='string'&&Object.hasOwn(SECCIONES_DIRECTORIO,v);}
 export function filtrosDirectorio(fuente:string){
  const p=new URLSearchParams(fuente),r=new URLSearchParams();
- for(const[k,max]of [['q',150],['comuna',100],['situacion',30],['orden',10]] as const){const v=p.get(k)?.trim().slice(0,max);if(v)r.set(k,v);}
+ for(const[k,max]of [['q',150],['comuna',100],['situacion',30],['orden',10],['limite',3],['pagina',7]] as const){const v=p.get(k)?.trim().slice(0,max);if(v)r.set(k,v);}
  return r;
 }
 export function enlaceDirectorio(seccion:SeccionDirectorio,filtros='',accion?:'ver'|'editar',id?:string,guardado=false){
