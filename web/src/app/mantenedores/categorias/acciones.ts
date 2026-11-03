@@ -1,4 +1,5 @@
 "use server";
+import {destinoConExito} from '@/lib/aviso-exito';
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -82,7 +83,7 @@ export async function guardarCategoria(
   }
 
   revalidatePath("/mantenedores/categorias");
-  if (id) redirect("/mantenedores/categorias?guardado=1");
+  if (id) redirect(destinoConExito("/mantenedores/categorias?guardado=1"));
 
   return {
     resultado: "guardado",

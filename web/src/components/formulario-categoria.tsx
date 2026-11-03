@@ -1,4 +1,5 @@
 "use client";
+import {useResultadoGuardado} from '@/components/avisos-guardado';
 
 import Link from "next/link";
 import { useActionState } from "react";
@@ -21,6 +22,7 @@ export default function FormularioCategoria({
     activo: categoria?.activo === false ? "false" : "true",
   };
   const [estado, accion, pendiente] = useActionState(guardarCategoria, inicial);
+ useResultadoGuardado(estado);
 
   return (
     <form action={accion} className="formulario-catalogos" aria-busy={pendiente}>

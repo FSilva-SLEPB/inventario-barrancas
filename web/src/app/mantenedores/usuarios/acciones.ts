@@ -1,4 +1,5 @@
 "use server";
+import {destinoConExito} from '@/lib/aviso-exito';
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -36,7 +37,7 @@ export async function guardarUsuario(_anterior: EstadoUsuario, formulario: FormD
     return { ...fallo, mensaje: mensajes[codigo ?? ""] ?? "No se pudo guardar. Inténtalo nuevamente." };
   }
   revalidatePath("/mantenedores/usuarios");
-  if (datos.version > 0) redirect("/mantenedores/usuarios?guardado=1");
+  if (datos.version > 0) redirect(destinoConExito("/mantenedores/usuarios?guardado=1"));
   return { resultado: "guardado", mensaje: "Acceso guardado correctamente.", errores: {}, revision,
     valores: datos.version === 0 ? valoresUsuario() : { ...valores, version: String(datos.version + 1) } };
 }

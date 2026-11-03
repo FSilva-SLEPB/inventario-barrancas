@@ -1,5 +1,6 @@
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["tabpanel", "region"] }] */
 // El contenedor de la tabla recibe foco para permitir su desplazamiento con teclado.
+import VentanaEdicion from '@/components/ventana-edicion';
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -90,7 +91,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
                     {puedeEditar && (
                       <td>
                         <Link
-                          href={`/mantenedores/dependencias?editar=${dependencia.id}#formulario-dependencia`}
+                          href={`/mantenedores/dependencias?editar=${dependencia.id}`}
                           aria-label={`Editar dependencia ${dependencia.nombre} de ${etiquetaSede({ nombre: dependencia.sedeNombre, rbd: dependencia.sedeRbd })}`}
                         >
                           Editar
@@ -106,7 +107,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
       </section>
 
       {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
-        <section
+        <VentanaEdicion activa={Boolean(seleccionada)} titulo="Editar dependencia" cerrarHref="/mantenedores/dependencias"><section
           id="formulario-dependencia" className="panel-catalogos"
           aria-labelledby="titulo-formulario-dependencia"
         >
@@ -123,7 +124,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
               />
             </>
           )}
-        </section>
+        </section></VentanaEdicion>
       )}
     </main>
   );

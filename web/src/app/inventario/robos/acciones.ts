@@ -1,4 +1,5 @@
 'use server';
+import {destinoConExito} from '@/lib/aviso-exito';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
 import {exigirAdministrador,exigirGestionDependencias} from '@/lib/acceso';
@@ -17,7 +18,7 @@ function fallo(e:unknown,f:FormData):EstadoRobo{
 export async function reportarRobo(_estado:EstadoRobo,f:FormData):Promise<EstadoRobo>{
  const actor=await exigirGestionDependencias();let id:string;
  try{const reporte=validarReporteRobo(f,hoy());id=reporte.id;await obtenerBaseDatos().query('SELECT public.reportar_robo_acceso($1,$2::uuid,$3::jsonb)',[actor.email,id,JSON.stringify(reporte.datos)]);}catch(e){return fallo(e,f);}
- revalidatePath('/inventario','layout');redirect('/inventario/robos/'+id);
+ revalidatePath('/inventario','layout');redirect(destinoConExito('/inventario/robos/'+id, 'robo'));
 }
 export async function actualizarRobo(_estado:EstadoRobo,f:FormData):Promise<EstadoRobo>{
  const actor=await exigirAdministrador();let id:string;
@@ -32,5 +33,5 @@ export async function actualizarRobo(_estado:EstadoRobo,f:FormData):Promise<Esta
    const fecha=fechaRobo(f.get('fecha'),hoy());await obtenerBaseDatos().query('SELECT public.recuperar_equipo_robo_acceso($1,$2::uuid,$3,$4::uuid,$5::date,$6)',[actor.email,id,version,equipo,fecha,motivo]);
   }else throw new Error('Operación inválida.');
  }catch(e){return fallo(e,f);}
- revalidatePath('/inventario','layout');redirect('/inventario/robos/'+id);
+ revalidatePath('/inventario','layout');redirect(destinoConExito('/inventario/robos/'+id, 'robo'));
 }

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import AvisosGuardado from "@/components/avisos-guardado";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +14,7 @@ import { PERFILES, puedeAdministrar } from "@/lib/politica-acceso";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import "sweetalert2/dist/sweetalert2.min.css";
 import "./globals.css";
 import "./interfaz.css";
 import "./tema-institucional.css";
@@ -54,6 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const acceso = await obtenerAcceso();
   return <html lang="es-CL" data-scroll-behavior="smooth" className={gobCl.variable}>
     <body className={gobCl.className}>
+      <Suspense fallback={null}><AvisosGuardado /></Suspense>
       <a className="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
       <header className="cabecera-institucional">
         <div className="interior-cabecera">

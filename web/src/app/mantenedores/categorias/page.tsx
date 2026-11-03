@@ -1,3 +1,4 @@
+import VentanaEdicion from '@/components/ventana-edicion';
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -62,7 +63,7 @@ export default async function Catalogos({
                   {edicionHabilitada && (
                     <td>
                       <Link
-                        href={"/mantenedores/categorias?editar=" + categoria.id + "#formulario-categoria"}
+                        href={"/mantenedores/categorias?editar=" + categoria.id}
                         aria-label={"Editar categoría " + categoria.nombre}
                       >
                         Editar
@@ -77,7 +78,7 @@ export default async function Catalogos({
       </section>
 
       {edicionHabilitada && parametros.guardado!=="1" && (
-        <section
+        <VentanaEdicion activa={Boolean(categoriaEditar)} titulo="Editar categoría" cerrarHref="/mantenedores/categorias"><section
           id="formulario-categoria"
           className="panel-catalogos"
           aria-labelledby="titulo-formulario"
@@ -94,7 +95,7 @@ export default async function Catalogos({
             key={categoriaEditar?.id ?? "nueva"}
             categoria={categoriaEditar}
           />
-        </section>
+        </section></VentanaEdicion>
       )}
     </main>
   );

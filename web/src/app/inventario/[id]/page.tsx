@@ -1,3 +1,4 @@
+import ModalFicha from '@/components/modal-ficha';
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { exigirAcceso } from "@/lib/acceso";
@@ -22,10 +23,10 @@ export default async function FichaEquipo({params,searchParams}:{params:Promise<
   const compra=Object.entries(CAMPOS_COMPRA).filter(([k])=>e.compra[k as keyof typeof CAMPOS_COMPRA]);
   const dato=(label:string,v:string|null|undefined)=><div key={label}><dt>{label}</dt><dd>{v||'Sin informar'}</dd></div>;
   return <main className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Ficha e historial</p><h1>{e.categoriaNombre} · {e.marca} {e.modelo}</h1><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
-    <div className="acciones-catalogos">{editable&&!editando&&<Link className="btn btn-outline-primary" href={`/inventario/${id}?editar=si#editar-equipo`} aria-label="Editar información del equipo">✎ Editar información</Link>}
+    <div className="acciones-catalogos">{editable&&!editando&&<Link className="btn btn-outline-primary" href={`/inventario/${id}?editar=si`} aria-label="Editar información del equipo">✎ Editar información</Link>}
       <Link href={`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.situacion==='pendiente_entrega'?'pendientes':'inventario'}`}>Volver al inventario</Link></div></header>
     {p.guardado==='1'&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
-    {editando?<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link href={`/inventario/${id}`}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></div></section>
+    {editando?<ModalFicha titulo="Editar equipo" cerrarHref={`/inventario/${id}`} editando><section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link href={`/inventario/${id}`}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)}/></div></section></ModalFicha>
     :<div className="ficha-secciones"><section className="ficha-seccion"><h2>Identificación</h2><dl className="ficha-datos">{dato('Categoría',e.categoriaNombre)}{dato('Marca',e.marca)}{dato('Modelo',e.modelo)}{dato('Número de serie',e.serie||'Pendiente')}{dato('Número de inventario',e.inventario||'Pendiente')}
       {(!e.serie||!e.inventario)&&e.motivoIdentificacion&&dato('Dato pendiente',e.motivoIdentificacion)}</dl></section>
       <section className="ficha-seccion"><h2>Entrega y funcionamiento</h2><dl className="ficha-datos">{dato('Inventario / sede',etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd}))}{dato('Situación de entrega',SITUACIONES[e.situacion as keyof typeof SITUACIONES])}{dato('Origen',ORIGENES[e.origen])}{dato('Estado de funcionamiento',CONDICIONES[e.condicionTecnica])}

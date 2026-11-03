@@ -1,4 +1,5 @@
 'use server';
+import {destinoConExito} from '@/lib/aviso-exito';
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
@@ -25,5 +26,5 @@ export async function guardarFuncionario(_anterior:EstadoFuncionario,f:FormData)
  revalidatePath('/mantenedores/funcionarios');
  const crudo=f.get('filtros'),filtros=new URLSearchParams(typeof crudo==='string'?crudo.slice(0,2000):''),p=new URLSearchParams();
  for(const[k,max]of [['q',150],['estado',20],['pagina',7]] as const){const v=filtros.get(k);if(v!==null)p.set(k,v.slice(0,max));}
- p.set('ver',id);p.set('guardado','1');redirect('/mantenedores/funcionarios?'+p+'#ficha-funcionario');
+ p.set('ver',id);p.set('guardado','1');redirect(destinoConExito('/mantenedores/funcionarios?'+p+'#ficha-funcionario'));
 }

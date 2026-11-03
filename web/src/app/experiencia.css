@@ -44,3 +44,28 @@ table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child
 .tabla-directorio-personas { min-width: 1100px; }
 .tabla-directorio-separado th, .tabla-directorio-separado td { vertical-align: top; }
 .formulario-directorio-seccion .aviso-directorio { margin-bottom: 1.25rem; }
+
+/* Directorio: los identificadores completos tienen prioridad frente al ajuste de columnas. */
+.tabla-directorio-separado.tabla-datos {table-layout:auto;min-width:70rem;width:100%;}
+.tabla-directorio-personas.tabla-datos {min-width:90rem;}
+.tabla-directorio-separado.tabla-datos th {white-space:nowrap;word-break:normal;overflow-wrap:normal;}
+.tabla-directorio-separado.tabla-datos td {width:auto;min-width:9rem;word-break:normal;overflow-wrap:normal;vertical-align:middle;}
+.tabla-directorio-separado.tabla-datos .directorio-identificador {min-width:7rem;white-space:nowrap;}
+.tabla-directorio-separado.tabla-datos .directorio-nombre {min-width:19rem;max-width:25rem;}
+.tabla-directorio-separado.tabla-datos .directorio-correo {min-width:19rem;white-space:nowrap;}
+.tabla-directorio-separado.tabla-datos .directorio-accion {min-width:7rem;white-space:nowrap;}
+.filtros-directorio-ordenado {grid-template-columns: minmax(15rem,2fr) repeat(3,minmax(9rem,1fr)) auto;}
+.modal-ficha {position:fixed;inset:0;margin:auto;border:1px solid var(--color-borde-suave);border-radius:1.2rem;padding:0;width:min(64rem,calc(100vw - 2rem));max-width:calc(100vw - 2rem);max-height:90svh;color:var(--color-texto);background:var(--color-superficie);box-shadow:0 1.5rem 5rem #102f5060;}
+.modal-ficha::backdrop {background:#102d4b80;backdrop-filter:blur(3px);}
+.modal-ficha[open] {animation:entrada-modal .18s ease-out;}
+.modal-ficha-cabecera {display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.1rem 1.5rem;border-bottom:1px solid var(--color-borde-suave);background:var(--color-superficie-suave);position:sticky;top:0;z-index:1;}
+.modal-ficha-cabecera h2 {font-size:1.25rem;margin:0;}
+.modal-ficha-contenido {padding:1.5rem;}
+.modal-ficha .directorio-ficha {margin:0;border:0;padding:0;box-shadow:none;background:transparent;}
+.modal-ficha .ficha-cabecera h2 {font-size:1.15rem;}
+.confirmacion-guardado.swal2-popup {border-radius:1.2rem;font-family:inherit;color:var(--color-texto);background:var(--color-superficie);}
+.confirmacion-guardado .swal2-title {font-size:1.5rem;color:var(--color-titulo);}.confirmacion-guardado .swal2-html-container {color:var(--color-texto);}
+@keyframes entrada-modal {from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:1000px){.filtros-directorio-ordenado {grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.filtros-directorio-ordenado {grid-template-columns:minmax(0,1fr);}.modal-ficha {width:calc(100vw - 1rem);max-width:calc(100vw - 1rem);max-height:95svh;}.modal-ficha-cabecera,.modal-ficha-contenido {padding:1rem;}.modal-ficha .campos-directorio,.modal-ficha .ficha-datos {grid-template-columns:minmax(0,1fr);}}
+@media(prefers-reduced-motion:reduce){.modal-ficha[open],.confirmacion-guardado {animation:none!important;transition:none!important;}.modal-ficha::backdrop{backdrop-filter:none;}}
