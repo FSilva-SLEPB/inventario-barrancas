@@ -16,7 +16,7 @@ export const runtime = "nodejs";
 export default async function Catalogos({
   searchParams,
 }: {
-  searchParams: Promise<{ editar?: string | string[] }>;
+  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
 }) {
   await connection();
   const acceso = await exigirAcceso();
@@ -36,6 +36,8 @@ export default async function Catalogos({
         <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
       </header>
 
+      {parametros.guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
+      {edicionHabilitada&&<p><Link href="/mantenedores/categorias#formulario-categoria">Registrar categoría</Link></p>}
       <section aria-labelledby="titulo-categorias">
         <h2 id="titulo-categorias">Listado</h2>
         <p>Administra las categorías que usarás para registrar los bienes.</p>
@@ -74,7 +76,7 @@ export default async function Catalogos({
         )}
       </section>
 
-      {edicionHabilitada && (
+      {edicionHabilitada && parametros.guardado!=="1" && (
         <section
           id="formulario-categoria"
           className="panel-catalogos"

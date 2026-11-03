@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ editar?: string | string[] }>;
+  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
 };
 
 export default async function Dependencias({ searchParams }: Propiedades) {
@@ -57,6 +57,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
         </p>
       )}
 
+      {parametros.guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
       <section aria-labelledby="titulo-listado-dependencias">
         <h2 id="titulo-listado-dependencias">Listado de dependencias</h2>
         {dependencias.length === 0 ? <p>Todavía no hay dependencias registradas.</p> : (
@@ -104,7 +105,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
         )}
       </section>
 
-      {puedeEditar && !edicionInvalida && (
+      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
         <section
           id="formulario-dependencia" className="panel-catalogos"
           aria-labelledby="titulo-formulario-dependencia"

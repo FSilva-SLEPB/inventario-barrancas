@@ -123,3 +123,8 @@ móvil y movimiento reducido. Se verificó también un respaldo/restauración.
 La imagen de migraciones instala únicamente su paquete mínimo de pg/node-pg-migrate,
 con su archivo de bloqueo y el ajuste de glob documentado en la auditoría.
 Estos ensayos no son una instalación ni una prueba de HTTPS/OAuth real en CentOS.
+
+La revisión de directorios añade `1794096000000_directorios-separados` a la
+secuencia de instalación. La salud ahora requiere sus columnas y operación SQL;
+no iniciar una imagen de esta revisión sobre una base que solo tenga diez
+migraciones. Consultar [Directorios separados](directorios-separados.md).

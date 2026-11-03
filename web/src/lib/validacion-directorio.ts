@@ -69,7 +69,7 @@ export function prepararDirectorio(textoFuente:string,sedes:SedeDirectorio[]){
  if(!datos.length)throw new Error('No hay establecimientos/JISC para cargar.');return {datos,vista,omitidas};
 }
 export function cambiosDirectorio(antes:Record<string,unknown>|null,despues:Record<string,unknown>){
- const campos:Record<string,string>={nombre:'Director/a',rut:'RUN',correo:'Correo del responsable',situacion:'Situación del cargo',cargo:'Cargo',observaciones:'Actualización y observaciones','sede.nombre':'Establecimiento/JISC','sede.direccion':'Dirección','sede.comuna':'Comuna','sede.correo_institucional':'Correo institucional'};
+ const campos:Record<string,string>={nombre:'Nombre completo',nombres:'Nombres Director/a',apellidos:'Apellidos',rut:'RUN',correo:'Correo del responsable',situacion:'Situación del cargo',cargo:'Cargo',observaciones:'Actualización y observaciones','sede.rbd':'RBD','sede.nombre':'Establecimiento/JISC','sede.direccion':'Dirección','sede.comuna':'Comuna','sede.correo_institucional':'Correo institucional'};
  const leer=(obj:Record<string,unknown>|null,k:string):unknown=>k.startsWith('sede.')?(obj?.sede as Record<string,unknown>|undefined)?.[k.slice(5)]:obj?.[k];
  const mostrar=(k:string,v:unknown)=>k==='situacion'?SITUACIONES_DIRECTOR[v as keyof typeof SITUACIONES_DIRECTOR]??'Sin registrar':typeof v==='string'&&v?v:'Sin informar';
  return Object.entries(campos).flatMap(([k,campo])=>{const a=leer(antes,k),d=leer(despues,k);return antes?a===d?[]:[{campo,antes:mostrar(k,a),despues:mostrar(k,d)}]:!d?[]:[{campo,antes:'Sin registrar',despues:mostrar(k,d)}];});

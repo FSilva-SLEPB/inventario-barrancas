@@ -44,4 +44,17 @@ BEGIN
 END;
 $funcionario_ci$;
 
+DO $directorio_ci$
+BEGIN
+ IF EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass('public.directorio_sedes') AND attname='nombres' AND NOT attisdropped) THEN
+  INSERT INTO public.sedes(id,tipo,nombre,rbd) VALUES('50000000-0000-4000-8000-000000000001','establecimiento','Establecimiento ficticio de recuperación','CI-RECUPERACION-EE');
+  PERFORM public.guardar_ficha_directorio_acceso('felipe.silva@slepb.gob.cl','50000000-0000-4000-8000-000000000001',
+   jsonb_build_object('nombre','Ana María O''Higgins de Ejemplo','nombres','Ana María','apellidos','O''Higgins de Ejemplo',
+    'rut','','correo','persona@example.org','situacion','subrogante','observaciones','',
+    'sedeNombre','Establecimiento ficticio de recuperación','direccion','Calle ficticia','comuna','Comuna ficticia','correoInstitucional','sede@example.org'),
+   0,jsonb_build_array('Establecimiento ficticio de recuperación','','','')::text,'Directorio ficticio para recuperación');
+ END IF;
+END;
+$directorio_ci$;
+
 COMMIT;

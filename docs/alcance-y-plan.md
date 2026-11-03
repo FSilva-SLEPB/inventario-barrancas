@@ -382,3 +382,13 @@ asignaciones/devoluciones, nuevas actas y solicitudes mantienen sus etapas
 pendientes. La revisión de seguridad y sus límites están en
 [auditoría del 3 de noviembre](auditoria-seguridad-2026-11-03.md).
 No se ha desplegado esta rama en CentOS ni cargado el listado real de responsables.
+
+### Directorios y edición unificada (3 de noviembre)
+
+La nueva revisión divide los datos institucionales y personales en cuatro vistas: EE.EE.,
+sus directores/as, JI/SC y sus directoras. Estado contractual usa titular/subrogante/
+vacante/pendiente, según confirmación. Nombres y apellidos se revisan sin inferirlos
+automáticamente de los nombres completos existentes. Se conserva el vínculo y la
+recepción automática. Al guardar una edición se vuelve a consulta. El modelo sale de
+Mantenedores y celulares queda como módulo pendiente, sin gestión implementada.
+Ver [Directorio y cierre de edición](directorios-separados.md).

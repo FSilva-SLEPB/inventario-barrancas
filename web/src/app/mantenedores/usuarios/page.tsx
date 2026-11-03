@@ -11,13 +11,13 @@ import { etiquetaSede } from "@/lib/etiqueta-sede";
 export const metadata = { title: "Usuarios y perfiles | Inventario SLEP Barrancas" };
 
 export default async function Usuarios({ searchParams }: {
-  searchParams: Promise<{ editar?: string | string[] }>;
+  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
 }) {
   const actor = await exigirAdministrador();
   const usuarios = await listarUsuarios();
   const sedes = await listarSedes();
   const sistema = actor.rol === "administrador";
-  const { editar } = await searchParams;
+  const { editar, guardado } = await searchParams;
   const seleccionado = typeof editar === "string" ? usuarios.find(u => u.correo === editar) : undefined;
   const edicionInvalida = editar !== undefined && !seleccionado;
   const reservado = !sistema && seleccionado && perfilReservado(seleccionado.rol);
@@ -26,6 +26,8 @@ export default async function Usuarios({ searchParams }: {
       <p className="descripcion-pagina">Autoriza cuentas institucionales y administra sus permisos de acceso.</p>
     </header>
     <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
+    {guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
+    <p><Link href="/mantenedores/usuarios#formulario-usuario">Registrar usuario</Link></p>
     <section aria-labelledby="usuarios-listado"><h2 id="usuarios-listado">Usuarios registrados</h2>
       <div className="tabla-usuarios-contenedor" role="region" aria-labelledby="usuarios-listado" tabIndex={0}>
         <table className="tabla-datos tabla-catalogos">
@@ -48,7 +50,7 @@ export default async function Usuarios({ searchParams }: {
     {edicionInvalida ? <p role="alert" className="error-catalogos">
       No se encontró la cuenta. Selecciona Editar desde el listado.
     </p> : reservado ? <p role="alert">Solo el Administrador del sistema puede editar esta cuenta.</p>
-      : <section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
+      : guardado==="1" ? null : <section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
       <h2 id="usuario-titulo">{seleccionado ? "Editar acceso" : "Registrar usuario"}</h2>
       <p>La cuenta debe pertenecer a slepb.gob.cl. No se crean cuentas ni contraseñas de Google desde este formulario.</p>
       {seleccionado?.correo === actor.email && <p>Otro administrador deberá retirar tu permiso o desactivar tu cuenta.</p>}

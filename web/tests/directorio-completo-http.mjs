@@ -32,8 +32,8 @@ try{
  // La versión de la sede también protege contra una edición simultánea fuera del directorio.
  const antigua=versionSede(await sede(s.id));await db.query('UPDATE public.sedes SET direccion=$2 WHERE id=$1',[s.id,'Dirección modificada por otro editor']);
  await assert.rejects(guardar(admin,s.id,d,1,antigua),e=>e.code==='P2201');assert.equal((await director(s.id)).version,1);pruebas++;
- const ca=await cookie(admin),cc=await cookie(consulta);assert.equal((await pedir('/mantenedores/directores?ver='+s.id,cc)).headers.get('location'),'/sin-permiso');pruebas++;
- const ficha=await(await pedir('/mantenedores/directores?ver='+s.id,ca)).text();assert.ok(ficha.includes('12345678-5'));assert.ok(ficha.includes('responsable@example.org'));assert.ok(ficha.includes('Subrogante'));pruebas++;
+ const ca=await cookie(admin),cc=await cookie(consulta);assert.equal((await pedir('/mantenedores/directoras-jardines?ver='+s.id,cc)).headers.get('location'),'/sin-permiso');pruebas++;
+ const ficha=await(await pedir('/mantenedores/directoras-jardines?ver='+s.id,ca)).text();assert.ok(ficha.includes('12345678-5'));assert.ok(ficha.includes('Responsable ficticia'));assert.ok(ficha.includes('Subrogante'));pruebas++;
  const s2=await sede(sedes[1]);
  const cab='RBD\tESTABLECIMIENTO\tCOMUNA\tDIRECCIÓN\tCORREO ELECTRÓNICO ESTABLECIMIENTO\tRUT DIRECTOR/A\tDIRECTOR/A\tCORREOS PERSONALES\tTIPO DE CESE\tFECHA ACTUALIZACION Y OBSERVACIONES';
  const listado=cab+'\n'+[s.rbd,s.nombre,'Pudahuel','Dirección del listado','jardin@example.org','12345678-5','Directora del listado','directora@example.org','SUBDORGANCIA','01/09/2026'].join('\t')+'\n'+[s2.rbd,s2.nombre,'Pudahuel','Dirección pendiente','','','','','',''].join('\t')+'\n'+['ORG-EJEMPLO','Servicio Local de Educación Pública de ejemplo','Pudahuel','Oficina institucional','----','11111111-1','Persona de Nivel Central','','VIGENCIA NORMAL',''].join('\t');

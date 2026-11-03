@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ editar?: string | string[] }>;
+  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
 };
 
 export default async function Sedes({ searchParams }: Propiedades) {
@@ -55,6 +55,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
         </p>
       )}
 
+      {parametros.guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
       <section aria-labelledby="titulo-listado-sedes">
         <h2 id="titulo-listado-sedes">Listado de sedes</h2>
         {sedes.length === 0 ? <p>Todavía no hay sedes registradas.</p> : (
@@ -100,7 +101,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
         )}
       </section>
 
-      {puedeEditar && !edicionInvalida && (
+      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
         <section id="formulario-sede" className="panel-catalogos" aria-labelledby="titulo-formulario-sede">
           <h2 id="titulo-formulario-sede">{seleccionada ? "Editar sede" : "Registrar sede"}</h2>
           <p>El tipo y el nombre son obligatorios. El RBD y los datos de contacto son opcionales.</p>

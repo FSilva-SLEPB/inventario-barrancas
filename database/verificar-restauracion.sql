@@ -41,6 +41,11 @@ BEGIN
       RAISE EXCEPTION 'Falta la relación de funcionarios e historial';
     END IF;
   END IF;
+  IF EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass('public.directorio_sedes') AND attname='nombres' AND NOT attisdropped) THEN
+    IF NOT has_function_privilege(current_user,'public.guardar_sede_directorio_acceso(text,uuid,jsonb,text,text)','EXECUTE') THEN
+      RAISE EXCEPTION 'Falta la escritura controlada del directorio de sedes restaurado';
+    END IF;
+  END IF;
   IF EXISTS (
     SELECT 1 FROM pg_roles
     WHERE rolname = current_user
@@ -113,6 +118,13 @@ BEGIN
       AND NOT f.activo AND f.fecha_ingreso=DATE '2026-10-30' AND f.rut IS NULL AND f.correo IS NULL
       AND h.antes IS NULL AND h.despues->>'nombre'=f.nombre AND h.actor='felipe.silva@slepb.gob.cl') THEN
       RAISE EXCEPTION 'No se recuperó la ficha ficticia y su historial';
+    END IF;
+  END IF;
+  IF EXISTS(SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass('public.directorio_sedes') AND attname='nombres' AND NOT attisdropped) THEN
+    IF NOT EXISTS(SELECT 1 FROM public.directorio_sedes d JOIN public.directorio_historial h ON h.sede_id=d.sede_id
+      WHERE d.sede_id='50000000-0000-4000-8000-000000000001' AND d.nombres='Ana María' AND d.apellidos='O''Higgins de Ejemplo'
+       AND d.nombre='Ana María O''Higgins de Ejemplo' AND d.situacion='subrogante' AND h.despues->>'apellidos'=d.apellidos) THEN
+      RAISE EXCEPTION 'No se recuperó el directorio ficticio con nombres, apellidos e historial';
     END IF;
   END IF;
   IF NOT EXISTS (
