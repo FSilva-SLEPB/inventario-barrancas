@@ -74,8 +74,8 @@ entregas históricas ni cambia el equipo de identidad.
 - Modelo de datos sale del menú y las tarjetas de Mantenedores. Permanece como
   documentación técnica para administradores en `/documentacion/modelo-datos`;
   la URL anterior redirige después de comprobar el permiso.
-- Inventario de celulares es un acceso y una página pendiente de definición.
-  No registra celulares, líneas, asignaciones ni datos simulados.
+- Inventario de celulares se incorporó en una revisión posterior: ver
+  [su alcance y operación](inventario-celulares.md). No importa datos automáticamente.
 - Editar categorías, sedes, dependencias o usuarios vuelve al listado y cierra
   su formulario. Registrar varios elementos seguidos mantiene el flujo de alta.
 - Editar un equipo vuelve a su ficha de consulta. Las fichas NC vuelven a consulta

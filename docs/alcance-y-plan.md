@@ -392,3 +392,12 @@ automáticamente de los nombres completos existentes. Se conserva el vínculo y 
 recepción automática. Al guardar una edición se vuelve a consulta. El modelo sale de
 Mantenedores y celulares queda como módulo pendiente, sin gestión implementada.
 Ver [Directorio y cierre de edición](directorios-separados.md).
+
+### Ajuste posterior: celulares y retiro del dashboard
+
+Se retira el dashboard de robos a solicitud de Felipe, conservando el consolidado
+operativo y todos los incidentes. Se incorpora el inventario dedicado de celulares,
+con un número por equipo, EE/JI y Nivel Central, permisos por sede e historial.
+Dos por EE/JI es una referencia habitual, no un máximo. Ver
+[inventario de celulares](inventario-celulares.md). Las cifras anteriores describen
+su revisión histórica; el modelo actual añade celulares y celulares_historial.

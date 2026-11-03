@@ -32,12 +32,6 @@ table.tabla-modelo-uso td:last-child{min-width:28rem}
 .directorio-ficha,.detalle-tabla{scroll-margin-block:1rem}
 .formulario-directorio p[role]:empty,.carga-directorio p[role]:empty{display:none}
 /* Indicadores de incidentes: lectura común y gráficos sin dependencias externas. */
-.indicadores-dashboard{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;margin-block:1.5rem}
-.indicador{display:flex;flex-direction:column;gap:.5rem;padding:1.15rem;border:1px solid var(--color-borde-suave);border-radius:1rem;background:var(--color-superficie-alterna)}
-.indicador strong{font-size:2rem;color:var(--color-primario);line-height:1.1}.indicador span{font-size:.875rem;line-height:1.45}.indicador.robados{border-top:3px solid var(--color-error)}.indicador.reportados{border-top:3px solid var(--color-pendiente-borde)}
-.selector-indicador,.cabecera-resultados-dashboard{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;margin-block:1.25rem}.selector-indicador{justify-content:flex-start}.selector-indicador [aria-pressed="true"]{background:var(--color-primario);color:var(--color-sobre-primario,#fff)}
-.graficos-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-block:1.5rem}.panel-grafico{min-width:0;padding:1.25rem;border:1px solid var(--color-borde-suave);border-radius:1rem;background:var(--color-superficie)}.panel-grafico h2{font-size:1.125rem;margin-bottom:.6rem}.grafico-vacio{padding:1rem;color:var(--color-parrafo);background:var(--color-superficie-alterna);border-radius:.75rem}.barras-dashboard{list-style:none;margin:1.25rem 0 0;padding:0;display:grid;gap:1rem}.etiqueta-barra{display:flex;align-items:start;justify-content:space-between;gap:1rem;margin-bottom:.35rem;font-size:.875rem}.etiqueta-barra span{min-width:0;overflow-wrap:anywhere}.etiqueta-barra strong{flex-shrink:0;font-variant-numeric:tabular-nums}.pista-barra{height:.65rem;border-radius:999px;background:var(--color-superficie-suave);overflow:hidden}.barra-dashboard{display:block;height:100%;min-width:3px;background:var(--color-primario);border-radius:999px}.barra-dashboard.robados{background:var(--color-error)}.barra-dashboard.recuperados{background:var(--color-recibido-texto,var(--color-primario))}.lienzo-serie{overflow-x:auto;max-width:100%;margin-top:1rem}.lienzo-serie svg{display:block;max-width:none;font-family:inherit}table.tabla-dashboard{min-width:74rem}table.tabla-dashboard td:first-child{min-width:17rem}table.tabla-dashboard td:nth-child(2){min-width:9rem}
-@media(max-width:1199.98px){.indicadores-dashboard{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:767.98px){.graficos-dashboard{grid-template-columns:minmax(0,1fr)}.indicadores-dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.panel-grafico{padding:1rem}.indicador{padding:1rem}}@media(max-width:359.98px){.indicadores-dashboard{grid-template-columns:minmax(0,1fr)}}
 table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child{min-width:15rem}table.tabla-funcionarios td:nth-child(2){min-width:8rem;white-space:nowrap}table.tabla-funcionarios td:nth-child(3){min-width:14rem}table.tabla-funcionarios td:nth-child(4){min-width:17rem}.formulario-funcionario fieldset{min-width:0}.formulario-funcionario p[role]:empty{display:none}
 
 .tabla-directorio-separado { min-width: 800px; }
@@ -73,3 +67,16 @@ table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child
 .modal-ficha #editar-equipo {border:0;padding:0;background:transparent;margin-block:1rem;}
 .modal-ficha .ficha-equipo .historial-equipo {margin-top:1.25rem;}
 .modal-ficha .ficha-equipo .historial-equipo>summary {font-weight:700;color:var(--color-primario);cursor:pointer;}
+
+.tabla-celulares.tabla-datos {min-width:78rem;}
+.tabla-celulares.tabla-datos td {overflow-wrap:normal;min-width:8rem;}
+.tabla-celulares.tabla-datos td:nth-child(2) {min-width:18rem;}
+.tabla-celulares.tabla-datos .celular-telefono,.tabla-celulares.tabla-datos td:last-child {white-space:nowrap;}
+.tabla-celulares.tabla-datos th {white-space:nowrap;}
+.filtros-celulares {grid-template-columns:repeat(3,minmax(0,1fr));}
+.formulario-celular fieldset {min-width:0;}.formulario-celular details {margin-block:1rem;}.formulario-celular .campos-directorio {margin-bottom:1rem;}
+@media(max-width:767.98px){.filtros-celulares {grid-template-columns:minmax(0,1fr);}}
+.filtros-directorio.filtros-celulares {display:grid;}
+.tabla-celulares.tabla-datos td:nth-child(3) {min-width:12rem;}
+.tabla-celulares.tabla-datos th:last-child,.tabla-celulares.tabla-datos td:last-child {position:sticky;right:0;min-width:7rem;text-align:center;background:var(--color-superficie);box-shadow:-6px 0 12px rgb(15 23 42 / 4%);}
+.tabla-celulares.tabla-datos th:last-child {background:var(--color-superficie-suave);}

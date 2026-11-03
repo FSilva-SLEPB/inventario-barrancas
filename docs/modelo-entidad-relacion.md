@@ -19,6 +19,33 @@ erDiagram
     boolean activo
     timestamp_with_time_zone creado_en
   }
+  celulares {
+    uuid id PK
+    uuid sede_id FK
+    text telefono
+    text marca
+    text modelo
+    text imei
+    text numero_inventario
+    text condicion_tecnica
+    text responsable
+    text observaciones
+    boolean activo
+    integer version
+    text creado_por
+    timestamp_with_time_zone creado_en
+    text actualizado_por
+    timestamp_with_time_zone actualizado_en
+  }
+  celulares_historial {
+    bigint id PK
+    uuid celular_id FK
+    text actor
+    text motivo
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   dependencias {
     uuid id PK
     uuid sede_id FK
@@ -208,6 +235,8 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
+  sedes ||--o{ celulares : "sede_id"
+  celulares ||--o{ celulares_historial : "celular_id"
   sedes ||--o{ dependencias : "sede_id"
   sedes ||--o{ directorio_historial : "sede_id"
   sedes ||--o| directorio_sedes : "sede_id"
@@ -236,6 +265,8 @@ erDiagram
 | --- | --- | --- |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
+| celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
+| celulares_historial | Celulares | Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas. |
 | dependencias | Catálogos | Ubicaciones internas de una sede. Todavía no hay una FK desde equipos a dependencias. |
 | directorio_cargas | Directorio | Registro del hash de cada listado cargado para evitar duplicar cambios. |
 | directorio_historial | Directorio | Cambios de responsable y datos del establecimiento; conserva las personas anteriores. |
@@ -260,6 +291,7 @@ erDiagram
 - Directorio vigente: una ficha por sede. La clave primaria de directorio_sedes es también FK a sedes (0..1 ficha por sede).
 - Equipos: cada bien conserva su UUID, sede y categoría. Las cargas masivas se identifican en cargas_equipos.
 - Entregas: un lote agrupa entregas por sede; cada entrega tiene varios equipos en entregas_detalle.
+- Celulares: inventario dedicado con sede y un número móvil por equipo; celulares_historial conserva números anteriores, cambios de sede y vigencia. Dos por EE/JI es una referencia, no una restricción.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.
 - Los nombres, RUN y contactos conservados en instantáneas no son FK al directorio actual.

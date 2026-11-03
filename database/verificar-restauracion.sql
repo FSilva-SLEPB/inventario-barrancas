@@ -24,6 +24,20 @@ BEGIN
       RAISE EXCEPTION 'Falta una función controlada del inventario restaurado';
     END IF;
   END IF;
+  IF to_regclass('public.celulares') IS NOT NULL THEN
+    FOREACH tabla IN ARRAY ARRAY['celulares','celulares_historial'] LOOP
+      IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE')
+       OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN
+        RAISE EXCEPTION 'Permisos incorrectos en celulares restaurados';
+      END IF;
+    END LOOP;
+    IF NOT has_function_privilege(current_user,'public.guardar_celular_acceso(text,uuid,jsonb,integer,text)','EXECUTE') THEN
+      RAISE EXCEPTION 'Falta la función controlada de celulares restaurada';
+    END IF;
+  END IF;
   IF to_regclass('public.funcionarios_nc') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['funcionarios_nc','funcionarios_nc_historial'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT')
@@ -125,6 +139,13 @@ BEGIN
       WHERE d.sede_id='50000000-0000-4000-8000-000000000001' AND d.nombres='Ana María' AND d.apellidos='O''Higgins de Ejemplo'
        AND d.nombre='Ana María O''Higgins de Ejemplo' AND d.situacion='subrogante' AND h.despues->>'apellidos'=d.apellidos) THEN
       RAISE EXCEPTION 'No se recuperó el directorio ficticio con nombres, apellidos e historial';
+    END IF;
+  END IF;
+  IF to_regclass('public.celulares') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.celulares c JOIN public.celulares_historial h ON h.celular_id=c.id
+     WHERE c.id='60000000-0000-4000-8000-000000000001' AND c.telefono='+56900000001' AND c.numero_inventario='CI-CELULAR-001'
+      AND c.activo AND h.antes IS NULL AND h.despues->>'telefono'=c.telefono AND h.actor='felipe.silva@slepb.gob.cl') THEN
+      RAISE EXCEPTION 'No se recuperó el celular ficticio con su número e historial';
     END IF;
   END IF;
   IF NOT EXISTS (

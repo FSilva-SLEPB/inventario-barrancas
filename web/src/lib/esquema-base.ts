@@ -1,5 +1,7 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ celulares:{modulo:'Celulares',uso:'Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia.',fuentes:['src/lib/celulares.ts','src/app/inventario/celulares/acciones.ts']},
+ celulares_historial:{modulo:'Celulares',uso:'Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas.',fuentes:['src/lib/celulares.ts','migrations/1794182400000_inventario-celulares.mjs']},
  funcionarios_nc:{modulo:'Nivel Central',uso:'Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema.',fuentes:['src/lib/funcionarios.ts','src/app/mantenedores/funcionarios/acciones.ts']},
  funcionarios_nc_historial:{modulo:'Nivel Central',uso:'Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores.',fuentes:['src/lib/funcionarios.ts','migrations/1794009600000_funcionarios-nivel-central.mjs']},
  sedes:{modulo:'Catálogos',uso:'Identidad y datos de EE/JISC y Nivel Central; alcance por sede.',fuentes:['src/lib/sedes.ts','src/lib/equipos.ts','src/lib/directorio.ts']},

@@ -59,19 +59,19 @@ El [informe de avance para jefatura](docs/informe-avance-jefatura.md), el
 [guía de operación y mantenimiento](docs/operacion-y-mantenimiento.md) reúnen el
 estado revisado, los gráficos y la forma de mantener el proyecto.
 
-La configuración actual de Compose es de desarrollo; integrar código en GitHub
-no despliega automáticamente CentOS. Esta rama añade [dashboard de robos](docs/dashboard-robos.md),
+CentOS utiliza la imagen compilada; integrar código en GitHub no la reconstruye
+ni despliega automáticamente. El sistema incluye [inventario de celulares](docs/inventario-celulares.md),
 [fichas de funcionarios NC](docs/funcionarios-nivel-central.md),
 [preparación de producción](docs/despliegue-produccion.md) y una
 [revisión de seguridad](docs/auditoria-seguridad-2026-11-03.md). La imagen y
-Compose se ensayan con datos ficticios; la instalación definitiva en CentOS
-y OAuth/HTTPS reales siguen pendientes.
+Compose se ensayan con datos ficticios. El dominio definitivo y OAuth/HTTPS
+de producción siguen pendientes. El [dashboard de robos fue retirado](docs/dashboard-robos.md); el consolidado y los incidentes permanecen.
 
 Los [directorios separados](docs/directorios-separados.md) organizan los datos de
 EE.EE., JI/SC y sus responsables en cuatro consultas dentro de la sección Directorio,
 separada de Mantenedores. Cada fila abre su ficha mediante Ver ficha. La edición termina al guardar.
-El modelo permanece como documentación técnica fuera del menú de Mantenedores;
-Inventario de celulares queda como acceso pendiente de desarrollo.
+El modelo permanece como documentación técnica fuera del menú de Mantenedores.
+El inventario de celulares incluye sus fichas, números, permisos por sede e historial.
 
 ## Desarrollo local
 
