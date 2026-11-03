@@ -25,6 +25,6 @@ export async function guardarFuncionario(_anterior:EstadoFuncionario,f:FormData)
  }catch(e){const codigo=(e as {code?:string}).code;return fallo(codigo==='P2401'?'La ficha cambió mientras la editabas. Recarga antes de guardar.':codigo==='23505'?'El RUN o correo ya tiene una ficha. Revisa el registro existente.':'No se pudo guardar la ficha. Revisa permisos y datos.');}
  revalidatePath('/mantenedores/funcionarios');
  const crudo=f.get('filtros'),filtros=new URLSearchParams(typeof crudo==='string'?crudo.slice(0,2000):''),p=new URLSearchParams();
- for(const[k,max]of [['q',150],['estado',20],['pagina',7]] as const){const v=filtros.get(k);if(v!==null)p.set(k,v.slice(0,max));}
- p.set('ver',id);p.set('guardado','1');redirect(destinoConExito('/mantenedores/funcionarios?'+p+'#ficha-funcionario'));
+ for(const[k,max]of [['q',150],['estado',20],['pagina',7],['limite',3]] as const){const v=filtros.get(k);if(v!==null)p.set(k,v.slice(0,max));}
+ redirect(destinoConExito('/mantenedores/funcionarios'+(p.size?'?'+p:'')));
 }

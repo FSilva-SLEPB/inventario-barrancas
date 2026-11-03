@@ -2,7 +2,7 @@ import 'server-only';
 import { exigirAcceso,exigirGestionDependencias } from '@/lib/acceso';
 import { requiereSede } from '@/lib/politica-acceso';
 import { obtenerBaseDatos } from '@/lib/db';
-export type FiltrosRobos={ambito:string;sede:string;comuna:string;estado:string;desde:string;hasta:string;q:string;pagina:number};
+export type FiltrosRobos={ambito:string;sede:string;comuna:string;estado:string;desde:string;hasta:string;q:string;pagina:number;limite?:number};
 export type FilaRobo={incidenteId:string;equipoId:string;sedeNombre:string;rbd:string|null;sedeTipo:string;comuna:string|null;fecha:string;estado:keyof typeof import('./validacion-robos').ESTADOS_ROBO;marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};
 export type EquipoRobo={id:string;version:number;marca:string;modelo:string;serie:string|null;inventario:string|null;incidenteAbierto:boolean;sedeId:string;sedeNombre:string;rbd:string|null;comuna:string|null};
 const estado="CASE WHEN d.recuperado_fecha IS NOT NULL THEN 'recuperado' ELSE i.estado END";
@@ -27,11 +27,12 @@ export async function consolidadoRobos(f:FiltrosRobos){
    count(DISTINCT d.equipo_id) FILTER(WHERE d.recuperado_fecha IS NOT NULL) AS recuperados ${base} ${filtros}
    GROUP BY i.sede_id,i.sede_nombre,i.sede_rbd,i.comuna ORDER BY robados DESC,lower(i.sede_nombre)`,parametros)
  ]);
- const total=Number(resumen.rows[0].filas),pagina=Math.min(f.pagina,Math.max(1,Math.ceil(total/50)));
+ const limite=[50,100,150].includes(f.limite??50)?f.limite??50:50;
+ const total=Number(resumen.rows[0].filas),pagina=Math.min(f.pagina,Math.max(1,Math.ceil(total/limite)));
  const {rows}=await db.query<FilaRobo>(`SELECT i.id AS "incidenteId",d.equipo_id AS "equipoId",i.sede_nombre AS "sedeNombre",i.sede_rbd AS rbd,i.sede_tipo AS "sedeTipo",i.comuna,i.fecha::text,${estado} AS estado,
    d.identificacion->>'marca' AS marca,d.identificacion->>'modelo' AS modelo,d.identificacion->>'serie' AS serie,d.identificacion->>'inventario' AS inventario,d.identificacion->>'categoria' AS categoria
-   ${base} ${filtros} ORDER BY i.fecha DESC,i.id,d.equipo_id LIMIT 50 OFFSET $10`,[...parametros,(pagina-1)*50]);
- return {filas:rows,resumen:resumen.rows[0],grupos:grupos.rows,pagina,paginas:Math.max(1,Math.ceil(total/50))};
+   ${base} ${filtros} ORDER BY i.fecha DESC,i.id,d.equipo_id LIMIT $10 OFFSET $11`,[...parametros,limite,(pagina-1)*limite]);
+ return {filas:rows,resumen:resumen.rows[0],grupos:grupos.rows,pagina,paginas:Math.max(1,Math.ceil(total/limite))};
 }
 export async function equiposParaRobo(sede:string|null,q:string,equipo:string|null=null){
  const actor=await exigirGestionDependencias();
@@ -55,5 +56,5 @@ export async function detalleRobo(id:string){
 export async function robosEquipo(id:string){
  const actor=await exigirAcceso();
  return(await obtenerBaseDatos().query<{id:string;estado:string;fecha:string;recuperadoFecha:string|null}>(`SELECT i.id,i.estado,i.fecha::text,d.recuperado_fecha::text AS "recuperadoFecha" ${base}
- JOIN public.equipos e ON e.id=d.equipo_id WHERE d.equipo_id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid) ORDER BY i.fecha DESC,i.id`,[id,!requiereSede(actor.rol),actor.sedeId])).rows;
+ JOIN public.equipos e ON e.id=d.equipo_id WHERE d.equipo_id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND i.sede_id=$3::uuid)) ORDER BY i.fecha DESC,i.id`,[id,!requiereSede(actor.rol),actor.sedeId])).rows;
 }

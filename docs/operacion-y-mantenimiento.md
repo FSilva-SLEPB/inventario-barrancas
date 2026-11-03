@@ -203,3 +203,7 @@ El [inventario de celulares](inventario-celulares.md) requiere la migración
 Cada número identifica una línea vigente asociada a un equipo. Cambios de sede,
 número y vigencia conservan historial; archivar no constituye una baja.
 El dashboard de robos fue retirado; permanece el consolidado operativo.
+
+## Homologación y custodia compartida
+
+Filtros, resultados, fichas y confirmaciones siguen el mismo patrón en todos los módulos. Equipos y celulares comparten devolución a Bodega TI y asignación, confirmadas solo por UTIC. Las ubicaciones físicas se definirán después. Consultar [la guía de homologación y Bodega TI](homologacion-y-bodega-ti.md).

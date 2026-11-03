@@ -18,7 +18,7 @@ export type ValoresEquipo = Omit<DatosEquipo, "origen" | "condicionTecnica" | "c
   origen: string; condicionTecnica: string; version: string; motivoCambio: string;
 } & Record<keyof typeof CAMPOS_COMPRA, string>;
 export type EstadoEquipo = { resultado: "inicial" | "error" | "guardado"; mensaje: string;
-  valores: ValoresEquipo; errores: Partial<Record<keyof ValoresEquipo,string>>; revision: string };
+  valores: ValoresEquipo; errores: Partial<Record<keyof ValoresEquipo,string>>; revision: string;custodiaInicial?:string };
 export function valoresEquipo(): ValoresEquipo {
   return { id:"",sedeId:"",categoriaId:"",marca:"",modelo:"",serie:"",inventario:"",motivoIdentificacion:"",
     origen:"compra_utic",condicionTecnica:"sin_verificar",observaciones:"",version:"0",motivoCambio:"",

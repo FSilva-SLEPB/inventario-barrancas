@@ -28,7 +28,7 @@ anteriores. El estado de funcionamiento es independiente de la vigencia.
 
 Los dos perfiles administrativos consultan y actualizan todas las sedes, incluido
 Nivel Central. El encargado registra y actualiza su sede; los perfiles de consulta
-solo leen su alcance. Cambiar de sede requiere perfil administrativo. Las personas
+solo leen su alcance. Cambiar de sede requiere devolución a Bodega TI y una asignación confirmadas por UTIC; una edición de ficha no cambia la sede. Las personas
 de una nueva sede no reciben eventos privados de la sede anterior: el historial
 local muestra solamente eventos cuyo antes y después pertenecen a su sede.
 
@@ -46,16 +46,16 @@ equipos generales; incorporar reportes de celulares, actas, planes de operador,
 facturación y asignaciones formales a funcionarios requiere su flujo específico.
 No se incorporan esos procesos como si ya estuvieran implementados.
 
-El modelo actual contiene 21 tablas funcionales más `pgmigrations` y 22 claves
+El modelo actual contiene 22 tablas funcionales más `pgmigrations` y 28 claves
 foráneas. El diagrama y documento se generan desde la base; el material histórico
 para jefatura conserva su fecha y estructura originales.
 
 ## Instalación
 
-Esta actualización requiere la migración `1794182400000_inventario-celulares`.
+El alta del módulo requiere `1794182400000_inventario-celulares`; la custodia y los movimientos comunes requieren además `1794268800000_custodia-movimientos-inventario`.
 Primero se prepara un respaldo con restauración comprobada, se aplican las
 migraciones y se reconstruye/reemplaza solo la web compilada con el mismo proyecto
-Compose. La salud devuelve 503 si falta la tabla o la función de celulares.
+Compose. La salud devuelve 503 si faltan las columnas de custodia, las tablas o las funciones controladas de celulares/movimientos.
 Crear o fusionar el PR no instala código ni modifica la base de CentOS.
 
 El dashboard de Robos se retiró por solicitud de Felipe. Permanecen los reportes,
@@ -71,3 +71,7 @@ versiones concurrentes y salud sin la nueva función. Chromium verificó las
 ventanas, alta mínima, edición/cancelación, errores con datos conservados, aviso
 único, filtros, teclado, móvil, contraste, texto ampliado y el modelo actualizado.
 El ensayo de recuperación incluye el celular y su historial con datos ficticios.
+
+## Devolución y asignación
+
+Los celulares devueltos ingresan al mismo estado lógico **En Bodega TI** que los equipos generales y se consultan juntos. Solo UTIC confirma los movimientos desde la ficha, con fecha, receptor y motivo. Una asignación requiere primero estar en Bodega TI. El alta administrativa propone Bodega TI y permite registrar un equipo ya asignado; las fichas anteriores mantienen sus datos. Funcionamiento, vigencia y custodia se conservan separados. Las ubicaciones físicas se definirán después. Ver [la guía común](homologacion-y-bodega-ti.md).

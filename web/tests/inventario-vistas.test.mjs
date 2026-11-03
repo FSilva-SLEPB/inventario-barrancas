@@ -22,7 +22,12 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "react/jsx-runtime": jsx,
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children) },
     "next/navigation": { notFound:()=>{throw new Error("NOT_FOUND");}, useRouter: () => ({ push() {} }), redirect: destino => { throw new Error("REDIRECT:" + destino); } },
+    "@/components/ventana-movimiento": {default:()=>null,AccionesCustodia:()=>null},
+    "@/components/ficha-celular": {default:()=>null},
+    "@/lib/celulares": {detalleCelular:async()=>null},
+    "@/lib/inventario-bodega": {listarBodega:async f=>{consulta=f;return {filas:equipos,total,pagina:1,paginas:Math.max(1,Math.ceil(total/f.limite))};}},
     "@/lib/acceso": {
+      exigirAdministrador:async()=>{if(!["administrador","administrador_gestion"].includes(rol))throw new Error("REDIRECT:/sin-permiso");return {rol};},
       exigirAcceso: async () => ({ rol, sedeId: local ? escuela.id : null }),
       exigirGestionDependencias: async () => {
         if (!["administrador", "administrador_gestion", "encargado"].includes(rol)) throw new Error("REDIRECT:/sin-permiso");
@@ -89,11 +94,11 @@ test("nombre, RBD y búsqueda se conservan en paginación y cambio de estado", a
   assert.ok(enlaces.some(x => x.includes("pagina=2")));
 });
 
-test("Nivel Central ignora filtros P02 y no ofrece pendientes", async () => {
+test("Nivel Central ignora filtros P02 y comparte el estado de Bodega TI", async () => {
   const { html, consulta } = await pagina({ ambito: "nc", tipo: "jardin_infantil", sede: jardin.id, rbd: jardin.rbd, vista: "pendientes" }, false, [], 0, "nivel-central");
-  assert.deepEqual(consulta, ["nc", "inventario", 1, "", "", null, "", 50]);
+  assert.deepEqual(consulta, ["nc", "pendientes", 1, "", "", null, "", 50]);
   assert.ok(!opciones(html).includes('name="tipo"')); assert.ok(!opciones(html).includes('name="sede"'));
-  assert.ok(!opciones(html).includes('name="vista" value="pendientes"'));
+  assert.ok(opciones(html).includes('value="pendientes"'));
   assert.ok(!html.includes("Inventario P02"));
 });
 
@@ -186,7 +191,8 @@ test("las consultas de inventario ya no incluyen formularios de registro o carga
 
 test("bodega fuerza pendientes y deniega a perfiles sin administración", async () => {
   const { html, consulta } = await pagina({ vista: "inventario" }, false, [], 0, "bodega-ti", "administrador_gestion");
-  assert.equal(consulta[1], "pendientes");
+  assert.equal(consulta.clase, "");
+  assert.equal(consulta.limite,50);
   assert.ok(html.includes('<h1>Bodega TI</h1>'));
   assert.ok(!html.includes('id="filtro-vista"'));
   for (const rol of ["consulta", "encargado", "consulta_sede"]) {

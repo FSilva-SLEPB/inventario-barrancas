@@ -1,4 +1,6 @@
+import VentanaMovimiento from '@/components/ventana-movimiento';
 import Link from "next/link";
+import PanelResultados from '@/components/panel-resultados';
 import {notFound} from 'next/navigation';
 import ModalFicha from '@/components/modal-ficha';
 import FichaEquipo from '@/components/ficha-equipo';
@@ -8,9 +10,10 @@ import { exigirAcceso } from "@/lib/acceso";
 import { listarEquipos,obtenerEquipo } from "@/lib/equipos";
 import { listarSedes } from "@/lib/sedes";
 import { puedeAdministrar, puedeGestionarDependencias, requiereSede } from "@/lib/politica-acceso";
-import { CONDICIONES, SITUACIONES } from "@/lib/validacion-equipos";
+import {CUSTODIAS} from '@/lib/validacion-movimientos-inventario';
+import { CONDICIONES } from "@/lib/validacion-equipos";
 import SeleccionEntregas, { SeleccionarTodos } from "@/components/seleccion-entregas";
-import FiltrosInventario, { RegistrosPorPagina } from "@/components/filtros-inventario";
+import FiltrosInventario from "@/components/filtros-inventario";
 import { esIdSede } from "@/lib/validacion-sedes";
 import styles from "@/app/inventario/inventario.module.css";
 
@@ -23,8 +26,8 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
   if (bodega && !puedeAdministrar(actor.rol)) redirect("/sin-permiso");
   if (local && ambito === "nc") redirect("/sin-permiso");
   const ruta = bodega ? "/inventario/bodega-ti" : ambito === "nc" ? "/inventario/nivel-central" : "/inventario/p02";
-  const vista = bodega ? "pendientes" : ambito === "eeji" && p.vista === "pendientes" ? "pendientes" : "inventario";
-  const q = typeof p.q === "string" ? p.q.trim().slice(0, 120) : "";
+  const vista = bodega ? "pendientes" : p.vista === "pendientes" ? "pendientes" : "inventario";
+  const q = typeof p.q === "string" ? p.q.trim().slice(0, 150) : "";
   const numero = typeof p.pagina === "string" && /^\d{1,7}$/.test(p.pagina) ? Math.max(1, Number(p.pagina)) : 1;
   const tipo = !local && ambito === "eeji" && ["establecimiento", "jardin_infantil"].includes(String(p.tipo)) ? String(p.tipo) : "";
   const sedeId = tipo && !local && ambito === "eeji" && typeof p.sede === "string" && esIdSede(p.sede) ? p.sede : null;
@@ -44,7 +47,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
   if(seleccionado&&!esIdSede(seleccionado))notFound();
   const equipoSeleccionado=seleccionado?await obtenerEquipo(seleccionado):null;
   if(seleccionado&&(!equipoSeleccionado||!equipoEnVista(equipoSeleccionado,ambito,vista)))notFound();
-  const editando=Boolean(editar&&equipoSeleccionado&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.situacion!=='pendiente_entrega'));
+  const editando=Boolean(editar&&equipoSeleccionado&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.custodia!=='en_bodega'));
   const titulo = bodega ? "Bodega TI" : ambito === "nc" ? "Inventario Nivel Central" : "Inventario P02";
   const paginas = Math.max(1, Math.ceil(total / limite));
 
@@ -59,14 +62,10 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
         {puedeGestionarDependencias(actor.rol) && <Link className="btn btn-outline-primary btn-sm" href="/inventario/registro">Ir al registro</Link>}
       </div>
     </div>
-    {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están destinados a la sede y aún no forman parte de su inventario recibido.</p>}
+    {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están en Bodega TI. La sede indica su referencia de destino o procedencia; UTIC confirma su asignación.</p>}
     <FiltrosInventario key={JSON.stringify([ambito, vista, tipo, sedeId, rbd, q, limite])}
       {...{ ambito, vista, local, tipo, rbd, q, limite, bodega }} sedeId={sedeId ?? ""} sedes={sedesFiltro} />
-    <section className={styles.resultados} aria-label="Equipos del inventario">
-    <div className={styles.resumen}>
-      <p><strong>{total.toLocaleString("es-CL")}</strong> equipos {vista === "pendientes" ? "pendientes de entrega" : "registrados / recibidos"}</p>
-      <div className="acciones-resumen">{bodega&&<SeleccionEntregas pagina={equipos.map(e=>e.id).join(",")}/>}<RegistrosPorPagina key={limite} ruta={ruta} limite={limite} filtros={{ vista, tipo, sede: sedeId ?? "", rbd, q }} /></div>
-    </div>
+    <PanelResultados total={total} descripcion={vista==='pendientes'?'bienes en Bodega TI':'equipos registrados / recibidos'} ruta={ruta} limite={limite} filtros={{vista,tipo,sede:sedeId??'',rbd,q}} pagina={pagina} paginas={paginas} acciones={bodega?<SeleccionEntregas pagina={equipos.map(e=>e.id).join(',')}/>:undefined}>
     <div className={`${styles.contenedorTabla} tabla-contenedor tabla-inventario-contenedor`} role="region" aria-label="Resultados del inventario" tabIndex={0}>
       <table className={`tabla-datos ${styles.tabla} ${ambito === "eeji" ? styles.tablaP02 : styles.tablaCentral} ${bodega ? styles.tablaSeleccion : ""}`}>
         <caption className="visually-hidden">{titulo}: {vista === "pendientes" ? "pendientes de entrega" : "equipos registrados / recibidos"}</caption>
@@ -82,7 +81,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           {ambito === "eeji" && <><td className={styles.rbd}>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
           <td>{e.categoriaNombre}</td><td><span>{e.modelo}</span><small>{e.marca}</small></td>
           <td className={styles.identificador}>{e.serie || "Pendiente"}</td><td className={styles.identificador}>{e.inventario || "Pendiente"}</td>
-          <td><span className={`${styles.estado} ${e.situacion === "pendiente_entrega" ? styles.pendiente : styles.recibido}`}>{e.situacion === "recibido_historico" ? "Recibido (histórico)" : SITUACIONES[e.situacion as keyof typeof SITUACIONES]}</span>
+          <td><span className={`estado-custodia ${e.custodia}`}>{CUSTODIAS[e.custodia as keyof typeof CUSTODIAS]??(e.situacion==='pendiente_entrega'?CUSTODIAS.en_bodega:CUSTODIAS.asignado)}</span>{e.situacion==='recibido_historico'&&<small>Recibido (histórico)</small>}
             {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
           <td><Link className={styles.historial} scroll={false} data-ficha-id={e.id} href={enlaceFichaInventario(volver,'ver',e.id)}
@@ -93,12 +92,8 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
         </tbody>
       </table>
     </div>
-    <nav className={styles.paginacion} aria-label="Páginas de equipos">
-      <span>Página {pagina} de {paginas} · {total ? `${(pagina - 1) * limite + 1}–${Math.min(pagina * limite, total)} de ${total.toLocaleString("es-CL")}` : "Sin resultados"}</span>
-      <div>{pagina > 1 && <Link href={url(vista, pagina - 1)}>Anterior</Link>}
-        {pagina < paginas && <Link href={url(vista, pagina + 1)}>Siguiente</Link>}</div>
-    </nav>
-    </section>
+    </PanelResultados>
+    <VentanaMovimiento parametros={p} volver={volver}/>
     {seleccionado&&<ModalFicha titulo={editando?'Editar equipo':'Ficha del equipo'} cerrarHref={volver} editando={editando} focoId={seleccionado}>
       <FichaEquipo equipo={equipoSeleccionado??undefined} id={seleccionado} editar={editando} contexto={{volver,ambito,vista,verHref:enlaceFichaInventario(volver,'ver',seleccionado),editarHref:enlaceFichaInventario(volver,'editar',seleccionado)}}/>
     </ModalFicha>}

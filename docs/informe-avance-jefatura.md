@@ -23,7 +23,7 @@ posteriormente las asignaciones completas y los indicadores de gestión.
 | Acceso y perfiles | Google Workspace, cuentas autorizadas, cinco perfiles y alcance por sede | Revisión operativa continua de cuentas y configuración privada |
 | Catálogos | Sedes, dependencias y categorías | Dependencias aún no se vincula directamente a equipos por FK |
 | Inventario | Consultas separadas NC/P02, registro, carga con vista previa, ficha y edición con historial | Asignaciones/devoluciones/traspasos completos siguen pendientes |
-| Bodega y entregas | Consulta de pendientes y regularización histórica de entregas a jardines | Usa antecedentes y enlaces de actas existentes; no genera ni firma actas nuevas |
+| Bodega y entregas | Bodega lógica común para equipos/celulares, devolución y asignación por UTIC, más regularización histórica de entregas a jardines | Usa antecedentes y enlaces de actas existentes; no genera ni firma actas nuevas |
 | Directorio | Datos del establecimiento y director/a, contactos, edición e historial | Importación privada del listado real pendiente de ejecutar en CentOS |
 | Robos | Reporte, revisión, recuperación por equipo y consolidado por sede | Dashboard de establecimientos pendiente |
 | Presentación | Portadas y submenús, tablas comunes, revisión móvil y movimiento reducido | Instalación de la versión más reciente en CentOS pendiente de comprobar |
@@ -118,3 +118,7 @@ recuperación objetivo.
 - [Modelo de relaciones SVG](jefatura/modelo-relaciones.svg).
 - [Modelo con atributos SVG](jefatura/modelo-atributos.svg).
 - [Índice y notas de uso](jefatura/README.md).
+
+## Ampliación: homologación y custodia
+
+Filtros, resultados, paginación y confirmaciones comparten componentes. Equipos y celulares ingresan al mismo estado lógico Bodega TI al devolverse y solo se asignan desde allí, con confirmación de UTIC, fecha real, receptor e historial. Las ubicaciones físicas se definirán después. El modelo vigente contiene 22 tablas funcionales más pgmigrations y 28 claves foráneas. Ver [la guía funcional](homologacion-y-bodega-ti.md) y [el modelo generado desde PostgreSQL](modelo-entidad-relacion.md). Este avance debe instalarse en CentOS después de fusionar el PR; el PDF/PPTX anterior conserva su fecha histórica.

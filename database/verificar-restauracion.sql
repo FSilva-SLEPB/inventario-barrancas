@@ -24,6 +24,10 @@ BEGIN
       RAISE EXCEPTION 'Falta una función controlada del inventario restaurado';
     END IF;
   END IF;
+  IF to_regclass('public.movimientos_inventario') IS NOT NULL THEN
+    IF NOT has_table_privilege(current_user,'public.movimientos_inventario','SELECT') OR has_table_privilege(current_user,'public.movimientos_inventario','INSERT') OR has_table_privilege(current_user,'public.movimientos_inventario','UPDATE') OR has_table_privilege(current_user,'public.movimientos_inventario','DELETE') THEN RAISE EXCEPTION 'Permisos de movimientos incorrectos';END IF;
+    IF NOT has_function_privilege(current_user,'public.mover_bien_acceso(text,uuid,jsonb)','EXECUTE') OR has_function_privilege(current_user,'public.guardar_celular_ficha_base(text,uuid,jsonb,integer,text)','EXECUTE') OR has_function_privilege(current_user,'public.guardar_equipo_ficha_base(text,jsonb,integer,text,uuid)','EXECUTE') THEN RAISE EXCEPTION 'Funciones controladas de custodia incorrectas';END IF;
+  END IF;
   IF to_regclass('public.celulares') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['celulares','celulares_historial'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT')
@@ -115,6 +119,9 @@ $verificar$;
 \if :validar_datos_ci
 DO $datos_ci$
 BEGIN
+  IF to_regclass('public.movimientos_inventario') IS NOT NULL THEN
+    IF (SELECT count(*) FROM public.movimientos_inventario WHERE id IN('70000000-0000-4000-8000-000000000001','70000000-0000-4000-8000-000000000002') AND accion='devolucion' AND antes->>'custodia'='asignado' AND despues->>'custodia'='en_bodega')<>2 OR NOT EXISTS(SELECT 1 FROM public.equipos e JOIN public.equipos_historial h ON h.equipo_id=e.id WHERE h.movimiento_id='70000000-0000-4000-8000-000000000001' AND e.custodia='en_bodega' AND e.version=2) OR NOT EXISTS(SELECT 1 FROM public.celulares c JOIN public.celulares_historial h ON h.celular_id=c.id WHERE h.movimiento_id='70000000-0000-4000-8000-000000000002' AND c.custodia='en_bodega' AND c.version=2) THEN RAISE EXCEPTION 'No se recuperaron custodia, movimientos e historial de ambos tipos de bien';END IF;
+  END IF;
   IF to_regclass('public.equipos') IS NOT NULL THEN
     IF NOT EXISTS (
       SELECT 1 FROM public.equipos e JOIN public.equipos_historial h ON h.equipo_id=e.id

@@ -210,3 +210,7 @@ incluirán credenciales o PIN en registros de auditoría en texto legible.
 
 Estas decisiones se revisarán paso a paso en su etapa. La regla de una sola
 sede por encargado ya está confirmada.
+
+## Custodia de equipos y celulares
+
+Solo Administrador del sistema y Administrador de gestión (UTIC) confirman devolución a Bodega TI y asignación a una sede. Los perfiles locales consultan su alcance y mantienen sus permisos ordinarios de ficha, sin confirmar estos movimientos ni editar bienes en Bodega TI. El cambio de sede no se hace mediante una corrección de ficha. Las versiones, la atomicidad y el historial se comprueban en servidor y PostgreSQL.

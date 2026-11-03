@@ -62,7 +62,7 @@ Los selectores de establecimiento/JISC y RBD permanecen bloqueados y vacíos
 hasta elegir un tipo; los parámetros enviados sin tipo no aplican esos filtros. Nombre
 y RBD son selectores separados; pueden combinarse con la búsqueda general.
 La paginación y el cambio entre recibidos y pendientes conservan los filtros.
-Limpiar mantiene la página y el estado de entrega, y elimina los filtros de búsqueda.
+Limpiar mantiene el tamaño de página y el estado de entrega, y elimina los filtros de búsqueda.
 Los enlaces anteriores con parámetros se redirigen a la página correspondiente.
 El acceso directo a Nivel Central se deniega a perfiles limitados a una sede.
 
@@ -313,3 +313,7 @@ Validación: 102 pruebas unitarias, 336 comprobaciones HTTP con PostgreSQL tempo
 y Chromium real en NC/P02/Bodega, incluyendo filtros, página 2, selección para
 entregas, errores, cierre al guardar, solo lectura, móvil, teclado, contraste,
 texto ampliado y movimiento reducido. Se utilizan datos exclusivamente ficticios.
+
+## Custodia compartida con celulares
+
+Equipos y celulares usan los mismos filtros, resultados, ficha, confirmaciones y movimientos de devolución/asignación. Bodega TI reúne todos los bienes con custodia `en_bodega`; su sede es una referencia de destino o procedencia. Solo UTIC confirma los movimientos y solo se asigna desde Bodega TI. Las ubicaciones físicas quedan para una etapa posterior. La situación histórica de entrega se conserva; la custodia vigente determina su inclusión en cada listado. Una regularización repetida no revierte una devolución posterior. Esta ampliación sustituye las limitaciones anteriores sobre devoluciones y asignaciones entre sedes; las asignaciones formales a funcionarios, las solicitudes y las actas nuevas mantienen su alcance pendiente. Ver [la guía común](homologacion-y-bodega-ti.md).

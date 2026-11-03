@@ -1,5 +1,6 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ movimientos_inventario:{modulo:'Movimientos',uso:'Devoluciones a Bodega TI y asignaciones de equipos y celulares, con fecha, receptor, idempotencia e instantáneas.',fuentes:['src/lib/inventario-bodega.ts','migrations/1794268800000_custodia-movimientos-inventario.mjs']},
  celulares:{modulo:'Celulares',uso:'Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia.',fuentes:['src/lib/celulares.ts','src/app/inventario/celulares/acciones.ts']},
  celulares_historial:{modulo:'Celulares',uso:'Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas.',fuentes:['src/lib/celulares.ts','migrations/1794182400000_inventario-celulares.mjs']},
  funcionarios_nc:{modulo:'Nivel Central',uso:'Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema.',fuentes:['src/lib/funcionarios.ts','src/app/mantenedores/funcionarios/acciones.ts']},
@@ -10,7 +11,7 @@ export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]
  usuarios_acceso:{modulo:'Acceso',uso:'Cuentas autorizadas, perfil, vigencia y sede permitida.',fuentes:['src/lib/acceso.ts','src/lib/usuarios.ts']},
  usuarios_acceso_historial:{modulo:'Acceso',uso:'Auditoría de cambios de usuarios y permisos.',fuentes:['src/lib/usuarios.ts','migrations/1793404800000_administrar-usuarios.mjs']},
  cargas_equipos:{modulo:'Equipos',uso:'Origen e idempotencia de las cargas masivas de inventario.',fuentes:['src/app/inventario/carga/acciones.ts','src/lib/equipos.ts']},
- equipos:{modulo:'Equipos',uso:'Identidad estable del bien, sede, categoría, funcionamiento y situación de entrega.',fuentes:['src/lib/equipos.ts','src/lib/entregas.ts','src/lib/robos.ts']},
+ equipos:{modulo:'Equipos',uso:'Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado y situación de entrega.',fuentes:['src/lib/equipos.ts','src/lib/entregas.ts','src/lib/robos.ts']},
  equipos_historial:{modulo:'Equipos',uso:'Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores.',fuentes:['src/lib/equipos.ts','src/lib/presentacion-historial.ts']},
  directorio_sedes:{modulo:'Directorio',uso:'Responsable vigente de cada EE/JISC, RUN, contactos y situación del cargo.',fuentes:['src/lib/directorio.ts','src/lib/entregas.ts']},
  directorio_historial:{modulo:'Directorio',uso:'Cambios de responsable y datos del establecimiento; conserva las personas anteriores.',fuentes:['src/lib/directorio.ts','src/app/mantenedores/directores/acciones.ts']},

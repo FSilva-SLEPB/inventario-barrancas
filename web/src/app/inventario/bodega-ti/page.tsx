@@ -1,7 +1,34 @@
-import VistaInventario, { type ParametrosInventario } from "@/components/vista-inventario";
-
-export const metadata = { title: "Bodega TI | SLEP Barrancas" };
-
-export default async function BodegaTI(props: ParametrosInventario) {
-  return VistaInventario({ ...props, ambito: "eeji", bodega: true });
+import Link from 'next/link';
+import {notFound} from 'next/navigation';
+import {exigirAdministrador} from '@/lib/acceso';
+import {listarSedes} from '@/lib/sedes';
+import {esIdSede} from '@/lib/validacion-sedes';
+import {listarBodega,type FiltrosBodega} from '@/lib/inventario-bodega';
+import {obtenerEquipo} from '@/lib/equipos';
+import {detalleCelular} from '@/lib/celulares';
+import {CONDICIONES} from '@/lib/validacion-equipos';
+import {enlaceFichaInventario} from '@/lib/ficha-inventario';
+import FiltrosInventario from '@/components/filtros-inventario';
+import PanelResultados from '@/components/panel-resultados';
+import SeleccionEntregas,{SeleccionarTodos} from '@/components/seleccion-entregas';
+import ModalFicha from '@/components/modal-ficha';
+import FichaEquipo from '@/components/ficha-equipo';
+import FichaCelular from '@/components/ficha-celular';
+import VentanaMovimiento from '@/components/ventana-movimiento';
+export const metadata={title:'Bodega TI | SLEP Barrancas'};
+export default async function BodegaTI({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
+ await exigirAdministrador();const p=await searchParams,valor=(k:string,max=150)=>typeof p[k]==='string'?p[k].trim().slice(0,max):'',tipo=['nivel_central','establecimiento','jardin_infantil'].includes(valor('tipo'))?valor('tipo'):'';
+ const f:FiltrosBodega={tipo,sede:tipo&&esIdSede(valor('sede'))?valor('sede'):'',rbd:tipo&&tipo!=='nivel_central'?valor('rbd',120):'',clase:['equipo','celular'].includes(valor('clase'))?valor('clase'):'',q:valor('q'),pagina:/^[1-9]\d{0,6}$/.test(valor('pagina'))?Number(valor('pagina')):1,limite:[50,100,150].includes(Number(valor('limite')))?Number(valor('limite')):50};
+ const [datos,sedes]=await Promise.all([listarBodega(f),listarSedes()]);f.pagina=datos.pagina;const filtros=new URLSearchParams({...Object.fromEntries(Object.entries(f).map(([k,v])=>[k,String(v)])),vista:'pendientes'}),volver='/inventario/bodega-ti?'+filtros;
+ const edicion=valor('editar'),id=edicion||valor('ver'),clase=p.claseBien==='celular'?'celular':'equipo';if(id&&!esIdSede(id))notFound();const equipo=id&&clase==='equipo'?await obtenerEquipo(id):null,detalle=id&&clase==='celular'?await detalleCelular(id):null;
+ if(id&&((equipo?.custodia??detalle?.celular.custodia)!=='en_bodega'))notFound();
+ const ficha=(accion:'ver'|'editar',id:string,clase:'equipo'|'celular')=>{const u=new URL(enlaceFichaInventario(volver,accion,id),'http://interno.local');u.searchParams.set('claseBien',clase);return u.pathname+u.search;};
+ const seleccion=datos.filas.filter(e=>e.clase==='equipo').map(e=>e.id).join(',');
+ return <main><header><h1>Bodega TI</h1><p className="descripcion-pagina">Equipos y celulares en custodia de TI, disponibles para asignación. Las devoluciones ingresan a este mismo estado.</p><p><Link href="/inventario">Volver a Inventario</Link></p></header><p className="ayuda-catalogos">La sede es una referencia de destino o procedencia. Las ubicaciones físicas de las bodegas se definirán después.</p>
+ <FiltrosInventario key={JSON.stringify(f)} ambito="eeji" permitirNC bodega vista="pendientes" local={false} tipo={tipo} sedeId={f.sede} rbd={f.rbd} q={f.q} sedes={sedes.filter(s=>s.tipo===tipo)} limite={f.limite} titulo="Filtrar Bodega TI" placeholder="Buscar por equipo, celular, teléfono, marca, modelo, serie o inventario" extras={<div className="campo-catalogos"><label htmlFor="filtro-clase">Tipo de bien</label><select id="filtro-clase" name="clase" defaultValue={f.clase}><option value="">Todos</option><option value="equipo">Equipos</option><option value="celular">Celulares</option></select></div>}/>
+ <PanelResultados total={datos.total} descripcion="bienes en Bodega TI" ruta="/inventario/bodega-ti" limite={f.limite} filtros={Object.fromEntries(filtros)} pagina={datos.pagina} paginas={datos.paginas} acciones={<SeleccionEntregas pagina={seleccion}/>}>
+ <div className="tabla-usuarios-contenedor tabla-inventario-contenedor"><table className="tabla-datos tabla-catalogos tabla-bodega"><caption className="visually-hidden">Equipos y celulares en Bodega TI</caption><thead><tr><th scope="col"><SeleccionarTodos pagina={seleccion}/></th><th scope="col">RBD</th><th scope="col">Sede de referencia</th><th scope="col">Equipo</th><th scope="col">Modelo</th><th scope="col">Serie / IMEI</th><th scope="col">Inventario / teléfono</th><th scope="col">Estado</th><th scope="col">Ficha</th></tr></thead><tbody>{datos.filas.map(e=><tr key={e.clase+e.id}><td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.clase!=='equipo'||e.sedeTipo!=='jardin_infantil'||e.situacion!=='pendiente_entrega'||Boolean(e.roboEstado)} aria-label={`Seleccionar ${e.inventario||e.serie||e.modelo} de ${e.sedeNombre}`}/></td><td className="dato-identificador">{e.sedeRbd||'Sin RBD'}</td><td>{e.sedeNombre}</td><td>{e.categoriaNombre}</td><td>{e.modelo||'Sin informar'}<span className="dato-secundario">{e.marca}</span></td><td className="dato-identificador">{e.serie||'Pendiente'}</td><td className="dato-identificador">{e.inventario||'Sin informar'}{e.telefono&&<span className="dato-secundario">{e.telefono}</span>}</td><td><span className="estado-custodia en_bodega">En Bodega TI</span><small className="dato-secundario">Funcionamiento: {CONDICIONES[e.condicionTecnica as keyof typeof CONDICIONES]}</small>{e.roboEstado&&<small className="alerta-incidente">Incidente abierto</small>}</td><td><Link data-ficha-id={e.id} scroll={false} href={ficha('ver',e.id,e.clase)}>Ver ficha</Link></td></tr>)}{!datos.filas.length&&<tr><td colSpan={9}>No hay bienes para estos filtros.</td></tr>}</tbody></table></div></PanelResultados>
+ <p className="ayuda-catalogos">La selección múltiple conserva la regularización de entregas históricas de jardines. La asignación actual se registra desde la ficha de cada bien.</p>
+ {id&&<ModalFicha titulo={edicion?'Editar bien':'Ficha del bien'} cerrarHref={volver} editando={Boolean(edicion)} focoId={id}>{equipo?<FichaEquipo id={id} equipo={equipo} editar={Boolean(edicion)} contexto={{volver,verHref:ficha('ver',id,'equipo'),editarHref:ficha('editar',id,'equipo'),ambito:equipo.sedeTipo==='nivel_central'?'nc':'eeji',vista:'pendientes'}}/>:detalle&&<FichaCelular detalle={detalle} editar={Boolean(edicion)} sedes={sedes} local={false} gestiona admin filtros={filtros.toString()} volver={volver} editarHref={ficha('editar',id,'celular')} cancelarHref={ficha('ver',id,'celular')}/>}</ModalFicha>}
+ <VentanaMovimiento parametros={p} volver={volver}/></main>;
 }
