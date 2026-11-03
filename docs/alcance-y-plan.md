@@ -3,6 +3,10 @@
 Acuerdos de trabajo con Felipe Silva, UTIC del SLEP Barrancas.
 Fecha de corte: 30 de octubre de 2026, hora de Chile.
 
+El [informe de avance al 2 de noviembre de 2026](informe-avance-jefatura.md)
+consolida el estado hasta el PR #38. Las tablas de partida de este documento
+son históricas y no sustituyen ese corte.
+
 Este documento reúne las reglas acordadas y el orden propuesto de desarrollo.
 No significa que los módulos descritos estén implementados. Cada cambio deberá
 actualizar aquí su estado y mantener las decisiones anteriores, o explicar la
