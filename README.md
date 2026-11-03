@@ -49,7 +49,7 @@ Las contraseñas, credenciales y respaldos quedarán fuera del repositorio.
 
 ## Estado
 
-El código integrado hasta el PR #38 incorpora acceso institucional, catálogos,
+La base integrada hasta el PR #39 incorpora acceso institucional, catálogos,
 inventario NC/P02, ficha e historial, carga de equipos, regularización histórica
 de entregas a jardines, directorio y seguimiento/consolidado de robos. Las
 solicitudes, asignaciones completas y nuevas actas siguen en desarrollo.
@@ -60,8 +60,12 @@ El [informe de avance para jefatura](docs/informe-avance-jefatura.md), el
 estado revisado, los gráficos y la forma de mantener el proyecto.
 
 La configuración actual de Compose es de desarrollo; integrar código en GitHub
-no despliega automáticamente CentOS. El servicio de producción definitivo sigue
-pendiente de preparar y comprobar.
+no despliega automáticamente CentOS. Esta rama añade [dashboard de robos](docs/dashboard-robos.md),
+[fichas de funcionarios NC](docs/funcionarios-nivel-central.md),
+[preparación de producción](docs/despliegue-produccion.md) y una
+[revisión de seguridad](docs/auditoria-seguridad-2026-11-03.md). La imagen y
+Compose se ensayan con datos ficticios; la instalación definitiva en CentOS
+y OAuth/HTTPS reales siguen pendientes.
 
 ## Desarrollo local
 

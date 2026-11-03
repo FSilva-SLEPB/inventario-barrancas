@@ -30,7 +30,7 @@ AZUL, TINTA, GRIS, CLARO, BORDE = '#1266A7', '#193858', '#536D88', '#F3F7FC', '#
 COLORES = {'Catálogos':'#EAF2FE','Acceso':'#F0ECFA','Equipos':'#E8F3FE','Directorio':'#E6F5F0','Entregas':'#FFF3DE','Robos':'#FCEBEC'}
 
 # El modelo fuente fue generado desde PostgreSQL y se compara con el esquema en CI.
-texto = (ROOT / 'docs/modelo-entidad-relacion.md').read_text()
+texto = (ROOT / 'docs/fuentes/modelo-corte-pr39.md').read_text()
 mermaid = re.search(r'```mermaid\n(.*?)\n```', texto, re.S).group(1)
 entidades = {}
 for nombre, campos in re.findall(r'^  (\w+) \{\n(.*?)^  \}', mermaid, re.M | re.S):
@@ -48,7 +48,7 @@ for linea in texto.split('## Tablas y uso',1)[1].split('## Relaciones',1)[0].spl
     if partes[0] in entidades or partes[0] == 'pgmigrations': catalogo.append(dict(nombre=partes[0], area=partes[1], uso=partes[2]))
 por_nombre = {t['nombre']:t for t in catalogo}
 assert len(entidades) == 17 and len(relaciones) == 19 and len(catalogo) == 18
-assert sum(1 for _ in (ROOT/'web/migrations').glob('*.mjs')) == 9
+# Las nueve migraciones corresponden al corte fijado, no al desarrollo posterior.
 assert Counter(t['area'] for t in catalogo if t['nombre'] in entidades) == {'Catálogos':3,'Acceso':2,'Equipos':3,'Directorio':3,'Entregas':3,'Robos':3}
 
 

@@ -9,9 +9,11 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   ...(gestion?[{href:'/inventario/registro',titulo:'Registro de equipos',descripcion:admin?'Ingreso individual y carga masiva de equipos.':'Registrar equipos propios de la sede.',icono:'+'}]:[]),
   ...(admin?[{href:'/inventario/bodega-ti',titulo:'Bodega TI',descripcion:'Equipos destinados a establecimientos y pendientes de entrega.',icono:'TI'},
    {href:'/inventario/movimientos',titulo:'Movimientos y actas',descripcion:'Entregas registradas, personas receptoras y antecedentes.',icono:'↔'}]:[]),
+  {href:'/inventario/robos/dashboard',titulo:'Dashboard de robos',descripcion:'Indicadores y gráficos por sede, comuna, categoría y período.',icono:'▥'},
   {href:'/inventario/robos',titulo:'Consolidado de robos',descripcion:'Equipos reportados, robos validados y recuperaciones.',icono:'!'}
  ]},{id:'mantenedores',titulo:'Mantenedores',href:'/mantenedores',descripcion:'Datos de establecimientos, responsables, catálogos y accesos al sistema.',accesos:[
-  ...(admin?[{href:'/mantenedores/directores',titulo:'Directorio de establecimientos',descripcion:'Fichas de establecimientos/JISC y sus directores o directoras vigentes.',icono:'EE'},
+  ...(admin?[{href:'/mantenedores/funcionarios',titulo:'Funcionarios de Nivel Central',descripcion:'Fichas de personas, unidad, contacto e historial de cambios.',icono:'NC'},
+   {href:'/mantenedores/directores',titulo:'Directorio de establecimientos',descripcion:'Fichas de establecimientos/JISC y sus directores o directoras vigentes.',icono:'EE'},
    {href:'/mantenedores/usuarios',titulo:'Usuarios y perfiles',descripcion:'Cuentas autorizadas, perfiles y alcance de acceso.',icono:'US'}]:[]),
   {href:'/mantenedores/categorias',titulo:'Categorías de bienes',descripcion:'Tipos de equipos y bienes del inventario.',icono:'CA'},
   {href:'/mantenedores/sedes',titulo:'Sedes',descripcion:'Establecimientos, jardines, salas cunas y Nivel Central.',icono:'SE'},

@@ -1,5 +1,7 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ funcionarios_nc:{modulo:'Nivel Central',uso:'Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema.',fuentes:['src/lib/funcionarios.ts','src/app/mantenedores/funcionarios/acciones.ts']},
+ funcionarios_nc_historial:{modulo:'Nivel Central',uso:'Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores.',fuentes:['src/lib/funcionarios.ts','migrations/1794009600000_funcionarios-nivel-central.mjs']},
  sedes:{modulo:'Catálogos',uso:'Identidad y datos de EE/JISC y Nivel Central; alcance por sede.',fuentes:['src/lib/sedes.ts','src/lib/equipos.ts','src/lib/directorio.ts']},
  dependencias:{modulo:'Catálogos',uso:'Ubicaciones internas de una sede. Todavía no hay una FK desde equipos a dependencias.',fuentes:['src/lib/dependencias.ts','src/app/mantenedores/dependencias']},
  categorias_bienes:{modulo:'Catálogos',uso:'Categorías que clasifican los bienes y equipos.',fuentes:['src/lib/catalogos.ts','src/lib/equipos.ts']},

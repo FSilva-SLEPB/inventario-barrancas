@@ -28,6 +28,10 @@ La nulabilidad de cada columna se consulta en la pantalla Modelo de datos; otros
 
 ![Vista parcial: ocho tablas y nueve FK](modelo-principal.svg)
 
+El generador usa la fuente fijada `docs/fuentes/modelo-corte-pr39.md` para
+reproducir este corte. El esquema y los avances posteriores se consultan en
+[modelo actual](../modelo-entidad-relacion.md) y en las notas de cada módulo.
+
 ## Actualizar este material
 
 El texto de referencia es `docs/informe-avance-jefatura.md`; el esquema completo

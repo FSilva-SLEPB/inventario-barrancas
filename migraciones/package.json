@@ -1,0 +1,18 @@
+{
+  "name": "inventario-barrancas-migraciones",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "db:migrate": "node-pg-migrate up --migrations-schema public --no-verbose"
+  },
+  "dependencies": {
+    "node-pg-migrate": "9.0.0",
+    "pg": "8.23.1"
+  },
+  "overrides": {
+    "node-pg-migrate": {
+      "glob": "14.0.3"
+    }
+  }
+}

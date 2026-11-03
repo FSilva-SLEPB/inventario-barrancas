@@ -61,6 +61,10 @@ jobs:
       - name: Revisar vulnerabilidades conocidas
         run: npm audit --audit-level=high
 
+      - name: Revisar dependencias de migraciones
+        working-directory: migraciones
+        run: npm audit --audit-level=moderate
+
       - name: Probar validación de sedes
         run: node --test tests/validacion-sedes.test.mjs
 
@@ -68,7 +72,7 @@ jobs:
         run: node --test tests/validacion-dependencias.test.mjs
 
       - name: Probar identidad, permisos y vistas de inventario
-        run: node --experimental-vm-modules --test tests/acceso.test.mjs tests/inventario-vistas.test.mjs tests/entregas.test.mjs tests/directorio.test.mjs tests/robos.test.mjs
+        run: node --experimental-vm-modules --test tests/acceso.test.mjs tests/inventario-vistas.test.mjs tests/entregas.test.mjs tests/directorio.test.mjs tests/robos.test.mjs tests/dashboard-robos.test.mjs tests/funcionarios.test.mjs
 
       - name: Probar preparación privada del acceso
         run: python3 ../tests/acceso/probar-preparacion.py
@@ -88,6 +92,9 @@ jobs:
 
       - name: Probar medición, retención y avisos sin servicios reales
         run: python3 ../tests/respaldos/probar-control-respaldos.py
+
+      - name: Probar configuración de producción sin secretos reales
+        run: python3 ../tests/produccion/probar-configuracion.py
 
       - name: Revisar código
         run: npm run lint
@@ -169,3 +176,16 @@ jobs:
           DATABASE_URL: "postgresql://inventario_app:ci_app_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
           TEST_ADMIN_DATABASE_URL: "postgresql://inventario_admin:ci_admin_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
         run: node tests/ejecutar-acceso-http.mjs
+
+      - name: Construir imagen compilada de producción
+        working-directory: .
+        run: docker build --build-arg APP_REVISION="$GITHUB_SHA" -f Dockerfile.web -t inventario-ci-web:prueba .
+
+      - name: Probar la imagen de producción con sesiones y base temporales
+        working-directory: .
+        env:
+          PRUEBA_IMAGEN: inventario-ci-web:prueba
+          PRUEBA_DB_CONTAINER: ${{ job.services.db.id }}
+          DATABASE_URL: "postgresql://inventario_app:ci_app_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+          TEST_ADMIN_DATABASE_URL: "postgresql://inventario_admin:ci_admin_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
+        run: node scripts/probar-imagen-produccion.mjs
