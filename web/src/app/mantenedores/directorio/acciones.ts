@@ -36,6 +36,6 @@ export async function guardarFichaDirectorio(_anterior:EstadoFichaDirectorio,f:F
   if(config.personas)await obtenerBaseDatos().query('SELECT public.guardar_ficha_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5,$6)',[actor.email,sede,JSON.stringify(datos),version,sedeVersion,valores.motivo.trim()]);
   else await obtenerBaseDatos().query('SELECT public.guardar_sede_directorio_acceso($1,$2::uuid,$3::jsonb,$4,$5)',[actor.email,sede,JSON.stringify(datos),sedeVersion,valores.motivo.trim()]);
  }catch(e){const codigo=(e as {code?:string}).code;return fallo(codigo==='P2201'?'La ficha cambió mientras la editabas. Recarga antes de guardar.':codigo==='23505'?'El RBD ya está registrado en otra sede.':'No se pudo guardar la ficha. Revisa permisos y datos.');}
- revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
+ revalidatePath('/directorio','layout');revalidatePath('/mantenedores','layout');revalidatePath('/inventario','layout');
  redirect(enlaceDirectorio(seccion,filtros,'ver',sede,true));
 }

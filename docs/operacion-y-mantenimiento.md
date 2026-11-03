@@ -1,3 +1,12 @@
+> Estado actualizado el 3 de noviembre: la web de CentOS ya usa la imagen
+> compilada con `compose.produccion.yaml`, para acceso local en localhost mediante
+> SSH. Se verificaron contenedor saludable, HTTP 200 y estabilidad del navegador.
+> Para actualizarla hay que reconstruir la imagen y recrear solo la web con
+> `-p inventario-barrancas -f compose.produccion.yaml` y `--no-deps`. Un `git pull`
+> seguido de `start` no incorpora cambios a una imagen compilada. El dominio y
+> HTTPS definitivos siguen pendientes. PostgreSQL conserva su configuración
+> anterior; su política de arranque se revisará en la puesta en producción completa.
+
 # Operación y mantenimiento del inventario
 
 Guía para UTIC del SLEP Barrancas. Corte funcional: 2 de noviembre de 2026.

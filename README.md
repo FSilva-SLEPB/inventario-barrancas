@@ -68,7 +68,8 @@ Compose se ensayan con datos ficticios; la instalación definitiva en CentOS
 y OAuth/HTTPS reales siguen pendientes.
 
 Los [directorios separados](docs/directorios-separados.md) organizan los datos de
-EE.EE., JI/SC y sus responsables en cuatro consultas. La edición termina al guardar.
+EE.EE., JI/SC y sus responsables en cuatro consultas dentro de la sección Directorio,
+separada de Mantenedores. Cada fila abre su ficha mediante Ver ficha. La edición termina al guardar.
 El modelo permanece como documentación técnica fuera del menú de Mantenedores;
 Inventario de celulares queda como acceso pendiente de desarrollo.
 

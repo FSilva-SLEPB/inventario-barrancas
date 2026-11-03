@@ -48,7 +48,7 @@ try {
   const admin = await cookie("felipe.silva@slepb.gob.cl");
   const consulta = await cookie(correo, { rol: "administrador" });
   let formularioCategoria;
-  for (const ruta of ["/inventario/celulares", "/documentacion/modelo-datos", "/mantenedores/directorio-establecimientos", "/mantenedores/directores-establecimientos", "/mantenedores/directorio-jardines", "/mantenedores/directoras-jardines", "/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/mantenedores/funcionarios", "/mantenedores/directores", "/mantenedores/directores/cargar", "/mantenedores/modelo-datos", "/inventario/robos", "/inventario/robos/dashboard", "/inventario/robos/dashboard/exportar", "/inventario/robos/reportar", "/solicitudes", "/mantenedores",
+  for (const ruta of ["/directorio", "/directorio/establecimientos", "/directorio/directores", "/directorio/jardines", "/directorio/directoras", "/directorio/cargar", "/inventario/celulares", "/documentacion/modelo-datos", "/mantenedores/directorio-establecimientos", "/mantenedores/directores-establecimientos", "/mantenedores/directorio-jardines", "/mantenedores/directoras-jardines", "/inventario", "/inventario/nivel-central", "/inventario/p02", "/inventario/registro", "/inventario/bodega-ti", "/mantenedores/funcionarios", "/mantenedores/directores", "/mantenedores/directores/cargar", "/mantenedores/modelo-datos", "/inventario/robos", "/inventario/robos/dashboard", "/inventario/robos/dashboard/exportar", "/inventario/robos/reportar", "/solicitudes", "/mantenedores",
     "/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
     const anonimo = await pedir(ruta);
     assert.equal(anonimo.status, 307, ruta);

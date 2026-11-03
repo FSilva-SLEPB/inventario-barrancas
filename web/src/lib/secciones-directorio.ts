@@ -1,9 +1,9 @@
 import type {DirectorSede} from '@/lib/directorio';
 export const SECCIONES_DIRECTORIO={
- establecimientos:{href:'/mantenedores/directorio-establecimientos',titulo:'Directorio de establecimientos',tipo:'establecimiento',personas:false,correo:true},
- directores:{href:'/mantenedores/directores-establecimientos',titulo:'Directores/as EE.EE.',tipo:'establecimiento',personas:true,correo:true},
- jardines:{href:'/mantenedores/directorio-jardines',titulo:'Directorio JI y SC',tipo:'jardin_infantil',personas:false,correo:true},
- directoras:{href:'/mantenedores/directoras-jardines',titulo:'Directoras JI y SC',tipo:'jardin_infantil',personas:true,correo:false},
+ establecimientos:{href:'/directorio/establecimientos',titulo:'Directorio de establecimientos',tipo:'establecimiento',personas:false,correo:true},
+ directores:{href:'/directorio/directores',titulo:'Directores/as EE.EE.',tipo:'establecimiento',personas:true,correo:true},
+ jardines:{href:'/directorio/jardines',titulo:'Directorio JI y SC',tipo:'jardin_infantil',personas:false,correo:true},
+ directoras:{href:'/directorio/directoras',titulo:'Directoras JI y SC',tipo:'jardin_infantil',personas:true,correo:false},
 } as const;
 export type SeccionDirectorio=keyof typeof SECCIONES_DIRECTORIO;
 export function esSeccionDirectorio(v:unknown):v is SeccionDirectorio{return typeof v==='string'&&Object.hasOwn(SECCIONES_DIRECTORIO,v);}

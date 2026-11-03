@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { puedeAdministrar } from "@/lib/politica-acceso";
 import { obtenerAcceso, obtenerSesion } from "@/lib/acceso";
 
 const accesos = [
@@ -45,6 +46,7 @@ export default async function Home() {
       </div>
     </section>
   </main>;
+  const accesosVisibles = puedeAdministrar(acceso.rol) ? [accesos[0], {href:"/directorio",titulo:"Directorio",descripcion:"Establecimientos, JI/SC y sus directores y directoras."}, ...accesos.slice(1)] : accesos;
   return (
     <main>
       <header>
@@ -59,7 +61,7 @@ export default async function Home() {
         <h2 id="titulo-accesos">Accesos principales</h2>
 
         <div className="accesos-inicio">
-          {accesos.map((acceso) => (
+          {accesosVisibles.map((acceso) => (
             <Link
               key={acceso.href}
               href={acceso.href}
