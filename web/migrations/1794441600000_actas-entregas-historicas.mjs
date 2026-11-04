@@ -54,12 +54,18 @@ BEGIN
  PERFORM 1 FROM public.usuarios_acceso WHERE correo=p_actor AND activo AND rol IN ('administrador','administrador_gestion') FOR SHARE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Sin autorización' USING ERRCODE='42501';END IF;
  IF p_id IS NULL OR p_entrega IS NULL THEN RAISE EXCEPTION 'Fuente requerida' USING ERRCODE='22023';END IF;
- meta:=public.normalizar_metadata_acta(p_metadata,false);
  SELECT * INTO e FROM public.entregas_equipos WHERE id=p_entrega FOR SHARE;
  IF NOT FOUND THEN RAISE EXCEPTION 'Entrega no disponible' USING ERRCODE='P2702';END IF;
+ -- Los contactos originales se conservan aunque las reglas de ingreso actual
+ -- sean más estrictas. Esto no autoriza su uso como destino SMTP.
+ IF jsonb_typeof(p_metadata) IS DISTINCT FROM 'object' THEN RAISE EXCEPTION 'Datos inválidos' USING ERRCODE='22023';END IF;
+ meta:=public.normalizar_metadata_acta(CASE WHEN COALESCE(e.receptor_datos->>'correo','')<>'' THEN p_metadata||jsonb_build_object('recibeCorreo','') ELSE p_metadata END,false);
+ IF COALESCE(e.receptor_datos->>'correo','')<>'' THEN
+  IF jsonb_typeof(p_metadata->'recibeCorreo') IS DISTINCT FROM 'string' OR lower(btrim(p_metadata->>'recibeCorreo')) IS DISTINCT FROM lower(e.receptor_datos->>'correo') THEN RAISE EXCEPTION 'Conservar correo registrado' USING ERRCODE='22023';END IF;
+  meta:=meta||jsonb_build_object('recibeCorreo',e.receptor_datos->>'correo');
+ END IF;
  -- No reemplazar a la receptora original ni enriquecerla con el directorio actual.
  IF COALESCE(e.receptor_datos->>'rut','')<>'' AND meta->>'recibeRun' IS DISTINCT FROM upper(replace(e.receptor_datos->>'rut','.','')) THEN RAISE EXCEPTION 'Conservar RUN registrado' USING ERRCODE='22023';END IF;
- IF COALESCE(e.receptor_datos->>'correo','')<>'' AND meta->>'recibeCorreo' IS DISTINCT FROM lower(e.receptor_datos->>'correo') THEN RAISE EXCEPTION 'Conservar correo registrado' USING ERRCODE='22023';END IF;
  meta:=meta||jsonb_build_object('recibeCargo',e.receptor_cargo);
  SELECT * INTO a FROM public.actas_documentos WHERE id=p_id;
  IF FOUND THEN IF a.actor=p_actor AND a.entrega_id=p_entrega AND a.solicitud=meta THEN RETURN jsonb_build_object('id',a.id,'datos',a.datos,'completa',a.pdf IS NOT NULL);END IF;RAISE EXCEPTION 'Solicitud repetida con otros datos' USING ERRCODE='P2701';END IF;

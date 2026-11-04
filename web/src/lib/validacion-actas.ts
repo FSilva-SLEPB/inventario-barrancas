@@ -1,14 +1,15 @@
 import {normalizarRut} from '@/lib/validacion-directorio';
 export const CAMPOS_ACTA={entregaNombre:200,entregaRun:12,entregaCargo:200,entregaCorreo:254,recibeRun:12,recibeCargo:200,recibeCorreo:254,accesorios:500,observaciones:2000} as const;
 export type MetadataActa=Record<keyof typeof CAMPOS_ACTA,string>;
-export function metadatosActa(v:Record<string,unknown>,historica=false):MetadataActa{
- const r={} as MetadataActa;
+export function metadatosActa(v:Record<string,unknown>,historica=false,correoOriginal?:string):MetadataActa{
+ const r={} as MetadataActa,conservaCorreo=Boolean(historica&&correoOriginal&&typeof v.recibeCorreo==='string'&&v.recibeCorreo.trim().toLowerCase()===correoOriginal.toLowerCase());
  for(const[k,max]of Object.entries(CAMPOS_ACTA)){
+  if(k==='recibeCorreo'&&conservaCorreo){r.recibeCorreo=correoOriginal!;continue;}
   const x=v[k];if(typeof x!=='string'||x.length>max||/\p{Cc}/u.test(k==='observaciones'||k==='accesorios'?x.replace(/[\r\n\t]/g,''):x))throw new Error('Revisa los datos del acta.');r[k as keyof MetadataActa]=x.normalize('NFC').trim();
  }
  if(!historica&&!r.entregaNombre)throw new Error('Indica el nombre de quien entrega.');
  for(const k of ['entregaRun','recibeRun'] as const){if(historica&&!r[k])continue;r[k]=normalizarRut(r[k]);if(!r[k])throw new Error('Indica un RUN válido para quien entrega y quien recibe.');}
- for(const k of ['entregaCorreo','recibeCorreo'] as const)r[k]=r[k]?validarCorreoActa(r[k]):'';
+ for(const k of ['entregaCorreo','recibeCorreo'] as const){if(k==='recibeCorreo'&&conservaCorreo)continue;r[k]=r[k]?validarCorreoActa(r[k]):'';}
  return r;
 }
 export function validarCorreoActa(s:string){
