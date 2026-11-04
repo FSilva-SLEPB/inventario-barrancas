@@ -4,7 +4,7 @@ import {usePathname,useSearchParams} from 'next/navigation';
 import {validarAvisoExito} from '@/app/avisos/acciones';
 async function mostrarExito(titulo:string,texto:string){
  const {default:Swal}=await import('sweetalert2');
- await Swal.fire({icon:'success',title:titulo,text:texto,confirmButtonText:'Aceptar',heightAuto:false,buttonsStyling:false,customClass:{popup:'confirmacion-guardado',confirmButton:'btn btn-primary'},showClass:{popup:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'':'swal2-show'},hideClass:{popup:''}});
+ await Swal.fire({target:document.querySelector<HTMLElement>('dialog[open]')??document.body,icon:'success',title:titulo,text:texto,confirmButtonText:'Aceptar',heightAuto:false,buttonsStyling:false,customClass:{popup:'confirmacion-guardado',confirmButton:'btn btn-primary'},showClass:{popup:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'':'swal2-show'},hideClass:{popup:''}});
 }
 export function useResultadoGuardado(estado:{estado?:string;resultado?:string;mensaje:string}){
  const visto=useRef<unknown>(null);

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   serverExternalPackages: ['pdfkit','actas-smtp'],
-  outputFileTracingIncludes: {'/inventario/actas/**':['./src/app/fonts/*.otf']},
+  outputFileTracingIncludes: {'/inventario/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png']},
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [

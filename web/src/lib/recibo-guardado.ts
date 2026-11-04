@@ -2,8 +2,8 @@ import {createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 export const MENSAJES_EXITO={
  acta:{titulo:'Acta emitida',texto:'El folio y el PDF de esta versión quedaron guardados.'},
  correo:{titulo:'Correo enviado',texto:'El servidor de correo aceptó el envío con el PDF adjunto.'},
- devolucion:{titulo:'Devolución registrada',texto:'El bien quedó en Bodega TI para una nueva asignación.'},
- asignacion:{titulo:'Asignación registrada',texto:'El bien quedó asignado a la sede seleccionada.'},
+ devolucion:{titulo:'Devolución registrada',texto:'El bien quedó en Bodega TI y su acta está lista para imprimir o enviar.'},
+ asignacion:{titulo:'Asignación registrada',texto:'El bien quedó asignado y su acta está lista para imprimir o enviar.'},
  guardado:{titulo:'Cambios guardados',texto:'La actualización se realizó correctamente.'},
  contacto:{titulo:'Contacto actualizado',texto:'La actualización del contacto se realizó correctamente.'},
  entrega:{titulo:'Entrega registrada',texto:'Los datos de la entrega se guardaron correctamente.'},

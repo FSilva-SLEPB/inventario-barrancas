@@ -37,3 +37,10 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   usan destinatarios ficticios y transporte local aislado; las credenciales reales
   se configuran exclusivamente en CentOS. No confundir aceptación SMTP con lectura
   o entrega confirmada, ni reintentar automáticamente un resultado indeterminado.
+
+- Asignar/entregar y devolver se inician desde el bien en Inventario o Bodega TI.
+  Confirmar guarda movimiento y acta juntos; Movimientos y actas es consulta de
+  operaciones realizadas. Documentar un antecedente previo se inicia desde el bien.
+- Usar el contenido y estructura de los modelos Word enviados por Felipe (datos
+  de receptor, detalle de bienes, condiciones y firmas), junto con el logo oficial.
+  Mantener el estilo institucional aprobado y los PDFs ya emitidos conservados.

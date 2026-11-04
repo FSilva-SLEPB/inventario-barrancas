@@ -24,7 +24,7 @@ export default function SeleccionEntregas({ pagina }: {pagina:string}) {
     return()=>{document.removeEventListener('change',actualizar);document.removeEventListener('seleccion-entregas',actualizar);};
   },[pagina]);
   return <form id="seleccion-entregas" action="/inventario/movimientos/regularizar" method="get" className="seleccion-entregas-compacta">
-    <span role="status">{cantidad?`${cantidad} seleccionados`:'Marca los equipos entregados'}</span>
-    <button type="submit" className="btn btn-primary" disabled={!cantidad}>Marcar como entregados</button>
+    <span role="status">{cantidad?`${cantidad} seleccionados`:'Selecciona entregas anteriores'}</span>
+    <button type="submit" className="btn btn-primary" disabled={!cantidad}>Registrar entrega anterior</button>
   </form>;
 }

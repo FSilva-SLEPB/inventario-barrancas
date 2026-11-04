@@ -38,3 +38,12 @@ Las devoluciones/asignaciones se consultan en Movimientos y actas y en el histor
 ## Instalación
 
 Requiere aplicar la migración y reconstruir la imagen compilada. En CentOS se detiene el servicio web, se obtiene y verifica un respaldo, se actualiza `main`, se migra y se reconstruye con `compose.produccion.yaml` y el proyecto `inventario-barrancas`. Se inicia únicamente web con `--no-deps`, se comprueba `/api/salud` y se prueban las fichas. No usar el servidor `next dev` para esta instalación estable ni eliminar el volumen PostgreSQL. La guía [de despliegue](despliegue-produccion.md) detalla el procedimiento.
+
+## Acta y origen de la operación
+
+Asignar/entregar y devolver parten del bien en Inventario o Bodega TI, también
+como botones de su columna Acciones. Una confirmación guarda movimiento y acta
+juntos y vuelve a la consulta con el PDF abierto, listo para imprimir o enviar.
+Movimientos y actas consulta lo ya ejecutado. Las entregas anteriores pendientes
+de documentar se completan desde Actas del bien, sin repetir el movimiento.
+Consultar [Actas institucionales](actas-generacion-y-correo.md).
