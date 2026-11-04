@@ -5,6 +5,34 @@ El modelo es documentación técnica para administradores, fuera del menú opera
 
 ```mermaid
 erDiagram
+  actas_contador {
+    boolean id PK
+    bigint ultimo
+  }
+  actas_documentos {
+    uuid id PK
+    uuid movimiento_id FK
+    bigint folio
+    integer version
+    text actor
+    jsonb solicitud
+    jsonb datos
+    bytea pdf
+    text sha256
+    timestamp_with_time_zone emitido_en
+  }
+  actas_envios {
+    uuid id PK
+    uuid acta_id FK
+    text actor
+    text__ destinatarios
+    text estado
+    text remitente
+    uuid token
+    jsonb resultado
+    timestamp_with_time_zone creado_en
+    timestamp_with_time_zone terminado_en
+  }
   cargas_equipos {
     uuid id PK
     text actor
@@ -255,6 +283,8 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
+  movimientos_inventario ||--o| actas_documentos : "movimiento_id"
+  actas_documentos ||--o{ actas_envios : "acta_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
@@ -289,6 +319,9 @@ erDiagram
 
 | Tabla | Área | Uso en esta versión |
 | --- | --- | --- |
+| actas_contador | Actas | Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número. |
+| actas_documentos | Actas | Acta emitida con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
+| actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
@@ -319,6 +352,7 @@ erDiagram
 - Equipos: cada bien conserva su UUID, sede y categoría. Las cargas masivas se identifican en cargas_equipos.
 - Entregas: un lote agrupa entregas por sede; cada entrega tiene varios equipos en entregas_detalle.
 - Celulares: inventario dedicado con sede y un número móvil por equipo; celulares_historial conserva números anteriores, cambios de sede y vigencia. Dos por EE/JI es una referencia, no una restricción.
+- Actas: cada documento se vincula a un movimiento y conserva folio, datos y PDF con su SHA-256; actas_envios registra los intentos y resultados de correo. actas_contador mantiene la secuencia única desde 0.
 - Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las ubicaciones físicas de Bodega TI se definirán después.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.

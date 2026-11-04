@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
+  serverExternalPackages: ['pdfkit','actas-smtp'],
+  outputFileTracingIncludes: {'/inventario/actas/**':['./src/app/fonts/*.otf']},
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [

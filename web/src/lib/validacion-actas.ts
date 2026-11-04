@@ -1,0 +1,19 @@
+import {normalizarRut} from '@/lib/validacion-directorio';
+export const CAMPOS_ACTA={entregaNombre:200,entregaRun:12,entregaCargo:200,entregaCorreo:254,recibeRun:12,recibeCargo:200,recibeCorreo:254,accesorios:500,observaciones:2000} as const;
+export type MetadataActa=Record<keyof typeof CAMPOS_ACTA,string>;
+export function metadatosActa(v:Record<string,unknown>):MetadataActa{
+ const r={} as MetadataActa;
+ for(const[k,max]of Object.entries(CAMPOS_ACTA)){
+  const x=v[k];if(typeof x!=='string'||x.length>max||/\p{Cc}/u.test(k==='observaciones'||k==='accesorios'?x.replace(/[\r\n\t]/g,''):x))throw new Error('Revisa los datos del acta.');r[k as keyof MetadataActa]=x.normalize('NFC').trim();
+ }
+ if(!r.entregaNombre)throw new Error('Indica el nombre de quien entrega.');
+ for(const k of ['entregaRun','recibeRun'] as const){r[k]=normalizarRut(r[k]);if(!r[k])throw new Error('Indica un RUN válido para quien entrega y quien recibe.');}
+ for(const k of ['entregaCorreo','recibeCorreo'] as const)r[k]=r[k]?validarCorreoActa(r[k]):'';
+ return r;
+}
+export function validarCorreoActa(s:string){
+ const x=s.trim().toLowerCase();if(x.length>254||!/^[a-z0-9._%+!-]+@[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,63}$/.test(x)||/[\p{Cc}<>]/u.test(x)||x.includes('..'))throw new Error('Indica una dirección de correo válida, sin nombres ni cabeceras.');return x;
+}
+export function destinatariosActa(s:string){const a=s.split(',').map(validarCorreoActa);if(!a.length||a.length>5||new Set(a).size!==a.length)throw new Error('Indica hasta cinco correos distintos separados por comas.');return a;}
+export function folioActa(n:number|string){const v=String(n);if(!/^\d{1,12}$/.test(v))throw new Error('Folio inválido.');return 'ACT-'+v.padStart(6,'0');}
+export type DatosActa={schema:number;tipo:'asignacion'|'devolucion';fecha:string;emitidoEn:string;movimientoId:string;clase:'equipo'|'celular';origen:string;destino:string;sedeNombre:string;rbd:string;receptorNombre:string;actor:string;bienes:Array<Record<string,unknown>>;metadata:MetadataActa;folio:number;version:number};

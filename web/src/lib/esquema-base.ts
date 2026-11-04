@@ -1,5 +1,8 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ actas_contador:{modulo:'Actas',uso:'Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número.',fuentes:['migrations/1794355200000_actas-documentos-correo.mjs']},
+ actas_documentos:{modulo:'Actas',uso:'Acta emitida con folio, datos de la emisión y PDF conservado con su huella SHA-256.',fuentes:['src/lib/actas.ts','src/lib/pdf-actas.ts']},
+ actas_envios:{modulo:'Actas',uso:'Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia.',fuentes:['src/app/inventario/actas/acciones.ts','src/lib/correo-actas.ts']},
  movimientos_inventario:{modulo:'Movimientos',uso:'Devoluciones a Bodega TI y asignaciones de equipos y celulares, con fecha, receptor, idempotencia e instantáneas.',fuentes:['src/lib/inventario-bodega.ts','migrations/1794268800000_custodia-movimientos-inventario.mjs']},
  celulares:{modulo:'Celulares',uso:'Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia.',fuentes:['src/lib/celulares.ts','src/app/inventario/celulares/acciones.ts']},
  celulares_historial:{modulo:'Celulares',uso:'Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas.',fuentes:['src/lib/celulares.ts','migrations/1794182400000_inventario-celulares.mjs']},
