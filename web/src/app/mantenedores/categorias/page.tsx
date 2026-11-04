@@ -1,3 +1,5 @@
+import AccionesRegistro from '@/components/acciones-registro';
+import ModalFicha from '@/components/modal-ficha';
 import VentanaEdicion from '@/components/ventana-edicion';
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -17,7 +19,7 @@ export const runtime = "nodejs";
 export default async function Catalogos({
   searchParams,
 }: {
-  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
 }) {
   await connection();
   const acceso = await exigirAcceso();
@@ -29,8 +31,11 @@ export default async function Catalogos({
     (categoria) => categoria.id === parametros.editar,
   );
 
+  const consulta = typeof parametros.ver === 'string' ? categorias.find(x=>x.id===parametros.ver) : undefined;
+
   return (
     <main>
+{consulta&&<ModalFicha titulo="Ver registro" cerrarHref="/mantenedores/categorias" focoId={consulta.id}><dl className="ficha-datos"><dt>Nombre</dt><dd>{consulta.nombre}</dd><dt>Estado</dt><dd>{consulta.activo?'Activo':'Inactivo'}</dd></dl></ModalFicha>}
       <header>
         <p>SLEP Barrancas</p>
         <h1>Categorías de bienes</h1>
@@ -52,7 +57,7 @@ export default async function Catalogos({
               <tr>
                 <th scope="col">Nombre</th>
                 <th scope="col">Estado</th>
-                {edicionHabilitada && <th scope="col">Acciones</th>}
+                <th scope="col">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -60,16 +65,7 @@ export default async function Catalogos({
                 <tr key={categoria.id}>
                   <th scope="row">{categoria.nombre}</th>
                   <td>{categoria.activo ? "Activa" : "Inactiva"}</td>
-                  {edicionHabilitada && (
-                    <td>
-                      <Link
-                        href={"/mantenedores/categorias?editar=" + categoria.id}
-                        aria-label={"Editar categoría " + categoria.nombre}
-                      >
-                        Editar
-                      </Link>
-                    </td>
-                  )}
+                  <td><AccionesRegistro id={categoria.id} nombre={categoria.nombre} verHref={`/mantenedores/categorias?ver=${categoria.id}`} editarHref={edicionHabilitada?`/mantenedores/categorias?editar=${categoria.id}`:undefined}/></td>
                 </tr>
               ))}
             </tbody>

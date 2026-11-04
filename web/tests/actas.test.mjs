@@ -19,3 +19,7 @@ test('PDF real usa fuente institucional y pagina textos extensos sin mutar datos
 });
 const correo=await cargar('@/lib/correo-actas');await correo.evaluate();
 test('correo exige remitente institucional y configuración coherente',()=>{const f=correo.namespace.configuracionCorreoActas;assert.throws(()=>f({}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'persona@example.org'}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',ACTAS_SMTP_USUARIO:'uno'}));const x=f({ACTAS_SMTP_HOST:'smtp.example.org',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl'});assert.equal(x.port,587);assert.equal(x.secure,false);});
+
+test('entrega histórica admite desconocidos sin aceptar RUN falso ni alterar requisitos de movimientos',()=>{const vacios=Object.fromEntries(Object.keys(metadata).map(k=>[k,'']));assert.equal(metadatosActa(vacios,true).entregaNombre,'');assert.throws(()=>metadatosActa(vacios));assert.throws(()=>metadatosActa({...vacios,recibeRun:'12345678-9'},true));});
+
+test('contactos históricos aceptados se conservan sin habilitarlos como destinos SMTP',()=>{for(const correo of ["o'connor@example.org",'persona@ejemplo.cló']){const d={...metadata,recibeCorreo:correo};assert.equal(metadatosActa(d,true,correo).recibeCorreo,correo);assert.throws(()=>metadatosActa(d,true));assert.throws(()=>metadatosActa(d,true,'otra@example.org'));assert.throws(()=>destinatariosActa(correo));}});

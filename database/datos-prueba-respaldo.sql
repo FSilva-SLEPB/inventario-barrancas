@@ -92,4 +92,19 @@ BEGIN
 END;
 $acta_ci$;
 
+DO $acta_historica_ci$
+DECLARE bien uuid;entrega uuid;r jsonb;
+BEGIN
+ IF to_regprocedure('public.preparar_acta_entrega_acceso(text,uuid,uuid,jsonb)') IS NOT NULL THEN
+  INSERT INTO public.sedes(id,tipo,nombre,rbd) VALUES('a0000000-0000-4000-8000-000000000001','jardin_infantil','Jardín ficticio de recuperación','CI-HIST-001');
+  bien:=public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object('id','','sedeId','a0000000-0000-4000-8000-000000000001','categoriaId','30000000-0000-4000-8000-000000000001','marca','Marca ficticia','modelo','Histórico ficticio','serie','CI-HIST-SERIE','inventario','CI-HIST-INV','origen','compra_utic','condicionTecnica','sin_verificar'),0,'Alta histórica ficticia');
+  PERFORM public.regularizar_entregas_acceso('felipe.silva@slepb.gob.cl','b0000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('sedeId','a0000000-0000-4000-8000-000000000001','equipos',jsonb_build_array(jsonb_build_object('id',bien,'version',1)),'fecha','2026-10-26','receptora','Receptora histórica ficticia','enlaceActa','')));
+  SELECT id INTO entrega FROM public.entregas_equipos WHERE lote_id='b0000000-0000-4000-8000-000000000001';
+  r:=public.preparar_acta_entrega_acceso('felipe.silva@slepb.gob.cl','c0000000-0000-4000-8000-000000000001',entrega,jsonb_build_object('entregaNombre','','entregaRun','','entregaCargo','','entregaCorreo','','recibeRun','','recibeCargo','','recibeCorreo','','accesorios','','observaciones','Acta histórica ficticia para comprobar recuperación'));
+  -- PDF exclusivamente ficticio de la misma batería, sin servicios ni datos reales.
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','c0000000-0000-4000-8000-000000000001',(SELECT pdf FROM public.actas_documentos WHERE id='80000000-0000-4000-8000-000000000001'));
+ END IF;
+END;
+$acta_historica_ci$;
+
 COMMIT;

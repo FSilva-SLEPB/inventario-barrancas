@@ -20,6 +20,7 @@ erDiagram
     bytea pdf
     text sha256
     timestamp_with_time_zone emitido_en
+    uuid entrega_id FK
   }
   actas_envios {
     uuid id PK
@@ -283,7 +284,8 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
-  movimientos_inventario ||--o| actas_documentos : "movimiento_id"
+  entregas_equipos |o--o| actas_documentos : "entrega_id"
+  movimientos_inventario |o--o| actas_documentos : "movimiento_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
@@ -320,7 +322,7 @@ erDiagram
 | Tabla | Área | Uso en esta versión |
 | --- | --- | --- |
 | actas_contador | Actas | Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número. |
-| actas_documentos | Actas | Acta emitida con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
+| actas_documentos | Actas | Acta de movimiento o entrega histórica (una sola fuente), con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |

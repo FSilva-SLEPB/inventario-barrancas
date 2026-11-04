@@ -12,8 +12,11 @@ existentes, incluyendo equipos, celulares, Bodega TI, Robos y directorios.
   Los criterios específicos de cada consulta pueden variar; su interacción no.
 - Conservar filtros, tamaño de página y página al consultar, cancelar o guardar.
   Cambiar criterios inicia la primera página y limpia dependencias incompatibles.
-- En listados, una acción Ver ficha. Dentro de la ficha se edita. Guardar cierra
-  la edición y confirma el éxito; un error conserva los valores sin confirmar éxito.
+- Nuevo criterio indicado por Felipe y su jefatura: los listados usan columna
+  Acciones con botones Ver, Editar y acciones de documentos cuando correspondan.
+  Sustituye la regla anterior de una sola entrada Ver ficha. Reutilizar el mismo
+  componente de acciones y conservar permisos, filtros y navegación de modales.
+  Guardar cierra la edición y confirma éxito; los errores conservan los valores.
 - Asignación y devolución de equipos/celulares usan el mismo flujo de movimientos
   y el estado lógico En Bodega TI. Las ubicaciones físicas de bodegas se definirán
   después; no crear sedes, direcciones ni bodegas ficticias.

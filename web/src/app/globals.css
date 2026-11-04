@@ -130,12 +130,12 @@ p {
   margin: 0 0 1rem;
 }
 
-a, a:visited {
+:where(a:not(.btn):not(.boton-catalogos)) {
   color: var(--color-primario);
   text-underline-offset: 0.2em;
 }
 
-a:hover {
+:where(a:not(.btn):not(.boton-catalogos):hover) {
   color: var(--color-primario-hover);
 }
 

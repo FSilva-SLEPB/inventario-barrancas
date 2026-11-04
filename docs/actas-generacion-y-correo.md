@@ -62,3 +62,26 @@ Requiere `1794355200000_actas-documentos-correo` y reconstruir la imagen compila
 El respaldo incluye contador, documento con sus bytes/huella y registros de envío. La verificación de recuperación comprueba permisos, datos ficticios del PDF e historial. Las pruebas de correo usan únicamente un servidor local TLS y buzones ficticios, con casos de duplicación, rechazo parcial y conexión interrumpida. No se envían mensajes a personas reales desde el entorno de desarrollo.
 
 La dependencia de SMTP está fijada con el alias `actas-smtp` a Nodemailer 10.3.1. Esto permite utilizar la versión actualizada sin instalar el peer opcional antiguo de correo de NextAuth; la aplicación sigue utilizando el proveedor de Google para autenticación. No se fuerza una degradación de dependencias.
+
+## Entregas históricas y acciones (4/11/2026)
+
+En **Inventario → Movimientos y actas**, cada entrega histórica tiene **Ver** y
+**Preparar acta**. Esta última opción también aparece en el detalle de la entrega.
+Revisar los participantes y emitir el documento abre su PDF con Imprimir,
+Descargar PDF y Enviar por correo. La columna Acciones del listado de actas ofrece
+Ver acta e Imprimir; imprimir carga el mismo PDF conservado y ofrece Abrir PDF como
+alternativa para los navegadores que bloqueen la impresión del visor.
+
+El documento histórico conserva la fecha real de entrega, la receptora, la sede y
+todos los bienes de las instantáneas originales. Su fecha de emisión es actual y
+recibe el siguiente folio de la secuencia común. No crea un movimiento, ni cambia
+custodia, inventario o antecedentes del documento original. Los datos originales
+no informados pueden quedar vacíos y se identifican así en el PDF. Los RUN/correos
+que ya estaban registrados se muestran rellenos y no se sustituyen por el
+directorio actual. El enlace de un documento anterior sigue disponible.
+
+Migración: `1794441600000_actas-entregas-historicas`. Agrega `entrega_id` como fuente
+alternativa y exige exactamente una fuente por acta, única por movimiento/entrega.
+Preserva los PDFs, folios, envíos y funciones anteriores. Se mantienen los
+permisos exclusivos de UTIC para emitir, consultar y enviar actas. El envío real
+requiere configurar la cuenta institucional de no responder en CentOS.

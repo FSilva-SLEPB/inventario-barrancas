@@ -125,6 +125,9 @@ $verificar$;
 \if :validar_datos_ci
 DO $datos_ci$
 BEGIN
+  IF to_regprocedure('public.preparar_acta_entrega_acceso(text,uuid,uuid,jsonb)') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.actas_documentos a JOIN public.entregas_equipos e ON e.id=a.entrega_id JOIN public.entregas_detalle d ON d.entrega_id=e.id WHERE a.id='c0000000-0000-4000-8000-000000000001' AND a.movimiento_id IS NULL AND a.datos->>'tipo'='entrega_historica' AND a.datos->>'fecha'='2026-10-26' AND a.datos->>'receptorNombre'='Receptora histórica ficticia' AND a.datos->'metadata'->>'entregaRun'='' AND a.datos->'bienes'->0->>'serie'='CI-HIST-SERIE' AND e.receptor_nombre='Receptora histórica ficticia' AND d.despues->>'serie'='CI-HIST-SERIE' AND a.sha256=encode(sha256(a.pdf),'hex')) THEN RAISE EXCEPTION 'No se recuperaron la fuente histórica, los bienes originales y el PDF conservado';END IF;
+  END IF;
   IF to_regclass('public.actas_documentos') IS NOT NULL THEN
     IF NOT EXISTS(SELECT 1 FROM public.actas_documentos a JOIN public.actas_envios e ON e.acta_id=a.id
       WHERE a.id='80000000-0000-4000-8000-000000000001' AND a.movimiento_id='70000000-0000-4000-8000-000000000001'
