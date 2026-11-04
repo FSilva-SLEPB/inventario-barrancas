@@ -25,3 +25,12 @@ existentes, incluyendo equipos, celulares, Bodega TI, Robos y directorios.
 
 Consultar la guía actual en docs/homologacion-y-bodega-ti.md y las instrucciones
 específicas de web/AGENTS.md para desarrollar con la versión instalada de Next.js.
+
+- Todas las actas deben reutilizar las acciones de Imprimir, Descargar PDF y Enviar
+  por correo. Se conserva el PDF emitido: imprimir o reenviar no cambia su folio,
+  versión ni datos. La numeración acordada el 4/11/2026 comienza en 0 con una sola
+  secuencia, y el remitente será una cuenta institucional de no responder.
+- No enviar correos reales desde el entorno de desarrollo. Los ensayos de correo
+  usan destinatarios ficticios y transporte local aislado; las credenciales reales
+  se configuran exclusivamente en CentOS. No confundir aceptación SMTP con lectura
+  o entrega confirmada, ni reintentar automáticamente un resultado indeterminado.

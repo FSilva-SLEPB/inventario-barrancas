@@ -211,3 +211,7 @@ servidos desde la aplicación. Las interacciones se implementarán con React.
 ## Homologación y custodia compartida
 
 Filtros, resultados, fichas y confirmaciones siguen el mismo patrón en todos los módulos. Equipos y celulares comparten devolución a Bodega TI y asignación, confirmadas solo por UTIC. Las ubicaciones físicas se definirán después. Consultar [la guía de homologación y Bodega TI](docs/homologacion-y-bodega-ti.md).
+
+## Actas de asignación y devolución
+
+UTIC puede emitir actas desde movimientos confirmados, con numeración única desde 0, PDF conservado, impresión y envío desde correo institucional de no responder. El envío requiere configurar el transporte privado en CentOS. Ver [generación, impresión y correo de actas](docs/actas-generacion-y-correo.md).

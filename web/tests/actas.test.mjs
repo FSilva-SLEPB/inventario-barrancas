@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {createRequire} from 'node:module';
+import vm from 'node:vm';
+import ts from 'typescript';
+const require=createRequire(import.meta.url),cache=new Map();
+async function cargar(n){if(cache.has(n))return cache.get(n);let m;if(n==='server-only')m=new vm.SyntheticModule([],()=>{});else if(!n.startsWith('@/')){const obj=require(n),v={...obj,default:obj.default??obj};m=new vm.SyntheticModule(Object.keys(v),function(){for(const[k,x]of Object.entries(v))this.setExport(k,x);});}else{const texto=await readFile(new URL('../src/'+n.slice(2)+'.ts',import.meta.url),'utf8'),js=ts.transpileModule(texto,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;m=new vm.SourceTextModule(js);cache.set(n,m);await m.link(cargar);return m;}cache.set(n,m);return m;}
+const mod=await cargar('@/lib/validacion-actas');await mod.evaluate();const {metadatosActa,folioActa,validarCorreoActa,destinatariosActa}=mod.namespace;
+const metadata={entregaNombre:'Persona ficticia',entregaRun:'12.345.678-5',entregaCargo:'',entregaCorreo:'',recibeRun:'12345678-5',recibeCargo:'',recibeCorreo:'persona@example.org',accesorios:'Cargador',observaciones:'Una línea\nOtra línea'};
+test('folios desde cero, sin duplicación por tipo o año',()=>{assert.equal(folioActa(0),'ACT-000000');assert.equal(folioActa(12),'ACT-000012');assert.equal(folioActa(1000000),'ACT-1000000');for(const x of [-1,'x',Infinity])assert.throws(()=>folioActa(x));});
+test('participantes y RUN se validan y las observaciones se conservan',()=>{assert.equal(metadatosActa(metadata).entregaRun,'12345678-5');for(const c of [{entregaRun:''},{recibeRun:'12345678-9'},{entregaNombre:' '},{entregaCorreo:'Nombre <persona@example.org>'},{recibeCorreo:'x@example.org\r\nBcc:otra@example.org'},{observaciones:'x\u0000'}])assert.throws(()=>metadatosActa({...metadata,...c}));});
+test('correo explícito, sin cabeceras y hasta cinco destinatarios distintos',()=>{assert.deepEqual([...destinatariosActa('UNO@example.org, dos@example.org')],['uno@example.org','dos@example.org']);for(const x of ['', 'x@example.org,x@example.org','x@example.org\nBcc:x@example.org','Nombre <x@example.org>','a@b','a@example.org,b@example.org,c@example.org,d@example.org,e@example.org,f@example.org'])assert.throws(()=>destinatariosActa(x));assert.equal(validarCorreoActa('Persona@EXAMPLE.ORG'),'persona@example.org');});
+const pdfmod=await cargar('@/lib/pdf-actas');await pdfmod.evaluate();
+test('PDF real usa fuente institucional y pagina textos extensos sin mutar datos',async()=>{
+ process.chdir(new URL('..',import.meta.url).pathname);
+ const d={schema:1,tipo:'asignacion',fecha:'2026-11-04',emitidoEn:'2026-11-04T12:00:00Z',movimientoId:'11111111-1111-4111-8111-111111111111',clase:'celular',origen:'Bodega TI',destino:'Sede ficticia',sedeNombre:'Sede ficticia',rbd:'PRUEBA',receptorNombre:'María Ñandú de Ejemplo',actor:'persona@example.org',bienes:[{telefono:'+56900000001',marca:'Marca ficticia',modelo:'Modelo',inventario:'DEMO',imei:'',condicionTecnica:'sin_verificar'}],metadata:{...metadata,observaciones:'Observación: devolución y asignación. '.repeat(45)},folio:0,version:1};
+ const antes=JSON.stringify(d),pdf=await pdfmod.namespace.generarPdfActa(d);assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.ok(pdf.length>10000);assert.ok((pdf.toString('latin1').match(/\/Type \/Page\b/g)??[]).length>=2);assert.equal(JSON.stringify(d),antes);
+});
+const correo=await cargar('@/lib/correo-actas');await correo.evaluate();
+test('correo exige remitente institucional y configuración coherente',()=>{const f=correo.namespace.configuracionCorreoActas;assert.throws(()=>f({}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'persona@example.org'}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',ACTAS_SMTP_USUARIO:'uno'}));const x=f({ACTAS_SMTP_HOST:'smtp.example.org',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl'});assert.equal(x.port,587);assert.equal(x.secure,false);});
