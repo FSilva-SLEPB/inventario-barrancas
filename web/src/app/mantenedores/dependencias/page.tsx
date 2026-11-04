@@ -1,3 +1,5 @@
+import AccionesRegistro from '@/components/acciones-registro';
+import ModalFicha from '@/components/modal-ficha';
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["tabpanel", "region"] }] */
 // El contenedor de la tabla recibe foco para permitir su desplazamiento con teclado.
 import VentanaEdicion from '@/components/ventana-edicion';
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
 };
 
 export default async function Dependencias({ searchParams }: Propiedades) {
@@ -37,8 +39,11 @@ export default async function Dependencias({ searchParams }: Propiedades) {
   const seleccionada = id ? dependencias.find((dependencia) => dependencia.id === id) : undefined;
   const edicionInvalida = pideEdicion && !seleccionada;
 
+  const consulta = typeof parametros.ver === 'string' ? dependencias.find(x=>x.id===parametros.ver) : undefined;
+
   return (
     <main>
+{consulta&&<ModalFicha titulo="Ver registro" cerrarHref="/mantenedores/dependencias" focoId={consulta.id}><dl className="ficha-datos"><dt>Nombre</dt><dd>{consulta.nombre}</dd><dt>Estado</dt><dd>{consulta.activo?'Activo':'Inactivo'}</dd><dt>Sede</dt><dd>{consulta.sedeNombre}</dd><dt>RBD</dt><dd>{consulta.sedeRbd||'Sin informar'}</dd></dl></ModalFicha>}
       <header>
         <p>SLEP Barrancas</p>
         <h1>Dependencias</h1>
@@ -73,7 +78,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
                   <th scope="col">Dependencia</th>
                   <th scope="col">Sede</th>
                   <th scope="col">Estado</th>
-                  {puedeEditar && <th scope="col">Acciones</th>}
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -88,16 +93,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
                       </small>
                     </td>
                     <td>{dependencia.activo ? "Activa" : "Inactiva"}</td>
-                    {puedeEditar && (
-                      <td>
-                        <Link
-                          href={`/mantenedores/dependencias?editar=${dependencia.id}`}
-                          aria-label={`Editar dependencia ${dependencia.nombre} de ${etiquetaSede({ nombre: dependencia.sedeNombre, rbd: dependencia.sedeRbd })}`}
-                        >
-                          Editar
-                        </Link>
-                      </td>
-                    )}
+                    <td><AccionesRegistro id={dependencia.id} nombre={dependencia.nombre} verHref={`/mantenedores/dependencias?ver=${dependencia.id}`} editarHref={puedeEditar?`/mantenedores/dependencias?editar=${dependencia.id}`:undefined}/></td>
                   </tr>
                 ))}
               </tbody>

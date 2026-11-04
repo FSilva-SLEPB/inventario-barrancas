@@ -25,6 +25,7 @@ function iniciar(sufijo,extra={},publicar=false){
  for(const[k,v]of Object.entries(e))args.push('--env',k+'='+v);
  args.push(imagen);docker(args);creados.push(n);return n;
 }
+function retirar(n){docker(['stop','--time','5',n],true);docker(['rm',n],true);const i=creados.indexOf(n);if(i>=0)creados.splice(i,1);}
 async function esperar(url,estado){let ultima;for(let i=0;i<80;i++){try{ultima=await fetch(url,{signal:AbortSignal.timeout(3000)});if(ultima.status===estado)return ultima;}catch{}await new Promise(r=>setTimeout(r,200));}throw new Error('La imagen no alcanzó el estado HTTP esperado.');}
 async function comprobarFallo(contenedor){
  for(let i=0;i<60;i++){
@@ -42,10 +43,11 @@ try{
  const metadatos=docker(['exec',principal,'node','-e',"const fs=require('fs');const m=JSON.parse(fs.readFileSync('/app/.next/server/server-reference-manifest.json','utf8'));console.log(JSON.stringify({node:Object.fromEntries(Object.entries(m.node).map(([id,a])=>[id,{exportedName:a.exportedName,filename:a.filename}]))}))"]).stdout;
  const manifiesto=join(temporal,'acciones.json');await writeFile(manifiesto,metadatos,{mode:0o600});
  const entorno={...process.env,NEXTAUTH_URL:canonico,NEXTAUTH_SECRET:clave,GOOGLE_CLIENT_ID:'id-ficticio',GOOGLE_CLIENT_SECRET:'secreto-ficticio',ACCESO_HTTP_URL:origen,TEST_ACTION_MANIFEST:manifiesto};
- const archivos=['acceso','perfiles','equipos','entregas','directorio','directorio-completo','robos','experiencia','funcionarios','produccion','seguridad','directorios-separados','celulares','movimientos-inventario','actas'];
+ const archivos=['acceso','perfiles','equipos','entregas','directorio','directorio-completo','robos','experiencia','funcionarios','produccion','seguridad','directorios-separados','celulares','movimientos-inventario','actas','actas-historicas'];
  for(const a of archivos){const p=spawn(process.execPath,['tests/'+a+'-http.mjs'],{cwd:raiz+'web',env:entorno,stdio:'inherit'});const codigo=await new Promise(r=>p.once('exit',r));assert.equal(codigo,0,'Falló prueba de imagen: '+a);}
- const sinConfig=iniciar('-config',{NEXTAUTH_URL:'http://ejemplo-no-permitido.invalid'});await comprobarFallo(sinConfig);
- const malaConexion=new URL(conexion);malaConexion.password='clave-ficticia-incorrecta';const sinBase=iniciar('-base',{DATABASE_URL:malaConexion.toString()});await comprobarFallo(sinBase);
+ retirar(principal);
+ const sinConfig=iniciar('-config',{NEXTAUTH_URL:'http://ejemplo-no-permitido.invalid'});await comprobarFallo(sinConfig);retirar(sinConfig);
+ const malaConexion=new URL(conexion);malaConexion.password='clave-ficticia-incorrecta';const sinBase=iniciar('-base',{DATABASE_URL:malaConexion.toString()});await comprobarFallo(sinBase);retirar(sinBase);
  console.log('Imagen rechaza configuración y conexión incompletas con HTTP 503 sin publicar detalles. Ensayo de producción correcto.');
 }finally{
  for(const n of creados.reverse()){docker(['stop','--time','5',n],true);docker(['rm',n],true);}

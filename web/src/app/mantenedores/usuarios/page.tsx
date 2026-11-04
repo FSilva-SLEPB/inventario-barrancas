@@ -1,3 +1,5 @@
+import AccionesRegistro from '@/components/acciones-registro';
+import ModalFicha from '@/components/modal-ficha';
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["region"] }] */
 import VentanaEdicion from '@/components/ventana-edicion';
 import Link from "next/link";
@@ -12,17 +14,19 @@ import { etiquetaSede } from "@/lib/etiqueta-sede";
 export const metadata = { title: "Usuarios y perfiles | Inventario SLEP Barrancas" };
 
 export default async function Usuarios({ searchParams }: {
-  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
 }) {
   const actor = await exigirAdministrador();
   const usuarios = await listarUsuarios();
   const sedes = await listarSedes();
   const sistema = actor.rol === "administrador";
-  const { editar, guardado } = await searchParams;
+  const { editar, guardado, ver } = await searchParams;
   const seleccionado = typeof editar === "string" ? usuarios.find(u => u.correo === editar) : undefined;
+  const consulta = typeof ver === 'string' ? usuarios.find(u=>u.correo===ver) : undefined;
   const edicionInvalida = editar !== undefined && !seleccionado;
   const reservado = !sistema && seleccionado && perfilReservado(seleccionado.rol);
   return <main>
+{consulta&&<ModalFicha titulo="Ver registro" cerrarHref="/mantenedores/usuarios" focoId={consulta.correo}><dl className="ficha-datos"><dt>Nombre</dt><dd>{consulta.nombre||'Sin informar'}</dd><dt>Correo</dt><dd>{consulta.correo}</dd><dt>Perfil</dt><dd>{PERFILES[consulta.rol]}</dd><dt>Estado</dt><dd>{consulta.activo?'Activo':'Inactivo'}</dd></dl></ModalFicha>}
     <header><p>SLEP Barrancas</p><h1>Usuarios y perfiles</h1>
       <p className="descripcion-pagina">Autoriza cuentas institucionales y administra sus permisos de acceso.</p>
     </header>
@@ -42,8 +46,7 @@ export default async function Usuarios({ searchParams }: {
               {u.correo === actor.email && <small className="usuario-nombre">Tu cuenta</small>}</th>
             <td>{PERFILES[u.rol]}</td><td>{u.sedeId ? sede ? etiquetaSede(sede) : "Sede no disponible" : "Todos los ámbitos"}</td>
             <td>{u.activo ? "Activo" : "Inactivo"}</td>
-            <td>{sistema || !perfilReservado(u.rol) ? <Link href={`/mantenedores/usuarios?editar=${encodeURIComponent(u.correo)}`}
-              aria-label={`Editar acceso de ${u.correo}`}>Editar</Link> : "Reservado al administrador del sistema"}</td>
+            <td><AccionesRegistro id={u.correo} nombre={u.correo} verHref={`/mantenedores/usuarios?ver=${encodeURIComponent(u.correo)}`} editarHref={sistema||!perfilReservado(u.rol)?`/mantenedores/usuarios?editar=${encodeURIComponent(u.correo)}`:undefined}/>{!sistema&&perfilReservado(u.rol)&&<small>Edición reservada al administrador del sistema</small>}</td>
           </tr>; })}</tbody>
         </table>
       </div>

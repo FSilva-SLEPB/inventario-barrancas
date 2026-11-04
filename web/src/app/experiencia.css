@@ -104,14 +104,21 @@ table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child
 .estado-custodia.en_bodega{border-color:#edcf78;background:#fff5d0;color:#795600}
 .tabla-bodega{min-width:1160px;table-layout:auto}
 .tabla-bodega th:first-child{width:3.5rem}.tabla-bodega th:last-child{width:7rem}
-.tabla-bodega td:last-child a{display:inline-flex;white-space:nowrap;border:1px solid var(--borde,#cbdced);border-radius:.65rem;padding:.45rem .7rem;font-weight:700;text-decoration:none}
 .dato-identificador{white-space:nowrap;overflow-wrap:normal}.tabla-bodega .dato-secundario{display:block;margin-top:.25rem}
 html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-color:#fff}
 
-.resultados-inventario a[data-ficha-id]{display:inline-flex;align-items:center;justify-content:center;padding:.4rem .65rem;min-height:2.25rem;border:1px solid var(--color-borde-suave);border-radius:.625rem;background:var(--color-superficie);color:var(--color-primario);font-size:.875rem;font-weight:700;text-decoration:none;white-space:nowrap}
-.resultados-inventario a[data-ficha-id]:hover{background:var(--color-seleccion);border-color:var(--color-primario)}
 .tabla-celulares.tabla-datos{table-layout:auto;min-width:90rem}
 .tabla-celulares.tabla-datos td:nth-last-child(2){min-width:13rem}
 
 .visor-acta-pdf{width:100%;height:75vh;min-height:30rem;border:1px solid var(--color-borde-suave);border-radius:.75rem;background:var(--color-superficie-alterna)}
 .acciones-documento{flex-wrap:wrap}.comprobacion-envio{display:flex;gap:.6rem;align-items:flex-start;margin-block:1rem}.comprobacion-envio input{width:auto;flex:0 0 auto}
+/* Un mismo grupo de acciones en todos los listados; Bootstrap controla sus estados. */
+.acciones-registro{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;min-width:10rem}
+.acciones-registro .btn{white-space:nowrap;min-height:2.5rem;text-decoration:none}
+.tabla-directorio-separado th:last-child,.tabla-bodega th:last-child{width:11rem;min-width:11rem}
+.tabla-inventario-contenedor th:last-child,.tabla-inventario-contenedor td:last-child{min-width:11rem}
+
+.accion-imprimir{display:inline-flex;gap:.5rem;align-items:center;flex-wrap:wrap}.marco-impresion-acta{position:fixed;left:-10000px;top:0;width:800px;height:600px;border:0}.alternativa-impresion{font-size:.85rem;white-space:nowrap}
+.tabla-movimientos.tabla-datos{min-width:75rem;table-layout:auto;word-break:normal}
+.tabla-movimientos.tabla-datos td{overflow-wrap:normal;min-width:6.5rem}
+.tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:11rem}

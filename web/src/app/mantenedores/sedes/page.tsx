@@ -1,3 +1,5 @@
+import AccionesRegistro from '@/components/acciones-registro';
+import ModalFicha from '@/components/modal-ficha';
 /* eslint jsx-a11y/no-noninteractive-tabindex: ["error", { "roles": ["tabpanel", "region"] }] */
 // El contenedor de la tabla recibe foco para permitir su desplazamiento con teclado.
 import VentanaEdicion from '@/components/ventana-edicion';
@@ -11,7 +13,6 @@ import { exigirAcceso } from "@/lib/acceso";
 import { puedeAdministrar } from "@/lib/politica-acceso";
 import { esIdSede, TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./sedes.module.css";
-import { etiquetaSede } from "@/lib/etiqueta-sede";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
 };
 
 export default async function Sedes({ searchParams }: Propiedades) {
@@ -35,8 +36,11 @@ export default async function Sedes({ searchParams }: Propiedades) {
   const seleccionada = id ? sedes.find((sede) => sede.id === id) : undefined;
   const edicionInvalida = pideEdicion && !seleccionada;
 
+  const consulta = typeof parametros.ver === 'string' ? sedes.find(x=>x.id===parametros.ver) : undefined;
+
   return (
     <main>
+{consulta&&<ModalFicha titulo="Ver registro" cerrarHref="/mantenedores/sedes" focoId={consulta.id}><dl className="ficha-datos"><dt>Nombre</dt><dd>{consulta.nombre}</dd><dt>Estado</dt><dd>{consulta.activo?'Activo':'Inactivo'}</dd><dt>RBD</dt><dd>{consulta.rbd||'Sin informar'}</dd><dt>Tipo</dt><dd>{TIPOS_SEDE[consulta.tipo]}</dd><dt>Dirección</dt><dd>{consulta.direccion||'Sin informar'}</dd><dt>Comuna</dt><dd>{consulta.comuna||'Sin informar'}</dd></dl></ModalFicha>}
       <header>
         <p>SLEP Barrancas</p>
         <h1>Sedes</h1>
@@ -73,7 +77,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
                   <th scope="col">Tipo</th>
                   <th scope="col">Dirección</th>
                   <th scope="col">Comuna</th>
-                  {puedeEditar && <th scope="col">Acciones</th>}
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -84,16 +88,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
                     <td>{TIPOS_SEDE[sede.tipo]}</td>
                     <td>{sede.direccion ?? "—"}</td>
                     <td>{sede.comuna ?? "—"}</td>
-                    {puedeEditar && (
-                      <td>
-                        <Link
-                          href={`/mantenedores/sedes?editar=${sede.id}`}
-                          aria-label={`Editar sede ${etiquetaSede(sede)}`}
-                        >
-                          Editar
-                        </Link>
-                      </td>
-                    )}
+                    <td><AccionesRegistro id={sede.id} nombre={sede.nombre} verHref={`/mantenedores/sedes?ver=${sede.id}`} editarHref={puedeEditar?`/mantenedores/sedes?editar=${sede.id}`:undefined}/></td>
                   </tr>
                 ))}
               </tbody>

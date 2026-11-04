@@ -7,7 +7,7 @@ Regla permanente acordada con Felipe: **un mismo proceso debe verse y funcionar 
 - `PanelFiltros` presenta los criterios específicos, Búsqueda general, Buscar y Limpiar. Cambiar criterios vuelve a la primera página; cambiar Tipo limpia Sede y RBD incompatibles.
 - `FiltrosInventario` reutiliza ese panel y los mismos selectores para Nivel Central, P02, Celulares y Bodega TI. Sede y RBD se habilitan al elegir Tipo; Nivel Central no usa RBD.
 - `PanelResultados` reúne recuento, Mostrar 50/100/150 y paginación. También se utiliza en Directorio, Funcionarios y Robos.
-- Cada fila tiene una acción Ver ficha. Editar se ofrece dentro de la ventana de ficha. Cancelar conserva la consulta. Guardar cierra la edición y confirma el éxito con el aviso compartido; un error conserva los valores y no anuncia éxito.
+- Cada listado tiene columna **Acciones**, con los botones **Ver** y **Editar** según permisos. Documentos: **Ver acta** e **Imprimir**; un acta emitida conserva su PDF y no se edita. Este criterio sustituye la regla anterior de editar solo después de ver la ficha. Cancelar conserva la consulta. Guardar cierra la edición y confirma el éxito con el aviso compartido; un error conserva los valores y no anuncia éxito.
 - Se amplían estos componentes cuando aparece una necesidad nueva. No se crea otra variante de filtros, botones o confirmaciones para el mismo proceso.
 
 ## Custodia común
