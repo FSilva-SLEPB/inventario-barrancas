@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {randomUUID,createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import pg from 'pg';
+import {readdir,readFile} from 'node:fs/promises';
+import {join} from 'node:path';
 const {encode}=createRequire(import.meta.url)('next-auth/jwt'),origen=process.env.ACCESO_HTTP_URL;
 assert.ok(origen&&process.env.TEST_ADMIN_DATABASE_URL&&process.env.DATABASE_URL);
 const db=new pg.Client({connectionString:process.env.TEST_ADMIN_DATABASE_URL}),app=new pg.Client({connectionString:process.env.DATABASE_URL}),sufijo=randomUUID(),sedes=[randomUUID(),randomUUID()],cat=randomUUID(),lote=randomUUID(),equipos=[],actas=[];
@@ -10,7 +12,7 @@ const correos={admin:'historica-admin-'+sufijo+'@slepb.gob.cl',consulta:'histori
 const cookie=async correo=>'next-auth.session-token='+await encode({secret:process.env.NEXTAUTH_SECRET,token:{sub:'ficticio',correoInstitucional:correo},maxAge:600});
 const pedir=(ruta,c)=>fetch(origen+ruta,{headers:{Cookie:c},redirect:'manual'}),post=(ruta,f,c)=>fetch(origen+ruta,{method:'POST',redirect:'manual',headers:{Cookie:c,Origin:new URL(origen).origin},body:f});
 const dec=s=>s.replaceAll('&quot;','"').replaceAll('&#x27;',"'").replaceAll('&amp;','&');
-function form(html){const bloque=[...html.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/g)].map(m=>m[0]).find(x=>x.includes('class="formulario-acta"'));assert.ok(bloque);const f=new FormData();for(const[t]of bloque.matchAll(/<input\b[^>]*>/g)){const n=/\bname="([^"]+)"/.exec(t)?.[1];if(n)f.append(dec(n),dec(/\bvalue="([^"]*)"/.exec(t)?.[1]??''));}for(const[,n,t]of bloque.matchAll(/<textarea\b[^>]*name="([^"]+)"[^>]*>([\s\S]*?)<\/textarea>/g))f.append(n,dec(t));return f;}
+function form(html,clase="formulario-acta"){const bloque=[...html.matchAll(/<form\b[^>]*>[\s\S]*?<\/form>/g)].map(m=>m[0]).find(x=>x.includes('class="'+clase+'"'));assert.ok(bloque);const f=new FormData();for(const[t]of bloque.matchAll(/<input\b[^>]*>/g)){const n=/\bname="([^"]+)"/.exec(t)?.[1];if(n)f.append(dec(n),dec(/\bvalue="([^"]*)"/.exec(t)?.[1]??''));}for(const[,n,t]of bloque.matchAll(/<textarea\b[^>]*name="([^"]+)"[^>]*>([\s\S]*?)<\/textarea>/g))f.append(n,dec(t));return f;}
 const vacios=Object.fromEntries(['entregaNombre','entregaRun','entregaCargo','entregaCorreo','recibeRun','recibeCargo','recibeCorreo','accesorios','observaciones'].map(k=>[k,'']));
 const preparar=(actor,id,entrega,meta=vacios,cliente=app)=>cliente.query('SELECT public.preparar_acta_entrega_acceso($1,$2,$3,$4::jsonb) AS r',[actor,id,entrega,JSON.stringify(meta)]);
 let pruebas=0;
@@ -36,6 +38,12 @@ try{
  assert.equal(await estado(),antes);assert.equal((await db.query('SELECT count(*) FROM public.movimientos_inventario')).rows[0].count,movAntes);assert.equal((await db.query('SELECT receptor_nombre FROM public.entregas_equipos WHERE id=$1',[fuente.id])).rows[0].receptor_nombre,'Receptora original 0');pruebas++;
  assert.equal((await post(ruta,f,ca)).status,303);assert.equal((await preparar(correos.admin,id,fuente.id)).rows[0].r.completa,true);await assert.rejects(preparar(correos.admin,randomUUID(),fuente.id),e=>e.code==='P2701');pruebas++;
  assert.equal((await pedir(ruta,ca)).headers.get('location'),'/inventario/actas/'+id);const emitidas=await(await pedir('/inventario/actas?q=Receptora',ca)).text();assert.ok(emitidas.includes('Ver acta'));assert.ok(emitidas.includes('Imprimir'));assert.ok(!emitidas.includes('>Editar</a>'));pruebas++;
+ if(process.env.ACTAS_TEST_MAIL_DIR){
+  const correoRuta='/inventario/actas/'+id+'?correo=si',fCorreo=form(await(await pedir(correoRuta,ca)).text(),'formulario-correo-acta');fCorreo.set('destinatarios','persona@example.org');assert.equal((await post(correoRuta,fCorreo,ca)).status,303);
+  const mensajes=await Promise.all((await readdir(process.env.ACTAS_TEST_MAIL_DIR)).filter(n=>n.endsWith('.eml')).map(n=>readFile(join(process.env.ACTAS_TEST_MAIL_DIR,n),'utf8'))),eml=mensajes.find(s=>s.includes('<acta-'+fCorreo.get('solicitud')+'@'));assert.ok(eml);
+  const asunto=/^Subject: (.*(?:\r?\n[ \t].*)*)/m.exec(eml)?.[1].replace(/\r?\n[ \t]+/g,'').replace(/=\?UTF-8\?([BQ])\?([^?]+)\?=/gi,(_,cod,t)=>cod.toUpperCase()==='B'?Buffer.from(t,'base64').toString('utf8'):Buffer.from(t.replace(/_/g,' ').replace(/=([0-9A-F]{2})/gi,(_,h)=>String.fromCharCode(parseInt(h,16))),'latin1').toString('utf8'));assert.ok(asunto?.includes('Acta de entrega histórica'),asunto);
+  const adjunto=/Content-Type: application\/pdf[\s\S]*?Content-Transfer-Encoding: base64[\s\S]*?\r\n\r\n([A-Za-z0-9+/=\r\n]+)\r\n--/.exec(eml);assert.ok(adjunto);assert.deepEqual(Buffer.from(adjunto[1].replace(/\s/g,''),'base64'),pdf);pruebas++;
+ }
  // Cambios en el directorio y en equipos actuales no reescriben el acta.
  await db.query('UPDATE public.sedes SET nombre=$2 WHERE id=$1',[sedes[0],'Nombre posterior ficticio']);await db.query('UPDATE public.equipos SET modelo=$2 WHERE id=$1',[equipos[0],'Modelo posterior']);assert.deepEqual(Buffer.from(await(await pedir('/inventario/actas/'+id+'/pdf',ca)).arrayBuffer()),pdf);assert.equal((await db.query('SELECT datos FROM public.actas_documentos WHERE id=$1',[id])).rows[0].datos.sedeNombre,a.datos.sedeNombre);pruebas++;
  const conDatos=entregas[1],formConDatos=form(await(await pedir('/inventario/actas?entrega='+conDatos.id,ca)).text());assert.equal(formConDatos.get('recibeRun'),'12345678-5');assert.equal(formConDatos.get('recibeCorreo'),"o'connor@example.org");await assert.rejects(preparar(correos.admin,randomUUID(),conDatos.id,{...vacios,recibeRun:'',recibeCorreo:"o'connor@example.org"}),e=>e.code==='22023');pruebas++;
