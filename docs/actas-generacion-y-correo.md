@@ -121,3 +121,7 @@ La devolución propone como persona que entrega a quien recibió en la asignaci�
 registrada, y como receptor en UTIC a quien opera el sistema. El motivo puede quedar
 vacío en el movimiento. El historial registra automáticamente el tipo de operación
 cuando no se escribió un motivo; no se inventa una justificación personal.
+
+Al revisar formularios con datos ausentes, escribir con teclado carácter a carácter
+en nombre, RUN o correo y comprobar que el campo siga editable. Escribir en un campo
+vacío activa el lápiz de su grupo; no debe bloquearse después de la primera letra.
