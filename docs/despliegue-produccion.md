@@ -128,3 +128,12 @@ La revisión de directorios añade `1794096000000_directorios-separados` a la
 secuencia de instalación. La salud ahora requiere sus columnas y operación SQL;
 no iniciar una imagen de esta revisión sobre una base que solo tenga diez
 migraciones. Consultar [Directorios separados](directorios-separados.md).
+
+## Revisión después de instalar
+
+`verificar-produccion.py` comprueba la configuración prevista. La nueva revisión
+`scripts/revisar-instalacion.py` comprueba también la ejecución efectiva, la
+revisión de la imagen, puertos, volumen, permisos y el modo de correo. Es de
+solo lectura y conserva pendientes manuales; véase
+[revisión de instalación](revision-instalacion.md). No usarla como healthcheck
+ni encadenarla automáticamente con un despliegue.

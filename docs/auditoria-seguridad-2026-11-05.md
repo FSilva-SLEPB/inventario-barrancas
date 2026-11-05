@@ -73,3 +73,35 @@ de implementación corregidos, no incidentes demostrados en producción.
 No se habilita correo de producción general ni se modifica la instalación desde
 este entorno. El corte debe acompañarse del resultado de CI del commit del PR y
 de la evidencia de instalación cuando se ejecute en CentOS.
+
+## Seguimiento después de instalar el PR #51
+
+Felipe mostró la aplicación de `1794700800000_prestamos-inventario` y confirmó
+que la web compilada funciona. El último respaldo previo mostrado y restaurado
+correctamente fue `inventario_20261105T213908Z_suy5OBOJ`. Esta confirmación no
+equivale a inspección directa del host por el agente.
+
+El seguimiento sustituye minimatch de las ramas vulnerables por 11.0.4 en el
+árbol de desarrollo, manteniendo minimatch 3 para sus consumidores anteriores.
+El lockfile solo cambia la versión afectada y su ubicación por deduplicación.
+La excepción cruza la versión mayor de una dependencia transitiva; se comprobó
+con Node 24, instalación reproducible, 125 pruebas unitarias, ESLint y compilación.
+La nueva consulta completa de `npm audit` informó **0 avisos**, frente a los diez
+paquetes afectados en el corte anterior. Los resultados son de momentos distintos;
+no se reescribe la evidencia inicial ni se certifica ausencia de vulnerabilidades.
+
+También se prepara una [revisión de instalación efectiva](revision-instalacion.md)
+de solo lectura. Sus 48 escenarios simulados comprueban aislamiento, revisión,
+puertos, volumen, correo restringido y ausencia de secretos en la salida, incluidos
+los errores de comandos. Se incorpora a CI; no ha sido ejecutada en CentOS.
+La revisión separada de QA encontró un falso resultado favorable en el diagnóstico:
+el comando esperado podía coexistir con un punto de entrada/directorio distinto
+o variables adicionales de carga de código. Se corrigió antes de publicar y se
+añadieron casos para esas variantes, claves duplicadas y TLS desactivado. Las pruebas
+son simuladas; no constituyen ejecución independiente sobre CentOS.
+
+Felipe indicó que el servicio de correo aún no está definido; la dirección exacta
+del remitente tampoco fue indicada. El ensayo institucional continúa pendiente,
+con único destino autorizado `correoprueba@slepb.gob.cl`. HTTPS/OAuth real, seguridad
+del host, recuperación programada y los riesgos de identidad/lectura SQL amplia
+mantienen su alcance pendiente.

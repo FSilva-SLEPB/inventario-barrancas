@@ -59,7 +59,7 @@ jobs:
         run: npm ci
 
       - name: Revisar vulnerabilidades conocidas
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=moderate
 
       - name: Revisar dependencias de migraciones
         working-directory: migraciones
@@ -95,6 +95,9 @@ jobs:
 
       - name: Probar configuración de producción sin secretos reales
         run: python3 ../tests/produccion/probar-configuracion.py
+
+      - name: Probar revisión de instalación sin servicios ni secretos reales
+        run: python3 ../tests/produccion/probar-instalacion.py
 
       - name: Revisar código
         run: npm run lint

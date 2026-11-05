@@ -413,3 +413,11 @@ Ver [préstamos](prestamos-inventario.md), [auditoría del corte](auditoria-segu
 y [material para jefatura](informe-avance-2026-11-05.md). El correo real de ensayo
 se configura solo en CentOS para `correoprueba@slepb.gob.cl`; los ensayos locales
 usan SMTP aislado y direcciones ficticias.
+
+### Seguimiento de instalación y seguridad del PR #51
+
+Felipe confirmó la migración de préstamos y la web compilada funcionando en
+CentOS. Se continúa con la corrección del aviso de desarrollo de minimatch y
+una revisión de instalación efectiva de solo lectura. El servicio de correo y
+el remitente exacto siguen pendientes de definición; no se habilitan destinos
+reales de establecimientos. Ver [revisión operativa](revision-instalacion.md).
