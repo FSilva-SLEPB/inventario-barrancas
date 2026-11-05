@@ -1,3 +1,4 @@
+import DocumentosBien from '@/components/actas/documentos-bien';
 import {AccionesCustodia} from '@/components/ventana-movimiento';
 import {CUSTODIAS} from '@/lib/validacion-movimientos-inventario';
 import ModalFicha from '@/components/modal-ficha';
@@ -29,7 +30,7 @@ export default async function FichaEquipo({id,editar=false,guardado=false,contex
   const verHref=contexto?.verHref??`/inventario/${id}`;
   const volver=contexto?.volver??`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.custodia==='en_bodega'?'pendientes':'inventario'}`;
   const formulario=<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link scroll={false} href={verHref}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)} volver={contexto?.volver}/></div></section>;
-  return <Contenedor className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Ficha e historial</p><Titulo>{e.categoriaNombre} · {e.marca} {e.modelo}</Titulo><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
+  return <Contenedor className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Registro e historial</p><Titulo>{e.categoriaNombre} · {e.marca} {e.modelo}</Titulo><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
     <div className="acciones-catalogos">{!editando&&<AccionesCustodia tipo="equipo" id={id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/>}
     {editable&&!editando&&<Link data-editar-ficha scroll={false} className="btn btn-outline-primary" href={contexto?.editarHref??`/inventario/${id}?editar=si`} aria-label="Editar información del equipo">✎ Editar información</Link>}
       <Link scroll={false} href={contexto?.volver??`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.custodia==='en_bodega'?'pendientes':'inventario'}`}>{contexto?'Cerrar registro':'Volver al inventario'}</Link></div></header>
@@ -43,6 +44,7 @@ export default async function FichaEquipo({id,editar=false,guardado=false,contex
       {compra.length>0&&<section className="ficha-seccion ficha-adquisicion"><h2>Adquisición</h2><dl className="ficha-datos">{compra.map(([k,label])=>dato(label,e.compra[k as keyof typeof CAMPOS_COMPRA]))}</dl></section>}
       {(e.observaciones||e.archivoOrigen)&&<section className="ficha-seccion"><h2>Antecedentes</h2>{e.observaciones&&<p>{e.observaciones}</p>}{e.archivoOrigen&&<p>Archivo de origen: {e.archivoOrigen} · fila {e.filaOrigen}.</p>}</section>}
     </div>}
+    {!editando&&puedeAdministrar(actor.rol)&&<DocumentosBien tipo="equipo" id={id} volver={volver}/>}
     {robos.length>0&&<section className="ficha-seccion"><h2>Incidentes de robo</h2><ul>{robos.map(r=><li key={r.id}>{r.fecha.split('-').reverse().join('/')} · {ESTADOS_ROBO[(r.recuperadoFecha?'recuperado':r.estado) as keyof typeof ESTADOS_ROBO]} {puedeGestionarDependencias(actor.rol)&&<Link href={'/inventario/robos/'+r.id}>Ver incidente</Link>}</li>)}</ul></section>}
     <SeccionHistorial id="historial" className="historial-equipo">{contexto?<summary>Historial del equipo</summary>:<h2>Historial del equipo</h2>}<p className="ayuda-catalogos">Registro de ingresos, entregas y actualizaciones, con fecha y responsable. Las ediciones conservan el valor anterior y el nuevo.</p>
       <ol className="linea-historial">{historial.map((h,i)=>{

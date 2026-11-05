@@ -1,5 +1,6 @@
+import VentanaActaEmitida from '@/components/actas/ventana-acta-emitida';
 import AccionesRegistro from '@/components/acciones-registro';
-import VentanaMovimiento from '@/components/ventana-movimiento';
+import VentanaMovimiento,{AccionesCustodia} from '@/components/ventana-movimiento';
 import Link from "next/link";
 import PanelResultados from '@/components/panel-resultados';
 import {notFound} from 'next/navigation';
@@ -85,7 +86,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           <td><span className={`estado-custodia ${e.custodia}`}>{CUSTODIAS[e.custodia as keyof typeof CUSTODIAS]??(e.situacion==='pendiente_entrega'?CUSTODIAS.en_bodega:CUSTODIAS.asignado)}</span>{e.situacion==='recibido_historico'&&<small>Recibido (histórico)</small>}
             {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}/>
+          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}><AccionesCustodia tipo="equipo" id={e.id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/></AccionesRegistro>
           </td>
         </tr>)}
           {!equipos.length && <tr><td colSpan={bodega ? 9 : ambito === "eeji" ? 8 : 6} className={styles.vacio}>No hay equipos que coincidan con los filtros seleccionados.</td></tr>}
@@ -93,7 +94,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
       </table>
     </div>
     </PanelResultados>
-    <VentanaMovimiento parametros={p} volver={volver}/>
+    <VentanaMovimiento parametros={p} volver={volver}/><VentanaActaEmitida parametros={p} volver={volver}/>
     {seleccionado&&<ModalFicha titulo={editando?'Editar equipo':'Registro del equipo'} cerrarHref={volver} editando={editando} focoId={seleccionado}>
       <FichaEquipo equipo={equipoSeleccionado??undefined} id={seleccionado} editar={editando} contexto={{volver,ambito,vista,verHref:enlaceFichaInventario(volver,'ver',seleccionado),editarHref:enlaceFichaInventario(volver,'editar',seleccionado)}}/>
     </ModalFicha>}

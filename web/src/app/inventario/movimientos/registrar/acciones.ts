@@ -5,11 +5,26 @@ import {redirect} from 'next/navigation';
 import {exigirAdministrador} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {validarMovimiento,retornoMovimiento} from '@/lib/validacion-movimientos-inventario';
+import {CAMPOS_ACTA,metadatosActa,type MetadataActa} from '@/lib/validacion-actas';
+import {completarActaEnTransaccion} from '@/lib/actas';
+import {esIdSede} from '@/lib/validacion-sedes';
 import {destinoConExito} from '@/lib/aviso-exito';
 export type EstadoMovimiento={estado:'inicial'|'error';mensaje:string;valores:Record<string,string>;revision?:string};
 export async function registrarMovimiento(_anterior:EstadoMovimiento,f:FormData):Promise<EstadoMovimiento>{
- const actor=await exigirAdministrador(),valores:Record<string,string>={};for(const k of ['destino','fecha','receptor','motivo']){const v=f.get(k);valores[k]=typeof v==='string'?v.slice(0,2000):'';}
- let preparado:ReturnType<typeof validarMovimiento>;try{preparado=validarMovimiento(f);if(!retornoMovimiento(preparado.volver))throw new Error('El regreso a la consulta no es válido.');}catch(e){return {estado:'error',revision:randomUUID(),mensaje:e instanceof Error?e.message:'Revisa el movimiento.',valores};}
- try{await obtenerBaseDatos().query('SELECT public.mover_bien_acceso($1,$2::uuid,$3::jsonb)',[actor.email,preparado.solicitud,JSON.stringify(preparado.datos)]);}catch(e){const c=(e as {code?:string}).code,m:Record<string,string>={P2601:'El bien cambió o la solicitud ya fue utilizada. Recarga la ficha antes de confirmar.',P2602:'El estado del bien no permite este movimiento. Solo se asigna desde Bodega TI y solo se devuelve un bien asignado.',P2604:'El bien o la sede ya no están disponibles.',P2605:'El equipo tiene un incidente de robo abierto. Revisa su recuperación antes de moverlo.',"42501":'Solo UTIC puede confirmar movimientos.',"22023":'Revisa los datos y la fecha: no puede ser anterior al último movimiento.'};return {estado:'error',revision:randomUUID(),mensaje:m[c??'']??'No se pudo registrar el movimiento. No se guardaron cambios parciales.',valores};}
- revalidatePath('/inventario','layout');redirect(destinoConExito(retornoMovimiento(preparado.volver)!,preparado.datos.accion==='devolucion'?'devolucion':'asignacion'));
+ const actor=await exigirAdministrador(),valores:Record<string,string>={},camposMovimiento=['solicitud','tipo','bienId','accion','destino','fecha','receptor','motivo','version','volver'],campos=[...camposMovimiento,'actaSolicitud',...Object.keys(CAMPOS_ACTA)];
+ for(const k of ['destino','fecha','receptor','motivo',...Object.keys(CAMPOS_ACTA)]){const v=f.get(k);valores[k]=typeof v==='string'?v.slice(0,2500):'';}
+ const error=(mensaje:string):EstadoMovimiento=>({estado:'error',revision:randomUUID(),mensaje,valores});let preparado:ReturnType<typeof validarMovimiento>,metadata:MetadataActa;const documento=f.get('actaSolicitud');
+ try{
+  if(campos.some(k=>f.getAll(k).length!==1||typeof f.get(k)!=='string')||[...f.keys()].some(k=>!campos.includes(k)&&!k.startsWith('$ACTION'))||typeof documento!=='string'||!esIdSede(documento))throw new Error('Formulario inválido. Vuelve a abrir la operación desde el bien.');
+  const soloMovimiento=new FormData();for(const k of camposMovimiento)soloMovimiento.set(k,f.get(k)!);preparado=validarMovimiento(soloMovimiento);
+  if(!retornoMovimiento(preparado.volver))throw new Error('Inicia la operación desde Inventario o Bodega TI.');metadata=metadatosActa(valores);
+ }catch(e){return error(e instanceof Error?e.message:'Revisa los datos de la operación y del acta.');}
+ let db:import('pg').PoolClient|undefined;
+ try{db=await obtenerBaseDatos().connect();
+  await db.query('BEGIN');await db.query('SELECT public.mover_bien_acceso($1,$2::uuid,$3::jsonb)',[actor.email,preparado.solicitud,JSON.stringify(preparado.datos)]);
+  await completarActaEnTransaccion(db,actor.email,documento as string,preparado.solicitud,metadata);await db.query('COMMIT');
+ }catch(e){if(db)await db.query('ROLLBACK').catch(()=>{});const c=(e as {code?:string}).code,m:Record<string,string>={P2601:'El bien cambió o la solicitud ya fue utilizada. Recarga el registro antes de confirmar.',P2602:'Solo se asigna desde Bodega TI y solo se devuelve un bien asignado.',P2604:'El bien o la sede ya no están disponibles.',P2605:'El equipo tiene un incidente de robo abierto. Revisa su recuperación antes de moverlo.',P2701:'La solicitud del acta ya fue utilizada con otros datos. Revisa el registro.',"42501":'Solo UTIC puede confirmar operaciones.',"22023":'Revisa los datos, participantes y fecha de la operación.'};return error(m[c??'']??'No se pudo completar la operación y su acta. No se guardaron cambios parciales.');
+ }finally{db?.release();}
+ revalidatePath('/inventario','layout');const destino=new URL(retornoMovimiento(preparado.volver)!,'http://inventario.local');destino.searchParams.set('acta',documento as string);
+ redirect(destinoConExito(destino.pathname+destino.search,preparado.datos.accion==='devolucion'?'devolucion':'asignacion'));
 }

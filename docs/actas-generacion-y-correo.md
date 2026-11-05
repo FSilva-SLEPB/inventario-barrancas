@@ -1,87 +1,94 @@
-# Actas: generación, impresión y correo
+# Actas institucionales, impresión y correo
 
-## Alcance de la primera integración
+## Recorrido de uso
 
-Desde **Inventario → Movimientos y actas**, UTIC puede preparar un acta para una asignación o devolución confirmada de equipos o celulares. Se consulta también el listado de actas emitidas, con los filtros y paginación comunes.
+1. UTIC abre el bien en **Inventario** o **Bodega TI**. En la columna **Acciones**
+   dispone de **Asignar / entregar** cuando está en bodega, o **Devolver a Bodega TI**
+   cuando está asignado. También están disponibles en el detalle del bien.
+2. Revisa destino, fecha real, receptor y motivo. Completa los participantes del
+   acta: nombres y RUN reales. Contacto, cargo, unidad, subdirección, estado,
+   accesorios y observaciones usan los mismos campos compartidos en todo el sistema.
+   Los contactos de directorio son sugerencias editables; cambiar el destino limpia
+   los datos de la sede anterior. No se inventa una persona para un cargo pendiente.
+3. **Confirmar asignación y acta** o **Confirmar devolución y acta** guarda ambos
+   registros en una sola transacción. Si falla el PDF, se revierte también el
+   movimiento y el folio. Un reintento de la misma solicitud no duplica nada.
+4. Se conserva la consulta con sus filtros y se abre el acta en una ventana. Incluye
+   **Imprimir**, **Descargar PDF** y **Enviar por correo**, con el mismo componente
+   del detalle de documentos. La confirmación de éxito indica que el acta está lista.
+5. **Movimientos y actas** es consulta de operaciones realizadas: Ver bien, Ver
+   acta e Imprimir según corresponda. No inicia asignaciones ni devoluciones.
 
-Las cuatro familias propuestas comparten la presentación y las acciones de Imprimir, Descargar PDF y Enviar por correo. Esta integración habilita los movimientos existentes de asignación/devolución. Préstamos, cambios/traspasos compuestos, entrega de insumos y bajas requieren sus registros y validaciones antes de emitir actas operativas. Los quince DOCX se revisaron como ejemplos; no se utilizan como archivos de combinación ni se instalan como plantillas.
+La sede puede consultar el inventario de su alcance, pero solo los dos perfiles
+administradores de UTIC confirman movimientos y emiten/consultan/envían actas.
 
-## Emisión y numeración
+## Modelo institucional
 
-Felipe indicó finalmente iniciar desde **0**, sustituyendo la idea inicial de continuar una serie anterior. La numeración es única, sin una secuencia distinta por tipo ni reinicio automático anual: ACT-000000, ACT-000001, etc.
+El contenido se basa en los Word aportados por Felipe: asignación NC, EE y JISC,
+asignación de celulares y devolución de equipos/celulares. Se conserva el estilo
+institucional aprobado y se incorpora el logo oficial de Barrancas, la cabecera
+institucional y su unidad. Los Word privados no se instalan ni se publican.
 
-La pantalla muestra el movimiento y su receptor real. Se revisan los datos de quien entrega y se completan los RUN y antecedentes pertinentes. No se completan movimientos antiguos automáticamente con el director o funcionario vigente. Se conservan la fecha real del movimiento y la fecha de emisión como datos diferentes.
-
-Preparar los datos no ejecuta otra asignación o devolución. La emisión reserva el folio, compone el PDF y guarda sus datos y bytes en una transacción. Si la composición falla, se revierte también la reserva del folio. Un reintento de la misma solicitud no emite otra acta. Dos solicitudes concurrentes no generan dos actas para el mismo movimiento.
-
-El PDF lleva la fuente institucional, encabezados y páginas calculadas. Se conservan su versión, sus bytes y su huella SHA-256. Cambiar posteriormente el nombre de una sede, los datos de un bien o el directorio no cambia el documento emitido. Las correcciones/anulaciones con documentos de reemplazo se desarrollarán como un flujo propio: esta primera versión no permite sobrescribir ni borrar un acta emitida.
-
-## Impresión y descarga
-
-La ficha contiene las acciones comunes:
-
-- **Imprimir:** solicita la impresión del PDF conservado, mediante el visor del navegador.
-- **Descargar PDF:** obtiene ese mismo archivo y versión.
-- **Enviar por correo:** permite revisar los destinatarios antes de adjuntar el PDF conservado.
-
-Abrir la impresión no se registra como prueba de una impresión completada; el usuario puede cancelar el diálogo. Si el navegador no abre la impresión embebida, Abrir PDF permite utilizar la impresión nativa del visor. Generar el documento no atribuye una firma ni aceptación a sus participantes.
-
-## Correo de no responder
-
-El remitente será una cuenta institucional de **no responder**. Su dirección exacta y el relay o cuenta autorizada se configuran en el archivo privado `.env` de CentOS:
-
-| Variable | Uso |
+| Parte del modelo aportado | Documento generado |
 | --- | --- |
-| ACTAS_CORREO_REMITENTE | Dirección institucional real de no responder, autorizada por la organización |
-| ACTAS_SMTP_HOST | Host del servicio o relay autorizado |
-| ACTAS_SMTP_PUERTO | Puerto; por defecto 587 |
-| ACTAS_SMTP_TLS_DIRECTO | `si` para TLS directo, por ejemplo puerto 465; `no` para STARTTLS obligatorio |
-| ACTAS_SMTP_USUARIO | Usuario si el servicio requiere autenticación |
-| ACTAS_SMTP_CLAVE | Credencial privada correspondiente; no se introduce en Git ni en el chat |
+| Folio y fecha | Secuencia común desde ACT-000000, versión, fecha real y fecha de emisión |
+| Recibe | Nombre, RUN, cargo y correo; unidad/subdirección cuando corresponde |
+| EE/JISC | RBD, establecimiento, dirección y comuna conservados al confirmar |
+| Detalle de bienes | Tabla de inventario, descripción, marca, modelo y serie; para celulares, IMEI y teléfono por equipo |
+| Estado, accesorios y observación | Condición registrada y antecedentes revisados por UTIC |
+| Condiciones de uso | Uso institucional, comercialización, avisos de robo, responsabilidad y devolución NC al terminar la relación laboral |
+| Devolución | Constancia de recepción por la Unidad TIC, estado y accesorios faltantes |
+| Entrega / recibe | Nombres, RUN, cargo y espacios de firma, con identificación del emisor |
 
-Se verifica siempre el certificado TLS. La cuenta y las credenciales de Google Drive o el inicio de sesión de la web no se reutilizan como permiso para enviar correos. En caso de usar un relay sin usuario/clave, este debe estar autorizado institucionalmente para el servidor. No hay un botón que envíe automáticamente a todos los contactos de una sede.
+No se afirma que un equipo está nuevo u operativo si su registro no lo indica.
+Generar el PDF no acredita una firma. Los documentos breves usan una página A4;
+con más bienes o texto, continúan con logo, cabecera, tabla y numeración de páginas.
 
-El formulario permite revisar hasta cinco direcciones distintas separadas por comas; se rechazan cabeceras, nombres con direcciones embebidas y caracteres de control. El asunto y nombre de adjunto proceden del folio conservado. La cuenta de no responder lleva un nombre visible institucional y cabeceras de correo automático.
+Los préstamos, cambios/traspasos compuestos, entrega de insumos y bajas de los
+otros ejemplos necesitan sus propias operaciones y validaciones antes de emitir
+actas operativas. No se registran mediante una asignación ficticia.
 
-Si el transporte no está configurado, la opción sigue visible e informa que no está habilitada. La emisión, impresión y descarga funcionan sin SMTP; no se informa un envío exitoso ni se simula que salió un mensaje.
+## Datos anteriores y folios
 
-## Historial y resultados
+Cada PDF emitido conserva sus bytes, SHA-256, datos, folio y versión. El formato
+nuevo se aplica a nuevas emisiones; no sobrescribe documentos ya emitidos o
+adjuntados a correos anteriores. Imprimir, descargar y reenviar usan el mismo PDF.
 
-Solo los dos perfiles administradores de UTIC emiten, consultan estas actas y solicitan sus envíos en esta primera integración. Las acciones vuelven a comprobar permisos; ocultar un botón no es el control de acceso.
+Los registros previos sin documento se completan desde **Ver → Actas del bien →
+Completar acta**. Se documenta la operación anterior, sin volver a mover el equipo.
+Las entregas históricas conservan la fecha, sede, receptora y todos los bienes del
+grupo original. Los datos desconocidos pueden quedar vacíos y se identifican así.
+Los contactos ya registrados se conservan incluso cuando las reglas actuales para
+nuevos destinatarios son más estrictas; nunca se sustituyen por el directorio actual.
 
-Cada intento registra la solicitud, destinatarios, remitente, actor, resultado y fechas. El servidor de correo puede aceptar todos los destinatarios, aceptar algunos, rechazar el envío o dejar un resultado incierto por una interrupción. La aceptación no es una confirmación de lectura ni de llegada a la bandeja de entrada.
+## Correo institucional
 
-No se reenvía automáticamente un resultado incierto. Se exige revisar el intento anterior antes de solicitar otro. Una solicitud ya procesada no vuelve a enviarse. Se impiden dos envíos simultáneos del acta y se limita la repetición reciente. Si el proceso se interrumpe, un intento que no se confirmó pasa a mostrarse como resultado por confirmar, sin convertirlo en éxito.
+El remitente es una cuenta institucional de no responder. Configurar exclusivamente
+en CentOS las variables `ACTAS_CORREO_REMITENTE`, `ACTAS_SMTP_HOST`,
+`ACTAS_SMTP_PUERTO`, `ACTAS_SMTP_TLS_DIRECTO`, `ACTAS_SMTP_USUARIO` y
+`ACTAS_SMTP_CLAVE`; no compartir ni incorporar credenciales a Git.
 
-El adjunto y la impresión usan los mismos bytes del PDF emitido; no se vuelve a consultar el directorio para regenerarlo. No se consumen nuevos folios al imprimir, descargar o reenviar.
+Cada envío requiere destinatarios explícitos, valida cabeceras y conserva actor,
+resultado e idempotencia. Una aceptación SMTP no confirma lectura ni llegada a la
+bandeja final. Los resultados inciertos exigen revisión antes de reenviar y no se
+reintentan automáticamente. Sin configuración, el formulario explica que el envío
+no está habilitado. Las pruebas usan únicamente SMTP local TLS y buzones ficticios.
 
-## Instalación y verificación
+Se utiliza el alias `actas-smtp` fijado a Nodemailer 10.3.1, sin instalar el peer
+opcional antiguo de NextAuth. La autenticación institucional sigue usando Google.
 
-Requiere `1794355200000_actas-documentos-correo` y reconstruir la imagen compilada con `compose.produccion.yaml`. Se conserva el proyecto y volumen existentes. Primero se obtiene un respaldo con recuperación verificada. La configuración privada y la conectividad SMTP se verifican después en CentOS; integrar el PR no configura por sí solo una cuenta de correo.
+## Actualización
 
-El respaldo incluye contador, documento con sus bytes/huella y registros de envío. La verificación de recuperación comprueba permisos, datos ficticios del PDF e historial. Las pruebas de correo usan únicamente un servidor local TLS y buzones ficticios, con casos de duplicación, rechazo parcial y conexión interrumpida. No se envían mensajes a personas reales desde el entorno de desarrollo.
+La integración inicial utilizó `1794355200000_actas-documentos-correo` y la fuente
+histórica `1794441600000_actas-entregas-historicas`. El recorrido actual requiere
+**1794528000000_acta-desde-inventario** y reconstruir/recrear la web compilada.
 
-La dependencia de SMTP está fijada con el alias `actas-smtp` a Nodemailer 10.3.1. Esto permite utilizar la versión actualizada sin instalar el peer opcional antiguo de correo de NextAuth; la aplicación sigue utilizando el proveedor de Google para autenticación. No se fuerza una degradación de dependencias.
+La última migración conserva los documentos y datos previos; amplía los metadatos
+opcionales y guarda ubicación, tipo de sede y categoría al confirmar, para que el
+PDF no dependa de cambios posteriores en los mantenedores. Mantiene permisos,
+versiones e idempotencia, incluidos los metadatos de documentos anteriores.
 
-## Entregas históricas y acciones (4/11/2026)
-
-En **Inventario → Movimientos y actas**, cada entrega histórica tiene **Ver** y
-**Preparar acta**. Esta última opción también aparece en el detalle de la entrega.
-Revisar los participantes y emitir el documento abre su PDF con Imprimir,
-Descargar PDF y Enviar por correo. La columna Acciones del listado de actas ofrece
-Ver acta e Imprimir; imprimir carga el mismo PDF conservado y ofrece Abrir PDF como
-alternativa para los navegadores que bloqueen la impresión del visor.
-
-El documento histórico conserva la fecha real de entrega, la receptora, la sede y
-todos los bienes de las instantáneas originales. Su fecha de emisión es actual y
-recibe el siguiente folio de la secuencia común. No crea un movimiento, ni cambia
-custodia, inventario o antecedentes del documento original. Los datos originales
-no informados pueden quedar vacíos y se identifican así en el PDF. Los RUN/correos
-que ya estaban registrados se muestran rellenos y no se sustituyen por el
-directorio actual. El enlace de un documento anterior sigue disponible.
-
-Migración: `1794441600000_actas-entregas-historicas`. Agrega `entrega_id` como fuente
-alternativa y exige exactamente una fuente por acta, única por movimiento/entrega.
-Preserva los PDFs, folios, envíos y funciones anteriores. Se mantienen los
-permisos exclusivos de UTIC para emitir, consultar y enviar actas. El envío real
-requiere configurar la cuenta institucional de no responder en CentOS.
+Respaldo, migraciones y salud se comprueban antes de habilitar la web. La ejecución
+standalone debe incluir fuentes institucionales y logo local, incluso en las rutas
+que confirman operaciones desde el inventario. El respaldo conserva PDF, contador,
+fuentes e historial de correo; se verifica su restauración en un contenedor aislado.

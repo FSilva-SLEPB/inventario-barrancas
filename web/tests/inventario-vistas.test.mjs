@@ -22,6 +22,7 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "react/jsx-runtime": jsx,
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children) },
     "next/navigation": { notFound:()=>{throw new Error("NOT_FOUND");}, useRouter: () => ({ push() {} }), redirect: destino => { throw new Error("REDIRECT:" + destino); } },
+    "@/components/actas/ventana-acta-emitida": {default:()=>null},
     "@/components/ventana-movimiento": {default:()=>null,AccionesCustodia:()=>null},
     "@/components/ficha-celular": {default:()=>null},
     "@/lib/celulares": {detalleCelular:async()=>null},
