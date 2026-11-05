@@ -18,5 +18,5 @@ export async function iniciarSMTPPrueba(){
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
  const ca=join(dir,'confianza.pem');let confianza='';if(process.env.NODE_EXTRA_CA_CERTS){try{confianza=await readFile(process.env.NODE_EXTRA_CA_CERTS,'utf8');}catch{}}
  await writeFile(ca,confianza+'\n'+await readFile(cert,'utf8'));
- return {dir,env:{ACTAS_SMTP_HOST:'127.0.0.1',ACTAS_SMTP_PUERTO:String(server.address().port),ACTAS_SMTP_TLS_DIRECTO:'si',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',NODE_EXTRA_CA_CERTS:ca,ACTAS_TEST_MAIL_DIR:dir},async cerrar(){for(const s of sockets)s.destroy();await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});}};
+ return {dir,env:{ACTAS_CORREO_MODO:'prueba',ACTAS_CORREO_PRUEBA_DESTINATARIOS:'persona@example.org,rechazado@example.org,incierto@example.org',ACTAS_SMTP_HOST:'127.0.0.1',ACTAS_SMTP_PUERTO:String(server.address().port),ACTAS_SMTP_TLS_DIRECTO:'si',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',NODE_EXTRA_CA_CERTS:ca,ACTAS_TEST_MAIL_DIR:dir},async cerrar(){for(const s of sockets)s.destroy();await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});}};
 }

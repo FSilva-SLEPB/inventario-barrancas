@@ -1,6 +1,8 @@
 import {esIdSede} from '@/lib/validacion-sedes';
 import {hoyChile} from '@/lib/validacion-entregas';
-export const CUSTODIAS={en_bodega:'En Bodega TI',asignado:'Asignado / recibido'} as const;
+export const CUSTODIAS={en_bodega:'En Bodega TI',asignado:'Asignado / recibido',en_prestamo:'En préstamo'} as const;
+export type AccionMovimiento='asignacion'|'devolucion'|'prestamo'|'devolucion_prestamo';
+export const ACCIONES_MOVIMIENTO={asignacion:'Asignación',devolucion:'Devolución',prestamo:'Préstamo',devolucion_prestamo:'Devolución de préstamo'};
 export type TipoBien='equipo'|'celular';
 export type DatosMovimiento={tipo:TipoBien;bienId:string;accion:'devolucion'|'asignacion';destino:string;fecha:string;receptor:string;motivo:string;version:number};
 export function validarMovimiento(f:FormData,hoy=hoyChile()){
@@ -16,13 +18,13 @@ export function validarMovimiento(f:FormData,hoy=hoyChile()){
 }
 export function retornoMovimiento(v:string){
  if(!v.startsWith('/inventario/')||v.length>2000||/[\p{Cc}\\]/u.test(v))return null;
- try{const u=new URL(v,'http://inventario.local');if(u.origin!=='http://inventario.local'||u.hash||!['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti','/inventario/celulares'].includes(u.pathname))return null;
+ try{const u=new URL(v,'http://inventario.local');if(u.origin!=='http://inventario.local'||u.hash||!['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti','/inventario/celulares','/inventario/prestamos'].includes(u.pathname))return null;
  const p=new URLSearchParams();for(const[k,max]of [['vista',20],['q',150],['pagina',7],['tipo',30],['sede',36],['rbd',120],['limite',3],['estado',20],['clase',10]] as const){const valores=u.searchParams.getAll(k);if(valores.length>1)return null;const valor=valores[0];if(valor!==undefined){if(valor.length>max)return null;p.set(k,valor);}}
  if([...u.searchParams.keys()].some(k=>!['vista','q','pagina','tipo','sede','rbd','limite','estado','clase'].includes(k)))return null;
  return u.pathname+(p.size?'?'+p:'');}catch{return null;}
 }
-export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:'devolucion'|'asignacion'){
- const base=retornoMovimiento(ruta);if(!base||!esIdSede(id))throw new Error('Enlace de movimiento inválido.');const u=new URL(base,'http://inventario.local');u.searchParams.set('movimiento',accion);u.searchParams.set('bien',id);u.searchParams.set('claseBien',tipo);return u.pathname+u.search;
+export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:AccionMovimiento,prestamoId?:string){
+ const base=retornoMovimiento(ruta);if(!base||!esIdSede(id))throw new Error('Enlace de movimiento inválido.');const u=new URL(base,'http://inventario.local');u.searchParams.set('movimiento',accion);u.searchParams.set('bien',id);u.searchParams.set('claseBien',tipo);if(accion==='devolucion_prestamo'){if(!prestamoId||!esIdSede(prestamoId))throw new Error('Identifica el préstamo.');u.searchParams.set('prestamoId',prestamoId);}return u.pathname+u.search;
 }
 
 export function enlaceActaInventario(volver:string,id:string){

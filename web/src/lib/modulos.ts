@@ -8,6 +8,7 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   {href:'/inventario/p02',titulo:local?'Inventario de mi sede':'Inventario P02',descripcion:'Establecimientos educacionales, jardines infantiles y salas cunas.',icono:'P02'},
   ...(gestion?[{href:'/inventario/registro',titulo:'Registro de equipos',descripcion:admin?'Ingreso individual y carga masiva de equipos.':'Registrar equipos propios de la sede.',icono:'+'}]:[]),
   ...(admin?[{href:'/inventario/bodega-ti',titulo:'Bodega TI',descripcion:'Equipos destinados a establecimientos y pendientes de entrega.',icono:'TI'},
+   {href:'/inventario/prestamos',titulo:'Préstamos',descripcion:'Préstamos temporales desde Bodega TI, plazos y devoluciones vinculadas.',icono:'↔'},
    {href:'/inventario/movimientos',titulo:'Movimientos y actas',descripcion:'Entregas registradas, personas receptoras y antecedentes.',icono:'↔'}]:[]),
   {href:'/inventario/celulares',titulo:'Inventario de celulares',descripcion:'Equipos celulares y números asociados de establecimientos, jardines y Nivel Central.',icono:'CEL'},
   {href:'/inventario/robos',titulo:'Consolidado de robos',descripcion:'Equipos reportados, robos validados y recuperaciones.',icono:'!'}

@@ -255,6 +255,20 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
+  prestamos_inventario {
+    uuid id PK, FK
+    uuid equipo_id FK
+    uuid celular_id FK
+    uuid origen_sede_id FK
+    uuid destino_sede_id FK
+    date fecha_salida
+    date fecha_limite
+    text receptor
+    jsonb datos_destino
+    text estado
+    uuid movimiento_devolucion_id FK
+    date fecha_devolucion
+  }
   sedes {
     uuid id PK
     text tipo
@@ -314,6 +328,12 @@ erDiagram
   sedes |o--o{ movimientos_inventario : "destino_sede_id"
   equipos |o--o{ movimientos_inventario : "equipo_id"
   sedes |o--o{ movimientos_inventario : "origen_sede_id"
+  celulares |o--o{ prestamos_inventario : "celular_id"
+  sedes ||--o{ prestamos_inventario : "destino_sede_id"
+  equipos |o--o{ prestamos_inventario : "equipo_id"
+  movimientos_inventario ||--o| prestamos_inventario : "id"
+  movimientos_inventario |o--o| prestamos_inventario : "movimiento_devolucion_id"
+  sedes ||--o{ prestamos_inventario : "origen_sede_id"
   sedes |o--o{ usuarios_acceso : "sede_id"
 ```
 
@@ -335,15 +355,16 @@ erDiagram
 | entregas_detalle | Entregas | Equipos de cada entrega, con instantáneas anteriores y posteriores. |
 | entregas_equipos | Entregas | Cabecera de entrega por sede, fecha y persona receptora; conserva sus datos históricos. |
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
-| equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado y situación de entrega. |
+| equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado/en préstamo y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
 | funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
 | funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
-| movimientos_inventario | Movimientos | Devoluciones a Bodega TI y asignaciones de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
+| movimientos_inventario | Movimientos | Asignaciones, devoluciones y préstamos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
+| prestamos_inventario | Préstamos | Préstamos temporales desde Bodega TI, pertenencia conservada, destino y plazo, devolución vinculada e historial en movimientos. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
 | usuarios_acceso | Acceso | Cuentas autorizadas, perfil, vigencia y sede permitida. |
 | usuarios_acceso_historial | Acceso | Auditoría de cambios de usuarios y permisos. |
@@ -355,12 +376,13 @@ erDiagram
 - Entregas: un lote agrupa entregas por sede; cada entrega tiene varios equipos en entregas_detalle.
 - Celulares: inventario dedicado con sede y un número móvil por equipo; celulares_historial conserva números anteriores, cambios de sede y vigencia. Dos por EE/JI es una referencia, no una restricción.
 - Actas: cada documento se vincula a un movimiento y conserva folio, datos y PDF con su SHA-256; actas_envios registra los intentos y resultados de correo. actas_contador mantiene la secuencia única desde 0.
+- Préstamos: cada préstamo conserva el bien y su sede de pertenencia, destino temporal, plazo, movimiento de salida y devolución exacta. Solo uno activo por bien; se consulta por UTIC fuera del inventario recibido del destinatario.
 - Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las ubicaciones físicas de Bodega TI se definirán después.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.
 - Los nombres, RUN y contactos conservados en instantáneas no son FK al directorio actual.
 - Dependencias pertenece a sedes; todavía no existe una FK de equipos a dependencias.
-- Funcionarios de Nivel Central tiene ficha e historial propios. Las asignaciones de equipos y las solicitudes siguen pendientes; no se representan como relaciones ya implementadas.
+- Funcionarios de Nivel Central tiene ficha e historial propios. Las entregas a funcionarios conservan los datos seleccionados en el documento; todavía no hay una FK desde equipos a funcionarios. Habilitación y solicitudes siguen pendientes.
 - pgmigrations es infraestructura de migraciones y se excluye del gráfico de negocio.
 
 El número de filas no prueba por sí solo el uso de una tabla. El catálogo anterior registra sus funciones actuales; una tabla vacía puede pertenecer a un flujo que todavía no tiene movimientos.

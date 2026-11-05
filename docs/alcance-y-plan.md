@@ -401,3 +401,15 @@ con un número por equipo, EE/JI y Nivel Central, permisos por sede e historial.
 Dos por EE/JI es una referencia habitual, no un máximo. Ver
 [inventario de celulares](inventario-celulares.md). Las cifras anteriores describen
 su revisión histórica; el modelo actual añade celulares y celulares_historial.
+
+## Corte de trabajo del 5 de noviembre de 2026
+
+PR #50 instalado según la evidencia de CentOS aportada por Felipe. La siguiente
+actualización prepara préstamos desde Bodega TI con fecha límite y devolución
+vinculada, correo restringido de prueba y revisión de QA/seguridad. No se declara
+instalada hasta comprobar la migración 18, imagen compilada, salud y recorrido real.
+
+Ver [préstamos](prestamos-inventario.md), [auditoría del corte](auditoria-seguridad-2026-11-05.md)
+y [material para jefatura](informe-avance-2026-11-05.md). El correo real de ensayo
+se configura solo en CentOS para `correoprueba@slepb.gob.cl`; los ensayos locales
+usan SMTP aislado y direcciones ficticias.

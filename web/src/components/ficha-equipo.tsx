@@ -22,7 +22,7 @@ export default async function FichaEquipo({id,editar=false,guardado=false,contex
   const actor=await exigirAcceso();if(!esIdSede(id))notFound();
   const e=equipo??await obtenerEquipo(id);if(!e||e.id!==id||(contexto&&!equipoEnVista(e,contexto.ambito,contexto.vista)))notFound();
   const [historial,categorias,robos]=await Promise.all([historialEquipo(id),listarCategorias(),robosEquipo(id)]);
-  const editable=puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega');
+  const editable=e.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega');
   const editando=editable&&editar;const sedes=editando?await listarSedes():[];
   const compra=Object.entries(CAMPOS_COMPRA).filter(([k])=>e.compra[k as keyof typeof CAMPOS_COMPRA]);
   const dato=(label:string,v:string|null|undefined)=><div key={label}><dt>{label}</dt><dd>{v||'Sin informar'}</dd></div>;

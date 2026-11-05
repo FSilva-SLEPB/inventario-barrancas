@@ -45,9 +45,11 @@ No se afirma que un equipo está nuevo u operativo si su registro no lo indica.
 Generar el PDF no acredita una firma. Los documentos breves usan una página A4;
 con más bienes o texto, continúan con logo, cabecera, tabla y numeración de páginas.
 
-Los préstamos, cambios/traspasos compuestos, entrega de insumos y bajas de los
-otros ejemplos necesitan sus propias operaciones y validaciones antes de emitir
-actas operativas. No se registran mediante una asignación ficticia.
+Los préstamos temporales y su devolución vinculada se implementan en la actualización
+18; véase [Préstamos](prestamos-inventario.md). Usan los modelos de préstamo EE/NC
+aportados por Felipe, con plazo y referencia al documento original. Los cambios o
+traspasos compuestos, entrega de insumos y bajas siguen pendientes de operaciones
+propias; no se registran mediante una asignación ficticia.
 
 ## Datos anteriores y folios
 
@@ -82,7 +84,8 @@ opcional antiguo de NextAuth. La autenticación institucional sigue usando Googl
 
 La integración inicial utilizó `1794355200000_actas-documentos-correo` y la fuente
 histórica `1794441600000_actas-entregas-historicas`. El recorrido actual requiere
-**1794528000000_acta-desde-inventario** y **1794614400000_operaciones-automatizadas**,
+**1794528000000_acta-desde-inventario**, **1794614400000_operaciones-automatizadas**
+y **1794700800000_prestamos-inventario**,
 y reconstruir/recrear la web compilada.
 
 La última migración conserva los documentos y datos previos; amplía los metadatos
@@ -125,3 +128,25 @@ cuando no se escribió un motivo; no se inventa una justificación personal.
 Al revisar formularios con datos ausentes, escribir con teclado carácter a carácter
 en nombre, RUN o correo y comprobar que el campo siga editable. Escribir en un campo
 vacío activa el lápiz de su grupo; no debe bloquearse después de la primera letra.
+
+## Ensayos solo a buzones de prueba (5 de noviembre)
+
+Por instrucción de Felipe, mantener `ACTAS_CORREO_MODO=prueba`. Configurar en CentOS
+`ACTAS_CORREO_PRUEBA_DESTINATARIOS` con la dirección exacta de prueba/Barranquín
+confirmada. Para este ensayo el único buzón institucional autorizado es
+`correoprueba@slepb.gob.cl`; no agregar otros. La capacidad técnica de hasta cinco
+buzones no amplía esta autorización.
+Sin lista explícita o sin transporte configurado, el envío permanece deshabilitado.
+
+En este modo el formulario propone el primer buzón autorizado, no el correo real
+registrado en el acta. El usuario puede elegir otros de la lista. El servidor rechaza
+cualquier destinatario externo a la lista antes de registrar el intento y otra vez
+antes de crear el transporte SMTP, incluso mediante una petición manipulada. No se
+sustituyen destinatarios silenciosamente. El asunto lleva `[PRUEBA]`; los bytes y
+participantes del PDF conservado no se modifican. El resultado registra el modo.
+
+La capacidad anterior de correo a destinatarios explícitos requiere configurar
+`ACTAS_CORREO_MODO=produccion` en el servidor. No existe un control en la interfaz
+para cambiar de modo. No se habilitará durante estos ensayos; requeriría una nueva
+instrucción de Felipe. Las credenciales se configuran solo en CentOS y no se comparten.
+En desarrollo se utiliza únicamente SMTP local TLS con direcciones ficticias.
