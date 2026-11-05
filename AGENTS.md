@@ -44,3 +44,6 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
 - Usar el contenido y estructura de los modelos Word enviados por Felipe (datos
   de receptor, detalle de bienes, condiciones y firmas), junto con el logo oficial.
   Mantener el estilo institucional aprobado y los PDFs ya emitidos conservados.
+
+- Acciones de listados con iconos (ojo, lápiz y flechas), nombre accesible y ayuda.
+- Entregas: motivo opcional, emisor desde la cuenta autenticada, participantes precargados y editables con lápiz. Separar institución y director/a; NC selecciona funcionario y muestra unidad/subdirección, sin campos de colegio. No inventar nombres ni RUN que no existen en las fichas. Reimprimir conserva el emisor original.

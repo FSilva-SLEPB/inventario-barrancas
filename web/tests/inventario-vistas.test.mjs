@@ -113,7 +113,7 @@ test("perfil local permanece en P02 al forzar ámbito y filtros ajenos", async (
 test("tabla conserva identificadores y acciones de consulta sin edición para perfiles de lectura", async () => {
   const equipo = { id: escuela.id, sedeRbd: "00123", sedeNombre: escuela.nombre, categoriaNombre: "Proyector", modelo: "PowerLite", marca: "Epson", serie: "000-ABC", inventario: "INV-001", situacion: "recibido_historico", condicionTecnica: "sin_verificar" };
   const { html } = await pagina({ tipo: "establecimiento" }, false, [equipo]);
-  assert.ok(html.includes('ver=' + equipo.id));assert.ok(html.includes('>Ver</a>'));assert.ok(!html.includes('>Ver historial</a>'));assert.ok(!html.includes('editar='));
+  assert.ok(html.includes('ver=' + equipo.id));assert.ok(html.includes('aria-label="Ver:'));assert.ok(!html.includes('>Ver historial</a>'));assert.ok(!html.includes('editar='));
   assert.ok(html.includes("000-ABC")); assert.ok(html.includes("INV-001"));
   assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Funcionamiento: Sin verificar"));
 });
@@ -213,4 +213,4 @@ test("el registro único muestra destino y carga solo a administradores", async 
   await assert.rejects(pagina({}, false, [], 0, "registro", "consulta"), /REDIRECT:\/sin-permiso/);
 });
 
-test("Acciones ofrece edición directa a UTIC y conserva la búsqueda",async()=>{const e={id:escuela.id,sedeNombre:escuela.nombre,categoriaNombre:'Equipo',modelo:'Modelo',marca:'Marca',serie:'SERIE',inventario:'INV',custodia:'asignado',situacion:'recibido_historico',condicionTecnica:'sin_verificar'};const {html}=await pagina({q:'SERIE',limite:'100'},false,[e],1,'p02','administrador_gestion');assert.ok(html.includes('>Ver</a>'));assert.ok(html.includes('>Editar</a>'));assert.ok(html.includes('editar='+e.id));for(const url of [...html.matchAll(/href="([^"]+)"/g)].map(m=>m[1].replaceAll('&amp;','&')).filter(x=>x.includes('editar=')||x.includes('ver='))){const u=new URL(url,'http://local');assert.equal(u.searchParams.get('q'),'SERIE');assert.equal(u.searchParams.get('limite'),'100');}});
+test("Acciones ofrece edición directa a UTIC y conserva la búsqueda",async()=>{const e={id:escuela.id,sedeNombre:escuela.nombre,categoriaNombre:'Equipo',modelo:'Modelo',marca:'Marca',serie:'SERIE',inventario:'INV',custodia:'asignado',situacion:'recibido_historico',condicionTecnica:'sin_verificar'};const {html}=await pagina({q:'SERIE',limite:'100'},false,[e],1,'p02','administrador_gestion');assert.ok(html.includes('aria-label="Ver:'));assert.ok(html.includes('aria-label="Editar:'));assert.ok(html.includes('editar='+e.id));for(const url of [...html.matchAll(/href="([^"]+)"/g)].map(m=>m[1].replaceAll('&amp;','&')).filter(x=>x.includes('editar=')||x.includes('ver='))){const u=new URL(url,'http://local');assert.equal(u.searchParams.get('q'),'SERIE');assert.equal(u.searchParams.get('limite'),'100');}});

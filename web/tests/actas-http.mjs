@@ -23,7 +23,7 @@ try{
  const ca=await cookie('administrador'),cl=await cookie('encargado'),cc=await cookie('consulta'),contadorInicial=BigInt((await db.query('SELECT ultimo FROM public.actas_contador')).rows[0].ultimo);
  const m=await movimiento('equipo','asignacion');
  for(const rol of ['encargado','consulta','consulta_sede']){await assert.rejects(preparar(correos[rol],randomUUID(),m),e=>e.code==='42501');pruebas++;}
- for(const cambio of [{entregaRun:''},{recibeRun:'12345678-9'},{entregaNombre:''},{entregaCorreo:'x@example.org\r\nBcc:x@example.org'},{observaciones:'x'.repeat(2001)},{extra:true}]){await assert.rejects(preparar(correos.administrador,randomUUID(),m,{...meta,...cambio}),e=>e.code==='22023');pruebas++;}
+ for(const cambio of [{entregaRun:'12345678-9'},{recibeRun:'12345678-9'},{entregaNombre:''},{entregaCorreo:'x@example.org\r\nBcc:x@example.org'},{observaciones:'x'.repeat(2001)},{extra:true}]){await assert.rejects(preparar(correos.administrador,randomUUID(),m,{...meta,...cambio}),e=>e.code==='22023');pruebas++;}
  // Fallar durante la composición no deja un documento ni consume folio.
  await app.query('BEGIN');const fallido=randomUUID();await preparar(correos.administrador,fallido,m);await app.query('ROLLBACK');assert.equal((await db.query('SELECT ultimo FROM public.actas_contador')).rows[0].ultimo,String(contadorInicial));pruebas++;
  const ruta='/inventario/actas?movimiento='+m,alta=form(await(await pedir(ruta,ca)).text(),'formulario-acta'),id=String(alta.get('solicitud'));documentos.push(id);for(const[k,v]of Object.entries(meta))alta.set(k,v);

@@ -11,7 +11,7 @@ export function validarMovimiento(f:FormData,hoy=hoyChile()){
  if(v.accion==='asignacion'?!esIdSede(v.destino):v.destino!=='')throw new Error('Selecciona una sede de destino válida.');
  const fecha=/^\d{4}-\d{2}-\d{2}$/.test(v.fecha)?new Date(v.fecha+'T00:00:00Z'):null;
  if(!fecha||Number.isNaN(fecha.getTime())||fecha.toISOString().slice(0,10)!==v.fecha||v.fecha<'1900-01-01'||v.fecha>hoy)throw new Error('Indica una fecha real válida, sin fechas futuras.');
- if(!v.receptor||!v.motivo)throw new Error('Indica quién recibe y el motivo del movimiento.');
+ if(!v.receptor)throw new Error('Indica quién recibe.');
  return {solicitud:v.solicitud,volver:v.volver,datos:{tipo:v.tipo,bienId:v.bienId,accion:v.accion,destino:v.destino,fecha:v.fecha,receptor:v.receptor,motivo:v.motivo,version:Number(v.version)} as DatosMovimiento};
 }
 export function retornoMovimiento(v:string){

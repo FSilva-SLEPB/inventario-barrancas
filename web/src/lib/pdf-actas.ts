@@ -21,7 +21,7 @@ export async function generarPdfActa(d:DatosActa){
   nueva();doc.font('institucional-negrita').fontSize(17).text(tituloDocumentoActa(d),margen,doc.y,{width:W});doc.y+=8;
   filaPar('Folio / versión',folioActa(d.folio)+' · v'+d.version,d.tipo==='entrega_historica'?'Fecha de entrega':'Fecha operación',d.fecha.split('-').reverse().join('/'));fila('Fecha de emisión',new Intl.DateTimeFormat('es-CL',{dateStyle:'short',timeStyle:'short',timeZone:'America/Santiago'}).format(new Date(d.emitidoEn)));
   if(d.tipo==='entrega_historica')texto('Documento emitido desde una entrega histórica registrada. Conserva sus bienes, fecha y receptora originales; no registra una nueva asignación. Los datos que no fueron informados al registrar permanecen identificados como tales.',8);
-  seccion('Origen y destino');filaPar('Origen',d.origen,'Destino',d.destino);fila('Establecimiento / sede',d.sedeNombre);filaPar('RBD',d.rbd,'Comuna',d.sedeDatos?.comuna||d.comuna||'');fila('Dirección',d.sedeDatos?.direccion??'');
+  seccion('Origen y destino');filaPar('Origen',d.origen,'Destino',d.destino);fila(d.sedeTipo==='nivel_central'?'Nivel Central':'Establecimiento / sede',d.sedeNombre);if(d.sedeTipo!=='nivel_central'){filaPar('RBD',d.rbd,'Comuna',d.sedeDatos?.comuna||d.comuna||'');fila('Dirección',d.sedeDatos?.direccion??'');}
   seccion('Recibe');filaPar('Nombre',d.receptorNombre,'RUN',d.metadata.recibeRun);filaPar('Cargo',d.metadata.recibeCargo,'Correo',d.metadata.recibeCorreo);if(d.sedeTipo==='nivel_central'||d.metadata.recibeUnidad||d.metadata.recibeSubdireccion){filaPar('Unidad',d.metadata.recibeUnidad??'','Subdirección',d.metadata.recibeSubdireccion??'');}
   seccion('Detalle de bienes',80);texto(d.tipo==='devolucion'?'Se deja constancia de la devolución de los siguientes bienes a la Unidad TIC:':'La firma de este documento deja constancia de la recepción de los siguientes bienes, en el estado registrado:');
   const columnas=d.clase==='celular'?['N.º inventario','Equipamiento','Marca / modelo','IMEI','Teléfono']:['N.º inventario','Descripción','Marca','Modelo','Serie'],anchos=d.clase==='celular'?[83,75,137,108,108.28]:[85,95,76,131,124.28];
@@ -33,7 +33,7 @@ export async function generarPdfActa(d:DatosActa){
   if(d.metadata.observaciones){seccion('Observaciones');texto(d.metadata.observaciones);}
   seccion(d.tipo==='devolucion'?'Constancia de devolución':'Condiciones de uso y responsabilidades',65);
   for(const [i,c]of condicionesActa(d).entries())texto((d.tipo==='devolucion'?'':String(i+1)+'. ')+c,8.5);
-  fila('Emisor del documento',d.actor);
+  fila('Emisor del documento',[d.actorNombre,d.actor].filter(Boolean).join(' · '));
   const participantes=[{titulo:'ENTREGA',nombre:d.metadata.entregaNombre||'No informado al registrar',run:d.metadata.entregaRun||'Sin informar',cargo:d.metadata.entregaCargo},{titulo:'RECIBE',nombre:d.receptorNombre,run:d.metadata.recibeRun||'Sin informar',cargo:d.metadata.recibeCargo}],col=W/2-12;
   doc.font('institucional').fontSize(9);const alto=Math.max(105,...participantes.map(p=>doc.heightOfString(p.nombre+'\nRUN '+p.run+(p.cargo?'\n'+p.cargo:''),{width:col})+75));espacio(alto+14);const y=doc.y+10;
   participantes.forEach((p,i)=>{const x=margen+i*(W/2+12);doc.font('institucional-negrita').fontSize(10).text(p.titulo,x,y,{width:col});doc.font('institucional').fontSize(9).text(p.nombre+'\nRUN '+p.run+(p.cargo?'\n'+p.cargo:''),x,y+20,{width:col});doc.save().strokeColor(borde).moveTo(x,y+alto-30).lineTo(x+col,y+alto-30).stroke().restore();doc.fontSize(8).text('Firma',x,y+alto-24,{width:col});});
