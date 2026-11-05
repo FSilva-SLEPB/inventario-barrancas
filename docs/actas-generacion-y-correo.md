@@ -5,8 +5,9 @@
 1. UTIC abre el bien en **Inventario** o **Bodega TI**. En la columna **Acciones**
    dispone de **Asignar / entregar** cuando está en bodega, o **Devolver a Bodega TI**
    cuando está asignado. También están disponibles en el detalle del bien.
-2. Revisa destino, fecha real, receptor y motivo. Completa los participantes del
-   acta: nombres y RUN reales. Contacto, cargo, unidad, subdirección, estado,
+2. Revisa destino, fecha real, receptor y motivo. Revisa los participantes precargados del
+   acta. Quien entrega se obtiene de la cuenta autenticada y su ficha de funcionario;
+   los datos pueden corregirse con el lápiz. El motivo es opcional. Contacto, cargo, unidad, subdirección, estado,
    accesorios y observaciones usan los mismos campos compartidos en todo el sistema.
    Los contactos de directorio son sugerencias editables; cambiar el destino limpia
    los datos de la sede anterior. No se inventa una persona para un cargo pendiente.
@@ -81,7 +82,8 @@ opcional antiguo de NextAuth. La autenticación institucional sigue usando Googl
 
 La integración inicial utilizó `1794355200000_actas-documentos-correo` y la fuente
 histórica `1794441600000_actas-entregas-historicas`. El recorrido actual requiere
-**1794528000000_acta-desde-inventario** y reconstruir/recrear la web compilada.
+**1794528000000_acta-desde-inventario** y **1794614400000_operaciones-automatizadas**,
+y reconstruir/recrear la web compilada.
 
 La última migración conserva los documentos y datos previos; amplía los metadatos
 opcionales y guarda ubicación, tipo de sede y categoría al confirmar, para que el
@@ -92,3 +94,34 @@ Respaldo, migraciones y salud se comprueban antes de habilitar la web. La ejecuc
 standalone debe incluir fuentes institucionales y logo local, incluso en las rutas
 que confirman operaciones desde el inventario. El respaldo conserva PDF, contador,
 fuentes e historial de correo; se verifica su restauración en un contenedor aislado.
+
+## Acciones y datos precargados
+
+Los listados comparten iconos: ojo para consultar, lápiz para editar, flecha para
+asignar o devolver, documento e impresora para actas. Cada icono tiene nombre
+accesible y ayuda al pasar el cursor; conserva permisos y navegación por teclado.
+
+Al entregar a EE/JISC se muestran por separado la institución (nombre, RBD,
+dirección, comuna y correo institucional) y su director/a (nombre, RUN, cargo y
+correo personal registrado). Los datos del directorio vigente se cargan solos.
+En NC se selecciona un funcionario activo: nombre, RUN, cargo, correo, unidad y
+subdirección se cargan juntos. No aparecen RBD o dirección de colegio. Una persona
+no registrada se puede completar expresamente con la opción Otra persona. Cambiar
+de sede o funcionario limpia los datos de la selección anterior.
+
+La cuenta autenticada es siempre el actor auditado y emisor del documento, aunque
+el lápiz cambie a la persona que entrega físicamente. Se prioriza la ficha de
+funcionario vinculada por correo y el nombre de Usuarios; si no hay nombre
+registrado se muestra el correo autenticado, sin inferir un nombre ni inventar un
+RUN. Los RUN conocidos se precargan y los informados se validan; uno ausente puede
+quedar sin informar. El nombre del emisor queda conservado en nuevas actas. Imprimir
+una versión emitida conserva su emisor y participantes originales.
+
+La devolución propone como persona que entrega a quien recibió en la asignación
+registrada, y como receptor en UTIC a quien opera el sistema. El motivo puede quedar
+vacío en el movimiento. El historial registra automáticamente el tipo de operación
+cuando no se escribió un motivo; no se inventa una justificación personal.
+
+Al revisar formularios con datos ausentes, escribir con teclado carácter a carácter
+en nombre, RUN o correo y comprobar que el campo siga editable. Escribir en un campo
+vacío activa el lápiz de su grupo; no debe bloquearse después de la primera letra.

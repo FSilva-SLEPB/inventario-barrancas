@@ -29,7 +29,7 @@ try{
   const id=await crear(tipo);assert.equal((await leer(tipo,id)).custodia,'asignado');pruebas++;
   await assert.rejects(mover(tipo,id,'asignacion',1,sedes[1]),e=>e.code==='P2602');pruebas++;
   for(const rol of ['encargado','consulta_sede','consulta']){await assert.rejects(mover(tipo,id,'devolucion',1,'',{},correos[rol]),e=>e.code==='42501');pruebas++;}
-  for(const cambios of [{receptor:''},{motivo:''},{fecha:'2099-01-01'},{fecha:'2026-02-30'},{version:0},{custodia:'en_bodega'}]){await assert.rejects(mover(tipo,id,'devolucion',1,'',cambios),e=>e.code==='22023');pruebas++;}
+  for(const cambios of [{receptor:''},{motivo:'x'.repeat(501)},{fecha:'2099-01-01'},{fecha:'2026-02-30'},{version:0},{custodia:'en_bodega'}]){await assert.rejects(mover(tipo,id,'devolucion',1,'',cambios),e=>e.code==='22023');pruebas++;}
   const solicitud=randomUUID();await mover(tipo,id,'devolucion',1,'',{},correos.administrador,solicitud);assert.equal((await leer(tipo,id)).custodia,'en_bodega');assert.equal((await leer(tipo,id)).version,2);assert.equal((await mover(tipo,id,'devolucion',1,'',{},correos.administrador,solicitud)).rows[0].r.repetida,true);pruebas++;
   await assert.rejects(mover(tipo,id,'devolucion',1,'',{motivo:'Otro'},correos.administrador,solicitud),e=>e.code==='P2601');await assert.rejects(mover(tipo,id,'devolucion',2),e=>e.code==='P2602');pruebas++;
   const bodega=await(await pedir('/inventario/bodega-ti?clase='+tipo+'&q='+sufijo,ca)).text();assert.ok(bodega.includes('ver='+id));assert.ok(bodega.includes('En Bodega TI'));pruebas++;

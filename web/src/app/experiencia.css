@@ -16,7 +16,7 @@ table.tabla-listado-directorio th,table.tabla-listado-directorio td{overflow-wra
 table.tabla-listado-directorio th:first-child{width:30%}
 table.tabla-listado-directorio td:nth-child(2){min-width:8rem;white-space:nowrap}
 table.tabla-listado-directorio td:nth-child(3){min-width:13rem}
-table.tabla-listado-directorio td:nth-child(4){min-width:10rem}
+table.tabla-listado-directorio td:nth-child(4){min-width:0}
 table.tabla-listado-directorio td:nth-child(5){min-width:18rem;overflow-wrap:anywhere}
 table.tabla-listado-directorio td:last-child{min-width:7rem;white-space:nowrap}
 table.tabla-datos thead th{white-space:nowrap}
@@ -26,7 +26,7 @@ table.tabla-modelo-uso td:nth-child(2),table.tabla-modelo-uso td:nth-child(3){mi
 table.tabla-modelo-uso td:last-child{min-width:28rem}
 .tabla-modelo-uso .enlace-tabla{white-space:nowrap}
 .tabla-modelo-columnas td:first-child{min-width:14rem}
-.tabla-modelo-columnas td:nth-child(2){min-width:11rem}
+.tabla-modelo-columnas td:nth-child(2){min-width:12rem}
 .tabla-modelo-columnas code{white-space:nowrap}
 .tabla-usuarios-contenedor,.tabla-contenedor{scrollbar-color:var(--color-borde) var(--color-superficie-alterna)}
 .directorio-ficha,.detalle-tabla{scroll-margin-block:1rem}
@@ -113,12 +113,24 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 .visor-acta-pdf{width:100%;height:75vh;min-height:30rem;border:1px solid var(--color-borde-suave);border-radius:.75rem;background:var(--color-superficie-alterna)}
 .acciones-documento{flex-wrap:wrap}.comprobacion-envio{display:flex;gap:.6rem;align-items:flex-start;margin-block:1rem}.comprobacion-envio input{width:auto;flex:0 0 auto}
 /* Un mismo grupo de acciones en todos los listados; Bootstrap controla sus estados. */
-.acciones-registro{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;min-width:10rem}
+.acciones-registro{display:flex;flex-wrap:nowrap;align-items:center;gap:.5rem;min-width:max-content}
 .acciones-registro .btn{white-space:nowrap;min-height:2.5rem;text-decoration:none}
-.tabla-directorio-separado th:last-child,.tabla-bodega th:last-child{width:11rem;min-width:11rem}
-.tabla-inventario-contenedor th:last-child,.tabla-inventario-contenedor td:last-child{min-width:11rem}
+.tabla-directorio-separado th:last-child,.tabla-bodega th:last-child{width:12rem;min-width:12rem}
+.tabla-inventario-contenedor th:last-child,.tabla-inventario-contenedor td:last-child{min-width:12rem}
 
 .accion-imprimir{display:inline-flex;gap:.5rem;align-items:center;flex-wrap:wrap}.marco-impresion-acta{position:fixed;left:-10000px;top:0;width:800px;height:600px;border:0}.alternativa-impresion{font-size:.85rem;white-space:nowrap}
 .tabla-movimientos.tabla-datos{min-width:75rem;table-layout:auto;word-break:normal}
 .tabla-movimientos.tabla-datos td{overflow-wrap:normal;min-width:6.5rem}
-.tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:11rem}
+.tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:12rem}
+
+/* Acciones compartidas: icono, nombre accesible y ayuda al pasar el cursor. */
+.accion-icono.btn{display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;min-width:2.75rem;padding:.5rem;flex-shrink:0;transition:none}
+.accion-icono svg{flex-shrink:0}
+.operacion-seccion{margin-block:1rem;padding:1rem;border:1px solid var(--borde,#cad8e3);border-radius:12px}
+.operacion-seccion h3{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:0}
+.operacion-seccion .ficha-datos{margin-bottom:0}
+.operacion-persona{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem 1.25rem}
+.operacion-persona .campo-catalogos{margin:0}
+@media(max-width:600px){.operacion-persona{grid-template-columns:1fr}.operacion-seccion{padding:.75rem}}
+
+.operacion-persona input[readonly]{background:transparent;border-color:transparent;padding-inline:0;color:inherit}
