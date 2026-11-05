@@ -17,6 +17,6 @@ export function validarCorreoActa(s:string){
 }
 export function destinatariosActa(s:string){const a=s.split(',').map(validarCorreoActa);if(!a.length||a.length>5||new Set(a).size!==a.length)throw new Error('Indica hasta cinco correos distintos separados por comas.');return a;}
 export function folioActa(n:number|string){const v=String(n);if(!/^\d{1,12}$/.test(v))throw new Error('Folio inválido.');return 'ACT-'+v.padStart(6,'0');}
-export type DatosActa={schema:number;tipo:'asignacion'|'devolucion'|'entrega_historica';fecha:string;emitidoEn:string;movimientoId:string|null;entregaId?:string;clase:'equipo'|'celular';origen:string;destino:string;sedeNombre:string;rbd:string;receptorNombre:string;sedeTipo?:string;sedeDatos?:{direccion?:string;comuna?:string;correoInstitucional?:string};actor:string;bienes:Array<Record<string,unknown>>;metadata:MetadataActa;folio:number;version:number};
+export type DatosActa={schema:number;tipo:'asignacion'|'devolucion'|'entrega_historica';fecha:string;emitidoEn:string;movimientoId:string|null;entregaId?:string;clase:'equipo'|'celular';origen:string;destino:string;sedeNombre:string;rbd:string;receptorNombre:string;sedeTipo?:string;comuna?:string;sedeDatos?:{direccion?:string;comuna?:string;correoInstitucional?:string};actor:string;bienes:Array<Record<string,unknown>>;metadata:MetadataActa;folio:number;version:number};
 
 export const TIPOS_ACTA={asignacion:"Asignación",devolucion:"Devolución",entrega_historica:"Entrega histórica"};

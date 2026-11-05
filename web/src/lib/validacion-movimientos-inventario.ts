@@ -24,3 +24,7 @@ export function retornoMovimiento(v:string){
 export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:'devolucion'|'asignacion'){
  const base=retornoMovimiento(ruta);if(!base||!esIdSede(id))throw new Error('Enlace de movimiento inválido.');const u=new URL(base,'http://inventario.local');u.searchParams.set('movimiento',accion);u.searchParams.set('bien',id);u.searchParams.set('claseBien',tipo);return u.pathname+u.search;
 }
+
+export function enlaceActaInventario(volver:string,id:string){
+ const base=retornoMovimiento(volver);if(!base||!esIdSede(id))throw new Error('Regreso al inventario inválido.');const u=new URL(base,'http://inventario.local');u.searchParams.set('acta',id);return u.pathname+u.search;
+}
