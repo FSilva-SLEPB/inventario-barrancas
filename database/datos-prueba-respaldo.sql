@@ -107,4 +107,25 @@ BEGIN
 END;
 $acta_historica_ci$;
 
+DO $prestamos_ci$
+DECLARE eq uuid;meta jsonb;pdf_ficticio bytea;r jsonb;
+BEGIN
+ IF to_regclass('public.prestamos_inventario') IS NOT NULL THEN
+  SELECT pdf INTO pdf_ficticio FROM public.actas_documentos WHERE id='80000000-0000-4000-8000-000000000001';
+  meta:=jsonb_build_object('entregaNombre','UTIC ficticio de recuperación','entregaRun','','entregaCargo','UTIC','entregaCorreo','','recibeRun','','recibeCargo','Receptor ficticio','recibeCorreo','persona@example.org','accesorios','','observaciones','Solo prueba de recuperación');
+  eq:=public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object('id','','sedeId','10000000-0000-4000-8000-000000000001','categoriaId','30000000-0000-4000-8000-000000000001','marca','Marca ficticia','modelo','Préstamo de recuperación','serie','CI-PRESTAMO-SERIE','inventario','CI-PRESTAMO-INV','origen','compra_utic','condicionTecnica','sin_verificar','custodiaInicial','en_bodega'),0,'Préstamo ficticio para recuperación');
+  PERFORM public.mover_prestamo_acceso('felipe.silva@slepb.gob.cl','d1000000-0000-4000-8000-000000000001',jsonb_build_object('tipo','equipo','bienId',eq,'accion','prestamo','destino','50000000-0000-4000-8000-000000000001','fecha','2026-11-01','fechaLimite','2026-11-08','prestamoId','','version',1,'receptor','Persona prestataria ficticia','motivo',''));
+  r:=public.preparar_acta_acceso('felipe.silva@slepb.gob.cl','e1000000-0000-4000-8000-000000000001','d1000000-0000-4000-8000-000000000001',meta);
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','e1000000-0000-4000-8000-000000000001',pdf_ficticio);
+  PERFORM public.guardar_celular_acceso('felipe.silva@slepb.gob.cl','e0000000-0000-4000-8000-000000000002',jsonb_build_object('sedeId','10000000-0000-4000-8000-000000000001','telefono','+56900000002','marca','Marca ficticia','modelo','Préstamo celular recuperación','imei','','inventario','CI-PRESTAMO-CEL','condicionTecnica','sin_verificar','responsable','Uso original de recuperación','observaciones','','activo',true,'custodiaInicial','en_bodega'),0,'Celular ficticio para recuperación');
+  PERFORM public.mover_prestamo_acceso('felipe.silva@slepb.gob.cl','d1000000-0000-4000-8000-000000000002',jsonb_build_object('tipo','celular','bienId','e0000000-0000-4000-8000-000000000002','accion','prestamo','destino','50000000-0000-4000-8000-000000000001','fecha','2026-11-01','fechaLimite','2026-11-08','prestamoId','','version',1,'receptor','Persona prestataria ficticia','motivo',''));
+  r:=public.preparar_acta_acceso('felipe.silva@slepb.gob.cl','e1000000-0000-4000-8000-000000000002','d1000000-0000-4000-8000-000000000002',meta);
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','e1000000-0000-4000-8000-000000000002',pdf_ficticio);
+  PERFORM public.mover_prestamo_acceso('felipe.silva@slepb.gob.cl','d2000000-0000-4000-8000-000000000002',jsonb_build_object('tipo','celular','bienId','e0000000-0000-4000-8000-000000000002','accion','devolucion_prestamo','destino','','fecha','2026-11-02','fechaLimite','','prestamoId','d1000000-0000-4000-8000-000000000002','version',2,'receptor','UTIC ficticio que recibe','motivo',''));
+  r:=public.preparar_acta_acceso('felipe.silva@slepb.gob.cl','e2000000-0000-4000-8000-000000000002','d2000000-0000-4000-8000-000000000002',meta);
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','e2000000-0000-4000-8000-000000000002',pdf_ficticio);
+ END IF;
+END;
+$prestamos_ci$;
+
 COMMIT;

@@ -134,3 +134,6 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 @media(max-width:600px){.operacion-persona{grid-template-columns:1fr}.operacion-seccion{padding:.75rem}}
 
 .operacion-persona input[readonly]{background:transparent;border-color:transparent;padding-inline:0;color:inherit}
+
+.estado-custodia.en_prestamo{background:var(--color-seleccion);color:var(--color-primario);border-color:var(--color-borde)}
+.estado-custodia.vencido{background:var(--color-pendiente-fondo);color:var(--color-pendiente-texto);border-color:var(--color-pendiente-borde)}

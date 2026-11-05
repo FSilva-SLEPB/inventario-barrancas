@@ -18,7 +18,7 @@ test('PDF real usa fuente institucional y pagina textos extensos sin mutar datos
  const antes=JSON.stringify(d),pdf=await pdfmod.namespace.generarPdfActa(d);assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.ok(pdf.length>10000);assert.ok(pdf.toString('latin1').includes('/Subtype /Image'),'Logo institucional incrustado en el PDF');assert.ok((pdf.toString('latin1').match(/\/Type \/Page\b/g)??[]).length>=2);assert.equal(JSON.stringify(d),antes);
 });
 const correo=await cargar('@/lib/correo-actas');await correo.evaluate();
-test('correo exige remitente institucional y configuración coherente',()=>{const f=correo.namespace.configuracionCorreoActas;assert.throws(()=>f({}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'persona@example.org'}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',ACTAS_SMTP_USUARIO:'uno'}));const x=f({ACTAS_SMTP_HOST:'smtp.example.org',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl'});assert.equal(x.port,587);assert.equal(x.secure,false);});
+test('correo exige remitente institucional y configuración coherente',()=>{const f=correo.namespace.configuracionCorreoActas;assert.throws(()=>f({}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'persona@example.org'}));assert.throws(()=>f({ACTAS_SMTP_HOST:'servidor',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',ACTAS_SMTP_USUARIO:'uno'}));const x=f({ACTAS_SMTP_HOST:'smtp.example.org',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl',ACTAS_CORREO_PRUEBA_DESTINATARIOS:'persona@example.org'});assert.equal(x.port,587);assert.equal(x.secure,false);});
 
 test('entrega histórica admite desconocidos sin aceptar RUN falso ni alterar requisitos de movimientos',()=>{const vacios=Object.fromEntries(Object.keys(metadata).map(k=>[k,'']));assert.equal(metadatosActa(vacios,true).entregaNombre,'');assert.throws(()=>metadatosActa(vacios));assert.throws(()=>metadatosActa({...vacios,recibeRun:'12345678-9'},true));});
 
@@ -29,3 +29,11 @@ test('modelo institucional distingue NC, establecimientos, jardines, celulares y
 test('unidad y subdirección son opcionales compatibles con documentos previos, con límites y controles',()=>{assert.equal(metadatosActa(metadata).recibeUnidad,'');assert.equal(metadatosActa({...metadata,recibeUnidad:'Unidad TIC',recibeSubdireccion:'Planificación'}).recibeSubdireccion,'Planificación');assert.throws(()=>metadatosActa({...metadata,recibeUnidad:'x'.repeat(201)}));assert.throws(()=>metadatosActa({...metadata,recibeSubdireccion:'Una\nOtra'}));});
 
 test('RUN desconocido queda vacío y uno informado debe ser válido',()=>{const r=metadatosActa({...metadata,entregaRun:'',recibeRun:''});assert.equal(r.entregaRun,'');assert.equal(r.recibeRun,'');assert.throws(()=>metadatosActa({...metadata,entregaRun:'12345678-9'}));});
+
+test('correo de ensayo falla cerrado y solo acepta la lista autorizada',async()=>{
+ const f=correo.namespace.configuracionCorreoActas,v=correo.namespace.validarDestinosCorreoActas,env={ACTAS_SMTP_HOST:'127.0.0.1',ACTAS_CORREO_REMITENTE:'no-responder@slepb.gob.cl'};
+ assert.throws(()=>f(env));assert.throws(()=>f({...env,ACTAS_CORREO_MODO:'otro'}));assert.throws(()=>f({...env,ACTAS_CORREO_PRUEBA_DESTINATARIOS:'persona@example.org,persona@example.org'}));
+ const c=f({...env,ACTAS_CORREO_PRUEBA_DESTINATARIOS:'Persona@example.org'});assert.equal(c.modo,'prueba');assert.throws(()=>v({...c,modo:undefined},['persona@example.org']));assert.deepEqual([...v(c,['PERSONA@example.org'])],['persona@example.org']);assert.throws(()=>v(c,['establecimiento@example.org']));assert.throws(()=>v(c,['persona@example.org','establecimiento@example.org']));
+ await assert.rejects(correo.namespace.enviarPdfActa(c,'11111111-1111-4111-8111-111111111111',['establecimiento@example.org'],{},Buffer.from('no importa')),/Modo de prueba/);
+ const prod=f({...env,ACTAS_CORREO_MODO:'produccion'});assert.equal(prod.modo,'produccion');assert.deepEqual([...v(prod,['destino@example.org'])],['destino@example.org']);
+});

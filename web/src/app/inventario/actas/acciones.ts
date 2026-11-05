@@ -8,7 +8,7 @@ import {esIdSede} from '@/lib/validacion-sedes';
 import {retornoMovimiento,enlaceActaInventario} from '@/lib/validacion-movimientos-inventario';
 import {CAMPOS_ACTA,metadatosActa,destinatariosActa} from '@/lib/validacion-actas';
 import {emitirActa,obtenerActa,fuenteActaEntrega,ESTADOS_ENVIO} from '@/lib/actas';
-import {configuracionCorreoActas,enviarPdfActa} from '@/lib/correo-actas';
+import {configuracionCorreoActas,enviarPdfActa,validarDestinosCorreoActas} from '@/lib/correo-actas';
 import {destinoConExito} from '@/lib/aviso-exito';
 export type EstadoActa={estado:'inicial'|'error'|'resultado';mensaje:string;revision:string;valores:Record<string,string>};
 function retornoFormulario(f:FormData){const v=f.get('volver');if(f.getAll('volver').length>1||v!==null&&(typeof v!=='string'||v!==''&&!retornoMovimiento(v)))throw new Error('Regreso al inventario inválido.');return typeof v==='string'&&v?retornoMovimiento(v):null;}
@@ -24,7 +24,7 @@ export async function enviarActa(_previo:EstadoActa,f:FormData):Promise<EstadoAc
  const actor=await exigirAdministrador(),revision=randomUUID(),raw=f.get('destinatarios'),valores={destinatarios:typeof raw==='string'?raw.slice(0,1500):''},fallo=(mensaje:string):EstadoActa=>({estado:'error',mensaje,revision,valores});
  const id=f.get('acta'),solicitud=f.get('solicitud'),revisado=f.get('revisado');const campos=['acta','solicitud','destinatarios'];if(campos.some(k=>f.getAll(k).length!==1)||f.getAll('revisado').length>1||[...f.keys()].some(k=>!campos.includes(k)&&k!=='revisado'&&k!=='volver'&&!k.startsWith('$ACTION'))||typeof id!=='string'||!esIdSede(id)||typeof solicitud!=='string'||!esIdSede(solicitud)||typeof raw!=='string'||raw.length>1500||(revisado!==null&&revisado!=='si'))return fallo('Formulario inválido. Vuelve a abrir el envío.');
  let retorno:string|null;try{retorno=retornoFormulario(f);}catch{return fallo('El regreso al inventario no es válido.');}
- let destinos:string[],config:ReturnType<typeof configuracionCorreoActas>;try{destinos=destinatariosActa(raw);config=configuracionCorreoActas();}catch(e){return fallo(e instanceof Error?e.message:'Revisa los destinatarios.');}
+ let destinos:string[],config:ReturnType<typeof configuracionCorreoActas>;try{destinos=destinatariosActa(raw);config=configuracionCorreoActas();destinos=validarDestinosCorreoActas(config,destinos);}catch(e){return fallo(e instanceof Error?e.message:'Revisa los destinatarios.');}
  const acta=await obtenerActa(id,true);if(!acta?.pdf)return fallo('El acta no está disponible.');
  try{const r=(await obtenerBaseDatos().query<{r:{repetida:boolean;token?:string;estado:string}}>('SELECT public.iniciar_envio_acta_acceso($1,$2,$3,$4::text[],$5,$6) AS r',[actor.email,solicitud,id,destinos,config.remitente,revisado==='si'])).rows[0].r;
  if(r.repetida){revalidatePath('/inventario/actas/'+id);return {estado:'resultado',mensaje:'Esta solicitud ya fue procesada: '+(ESTADOS_ENVIO[r.estado]??r.estado)+'. No se repitió el envío.',revision,valores};}

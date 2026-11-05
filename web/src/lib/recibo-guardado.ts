@@ -1,5 +1,7 @@
 import {createHmac,randomUUID,timingSafeEqual} from 'node:crypto';
 export const MENSAJES_EXITO={
+ prestamo:{titulo:'Préstamo registrado',texto:'El bien quedó en préstamo temporal y su acta está lista para imprimir o enviar.'},
+ devolucion_prestamo:{titulo:'Préstamo devuelto',texto:'El préstamo quedó cerrado, el bien volvió a Bodega TI y su acta está lista.'},
  acta:{titulo:'Acta emitida',texto:'El folio y el PDF de esta versión quedaron guardados.'},
  correo:{titulo:'Correo enviado',texto:'El servidor de correo aceptó el envío con el PDF adjunto.'},
  devolucion:{titulo:'Devolución registrada',texto:'El bien quedó en Bodega TI y su acta está lista para imprimir o enviar.'},

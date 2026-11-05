@@ -28,5 +28,5 @@ export function enlaceFichaInventario(volver:string,accion:'ver'|'editar',id:str
  const u=new URL(base,'http://inventario.local');u.searchParams.set(accion,id);return u.pathname+u.search;
 }
 export function equipoEnVista(e:{sedeTipo:string;situacion:string;custodia?:string},ambito:'nc'|'eeji',vista:string){
- return (ambito==='nc'?e.sedeTipo==='nivel_central':['establecimiento','jardin_infantil'].includes(e.sedeTipo))&&((vista==='pendientes')===(e.custodia?e.custodia==='en_bodega':e.situacion==='pendiente_entrega'));
+ return e.custodia!=='en_prestamo'&&(ambito==='nc'?e.sedeTipo==='nivel_central':['establecimiento','jardin_infantil'].includes(e.sedeTipo))&&((vista==='pendientes')===(e.custodia?e.custodia==='en_bodega':e.situacion==='pendiente_entrega'));
 }

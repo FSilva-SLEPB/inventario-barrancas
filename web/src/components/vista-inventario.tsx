@@ -49,7 +49,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
   if(seleccionado&&!esIdSede(seleccionado))notFound();
   const equipoSeleccionado=seleccionado?await obtenerEquipo(seleccionado):null;
   if(seleccionado&&(!equipoSeleccionado||!equipoEnVista(equipoSeleccionado,ambito,vista)))notFound();
-  const editando=Boolean(editar&&equipoSeleccionado&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.custodia!=='en_bodega'));
+  const editando=Boolean(editar&&equipoSeleccionado&&equipoSeleccionado.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.custodia!=='en_bodega'));
   const titulo = bodega ? "Bodega TI" : ambito === "nc" ? "Inventario Nivel Central" : "Inventario P02";
   const paginas = Math.max(1, Math.ceil(total / limite));
 
@@ -86,7 +86,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           <td><span className={`estado-custodia ${e.custodia}`}>{CUSTODIAS[e.custodia as keyof typeof CUSTODIAS]??(e.situacion==='pendiente_entrega'?CUSTODIAS.en_bodega:CUSTODIAS.asignado)}</span>{e.situacion==='recibido_historico'&&<small>Recibido (histórico)</small>}
             {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
             <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}><AccionesCustodia tipo="equipo" id={e.id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/></AccionesRegistro>
+          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={e.custodia==='en_prestamo'?undefined:puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}><AccionesCustodia tipo="equipo" id={e.id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/></AccionesRegistro>
           </td>
         </tr>)}
           {!equipos.length && <tr><td colSpan={bodega ? 9 : ambito === "eeji" ? 8 : 6} className={styles.vacio}>No hay equipos que coincidan con los filtros seleccionados.</td></tr>}

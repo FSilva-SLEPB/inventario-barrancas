@@ -47,3 +47,7 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
 
 - Acciones de listados con iconos (ojo, lápiz y flechas), nombre accesible y ayuda.
 - Entregas: motivo opcional, emisor desde la cuenta autenticada, participantes precargados y editables con lápiz. Separar institución y director/a; NC selecciona funcionario y muestra unidad/subdirección, sin campos de colegio. No inventar nombres ni RUN que no existen en las fichas. Reimprimir conserva el emisor original.
+
+- En los ensayos de correo usar únicamente el buzón de prueba/Barranquín confirmado por Felipe; nunca los correos reales de establecimientos. Modo prueba por defecto, lista explícita y validación antes de auditoría y transporte. No habilitar modo producción sin una nueva instrucción.
+
+- Préstamos temporales: salen únicamente de Bodega TI, con fecha límite y confirmación de UTIC. Conservan la sede de pertenencia; el destino temporal no reemplaza el inventario original. La devolución exige el ID del préstamo exacto y vuelve a Bodega TI. Vencer no devuelve ni prorroga automáticamente. Movimientos, préstamo, acta y folio comparten transacción e idempotencia. Consulta de prestatarios y actas solo UTIC en esta etapa.
