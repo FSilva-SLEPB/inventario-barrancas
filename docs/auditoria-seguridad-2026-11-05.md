@@ -19,7 +19,7 @@ no se accedió a CentOS ni se enviaron correos institucionales desde desarrollo.
 | Agente QA: dependencias web de ejecución y paquete de migraciones | 0 avisos reportados en esas consultas |
 | Agente QA: web incluyendo desarrollo | 10 paquetes afectados directa o indirectamente, moderados; 0 altos/críticos |
 | Implementador: conjunto unitario completo | 125 pruebas aprobadas |
-| Implementador: suite HTTP, servidor compilado, SQL y SMTP local | 560 comprobaciones aprobadas; 42 específicas de préstamos |
+| Implementador: suite HTTP, servidor compilado, SQL y SMTP local | 562 comprobaciones aprobadas; 44 específicas de préstamos |
 | Implementador: navegador Chromium con equipos/celulares y NC/EE/JI | 4 préstamos y 4 retornos, ocho PDFs, iconos, filtros, validación, teclado, móvil e impresión |
 | Implementador: actualización 14→18 y repetición | Datos, entregas, custodia, PDFs, folios e idempotencia anteriores conservados |
 | Implementador: recuperación con préstamos abiertos/cerrados | Cifrado, rechazo de claves/archivos alterados y restauración aislada aprobados |

@@ -54,8 +54,8 @@ desde desarrollo ni se usaron destinatarios reales de establecimientos.
 
 ## Calidad y seguridad
 
-Se ejecutaron 125 pruebas unitarias y 560 comprobaciones HTTP en la aplicación
-compilada con datos ficticios, incluidas 42 de préstamos. Chromium comprobó cuatro
+Se ejecutaron 125 pruebas unitarias y 562 comprobaciones HTTP en la aplicación
+compilada con datos ficticios, incluidas 44 de préstamos. Chromium comprobó cuatro
 salidas y cuatro retornos de equipos/celulares entre NC, EE y JI, ocho PDFs,
 impresión, precargas, validaciones, filtros, teclado y móvil. Se comprobó la
 actualización repetible desde una base anterior y la recuperación cifrada con
