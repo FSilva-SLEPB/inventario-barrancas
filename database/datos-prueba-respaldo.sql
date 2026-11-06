@@ -128,4 +128,17 @@ BEGIN
 END;
 $prestamos_ci$;
 
+DO $operacion_ci$
+DECLARE bien uuid;r jsonb;meta jsonb;
+BEGIN
+ IF to_regclass('public.operaciones_inventario') IS NOT NULL THEN
+  bien:=public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object('id','','sedeId','50000000-0000-4000-8000-000000000001','categoriaId','30000000-0000-4000-8000-000000000001','marca','Marca ficticia','modelo','Traspaso de recuperación','serie','CI-OPERACION-SERIE','inventario','CI-OPERACION-INV','origen','compra_sede','condicionTecnica','sin_verificar','custodiaInicial','asignado'),0,'Alta ficticia de recuperación');
+  PERFORM public.mover_operacion_acceso('felipe.silva@slepb.gob.cl','f1000000-0000-4000-8000-000000000001',jsonb_build_object('tipo','traspaso','clase','equipo','destino','a0000000-0000-4000-8000-000000000001','fecha','2026-11-02','receptor','Receptora del traspaso ficticio','receptorDevolucion','','motivo','','devoluciones','[]'::jsonb,'entregas',jsonb_build_array(jsonb_build_object('id',bien,'version',1,'movimientoId','f2000000-0000-4000-8000-000000000001')),'detalleDevueltos','','detalleEntregados','Accesorios ficticios de recuperación'));
+  meta:=jsonb_build_object('entregaNombre','Persona que entrega ficticia','entregaRun','','entregaCargo','Director/a','entregaCorreo','','recibeRun','','recibeCargo','Director/a','recibeCorreo','persona@example.org','accesorios','','observaciones','PDF ficticio exclusivo de la batería de recuperación');
+  r:=public.preparar_acta_operacion_acceso('felipe.silva@slepb.gob.cl','f3000000-0000-4000-8000-000000000001','f1000000-0000-4000-8000-000000000001',meta);
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','f3000000-0000-4000-8000-000000000001',(SELECT pdf FROM public.actas_documentos WHERE id='80000000-0000-4000-8000-000000000001'));
+ END IF;
+END;
+$operacion_ci$;
+
 COMMIT;

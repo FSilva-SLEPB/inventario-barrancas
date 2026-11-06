@@ -2,7 +2,7 @@ import {esIdSede} from '@/lib/validacion-sedes';
 import {hoyChile} from '@/lib/validacion-entregas';
 export const CUSTODIAS={en_bodega:'En Bodega TI',asignado:'Asignado / recibido',en_prestamo:'En préstamo'} as const;
 export type AccionMovimiento='asignacion'|'devolucion'|'prestamo'|'devolucion_prestamo';
-export const ACCIONES_MOVIMIENTO={asignacion:'Asignación',devolucion:'Devolución',prestamo:'Préstamo',devolucion_prestamo:'Devolución de préstamo'};
+export const ACCIONES_MOVIMIENTO={cambio:'Cambio de equipamiento',traspaso:'Traspaso',asignacion:'Asignación',devolucion:'Devolución',prestamo:'Préstamo',devolucion_prestamo:'Devolución de préstamo'};
 export type TipoBien='equipo'|'celular';
 export type DatosMovimiento={tipo:TipoBien;bienId:string;accion:'devolucion'|'asignacion';destino:string;fecha:string;receptor:string;motivo:string;version:number};
 export function validarMovimiento(f:FormData,hoy=hoyChile()){
@@ -23,7 +23,7 @@ export function retornoMovimiento(v:string){
  if([...u.searchParams.keys()].some(k=>!['vista','q','pagina','tipo','sede','rbd','limite','estado','clase'].includes(k)))return null;
  return u.pathname+(p.size?'?'+p:'');}catch{return null;}
 }
-export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:AccionMovimiento,prestamoId?:string){
+export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:AccionMovimiento|'cambio'|'traspaso',prestamoId?:string){
  const base=retornoMovimiento(ruta);if(!base||!esIdSede(id))throw new Error('Enlace de movimiento inválido.');const u=new URL(base,'http://inventario.local');u.searchParams.set('movimiento',accion);u.searchParams.set('bien',id);u.searchParams.set('claseBien',tipo);if(accion==='devolucion_prestamo'){if(!prestamoId||!esIdSede(prestamoId))throw new Error('Identifica el préstamo.');u.searchParams.set('prestamoId',prestamoId);}return u.pathname+u.search;
 }
 

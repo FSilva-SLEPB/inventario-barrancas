@@ -1,6 +1,8 @@
 import type {DatosActa} from '@/lib/validacion-actas';
 // Contenido institucional homologado a partir de los modelos Word proporcionados por Felipe.
 export function tituloDocumentoActa(d:DatosActa){
+ if(d.tipo==='cambio')return d.clase==='celular'?'Acta de cambio de celulares':'Acta de cambio de equipamiento';
+ if(d.tipo==='traspaso')return d.clase==='celular'?'Acta de traspaso de celulares':'Acta de traspaso de equipamiento';
  if(d.tipo==='entrega_historica')return 'Acta de entrega registrada';
  if(d.tipo==='prestamo')return 'Acta de préstamo temporal'+(d.sedeTipo==='nivel_central'?' · Nivel Central':'');
  if(d.tipo==='devolucion_prestamo')return 'Acta de devolución de préstamo';

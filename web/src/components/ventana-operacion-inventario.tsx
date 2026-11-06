@@ -1,0 +1,33 @@
+import {randomUUID} from 'node:crypto';
+import Link from 'next/link';
+import {notFound} from 'next/navigation';
+import {exigirAdministrador} from '@/lib/acceso';
+import {obtenerEquipo} from '@/lib/equipos';
+import {detalleCelular} from '@/lib/celulares';
+import {listarSedes} from '@/lib/sedes';
+import {listarDirectorio} from '@/lib/directorio';
+import {obtenerBaseDatos} from '@/lib/db';
+import {candidatosOperacion,ultimaEntregaBien} from '@/lib/operaciones-inventario';
+import {hoyChile} from '@/lib/validacion-entregas';
+import type {TipoBien} from '@/lib/validacion-movimientos-inventario';
+import {funcionarioDeEntrega,type TipoOperacionInventario} from '@/lib/validacion-operaciones-inventario';
+import {esIdSede} from '@/lib/validacion-sedes';
+import type {FuncionarioMovimiento} from '@/components/formulario-movimiento-inventario';
+import FormularioOperacion from '@/components/formulario-operacion-inventario';
+import ModalFicha from '@/components/modal-ficha';
+export default async function VentanaOperacion({parametros:p,volver}:{parametros:Record<string,string|string[]|undefined>;volver:string}){
+ const actor=await exigirAdministrador(),tipo=p.movimiento,clase=p.claseBien,id=p.bien;
+ if(!['cambio','traspaso'].includes(String(tipo))||!['equipo','celular'].includes(String(clase))||typeof id!=='string'||!esIdSede(id))notFound();
+ const bien=clase==='equipo'?await obtenerEquipo(id):(await detalleCelular(id))?.celular;if(!bien)notFound();
+ const sedes=await listarSedes(),origen=sedes.find(s=>s.id===bien.sedeId),directa=tipo==='traspaso'&&bien.custodia==='asignado';
+ const posible=tipo==='cambio'?bien.custodia==='asignado':bien.custodia==='en_bodega'||directa&&origen?.tipo!=='nivel_central';
+ if(!posible)return <ModalFicha titulo="Revisar estado del bien" cerrarHref={volver} focoId={id}><p role="alert">Los bienes de Nivel Central deben devolverse a Bodega TI antes de traspasarlos. Los préstamos deben devolverse antes de otra operación.</p><Link href={volver}>Volver al listado</Link></ModalFicha>;
+ const [devueltos,entregados,directorio,personal,usuario,ultima]=await Promise.all([tipo==='cambio'?candidatosOperacion(clase as TipoBien,bien.sedeId,'asignado'):Promise.resolve([]),candidatosOperacion(clase as TipoBien,tipo==='cambio'?'':bien.sedeId,tipo==='cambio'?'en_bodega':bien.custodia),listarDirectorio(),obtenerBaseDatos().query<FuncionarioMovimiento>('SELECT id,nombre,rut,correo,cargo,unidad,subdireccion FROM public.funcionarios_nc WHERE activo ORDER BY lower(nombre),id'),obtenerBaseDatos().query<{nombre:string|null}>('SELECT nombre FROM public.usuarios_acceso WHERE correo=$1',[actor.email]),ultimaEntregaBien(clase as TipoBien,id)]);
+ const receptores=directorio.filter(d=>d.nombre&&['titular','subrogante'].includes(d.situacion??'')).map(d=>({sedeId:d.sedeId,nombre:d.nombre!,rut:d.rut??'',correo:d.correo??'',cargo:d.cargo||'Director/a'})),persona=receptores.find(d=>d.sedeId===bien.sedeId),propio=personal.rows.find(f=>f.correo?.toLowerCase()===actor.email),emisor={nombre:propio?.nombre||usuario.rows[0]?.nombre||actor.email,rut:propio?.rut??'',cargo:propio?.cargo||propio?.unidad||'UTIC',correo:actor.email},entrega=directa?persona:emisor;
+ const preparar=(filas:typeof entregados)=>filas.map(f=>({...f,movimientoId:randomUUID()})),dev=preparar(devueltos),sal=preparar(entregados),semilla=(tipo==='cambio'?dev:sal).find(b=>b.id===id);
+ if(!semilla)return <ModalFicha titulo="Bien no disponible" cerrarHref={volver} focoId={id}><p role="alert">El bien ya no está disponible para esta operación. Revisa su estado y los incidentes abiertos.</p></ModalFicha>;
+ const nc=origen?.tipo==='nivel_central',anterior=ultima?.metadata,funcionario=nc&&ultima?personal.rows.find(f=>f.id===funcionarioDeEntrega(personal.rows,anterior?.recibeCorreo)):undefined;
+ const inicial={fecha:hoyChile(),destino:tipo==='cambio'?bien.sedeId:'',receptor:tipo==='cambio'?(nc?ultima?.receptor||('responsable' in bien?bien.responsable:''):persona?.nombre??''):'',funcionario:tipo==='cambio'&&nc?(funcionario?.id??(ultima?'manual':'')):'',motivo:'',entregaNombre:entrega?.nombre??'',entregaRun:entrega?.rut??'',entregaCorreo:entrega?.correo??'',entregaCargo:entrega?.cargo??'',recibeRun:tipo==='cambio'?(nc?anterior?.recibeRun??'':persona?.rut??''):'',recibeCorreo:tipo==='cambio'?(nc?anterior?.recibeCorreo??'':persona?.correo??''):'',recibeCargo:tipo==='cambio'?(nc?anterior?.recibeCargo??'':persona?.cargo??''):'',recibeUnidad:nc?anterior?.recibeUnidad??'':'',recibeSubdireccion:nc?anterior?.recibeSubdireccion??'':'',accesorios:'',observaciones:'',detalleDevueltos:'',detalleEntregados:'',devoluciones:JSON.stringify(tipo==='cambio'?[{id:semilla.id,version:semilla.version,movimientoId:semilla.movimientoId}]:[]),entregas:JSON.stringify(tipo==='traspaso'?[{id:semilla.id,version:semilla.version,movimientoId:semilla.movimientoId}]:[])};
+ const destinos=sedes.filter(s=>s.activo&&(tipo==='cambio'?s.id===bien.sedeId:s.id!==bien.sedeId&&(!directa||s.tipo!=='nivel_central')));
+ return <ModalFicha titulo={tipo==='cambio'?'Cambio de equipamiento':'Traspaso de bienes'} cerrarHref={volver} editando focoId={id}><FormularioOperacion tipo={tipo as TipoOperacionInventario} clase={clase as TipoBien} solicitud={randomUUID()} actaSolicitud={randomUUID()} inicial={inicial} devueltos={dev} entregados={sal} sedes={destinos} receptores={receptores} funcionarios={personal.rows} emisor={emisor.nombre+' · '+actor.email} sedeOrigen={bien.sedeId} directa={directa} volver={volver} hoy={hoyChile()}/></ModalFicha>;
+}
