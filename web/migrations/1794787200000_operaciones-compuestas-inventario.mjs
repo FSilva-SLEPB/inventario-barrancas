@@ -121,7 +121,7 @@ BEGIN
  SELECT * INTO o FROM public.operaciones_inventario WHERE id=p_operacion FOR SHARE;
  IF NOT FOUND OR o.actor<>p_actor THEN RAISE EXCEPTION 'Operación no disponible' USING ERRCODE='P2702';END IF;
  IF o.tipo='cambio' AND meta->>'entregaNombre'<>o.solicitud->>'receptorDevolucion' THEN RAISE EXCEPTION 'Revisa la persona UTIC que recibe los devueltos y entrega el reemplazo' USING ERRCODE='22023';END IF;
- SELECT COALESCE(jsonb_agg(m.despues ORDER BY COALESCE(m.equipo_id,m.celular_id)) FILTER(WHERE d.grupo='entrega'),'[]'),COALESCE(jsonb_agg(m.antes ORDER BY COALESCE(m.equipo_id,m.celular_id)) FILTER(WHERE d.grupo='devolucion'),'[]') INTO entregados,devueltos FROM public.operaciones_inventario_detalle d JOIN public.movimientos_inventario m ON m.id=d.movimiento_id WHERE d.operacion_id=o.id;
+ SELECT COALESCE(jsonb_agg(m.despues ORDER BY COALESCE(m.equipo_id,m.celular_id)) FILTER(WHERE d.grupo='entrega'),'[]'),COALESCE(jsonb_agg(m.antes||jsonb_build_object('categoriaNombre',m.despues->>'categoriaNombre') ORDER BY COALESCE(m.equipo_id,m.celular_id)) FILTER(WHERE d.grupo='devolucion'),'[]') INTO entregados,devueltos FROM public.operaciones_inventario_detalle d JOIN public.movimientos_inventario m ON m.id=d.movimiento_id WHERE d.operacion_id=o.id;
  UPDATE public.actas_contador SET ultimo=ultimo+1 WHERE id AND ultimo<999999999999 RETURNING ultimo INTO numero;
  IF NOT FOUND THEN RAISE EXCEPTION 'No se pudo asignar folio' USING ERRCODE='P2702';END IF;
  s:=o.datos->'destino';
