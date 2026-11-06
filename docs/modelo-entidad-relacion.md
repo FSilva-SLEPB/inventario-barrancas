@@ -21,6 +21,7 @@ erDiagram
     text sha256
     timestamp_with_time_zone emitido_en
     uuid entrega_id FK
+    uuid operacion_id FK
   }
   actas_envios {
     uuid id PK
@@ -255,6 +256,23 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
+  operaciones_inventario {
+    uuid id PK
+    text tipo
+    text clase
+    text actor
+    uuid origen_sede_id FK
+    uuid destino_sede_id FK
+    boolean directa
+    jsonb solicitud
+    jsonb datos
+    timestamp_with_time_zone registrado_en
+  }
+  operaciones_inventario_detalle {
+    uuid operacion_id FK
+    uuid movimiento_id PK, FK
+    text grupo
+  }
   prestamos_inventario {
     uuid id PK, FK
     uuid equipo_id FK
@@ -300,6 +318,7 @@ erDiagram
   }
   entregas_equipos |o--o| actas_documentos : "entrega_id"
   movimientos_inventario |o--o| actas_documentos : "movimiento_id"
+  operaciones_inventario |o--o| actas_documentos : "operacion_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
@@ -328,6 +347,10 @@ erDiagram
   sedes |o--o{ movimientos_inventario : "destino_sede_id"
   equipos |o--o{ movimientos_inventario : "equipo_id"
   sedes |o--o{ movimientos_inventario : "origen_sede_id"
+  sedes ||--o{ operaciones_inventario : "destino_sede_id"
+  sedes ||--o{ operaciones_inventario : "origen_sede_id"
+  movimientos_inventario ||--o| operaciones_inventario_detalle : "movimiento_id"
+  operaciones_inventario ||--o{ operaciones_inventario_detalle : "operacion_id"
   celulares |o--o{ prestamos_inventario : "celular_id"
   sedes ||--o{ prestamos_inventario : "destino_sede_id"
   equipos |o--o{ prestamos_inventario : "equipo_id"
@@ -342,7 +365,7 @@ erDiagram
 | Tabla | Área | Uso en esta versión |
 | --- | --- | --- |
 | actas_contador | Actas | Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número. |
-| actas_documentos | Actas | Acta de movimiento o entrega histórica (una sola fuente), con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
+| actas_documentos | Actas | Acta de movimiento, entrega histórica u operación compuesta (una sola fuente), con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
@@ -362,7 +385,9 @@ erDiagram
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
-| movimientos_inventario | Movimientos | Asignaciones, devoluciones y préstamos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
+| movimientos_inventario | Movimientos | Asignaciones, devoluciones, préstamos y traspasos directos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
+| operaciones_inventario | Movimientos | Cambio con grupos devueltos y reemplazos, o traspaso entre sedes; ruta real directa educativa o vía Bodega TI, solicitud y procedencia inmutables. |
+| operaciones_inventario_detalle | Movimientos | Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
 | prestamos_inventario | Préstamos | Préstamos temporales desde Bodega TI, pertenencia conservada, destino y plazo, devolución vinculada e historial en movimientos. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
@@ -377,6 +402,7 @@ erDiagram
 - Celulares: inventario dedicado con sede y un número móvil por equipo; celulares_historial conserva números anteriores, cambios de sede y vigencia. Dos por EE/JI es una referencia, no una restricción.
 - Actas: cada documento se vincula a un movimiento y conserva folio, datos y PDF con su SHA-256; actas_envios registra los intentos y resultados de correo. actas_contador mantiene la secuencia única desde 0.
 - Préstamos: cada préstamo conserva el bien y su sede de pertenencia, destino temporal, plazo, movimiento de salida y devolución exacta. Solo uno activo por bien; se consulta por UTIC fuera del inventario recibido del destinatario.
+- Operaciones compuestas: cada cambio o traspaso agrupa movimientos individuales y conserva una sola acta. El cambio separa bienes devueltos y reemplazos; el traspaso directo solo se admite entre sedes educativas. Si participa Nivel Central, se requiere paso por Bodega TI.
 - Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las ubicaciones físicas de Bodega TI se definirán después.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.

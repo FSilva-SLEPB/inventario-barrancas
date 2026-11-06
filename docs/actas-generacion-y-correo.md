@@ -47,9 +47,11 @@ con más bienes o texto, continúan con logo, cabecera, tabla y numeración de p
 
 Los préstamos temporales y su devolución vinculada se implementan en la actualización
 18; véase [Préstamos](prestamos-inventario.md). Usan los modelos de préstamo EE/NC
-aportados por Felipe, con plazo y referencia al documento original. Los cambios o
-traspasos compuestos, entrega de insumos y bajas siguen pendientes de operaciones
-propias; no se registran mediante una asignación ficticia.
+aportados por Felipe, con plazo y referencia al documento original. La actualización
+19 incorpora [Cambios y traspasos](cambios-y-traspasos.md): ambas listas del cambio
+y los movimientos de cada traspaso comparten una sola acta. Los directos entre sedes
+educativas registran su ruta real; Nivel Central requiere Bodega TI. Entrega de
+insumos y bajas formales siguen pendientes de operaciones propias.
 
 ## Datos anteriores y folios
 
@@ -85,13 +87,14 @@ opcional antiguo de NextAuth. La autenticación institucional sigue usando Googl
 La integración inicial utilizó `1794355200000_actas-documentos-correo` y la fuente
 histórica `1794441600000_actas-entregas-historicas`. El recorrido actual requiere
 **1794528000000_acta-desde-inventario**, **1794614400000_operaciones-automatizadas**
-y **1794700800000_prestamos-inventario**,
+**1794700800000_prestamos-inventario** y
+**1794787200000_operaciones-compuestas-inventario**,
 y reconstruir/recrear la web compilada.
 
-La última migración conserva los documentos y datos previos; amplía los metadatos
-opcionales y guarda ubicación, tipo de sede y categoría al confirmar, para que el
-PDF no dependa de cambios posteriores en los mantenedores. Mantiene permisos,
-versiones e idempotencia, incluidos los metadatos de documentos anteriores.
+La migración 19 conserva los documentos y datos previos y agrega una fuente de
+acta exclusiva para la operación compuesta, con cabecera, detalle y procedencia.
+El PDF conserva participantes, bienes y ruta de la emisión; no depende de cambios
+posteriores en los mantenedores. Mantiene permisos, versiones e idempotencia.
 
 Respaldo, migraciones y salud se comprueban antes de habilitar la web. La ejecución
 standalone debe incluir fuentes institucionales y logo local, incluso en las rutas

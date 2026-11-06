@@ -37,3 +37,11 @@ test('correo de ensayo falla cerrado y solo acepta la lista autorizada',async()=
  await assert.rejects(correo.namespace.enviarPdfActa(c,'11111111-1111-4111-8111-111111111111',['establecimiento@example.org'],{},Buffer.from('no importa')),/Modo de prueba/);
  const prod=f({...env,ACTAS_CORREO_MODO:'produccion'});assert.equal(prod.modo,'produccion');assert.deepEqual([...v(prod,['destino@example.org'])],['destino@example.org']);
 });
+
+test('cambio conserva dos grupos de 100 bienes y pagina el PDF sin modificar el contenido',async()=>{
+ process.chdir(new URL('..',import.meta.url).pathname);
+ const bienes=prefijo=>Array.from({length:100},(_,n)=>({inventario:prefijo+'-'+String(n).padStart(3,'0'),categoriaNombre:'Equipo de prueba',marca:'Marca ficticia',modelo:'Modelo de prueba de paginación',serie:prefijo+'-SERIE-'+n,condicion_tecnica:'sin_verificar'}));
+ const d={schema:5,tipo:'cambio',fecha:'2026-11-06',emitidoEn:'2026-11-06T12:00:00Z',movimientoId:null,operacionId:'11111111-1111-4111-8111-111111111111',clase:'equipo',origen:'Bodega TI',destino:'Sede ficticia',sedeNombre:'Sede ficticia',sedeTipo:'nivel_central',rbd:'',receptorNombre:'Persona ficticia',actor:'persona@example.org',bienes:bienes('REEMPLAZO'),bienesDevueltos:bienes('DEVUELTO'),detalleDevueltos:'Accesorios de los devueltos revisados',detalleEntregados:'Accesorios de los reemplazos registrados',metadata:{...metadata,entregaRun:'',recibeRun:''},folio:0,version:1};
+ const antes=JSON.stringify(d),pdf=await pdfmod.namespace.generarPdfActa(d);assert.equal(JSON.stringify(d),antes);assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.ok((pdf.toString('latin1').match(/\/Type \/Page\b/g)??[]).length>=10);assert.ok(pdf.toString('latin1').includes('/Subtype /Image'));assert.match(modelo.namespace.tituloDocumentoActa(d),/cambio de equipamiento/);
+ if(process.env.ACTAS_PDF_TEST_DIR){const {writeFile}=await import('node:fs/promises');await writeFile(process.env.ACTAS_PDF_TEST_DIR+'/cambio-100-100.pdf',pdf);}
+});

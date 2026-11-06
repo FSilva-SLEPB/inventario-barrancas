@@ -12,20 +12,24 @@ Regla permanente acordada con Felipe: **un mismo proceso debe verse y funcionar 
 
 ## Custodia común
 
-Equipos y celulares tienen dos estados de custodia: **En Bodega TI** y **Asignado / recibido**. Funcionamiento y vigencia de la ficha son datos independientes. Archivar un celular no constituye una devolución ni una baja patrimonial.
+Equipos y celulares tienen tres estados de custodia: **En Bodega TI**, **Asignado / recibido** y **En préstamo**. Funcionamiento y vigencia de la ficha son datos independientes. Archivar un celular no constituye una devolución ni una baja patrimonial.
 
 Bodega TI reúne ambos tipos de bien. La sede que aparece allí es una referencia de destino o procedencia. Las ubicaciones físicas de las distintas bodegas se definirán después; esta versión no crea sedes ni ubicaciones ficticias.
 
-Solo los perfiles **administrador** y **administrador de gestión** de UTIC confirman movimientos. Las sedes consultan los bienes de su alcance y mantienen sus permisos ordinarios de ficha; no pueden confirmar asignaciones/devoluciones ni editar bienes en Bodega TI.
+Solo los perfiles **administrador** y **administrador de gestión** de UTIC confirman movimientos. Las sedes consultan los bienes de su alcance y mantienen sus permisos ordinarios de ficha; no pueden confirmar asignaciones, devoluciones, préstamos, cambios ni traspasos, ni editar bienes en Bodega TI o en préstamo.
 
 | Operación | Requisito | Resultado |
 | --- | --- | --- |
 | Devolver | Bien asignado | En Bodega TI; conserva la sede como referencia de procedencia |
 | Asignar | Bien en Bodega TI | Asignado a una sede activa de NC, EE o JI/SC |
+| Prestar | Bien en Bodega TI y fecha límite | En préstamo; conserva pertenencia y registra destino temporal |
+| Devolver préstamo | Préstamo abierto exacto del bien | Préstamo cerrado y bien en Bodega TI |
+| Cambiar equipamiento | Devueltos asignados a la sede receptora y reemplazos en Bodega TI | Devueltos en Bodega y reemplazos asignados, con una sola acta |
+| Traspasar | Desde Bodega, o directo entre sedes educativas | Bienes asignados a otra sede activa y acta compartida |
 
-Ambas operaciones usan la misma ventana y validación: fecha real, persona que recibe y motivo. La asignación añade la sede de destino. No se admiten fechas futuras ni anteriores al último movimiento. Cada operación comprueba permisos y versión en servidor/base, conserva antes/después y admite reintentos sin duplicar el registro. Un celular archivado o un equipo con incidente de robo abierto no se puede mover.
+Las operaciones reutilizan ventana y validación: fecha real y persona que recibe; el motivo es opcional. La asignación añade la sede de destino. No se admiten fechas futuras ni anteriores al último movimiento. Cada operación comprueba permisos y versión en servidor/base, conserva antes/después y admite reintentos sin duplicar el registro. Un celular archivado o un equipo con incidente de robo abierto no se puede mover.
 
-Para cambiar de sede se devuelve primero a Bodega TI y luego se asigna. Editar datos de la ficha no permite saltarse este proceso. El número telefónico sigue asociado al celular; cambiar de número es una edición con historial. El receptor de una asignación de celular queda como responsable; al devolverlo se limpia ese dato vigente y se conserva en el historial.
+Si participa Nivel Central como origen o destino, se devuelve primero a Bodega TI y luego se asigna o traspasa. Entre establecimientos, jardines infantiles y salas cuna se admite traspaso directo, confirmado por UTIC y registrado sin devolución ficticia. Editar datos de la ficha no sustituye estos movimientos. El número telefónico sigue asociado al celular; cambiar de número es una edición con historial. El receptor de una asignación de celular queda como responsable; al devolverlo se limpia ese dato vigente y se conserva en el historial.
 
 ## Registros existentes e historial
 
@@ -33,7 +37,7 @@ La migración `1794268800000_custodia-movimientos-inventario` añade la custodia
 
 Las situaciones antiguas de recepción se conservan para importaciones y entregas históricas. La regularización histórica de jardines sigue disponible; repetirla no revierte una devolución posterior. Las actas anteriores conservan sus instantáneas y no se sustituyen por una asignación nueva.
 
-Las devoluciones/asignaciones se consultan en Movimientos y actas y en el historial de cada ficha. `movimientos_inventario` refiere exactamente a un equipo o a un celular; sus dos historiales enlazan al movimiento. El modelo entidad relación documenta las tablas y sus relaciones reales. Después de una reasignación, una sede no obtiene el historial privado de la sede anterior.
+Asignaciones, devoluciones, préstamos, cambios y traspasos se consultan en Movimientos y actas y en el historial de cada ficha. `movimientos_inventario` refiere exactamente a un equipo o a un celular; sus dos historiales enlazan al movimiento. El modelo entidad relación documenta las tablas y sus relaciones reales. Después de una reasignación, una sede no obtiene el historial privado de la sede anterior.
 
 ## Instalación
 
@@ -46,4 +50,5 @@ como botones de su columna Acciones. Una confirmación guarda movimiento y acta
 juntos y vuelve a la consulta con el PDF abierto, listo para imprimir o enviar.
 Movimientos y actas consulta lo ya ejecutado. Las entregas anteriores pendientes
 de documentar se completan desde Actas del bien, sin repetir el movimiento.
-Consultar [Actas institucionales](actas-generacion-y-correo.md).
+Consultar [Actas institucionales](actas-generacion-y-correo.md) y [Cambios y traspasos](cambios-y-traspasos.md).
+Los cambios separan grupos de bienes devueltos y reemplazos; la cabecera y todos sus movimientos comparten folio y PDF. Un préstamo activo debe devolverse antes de editar, cambiar o traspasar el bien. El vencimiento no lo devuelve automáticamente.
