@@ -22,7 +22,7 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
       [actor.email,JSON.stringify({...datos,...(inicial.length?{custodiaInicial:inicial[0]}:{})}),Number(valores.version),datos.id ? valores.motivoCambio : "Registro inicial"]);
   } catch(error) {
     const mensajes:Record<string,string>={"23505":"La serie o el número de inventario ya está registrado. No se guardó el equipo.",
-      "42501":"No tienes permiso para modificar este equipo o sede.",P2001:"La sede o categoría no está disponible.",
+      "42501":"No tienes permiso para modificar este equipo o sede.",P3002:"El registro está dado de baja y es de solo lectura.",P2001:"La sede o categoría no está disponible.",
       P2002:"El equipo cambió. Recarga su ficha antes de guardar.",P2003:"El cambio de inventario requiere un traspaso documentado."};
     const codigo=(error as {code?:string})?.code??"";
     if(!mensajes[codigo])console.error("No se pudo guardar el equipo.");

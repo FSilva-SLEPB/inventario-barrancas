@@ -141,4 +141,16 @@ BEGIN
 END;
 $operacion_ci$;
 
+DO $estados_ci$
+DECLARE bien uuid;
+BEGIN
+ IF to_regprocedure('public.guardar_estados_activo_acceso(text,uuid,jsonb)') IS NOT NULL THEN
+  bien:=public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object('id','','sedeId','10000000-0000-4000-8000-000000000001','categoriaId','30000000-0000-4000-8000-000000000001','marca','Marca ficticia','modelo','Histórico de estados','serie','CI-ESTADOS-SERIE','inventario','CI-ESTADOS-INV','origen','compra_utic','condicionTecnica','sin_verificar','custodiaInicial','en_bodega'),0,'Alta ficticia de recuperación');
+  PERFORM public.guardar_estados_activo_acceso('felipe.silva@slepb.gob.cl','f5000000-0000-4000-8000-000000000001',jsonb_build_object('clase','equipo','id',bien,'version',1,'administrativo','dado_de_baja','condicion','sin_verificar'));
+  PERFORM public.guardar_celular_acceso('felipe.silva@slepb.gob.cl','f4000000-0000-4000-8000-000000000002',jsonb_build_object('sedeId','10000000-0000-4000-8000-000000000001','telefono','+56900000003','marca','Marca ficticia','modelo','Estado celular recuperación','imei','','inventario','CI-ESTADOS-CEL','condicionTecnica','sin_verificar','responsable','','observaciones','','activo',true,'custodiaInicial','en_bodega'),0,'Alta ficticia de recuperación');
+  PERFORM public.guardar_estados_activo_acceso('felipe.silva@slepb.gob.cl','f5000000-0000-4000-8000-000000000002',jsonb_build_object('clase','celular','id','f4000000-0000-4000-8000-000000000002','version',1,'administrativo','robado','condicion',''));
+ END IF;
+END;
+$estados_ci$;
+
 COMMIT;

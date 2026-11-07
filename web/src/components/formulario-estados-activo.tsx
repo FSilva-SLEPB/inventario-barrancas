@@ -13,6 +13,8 @@ import {
 export type PropsFormularioEstadosActivo = {
   activoId: string;
   inicial?: DatosInicialesEstadoActivo;
+  soloEstados?: boolean;
+  onConfirmarCambioAdministrativo?: (actual: RegistroEstadoActivo, anterior: RegistroEstadoActivo) => Promise<RegistroEstadoActivo | void>;
   ejecutarProtocoloSeguridad?: (activoId: string) => void | Promise<void>;
   onCambio?: (actual: RegistroEstadoActivo, anterior: RegistroEstadoActivo) => void;
   onGuardar?: (registro: RegistroEstadoActivo) => void | Promise<void>;
@@ -20,7 +22,7 @@ export type PropsFormularioEstadosActivo = {
 export default function FormularioEstadosActivo(props: PropsFormularioEstadosActivo) {
   return <EditorEstadosActivo key={props.activoId} {...props}/>;
 }
-function EditorEstadosActivo({activoId, inicial, ejecutarProtocoloSeguridad = protocoloSimulado, onCambio, onGuardar}: PropsFormularioEstadosActivo) {
+function EditorEstadosActivo({activoId, inicial, soloEstados = false, onConfirmarCambioAdministrativo, ejecutarProtocoloSeguridad = protocoloSimulado, onCambio, onGuardar}: PropsFormularioEstadosActivo) {
   const [registro, setRegistro] = useState(() => crearRegistroEstadoActivo(activoId, inicial));
   const vigente = useRef(registro);
   const [guardando, setGuardando] = useState(false);
@@ -38,12 +40,19 @@ function EditorEstadosActivo({activoId, inicial, ejecutarProtocoloSeguridad = pr
     setError('');
     try {onCambio?.(siguiente, anterior);} catch {setError('No se pudo notificar el cambio del registro.');}
   };
-  const cambiarAdministrativo = (valor: EstadoAdministrativoActivo) => {
+  const cambiarAdministrativo = async (valor: EstadoAdministrativoActivo) => {
     if (guardadoEnCurso.current) return;
     const cambio = cambiarEstadoAdministrativo(vigente.current, valor);
     if (cambio.registro === vigente.current) return;
+    let siguiente = cambio.registro;
+    if (onConfirmarCambioAdministrativo) {
+      guardadoEnCurso.current = true;setGuardando(true);setError('');
+      try {siguiente = await onConfirmarCambioAdministrativo(siguiente, vigente.current) ?? siguiente;}
+      catch (e) {setError(e instanceof Error ? e.message : 'No se pudo guardar el estado. El registro conserva su estado anterior.');return;}
+      finally {guardadoEnCurso.current = false;setGuardando(false);}
+    }
     const transicion = ++numeroTransicion.current;
-    aplicar(cambio.registro);
+    aplicar(siguiente);
     if (cambio.protocoloSeguridad) {
       // El efecto pertenece al evento, nunca a un render, efecto o updater de React.
       try {
@@ -61,17 +70,17 @@ function EditorEstadosActivo({activoId, inicial, ejecutarProtocoloSeguridad = pr
     guardadoEnCurso.current = true;
     setGuardando(true);
     setError('');
-    try {await onGuardar(vigente.current);} catch {setError('No se pudo guardar. Los valores del formulario se conservan.');}
+    try {await onGuardar(vigente.current);} catch (e) {setError(e instanceof Error ? e.message : 'No se pudo guardar. Los valores del formulario se conservan.');}
     finally {guardadoEnCurso.current = false;setGuardando(false);}
   }}>
     <p><strong>Activo:</strong> {activoId}</p>
     <p id={id + '-situacion'} role="status">{soloLectura ? 'Registro archivado como histórico. Solo lectura.' : condicionBloqueada(registro.estadoAdministrativo) ? 'La condición queda vacía y bloqueada por el estado administrativo.' : 'Activo: ambos selectores están habilitados.'}</p>
     <fieldset disabled={bloqueado} className="border-0 p-0 m-0" aria-describedby={id + '-situacion'}>
       <legend>Datos y estados del activo</legend>
-      <div className="campo-catalogos">
+      {!soloEstados && <div className="campo-catalogos">
         <label htmlFor={id + '-descripcion'}>Descripción del activo</label>
         <input id={id + '-descripcion'} name="descripcion" value={registro.descripcion} readOnly={soloLectura} maxLength={200} onChange={e => {if (!guardadoEnCurso.current) aplicar(cambiarTextoActivo(vigente.current, 'descripcion', e.target.value));}}/>
-      </div>
+      </div>}
       <div className="campos-directorio">
         <div className="campo-catalogos">
           <label htmlFor={id + '-administrativo'}>Estado administrativo</label>
@@ -87,10 +96,10 @@ function EditorEstadosActivo({activoId, inicial, ejecutarProtocoloSeguridad = pr
           </select>
         </div>
       </div>
-      <div className="campo-catalogos">
+      {!soloEstados && <div className="campo-catalogos">
         <label htmlFor={id + '-observaciones'}>Observaciones</label>
         <textarea id={id + '-observaciones'} name="observaciones" value={registro.observaciones} readOnly={soloLectura} maxLength={2000} onChange={e => {if (!guardadoEnCurso.current) aplicar(cambiarTextoActivo(vigente.current, 'observaciones', e.target.value));}}/>
-      </div>
+      </div>}
       {onGuardar && <button type="submit" className="btn btn-primary" disabled={bloqueado}>{guardando ? 'Guardando…' : 'Guardar cambios'}</button>}
     </fieldset>
     {soloLectura && <p>Condición final: <strong>Obsoleto</strong>. {registro.fechaBaja ? <>Archivado el {new Intl.DateTimeFormat('es-CL', {dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Santiago'}).format(new Date(registro.fechaBaja))}.</> : 'Fecha de archivo no informada.'}</p>}

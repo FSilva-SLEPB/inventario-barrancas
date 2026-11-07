@@ -115,7 +115,7 @@ test("tabla conserva identificadores y acciones de consulta sin edición para pe
   const { html } = await pagina({ tipo: "establecimiento" }, false, [equipo]);
   assert.ok(html.includes('ver=' + equipo.id));assert.ok(html.includes('aria-label="Ver:'));assert.ok(!html.includes('>Ver historial</a>'));assert.ok(!html.includes('editar='));
   assert.ok(html.includes("000-ABC")); assert.ok(html.includes("INV-001"));
-  assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Funcionamiento: Sin verificar"));
+  assert.ok(html.includes("Recibido (histórico)")); assert.ok(html.includes("Condición: Sin verificar"));
 });
 
 

@@ -1,3 +1,5 @@
+import EstadosInventario from '@/components/estados-inventario';
+import {ESTADOS_ADMINISTRATIVOS_ACTIVO} from '@/lib/estados-activo';
 import DocumentosBien from '@/components/actas/documentos-bien';
 import {AccionesCustodia} from '@/components/ventana-movimiento';
 import {CUSTODIAS} from '@/lib/validacion-movimientos-inventario';
@@ -22,28 +24,29 @@ export default async function FichaEquipo({id,editar=false,guardado=false,contex
   const actor=await exigirAcceso();if(!esIdSede(id))notFound();
   const e=equipo??await obtenerEquipo(id);if(!e||e.id!==id||(contexto&&!equipoEnVista(e,contexto.ambito,contexto.vista)))notFound();
   const [historial,categorias,robos]=await Promise.all([historialEquipo(id),listarCategorias(),robosEquipo(id)]);
-  const editable=e.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega');
+  const editable=e.estadoAdministrativo!=='dado_de_baja'&&e.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega');
   const editando=editable&&editar;const sedes=editando?await listarSedes():[];
   const compra=Object.entries(CAMPOS_COMPRA).filter(([k])=>e.compra[k as keyof typeof CAMPOS_COMPRA]);
   const dato=(label:string,v:string|null|undefined)=><div key={label}><dt>{label}</dt><dd>{v||'Sin informar'}</dd></div>;
   const Contenedor=contexto?'div':'main',Titulo=contexto?'h3':'h1',SeccionHistorial=contexto?'details':'section';
   const verHref=contexto?.verHref??`/inventario/${id}`;
   const volver=contexto?.volver??`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.custodia==='en_bodega'?'pendientes':'inventario'}`;
-  const formulario=<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link scroll={false} href={verHref}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)} volver={contexto?.volver}/></div></section>;
+  const formulario=<section id="editar-equipo" className="ficha-seccion"><h2>Editar información</h2><p><Link scroll={false} href={verHref}>Cancelar edición</Link></p><div id="formulario-equipo"><FormularioEquipo estadoAdministrativo={e.estadoAdministrativo} key={id} inicial={equipoAFormulario(e)} sedes={sedes} categorias={categorias} local={!puedeAdministrar(actor.rol)} volver={contexto?.volver}/></div></section>;
   return <Contenedor className="ficha-equipo"><header className="ficha-cabecera"><div><p className="etiqueta-ficha">Registro e historial</p><Titulo>{e.categoriaNombre} · {e.marca} {e.modelo}</Titulo><p className="descripcion-pagina">{etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd})}</p></div>
-    <div className="acciones-catalogos">{!editando&&<AccionesCustodia tipoSede={e.sedeTipo} tipo="equipo" id={id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/>}
+    <div className="acciones-catalogos">{!editando&&<AccionesCustodia estadoAdministrativo={e.estadoAdministrativo} condicionTecnica={e.condicionTecnica} tipoSede={e.sedeTipo} tipo="equipo" id={id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/>}
     {editable&&!editando&&<Link data-editar-ficha scroll={false} className="btn btn-outline-primary" href={contexto?.editarHref??`/inventario/${id}?editar=si`} aria-label="Editar información del equipo">✎ Editar información</Link>}
       <Link scroll={false} href={contexto?.volver??`/inventario/${e.sedeTipo==='nivel_central'?'nivel-central':'p02'}?vista=${e.custodia==='en_bodega'?'pendientes':'inventario'}`}>{contexto?'Cerrar registro':'Volver al inventario'}</Link></div></header>
     {guardado&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
     {editando?(contexto?formulario:<ModalFicha titulo="Editar equipo" cerrarHref={verHref} editando>{formulario}</ModalFicha>)
     :<div className="ficha-secciones"><section className="ficha-seccion"><h2>Identificación</h2><dl className="ficha-datos">{dato('Categoría',e.categoriaNombre)}{dato('Marca',e.marca)}{dato('Modelo',e.modelo)}{dato('Número de serie',e.serie||'Pendiente')}{dato('Número de inventario',e.inventario||'Pendiente')}
       {(!e.serie||!e.inventario)&&e.motivoIdentificacion&&dato('Dato pendiente',e.motivoIdentificacion)}</dl></section>
-      <section className="ficha-seccion"><h2>Entrega y funcionamiento</h2><dl className="ficha-datos">{dato('Inventario / sede',etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd}))}{dato('Estado',CUSTODIAS[e.custodia as keyof typeof CUSTODIAS])}{dato('Situación de entrega',SITUACIONES[e.situacion as keyof typeof SITUACIONES])}{dato('Origen',ORIGENES[e.origen])}{dato('Estado de funcionamiento',CONDICIONES[e.condicionTecnica])}
+      <section className="ficha-seccion"><h2>Entrega y funcionamiento</h2><dl className="ficha-datos">{dato('Inventario / sede',etiquetaSede({nombre:e.sedeNombre,rbd:e.sedeRbd}))}{dato('Estado',CUSTODIAS[e.custodia as keyof typeof CUSTODIAS])}{dato('Situación de entrega',SITUACIONES[e.situacion as keyof typeof SITUACIONES])}{dato('Origen',ORIGENES[e.origen])}{dato('Estado de condición',e.condicionTecnica?CONDICIONES[e.condicionTecnica]:'—')}{dato('Estado administrativo',ESTADOS_ADMINISTRATIVOS_ACTIVO[e.estadoAdministrativo])}
         {e.fechaEntrega&&dato('Fecha de entrega',e.fechaEntrega.split('-').reverse().join('/'))}{e.enlaceActa&&<div><dt>Acta existente</dt><dd><a href={e.enlaceActa} target="_blank" rel="noopener noreferrer">Consultar documento</a></dd></div>}</dl>
         <p className="ayuda-catalogos">El funcionamiento indica si está operativo o necesita reparación; no determina su entrega ni una baja.</p></section>
       {compra.length>0&&<section className="ficha-seccion ficha-adquisicion"><h2>Adquisición</h2><dl className="ficha-datos">{compra.map(([k,label])=>dato(label,e.compra[k as keyof typeof CAMPOS_COMPRA]))}</dl></section>}
       {(e.observaciones||e.archivoOrigen)&&<section className="ficha-seccion"><h2>Antecedentes</h2>{e.observaciones&&<p>{e.observaciones}</p>}{e.archivoOrigen&&<p>Archivo de origen: {e.archivoOrigen} · fila {e.filaOrigen}.</p>}</section>}
     </div>}
+    {!editando&&puedeAdministrar(actor.rol)&&<EstadosInventario key={id+':'+e.version} clase="equipo" bien={e} />}
     {!editando&&puedeAdministrar(actor.rol)&&<DocumentosBien tipo="equipo" id={id} volver={volver}/>}
     {robos.length>0&&<section className="ficha-seccion"><h2>Incidentes de robo</h2><ul>{robos.map(r=><li key={r.id}>{r.fecha.split('-').reverse().join('/')} · {ESTADOS_ROBO[(r.recuperadoFecha?'recuperado':r.estado) as keyof typeof ESTADOS_ROBO]} {puedeGestionarDependencias(actor.rol)&&<Link href={'/inventario/robos/'+r.id}>Ver incidente</Link>}</li>)}</ul></section>}
     <SeccionHistorial id="historial" className="historial-equipo">{contexto?<summary>Historial del equipo</summary>:<h2>Historial del equipo</h2>}<p className="ayuda-catalogos">Registro de ingresos, entregas y actualizaciones, con fecha y responsable. Las ediciones conservan el valor anterior y el nuevo.</p>

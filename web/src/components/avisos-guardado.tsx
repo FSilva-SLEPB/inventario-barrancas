@@ -2,7 +2,7 @@
 import {useEffect,useRef} from 'react';
 import {usePathname,useSearchParams} from 'next/navigation';
 import {validarAvisoExito} from '@/app/avisos/acciones';
-async function mostrarExito(titulo:string,texto:string){
+export async function mostrarExito(titulo:string,texto:string){
  const {default:Swal}=await import('sweetalert2');
  await Swal.fire({target:document.querySelector<HTMLElement>('dialog[open]')??document.body,icon:'success',title:titulo,text:texto,confirmButtonText:'Aceptar',heightAuto:false,buttonsStyling:false,customClass:{popup:'confirmacion-guardado',confirmButton:'btn btn-primary'},showClass:{popup:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'':'swal2-show'},hideClass:{popup:''}});
 }

@@ -1,3 +1,4 @@
+import {ESTADOS_ADMINISTRATIVOS_ACTIVO} from '@/lib/estados-activo';
 import VentanaActaEmitida from '@/components/actas/ventana-acta-emitida';
 import AccionesRegistro from '@/components/acciones-registro';
 import VentanaMovimiento,{AccionesCustodia} from '@/components/ventana-movimiento';
@@ -49,7 +50,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
   if(seleccionado&&!esIdSede(seleccionado))notFound();
   const equipoSeleccionado=seleccionado?await obtenerEquipo(seleccionado):null;
   if(seleccionado&&(!equipoSeleccionado||!equipoEnVista(equipoSeleccionado,ambito,vista)))notFound();
-  const editando=Boolean(editar&&equipoSeleccionado&&equipoSeleccionado.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.custodia!=='en_bodega'));
+  const editando=Boolean(editar&&equipoSeleccionado&&equipoSeleccionado.estadoAdministrativo!=='dado_de_baja'&&equipoSeleccionado.custodia!=='en_prestamo'&&puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||equipoSeleccionado.custodia!=='en_bodega'));
   const titulo = bodega ? "Bodega TI" : ambito === "nc" ? "Inventario Nivel Central" : "Inventario P02";
   const paginas = Math.max(1, Math.ceil(total / limite));
 
@@ -78,15 +79,15 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
           <th scope="col">N.º de inventario</th><th scope="col">Estado</th><th scope="col">Acciones</th>
         </tr></thead>
         <tbody>{equipos.map(e => <tr key={e.id}>
-          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.sedeTipo!=="jardin_infantil"||Boolean(e.roboEstado)}
+          {bodega && <td><input type="checkbox" name="equipo" form="seleccion-entregas" value={e.id} disabled={e.estadoAdministrativo!=='activo'||e.sedeTipo!=="jardin_infantil"||Boolean(e.roboEstado)}
             aria-label={`Seleccionar ${e.inventario || e.serie || e.modelo} de ${e.sedeNombre}`} /></td>}
           {ambito === "eeji" && <><td className={styles.rbd}>{e.sedeRbd || "Sin RBD"}</td><td>{e.sedeNombre}</td></>}
           <td>{e.categoriaNombre}</td><td><span>{e.modelo}</span><small>{e.marca}</small></td>
           <td className={styles.identificador}>{e.serie || "Pendiente"}</td><td className={styles.identificador}>{e.inventario || "Pendiente"}</td>
           <td><span className={`estado-custodia ${e.custodia}`}>{CUSTODIAS[e.custodia as keyof typeof CUSTODIAS]??(e.situacion==='pendiente_entrega'?CUSTODIAS.en_bodega:CUSTODIAS.asignado)}</span>{e.situacion==='recibido_historico'&&<small>Recibido (histórico)</small>}
-            {e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
-            <small>Funcionamiento: {CONDICIONES[e.condicionTecnica]}</small></td>
-          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={e.custodia==='en_prestamo'?undefined:puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}><AccionesCustodia tipoSede={e.sedeTipo} tipo="equipo" id={e.id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/></AccionesRegistro>
+            {<small className="dato-secundario">Administrativo: {ESTADOS_ADMINISTRATIVOS_ACTIVO[e.estadoAdministrativo as keyof typeof ESTADOS_ADMINISTRATIVOS_ACTIVO]}</small>}{e.roboEstado&&<small className="alerta-incidente">{e.roboEstado==='validado'?'Robo validado · sin recuperar':'Robo reportado · pendiente de validación'}</small>}
+            <small>Condición: {CONDICIONES[e.condicionTecnica]}</small></td>
+          <td><AccionesRegistro id={e.id} nombre={'equipo '+(e.inventario||e.serie||e.modelo)} verHref={enlaceFichaInventario(volver,'ver',e.id)} editarHref={e.estadoAdministrativo==='dado_de_baja'||e.custodia==='en_prestamo'?undefined:puedeGestionarDependencias(actor.rol)&&(puedeAdministrar(actor.rol)||e.custodia!=='en_bodega')?enlaceFichaInventario(volver,'editar',e.id):undefined}><AccionesCustodia estadoAdministrativo={e.estadoAdministrativo} condicionTecnica={e.condicionTecnica} tipoSede={e.sedeTipo} tipo="equipo" id={e.id} custodia={e.custodia} volver={volver} permitido={puedeAdministrar(actor.rol)&&!e.roboEstado}/></AccionesRegistro>
           </td>
         </tr>)}
           {!equipos.length && <tr><td colSpan={bodega ? 9 : ambito === "eeji" ? 8 : 6} className={styles.vacio}>No hay equipos que coincidan con los filtros seleccionados.</td></tr>}

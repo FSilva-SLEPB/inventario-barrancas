@@ -1,14 +1,15 @@
 "use client";
+import CampoCondicionActivo from '@/components/campo-condicion-activo';
 import CampoCustodiaInicial from '@/components/campo-custodia-inicial';
 import {useResultadoGuardado} from '@/components/avisos-guardado';
 import { useActionState, useState } from "react";
 import { guardarEquipo } from "@/app/inventario/acciones";
-import { CAMPOS_COMPRA,CONDICIONES,ORIGENES,valoresEquipo,type ValoresEquipo,type EstadoEquipo } from "@/lib/validacion-equipos";
+import { CAMPOS_COMPRA,ORIGENES,valoresEquipo,type ValoresEquipo,type EstadoEquipo } from "@/lib/validacion-equipos";
 import type { Sede } from "@/lib/validacion-sedes";
 import type { CategoriaBien } from "@/lib/catalogos";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
-export default function FormularioEquipo({inicial,sedes,categorias,local=false,volver}:{
-  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;volver?:string;
+export default function FormularioEquipo({inicial,sedes,categorias,local=false,volver,estadoAdministrativo='activo'}:{
+  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;volver?:string;estadoAdministrativo?:string;
 }) {
   const valores=inicial??{...valoresEquipo(),origen:local?"compra_sede":"compra_utic",sedeId:local?sedes[0]?.id??"":""};
   const base:EstadoEquipo={resultado:"inicial",mensaje:"",valores,errores:{},revision:"inicial"};
@@ -44,9 +45,7 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false,v
         {v.id ? <><input type="hidden" name="origen" value={v.origen}/><p>{ORIGENES[v.origen as keyof typeof ORIGENES]}</p></>
           : <select id="equipo-origen" name="origen" defaultValue={v.origen}>{Object.entries(ORIGENES).filter(([k])=>!local||k!=="compra_utic").map(([k,label])=><option key={k} value={k}>{label}</option>)}</select>}
         <p className="error-catalogos">{estado.errores.origen}</p></div>
-      <div className="campo-catalogos"><label htmlFor="equipo-condicionTecnica">Estado de funcionamiento</label>
-        <select id="equipo-condicionTecnica" name="condicionTecnica" defaultValue={v.condicionTecnica}>
-          {Object.entries(CONDICIONES).map(([k,label])=><option key={k} value={k}>{label}</option>)}</select><p className="ayuda-catalogos">Indica si funciona o requiere reparación. No cambia su entrega, asignación ni situación por robo.</p></div>
+      <CampoCondicionActivo existente={Boolean(v.id)} id="equipo-condicionTecnica" valor={v.condicionTecnica} administrativo={estadoAdministrativo}/>
       <details><summary>Datos de adquisición disponibles</summary>
         {Object.entries(CAMPOS_COMPRA).map(([k,label])=>campo(k as keyof ValoresEquipo,label,false,250))}</details>
       <div className="campo-catalogos"><label htmlFor="equipo-observaciones">Observaciones</label>
