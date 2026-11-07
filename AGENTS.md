@@ -18,8 +18,9 @@ existentes, incluyendo equipos, celulares, Bodega TI, Robos y directorios.
   componente de acciones y conservar permisos, filtros y navegación de modales.
   Guardar cierra la edición y confirma éxito; los errores conservan los valores.
 - Asignación y devolución de equipos/celulares usan el mismo flujo de movimientos
-  y el estado lógico En Bodega TI. Las ubicaciones físicas de bodegas se definirán
-  después; no crear sedes, direcciones ni bodegas ficticias.
+  y el estado lógico En Bodega TI. Las cinco ubicaciones físicas confirmadas por
+  Felipe se detallan al final; su incorporación sigue pendiente. No crear sedes,
+  direcciones ni bodegas ficticias.
 - Respetar permisos, versiones, historial e idempotencia en servidor y base.
   Archivar una ficha, su funcionamiento y su custodia son conceptos distintos.
 - Verificar cambios de proceso con permisos, estados, concurrencia, datos previos,
@@ -54,3 +55,9 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
 
 - Próximos trabajos solicitados el 6/11: continuar el ciclo de equipos (cambios/reemplazos, traspasos y luego reparación/baja). Dejar la subida/carga del inventario para después. El dashboard de información de P02 se definirá más adelante: año, robos, tipo de compra, empresa y OC son criterios iniciales; todavía no se fija qué fecha representa el año ni las métricas. No reactivar el dashboard específico de Robos como sustituto.
 - Traspasos, regla confirmada el 6/11: cuando el origen o destino sea Nivel Central, el bien debe pasar por Bodega TI. Entre sedes educativas se permite entrega directa, confirmada por UTIC. Registrar la ruta real; no simular una devolución a Bodega para representar un traspaso directo.
+
+- Definición posterior a instalar PR53: habrá dos dashboards homologados, Nivel Central y establecimientos/JI-SC (P02). Las ubicaciones físicas son compartidas; la pertenencia de cada bien a un inventario se conserva por separado. Libre significa disponible para asignar, excluyendo espera de reparación o baja; no deducirlo solo de estar en bodega.
+- Bodegas reales confirmadas por Felipe: Bodega TI Primer Piso, Bodega TI Segundo Piso, Bodega BOX 3 y Bodega BOX 4 en dependencias de SLEP Barrancas; Bodega TI Bicentenario en el antiguo Liceo Bicentenario, RBD 31288, Av. Cardenal Raúl Silva Henríquez #1185, Cerro Navia. Ya no es establecimiento activo según Felipe. Conservar registro, referencias e historial al regularizarlo; no borrar sedes ni trasladar masivamente sus bienes por suposición. Bicentenario recibe por lo general equipos destinados a baja; ubicación no equivale a baja formal.
+- Especificación más reciente para el componente React: condición Operativo/Bodega de TI/Mantención/Mal estado/Obsoleto; administrativo Activo/Robado/No encontrado/Dado de baja. Regla 1: cambiar a Robado o No encontrado vacía y deshabilita condición, y ejecuta el callback simulado ejecutarProtocoloSeguridad(activoId). Regla 2: cambiar a Dado de baja fija Obsoleto y deja todo el registro solo lectura como histórico. Regla 3: Activo habilita ambos selectores. No agregar una regla inversa que dé de baja por seleccionar Obsoleto.
+- El componente y su ejemplo son una simulación reutilizable: no escriben en inventario, no ejecutan protocolos reales ni reemplazan los flujos autorizados del servidor. La integración posterior debe conservar permisos, versiones, operaciones e historial. Las condiciones antiguas Sin verificar/Fuera de servicio no se convierten automáticamente en Operativo, Obsoleto o Baja.
+- Felipe decidió no usar Inactivo como opción nueva; antes lo usaba aproximadamente para dejar un bien guardado. Usar En bodega y ubicación para ese caso; conservar y revisar las filas antiguas Inactivo. La última lista explícita de los dos selectores no incluye Inactivo ni Pendiente de inventario. No inferir alta contable ni depreciación a partir de un registro del sistema.
