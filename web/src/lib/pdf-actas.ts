@@ -1,4 +1,5 @@
 import 'server-only';
+import {ESTADOS_ADMINISTRATIVOS_ACTIVO} from '@/lib/estados-activo';
 import PDFDocument from 'pdfkit';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
@@ -30,7 +31,7 @@ export async function generarPdfActa(d:DatosActa){
   const filaBien=(celdas:string[],encabezado=false,reserva=0)=>{doc.font(encabezado?'institucional-negrita':'institucional').fontSize(8.5);const alto=Math.max(...celdas.map((s,i)=>doc.heightOfString(s||'Sin informar',{width:anchos[i]-10})))+13;if(doc.y+alto+reserva>doc.page.height-55){nueva();if(!encabezado)filaBien(columnas,true);}const y=doc.y;let x=margen;
    celdas.forEach((s,i)=>{doc.save();if(encabezado)doc.rect(x,y,anchos[i],alto).fill('#EDF3F8');doc.rect(x,y,anchos[i],alto).strokeColor(borde).stroke();doc.restore();doc.fillColor(tinta).font(encabezado?'institucional-negrita':'institucional').fontSize(8.5).text(s||'Sin informar',x+5,y+5,{width:anchos[i]-10});x+=anchos[i];});doc.y=y+alto;};
   const grupoBienes=(bienes:DatosActa['bienes'])=>{filaBien(columnas,true);
-  for(const b of bienes){const valor=(...k:string[])=>String(k.map(x=>b[x]).find(v=>v!==null&&v!==undefined&&v!=='')??'');filaBien(d.clase==='celular'?[valor('numero_inventario','inventario'), 'Celular',[valor('marca'),valor('modelo')].filter(Boolean).join(' · '),valor('imei'),valor('telefono')]:[valor('numero_inventario','inventario'),valor('categoriaNombre')||'Equipo',valor('marca'),valor('modelo'),valor('serie')],false,20);const condicion=valor('condicion_tecnica','condicionTecnica');doc.y+=3;texto('Funcionamiento registrado: '+(CONDICIONES[condicion as keyof typeof CONDICIONES]??'Sin verificar'),8);}
+  for(const b of bienes){const valor=(...k:string[])=>String(k.map(x=>b[x]).find(v=>v!==null&&v!==undefined&&v!=='')??'');filaBien(d.clase==='celular'?[valor('numero_inventario','inventario'), 'Celular',[valor('marca'),valor('modelo')].filter(Boolean).join(' · '),valor('imei'),valor('telefono')]:[valor('numero_inventario','inventario'),valor('categoriaNombre')||'Equipo',valor('marca'),valor('modelo'),valor('serie')],false,20);const condicion=valor('condicion_tecnica','condicionTecnica');doc.y+=3;texto('Condición registrada: '+(CONDICIONES[condicion as keyof typeof CONDICIONES]??'Sin verificar')+(b.estado_administrativo||b.estadoAdministrativo?' · Estado administrativo: '+(ESTADOS_ADMINISTRATIVOS_ACTIVO[(b.estado_administrativo??b.estadoAdministrativo) as keyof typeof ESTADOS_ADMINISTRATIVOS_ACTIVO]??'Sin informar'):''),8);}
   };
   if(d.tipo==='cambio'){grupoBienes(d.bienesDevueltos??[]);if(d.detalleDevueltos)texto(d.detalleDevueltos);seccion('Equipamiento entregado en reemplazo',80);}
   grupoBienes(d.bienes);if(d.detalleEntregados)texto(d.detalleEntregados);if(d.motivo){seccion('Motivo del cambio / traspaso');texto(d.motivo);}

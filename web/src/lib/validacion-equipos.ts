@@ -2,7 +2,8 @@ import { esIdSede } from "@/lib/validacion-sedes";
 
 export const ORIGENES = { compra_utic: "Compra gestionada por UTIC", compra_sede: "Compra propia de la sede",
   donacion: "Donación", otro: "Otro origen" } as const;
-export const CONDICIONES = { sin_verificar: "Sin verificar", operativo: "Operativo",
+import {ESTADOS_CONDICION_ACTIVO} from '@/lib/estados-activo';
+export const CONDICIONES = {...ESTADOS_CONDICION_ACTIVO, '':'Sin condición por estado administrativo', sin_verificar: "Sin verificar", operativo: "Operativo",
   en_reparacion: "En reparación", fuera_de_servicio: "Fuera de servicio (sin baja formal)" } as const;
 export const SITUACIONES = { registrado_nc: "Registrado en Nivel Central", pendiente_entrega: "Pendiente de entrega",
   recibido: "Recibido", recibido_historico: "Recibido según registro histórico" } as const;

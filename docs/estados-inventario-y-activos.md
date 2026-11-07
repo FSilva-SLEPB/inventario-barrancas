@@ -11,7 +11,7 @@ La última especificación de Felipe para el componente React es:
 2. Dado de baja: condición Obsoleto y formulario completo de solo lectura como histórico.
 3. Activo: ambos selectores habilitados.
 
-El [componente reutilizable](componente-estados-activo.md) implementa estas reglas de interfaz. No escribe estados en la aplicación instalada ni reemplaza sus protocolos y operaciones.
+El [componente reutilizable](componente-estados-activo.md) implementa estas reglas de interfaz. Su [integración operativa](estados-integrados-y-flujo-actas.md) guarda estados mediante acciones UTIC y la migración 20. No sustituye la validación y recuperación de incidentes reales.
 
 ## Datos anteriores
 

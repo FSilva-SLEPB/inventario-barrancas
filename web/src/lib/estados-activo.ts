@@ -78,3 +78,8 @@ export function cambiarTextoActivo(anterior: RegistroEstadoActivo, campo: 'descr
 export function ejecutarProtocoloSeguridad(activoId: string): void {
   console.info('[Simulación] ejecutarProtocoloSeguridad', activoId);
 }
+
+/** Compatibilidad de ingresos antiguos sin clasificar; no los convierte en Operativo. */
+export function condicionPermiteSalida(condicion: string) {
+  return ['operativo', 'bodega_ti', 'sin_verificar'].includes(condicion);
+}

@@ -24,6 +24,10 @@ BEGIN
       RAISE EXCEPTION 'Falta una función controlada del inventario restaurado';
     END IF;
   END IF;
+  IF to_regclass('public.cambios_estados_activo') IS NOT NULL THEN
+    IF NOT has_table_privilege(current_user,'public.cambios_estados_activo','SELECT') OR has_table_privilege(current_user,'public.cambios_estados_activo','INSERT') OR has_table_privilege(current_user,'public.cambios_estados_activo','UPDATE') OR has_table_privilege(current_user,'public.cambios_estados_activo','DELETE') OR NOT has_function_privilege(current_user,'public.guardar_estados_activo_acceso(text,uuid,jsonb)','EXECUTE') THEN RAISE EXCEPTION 'Permisos de estados restaurados incorrectos';END IF;
+    IF (SELECT count(*) FROM pg_trigger WHERE tgname IN ('equipos_proteger_estados','celulares_proteger_estados') AND NOT tgisinternal AND tgenabled='O')<>2 THEN RAISE EXCEPTION 'Faltan guardas de estados restauradas';END IF;
+  END IF;
   IF to_regclass('public.actas_documentos') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['actas_contador','actas_documentos','actas_envios'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') THEN RAISE EXCEPTION 'Permisos de actas incorrectos';END IF;
@@ -209,6 +213,11 @@ BEGIN
       AND nombre = 'Equipos de prueba de respaldo' AND activo
   ) THEN
     RAISE EXCEPTION 'Los datos ficticios no se recuperaron correctamente.';
+  END IF;
+  IF to_regclass('public.cambios_estados_activo') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.equipos e JOIN public.cambios_estados_activo h ON h.equipo_id=e.id WHERE e.serie='CI-ESTADOS-SERIE' AND e.estado_administrativo='dado_de_baja' AND e.condicion_tecnica='obsoleto' AND e.fecha_baja IS NOT NULL AND h.id='f5000000-0000-4000-8000-000000000001' AND h.antes->>'condicion_tecnica'='sin_verificar' AND h.despues->>'estado_administrativo'='dado_de_baja') OR NOT EXISTS(SELECT 1 FROM public.celulares c JOIN public.cambios_estados_activo h ON h.celular_id=c.id WHERE c.id='f4000000-0000-4000-8000-000000000002' AND c.estado_administrativo='robado' AND c.condicion_tecnica='' AND h.id='f5000000-0000-4000-8000-000000000002') THEN
+      RAISE EXCEPTION 'No se recuperaron estados, histórico de baja y auditoría de transición';
+    END IF;
   END IF;
 END;
 $datos_ci$;

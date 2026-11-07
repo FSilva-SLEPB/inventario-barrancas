@@ -148,3 +148,20 @@ test('el componente renderiza el histórico con Obsoleto, selectores bloqueados 
   assert.match(html, /Fecha de archivo no informada/);
   assert.deepEqual(llamadas, []);
 });
+
+const CampoCondicion = cargar('@/components/campo-condicion-activo').default;
+test('las altas ofrecen solo las cinco condiciones y requieren selección sin marcar Operativo', () => {
+  const html = renderToStaticMarkup(React.createElement(CampoCondicion, {id:'alta', valor:'sin_verificar', existente:false}));
+  assert.ok(!html.includes('value="sin_verificar"'));
+  assert.deepEqual([...html.matchAll(/<option value="([^"]*)"/g)].map(m=>m[1]), ['',...Object.keys(ESTADOS_CONDICION_ACTIVO)]);
+  assert.match(html, /required=""/);
+  assert.match(html, /<option value="" selected="">Selecciona una condición/);
+});
+test('el selector compartido conserva condición anterior y bloquea la vacía de incidentes', () => {
+  const previo = renderToStaticMarkup(React.createElement(CampoCondicion, {id:'anterior', valor:'sin_verificar', existente:true}));
+  assert.match(previo, /<option value="sin_verificar" selected="">/);
+  const incidente = renderToStaticMarkup(React.createElement(CampoCondicion, {id:'incidente', valor:'operativo', administrativo:'robado'}));
+  assert.match(incidente, /<select[^>]*disabled=""/);
+  assert.match(incidente, /<option value="" selected=""><\/option>/);
+  assert.match(incidente, /<input type="hidden" name="condicionTecnica" value=""/);
+});

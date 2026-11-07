@@ -1,6 +1,6 @@
 # Componente React de estados del activo
 
-Implementa las tres reglas especificadas por Felipe. Es un componente reutilizable y un ejemplo con datos ficticios. La integración con los formularios operativos y la persistencia del inventario sigue pendiente.
+Implementa las tres reglas especificadas por Felipe. Es un componente reutilizable y un ejemplo con datos ficticios. La integración operativa de equipos y celulares se describe en [Estados integrados y actas](estados-integrados-y-flujo-actas.md). El ejemplo aislado sigue usando datos ficticios.
 
 | Administrativo | Condición en pantalla | Selector administrativo | Selector de condición | Resto del formulario |
 | --- | --- | --- | --- | --- |
@@ -50,12 +50,14 @@ También se puede montar `EjemploEstadosActivo` desde un componente cliente para
 - Volver a Activo habilita los dos selectores. La condición que estaba vacía queda disponible para seleccionarla; no se deduce su estado físico.
 - Seleccionar Obsoleto mientras sigue Activo no produce una baja administrativa.
 - La baja conserva descripción y observaciones, fija Obsoleto, registra fecha y emite `onCambio(actual, anterior)`. Desde ese momento bloquea ediciones, selectores, guardado, reset y nuevas transiciones. Un histórico cargado sin fecha no recibe una fecha inventada.
+- `soloEstados` oculta descripción y observaciones cuando el formulario se usa como panel de estados de un bien existente.
+- `onConfirmarCambioAdministrativo(actual, anterior)` permite persistir la transición antes de aplicarla; una promesa rechazada conserva el registro anterior, y una respuesta puede aportar la fecha de archivo del servidor. El adaptador lo utiliza para evitar una baja solamente local sin guardar.
 - `onCambio` recibe registros inmutables. El consumidor puede conservar allí la transición de baja; el botón Guardar queda bloqueado por la regla 2. El ejemplo solo conserva eventos en memoria.
 - `inicial` se aplica al montar. Un `activoId` distinto monta una instancia independiente; para cargar otra versión del mismo activo, el consumidor puede usar una `key` de versión.
 
 ## Alcance y validación
 
-La aplicación instalada conserva su funcionamiento actual: sin migraciones, protocolos reales ni cambios en PDFs/historiales. La persistencia de una baja real necesita la operación de servidor autorizada, sus versiones y antecedentes; deshabilitar controles en React no reemplaza esa autorización.
+El componente aislado no realiza escrituras. El adaptador operativo usa la migración 20 y acciones autorizadas; el protocolo de seguridad permanece simulado. La persistencia de una baja real necesita la operación de servidor autorizada, sus versiones y antecedentes; deshabilitar controles en React no reemplaza esa autorización.
 
 Se añaden pruebas de catálogos exactos, las tres reglas, inmutabilidad, datos históricos, estados inválidos y renderizado del componente con React real. GitHub Actions ejecuta este archivo además de la verificación existente.
 

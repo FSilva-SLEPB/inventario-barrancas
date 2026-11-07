@@ -35,6 +35,16 @@ erDiagram
     timestamp_with_time_zone creado_en
     timestamp_with_time_zone terminado_en
   }
+  cambios_estados_activo {
+    uuid id PK
+    uuid equipo_id FK
+    uuid celular_id FK
+    text actor
+    jsonb solicitud
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   cargas_equipos {
     uuid id PK
     text actor
@@ -67,6 +77,8 @@ erDiagram
     text actualizado_por
     timestamp_with_time_zone actualizado_en
     text custodia
+    text estado_administrativo
+    timestamp_with_time_zone fecha_baja
   }
   celulares_historial {
     bigint id PK
@@ -167,6 +179,8 @@ erDiagram
     timestamp_with_time_zone creado_en
     timestamp_with_time_zone actualizado_en
     text custodia
+    text estado_administrativo
+    timestamp_with_time_zone fecha_baja
   }
   equipos_historial {
     bigint id PK
@@ -320,6 +334,8 @@ erDiagram
   movimientos_inventario |o--o| actas_documentos : "movimiento_id"
   operaciones_inventario |o--o| actas_documentos : "operacion_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
+  celulares |o--o{ cambios_estados_activo : "celular_id"
+  equipos |o--o{ cambios_estados_activo : "equipo_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
@@ -367,6 +383,7 @@ erDiagram
 | actas_contador | Actas | Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número. |
 | actas_documentos | Actas | Acta de movimiento, entrega histórica u operación compuesta (una sola fuente), con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
+| cambios_estados_activo | Estados del activo | Transiciones administrativas y de condición confirmadas por UTIC, con solicitud idempotente, versión e instantáneas inmutables. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
@@ -403,7 +420,8 @@ erDiagram
 - Actas: cada documento se vincula a un movimiento y conserva folio, datos y PDF con su SHA-256; actas_envios registra los intentos y resultados de correo. actas_contador mantiene la secuencia única desde 0.
 - Préstamos: cada préstamo conserva el bien y su sede de pertenencia, destino temporal, plazo, movimiento de salida y devolución exacta. Solo uno activo por bien; se consulta por UTIC fuera del inventario recibido del destinatario.
 - Operaciones compuestas: cada cambio o traspaso agrupa movimientos individuales y conserva una sola acta. El cambio separa bienes devueltos y reemplazos; el traspaso directo solo se admite entre sedes educativas. Si participa Nivel Central, se requiere paso por Bodega TI.
-- Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las ubicaciones físicas de Bodega TI se definirán después.
+- Movimientos: equipos y celulares comparten devolución a Bodega TI y asignación a sede; cada movimiento refiere exactamente a un bien y conserva antes/después. Las cinco ubicaciones físicas de Bodega TI acordadas están pendientes de incorporación.
+- Estados: cambios_estados_activo conserva solicitudes idempotentes, actor e instantáneas; el administrativo y la condición pertenecen al bien y las bajas conservan fecha de archivo e historial.
 - Robos: el incidente tiene sede y varios equipos; la recuperación se registra por equipo.
 - Los historiales conservan el actor como texto y los valores anteriores/posteriores como JSON; no dependen de que ese usuario o director siga vigente.
 - Los nombres, RUN y contactos conservados en instantáneas no son FK al directorio actual.
