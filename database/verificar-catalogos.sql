@@ -2,8 +2,9 @@ BEGIN;
 
 DO $pruebas$
 DECLARE
-  sede_a uuid := gen_random_uuid();
-  sede_b uuid := gen_random_uuid();
+  actor text := 'felipe.silva@slepb.gob.cl';
+  tabla text;
+  sede_a uuid;
   categoria_id uuid;
   sufijo text := gen_random_uuid()::text;
   nombre_categoria text := 'Categoría de prueba ' || sufijo;
@@ -20,43 +21,59 @@ BEGIN
     RAISE EXCEPTION 'La prueba requiere inventario_app con permisos limitados.';
   END IF;
 
-  INSERT INTO public.sedes (id, tipo, nombre)
-  VALUES
-    (sede_a, 'establecimiento', 'Sede de prueba A ' || sufijo),
-    (sede_b, 'establecimiento', 'Sede de prueba B ' || sufijo);
+  FOREACH tabla IN ARRAY ARRAY['sedes', 'dependencias', 'categorias_bienes'] LOOP
+    IF NOT has_table_privilege(current_user, format('public.%I', tabla), 'SELECT') THEN
+      RAISE EXCEPTION 'Falta SELECT en la tabla de catálogo %.', tabla;
+    END IF;
+    IF has_table_privilege(current_user, format('public.%I', tabla), 'INSERT')
+      OR has_table_privilege(current_user, format('public.%I', tabla), 'UPDATE')
+      OR has_table_privilege(current_user, format('public.%I', tabla), 'DELETE')
+      OR has_table_privilege(current_user, format('public.%I', tabla), 'TRUNCATE') THEN
+      RAISE EXCEPTION 'El rol de la aplicación debe operar los catálogos solo con funciones.';
+    END IF;
+  END LOOP;
 
-  INSERT INTO public.dependencias (sede_id, nombre)
-  VALUES (sede_a, 'Secretaría'), (sede_b, 'Secretaría');
+  IF public.guardar_sede_acceso(actor, NULL::uuid, '{"tipo":"establecimiento","nombre":"Sede de prueba A","rbd":null,"direccion":null,"comuna":null,"correoInstitucional":null,"activo":"true"}'::jsonb) ->> 'creada' <> 'true' THEN
+    RAISE EXCEPTION 'No se pudo registrar la sede de prueba A.';
+  END IF;
+  SELECT id INTO sede_a FROM public.sedes WHERE nombre = 'Sede de prueba A';
+  IF sede_a IS NULL THEN
+    RAISE EXCEPTION 'No se encontró la sede de prueba A.';
+  END IF;
 
   BEGIN
-    INSERT INTO public.dependencias (sede_id, nombre)
-    VALUES (sede_a, 'SECRETARÍA');
+    PERFORM public.guardar_dependencia_acceso(actor, NULL::uuid, sede_a, 'Secretaría', true);
+    PERFORM public.guardar_dependencia_acceso(actor, NULL::uuid, sede_a, 'Secretaría', true);
     RAISE EXCEPTION 'Se aceptó una dependencia duplicada en la misma sede.';
-  EXCEPTION WHEN unique_violation THEN
+  EXCEPTION WHEN SQLSTATE '23505' THEN
     NULL;
   END;
 
   BEGIN
-    INSERT INTO public.dependencias (sede_id, nombre)
-    VALUES (gen_random_uuid(), 'Dependencia sin sede');
+    PERFORM public.guardar_dependencia_acceso(actor, NULL::uuid, gen_random_uuid(), 'Dependencia sin sede', true);
     RAISE EXCEPTION 'Se aceptó una dependencia con una sede inexistente.';
-  EXCEPTION WHEN foreign_key_violation THEN
+  EXCEPTION WHEN SQLSTATE '23503' THEN
     NULL;
   END;
 
-  INSERT INTO public.categorias_bienes (nombre)
-  VALUES (nombre_categoria)
-  RETURNING id INTO categoria_id;
+  categoria_id := ((public.guardar_categoria_acceso(actor, NULL::uuid, nombre_categoria, true)) ->> 'id')::uuid;
+  IF categoria_id IS NULL THEN
+    RAISE EXCEPTION 'No se pudo registrar la categoría de prueba.';
+  END IF;
 
   BEGIN
-    INSERT INTO public.categorias_bienes (nombre)
-    VALUES (upper(nombre_categoria));
+    PERFORM public.guardar_categoria_acceso(actor, NULL::uuid, upper(nombre_categoria), true);
     RAISE EXCEPTION 'Se aceptó una categoría duplicada.';
-  EXCEPTION WHEN unique_violation THEN
+  EXCEPTION WHEN SQLSTATE '23505' THEN
     NULL;
   END;
 
-  UPDATE public.categorias_bienes SET activo = false WHERE id = categoria_id;
+  PERFORM public.guardar_categoria_acceso(
+    actor,
+    categoria_id,
+    (SELECT nombre FROM public.categorias_bienes WHERE id = categoria_id),
+    false
+  );
 
   IF NOT EXISTS (
     SELECT 1 FROM public.categorias_bienes

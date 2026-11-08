@@ -19,7 +19,7 @@ export async function guardarCategoria(
   _estadoAnterior: EstadoCategoria,
   datos: FormData,
 ): Promise<EstadoCategoria> {
-  await exigirAdministrador();
+  const actor = await exigirAdministrador();
 
   const id = datos.get("id");
   const nombreRecibido = datos.get("nombre");
@@ -55,18 +55,16 @@ export async function guardarCategoria(
 
   try {
     const db = obtenerBaseDatos();
-    const resultado = id
-      ? await db.query(
-          "UPDATE public.categorias_bienes SET nombre = $1, activo = $2 WHERE id = $3",
-          [nombre, activo === "true", id],
-        )
-      : await db.query(
-          "INSERT INTO public.categorias_bienes (nombre, activo) VALUES ($1, $2)",
-          [nombre, activo === "true"],
-        );
-
-    if (resultado.rowCount !== 1) {
-      return fallo("La categoría ya no está disponible. Recarga la página.");
+    if (id) {
+      await db.query(
+        "SELECT public.guardar_categoria_acceso($1, $2::uuid, $3, $4)",
+        [actor.email, id, nombre, activo === "true"],
+      );
+    } else {
+      await db.query(
+        "SELECT public.guardar_categoria_acceso($1, NULL::uuid, $3, $4)",
+        [actor.email, nombre, activo === "true"],
+      );
     }
   } catch (error) {
     const codigo = typeof error === "object" && error !== null && "code" in error
