@@ -46,11 +46,11 @@ export type IncidenteRobo={id:string;sedeId:string;sedeNombre:string;rbd:string|
 export type DetalleRobo={equipoId:string;identificacion:{marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};recuperadoFecha:string|null;recuperadoPor:string|null;motivo:string|null};
 export async function detalleRobo(id:string){
  const actor=await exigirGestionDependencias(),db=obtenerBaseDatos();
- const {rows}=await db.query<IncidenteRobo>(`SELECT id,sede_id AS "sedeId",sede_nombre AS "sedeNombre",sede_rbd AS rbd,comuna,fecha::text,lugar,descripcion,enlace,estado,version,reportado_por AS "reportadoPor" FROM public.incidentes_robos WHERE id=$1::uuid AND ($2::boolean OR sede_id=$3::uuid)`,[id,!requiereSede(actor.rol),actor.sedeId]);
+ const {rows}=await db.query<IncidenteRobo>(`SELECT i.id,i.sede_id AS "sedeId",i.sede_nombre AS "sedeNombre",i.sede_rbd AS rbd,i.comuna,i.fecha::text,i.lugar,i.descripcion,i.enlace,i.estado,i.version,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS "reportadoPor" FROM public.incidentes_robos i LEFT JOIN public.usuarios_acceso u ON u.correo=i.reportado_por WHERE i.id=$1::uuid AND ($2::boolean OR i.sede_id=$3::uuid)`,[id,!requiereSede(actor.rol),actor.sedeId]);
  if(!rows[0])return null;
  const [equipos,historial]=await Promise.all([
   db.query<DetalleRobo>('SELECT equipo_id AS "equipoId",identificacion,recuperado_fecha::text AS "recuperadoFecha",recuperado_por AS "recuperadoPor",recuperacion_motivo AS motivo FROM public.incidentes_robos_equipos WHERE incidente_id=$1::uuid ORDER BY equipo_id',[id]),
-  db.query<{id:string;evento:string;actor:string;motivo:string;fecha:string;equipoId:string|null}>('SELECT id,evento,actor,motivo,registrado_en::text AS fecha,equipo_id AS "equipoId" FROM public.incidentes_robos_historial WHERE incidente_id=$1::uuid ORDER BY registrado_en,id',[id])]);
+  db.query<{id:string;evento:string;actor:string;motivo:string;fecha:string;equipoId:string|null}>(`SELECT id,evento,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,motivo,registrado_en::text AS fecha,equipo_id AS "equipoId" FROM public.incidentes_robos_historial h LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor WHERE incidente_id=$1::uuid ORDER BY registrado_en,id`,[id])]);
  return {incidente:rows[0],equipos:equipos.rows,historial:historial.rows};
 }
 export async function robosEquipo(id:string){

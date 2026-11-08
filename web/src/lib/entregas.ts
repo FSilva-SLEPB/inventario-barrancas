@@ -32,17 +32,17 @@ export async function listarEntregas() {
   await exigirAdministrador();
   return (await obtenerBaseDatos().query<{id:string;actaId:string|null;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;actor:string;registrado:string;cantidad:number}>(`
     SELECT g.id,(SELECT a.id FROM public.actas_documentos a WHERE a.entrega_id=g.id AND a.pdf IS NOT NULL) AS "actaId",g.sede_nombre AS "sedeNombre",g.sede_rbd AS rbd,g.comuna,g.fecha_entrega::text AS fecha,g.receptor_nombre AS receptora,
-      l.actor,l.registrado_en::text AS registrado,count(*)::integer AS cantidad
-    FROM public.entregas_equipos g JOIN public.entregas_lotes l ON l.id=g.lote_id JOIN public.entregas_detalle d ON d.entrega_id=g.id
-    GROUP BY g.id,l.id ORDER BY l.registrado_en DESC,g.sede_nombre,g.id LIMIT 100`)).rows;
+      COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,l.registrado_en::text AS registrado,count(*)::integer AS cantidad
+    FROM public.entregas_equipos g JOIN public.entregas_lotes l ON l.id=g.lote_id JOIN public.entregas_detalle d ON d.entrega_id=g.id LEFT JOIN public.usuarios_acceso u ON u.correo=l.actor
+    GROUP BY g.id,l.id,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC'),l.registrado_en ORDER BY l.registrado_en DESC,g.sede_nombre,g.id LIMIT 100`)).rows;
 }
 export async function detalleEntrega(id: string) {
   await exigirAdministrador();
   if (!esIdSede(id)) return null;
   const { rows } = await obtenerBaseDatos().query<{id:string;actaId:string|null;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;cargo:string;enlace:string|null;actor:string;registrado:string;receptorDatos:{rut?:string;correo?:string};sedeDatos:{direccion?:string;correoInstitucional?:string}}>(`
     SELECT g.id,(SELECT a.id FROM public.actas_documentos a WHERE a.entrega_id=g.id AND a.pdf IS NOT NULL) AS "actaId",g.sede_nombre AS "sedeNombre",g.sede_rbd AS rbd,g.comuna,g.fecha_entrega::text AS fecha,g.receptor_nombre AS receptora,
-      g.receptor_cargo AS cargo,g.enlace_acta AS enlace,g.receptor_datos AS "receptorDatos",g.sede_datos AS "sedeDatos",l.actor,l.registrado_en::text AS registrado
-    FROM public.entregas_equipos g JOIN public.entregas_lotes l ON l.id=g.lote_id WHERE g.id=$1::uuid`,[id]);
+      g.receptor_cargo AS cargo,g.enlace_acta AS enlace,g.receptor_datos AS "receptorDatos",g.sede_datos AS "sedeDatos",COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,l.registrado_en::text AS registrado
+    FROM public.entregas_equipos g JOIN public.entregas_lotes l ON l.id=g.lote_id LEFT JOIN public.usuarios_acceso u ON u.correo=l.actor WHERE g.id=$1::uuid`,[id]);
   if (!rows[0]) return null;
   const items = (await obtenerBaseDatos().query<{id:string;antes:Record<string,unknown>;despues:Record<string,unknown>}>("SELECT equipo_id AS id,antes,despues FROM public.entregas_detalle WHERE entrega_id=$1::uuid ORDER BY equipo_id",[id])).rows;
   return { ...rows[0], items };

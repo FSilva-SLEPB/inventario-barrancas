@@ -15,6 +15,6 @@ export async function listarFuncionarios(f:FiltrosFuncionarios){
 export async function detalleFuncionario(id:string){
  await exigirAdministrador();const db=obtenerBaseDatos(),{rows}=await db.query<FuncionarioNC>(`SELECT ${columnas} FROM public.funcionarios_nc WHERE id=$1::uuid`,[id]);
  if(!rows[0])return null;
- const historia=await db.query<{id:string;actor:string;motivo:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>;fecha:string}>(`SELECT id::text,actor,motivo,antes,despues,registrado_en::text AS fecha FROM public.funcionarios_nc_historial WHERE funcionario_id=$1::uuid ORDER BY registrado_en DESC,id DESC LIMIT 50`,[id]);
+ const historia=await db.query<{id:string;actor:string;motivo:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>;fecha:string}>(`SELECT id::text,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,motivo,antes,despues,registrado_en::text AS fecha FROM public.funcionarios_nc_historial h LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor WHERE funcionario_id=$1::uuid ORDER BY registrado_en DESC,id DESC LIMIT 50`,[id]);
  return {funcionario:rows[0],historial:historia.rows};
 }

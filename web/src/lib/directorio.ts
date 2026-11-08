@@ -11,5 +11,6 @@ export async function listarDirectorio(): Promise<DirectorSede[]> {
 export async function historialDirectorio(sede: string) {
   await exigirAdministrador();
   return (await obtenerBaseDatos().query<{actor:string;motivo:string;fecha:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>}>(
-    'SELECT actor,motivo,registrado_en::text AS fecha,antes,despues FROM public.directorio_historial WHERE sede_id=$1::uuid ORDER BY registrado_en DESC,id DESC LIMIT 50',[sede])).rows;
+    `SELECT COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,motivo,registrado_en::text AS fecha,antes,despues FROM public.directorio_historial h LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor WHERE h.sede_id=$1::uuid ORDER BY registrado_en DESC,id DESC LIMIT 50`,
+    [sede])).rows;
 }
