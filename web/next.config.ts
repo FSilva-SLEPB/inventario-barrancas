@@ -1,5 +1,32 @@
 import type { NextConfig } from "next";
 
+// Next inyecta scripts y estilos en línea; la política bloquea orígenes externos
+// y marcos. En desarrollo se permite eval para el recargado en caliente.
+const POLITICA_CONTENIDO = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "form-action 'self'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "frame-src 'self'",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join("; ");
+
+const POLITICA_PERMISOS = [
+  "camera=()",
+  "microphone=()",
+  "geolocation=()",
+  "payment=()",
+  "usb=()",
+  "display-capture=()",
+].join(", ");
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
@@ -22,6 +49,14 @@ const nextConfig: NextConfig = {
           {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: POLITICA_CONTENIDO,
+          },
+          {
+            key: "Permissions-Policy",
+            value: POLITICA_PERMISOS,
           },
         ],
       },
