@@ -55,17 +55,10 @@ export async function guardarCategoria(
 
   try {
     const db = obtenerBaseDatos();
-    if (id) {
-      await db.query(
-        "SELECT public.guardar_categoria_acceso($1, $2::uuid, $3, $4)",
-        [actor.email, id, nombre, activo === "true"],
-      );
-    } else {
-      await db.query(
-        "SELECT public.guardar_categoria_acceso($1, NULL::uuid, $3, $4)",
-        [actor.email, nombre, activo === "true"],
-      );
-    }
+    await db.query(
+      "SELECT public.guardar_categoria_acceso($1, $2::uuid, $3, $4)",
+      [actor.email, id || null, nombre, activo === "true"],
+    );
   } catch (error) {
     const codigo = typeof error === "object" && error !== null && "code" in error
       ? error.code
