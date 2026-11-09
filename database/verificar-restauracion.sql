@@ -102,20 +102,42 @@ BEGIN
     RAISE EXCEPTION 'El usuario de aplicación puede crear esquemas en la base.';
   END IF;
 
-  FOREACH tabla IN ARRAY ARRAY['sedes', 'dependencias', 'categorias_bienes'] LOOP
-    IF to_regclass(format('public.%I', tabla)) IS NULL THEN
-      RAISE EXCEPTION 'Falta una tabla del catálogo restaurado.';
-    END IF;
-    FOREACH privilegio IN ARRAY ARRAY['SELECT', 'INSERT', 'UPDATE'] LOOP
-      IF NOT has_table_privilege(current_user, format('public.%I', tabla), privilegio) THEN
-        RAISE EXCEPTION 'Falta un permiso requerido del usuario de aplicación.';
+  IF to_regprocedure('public.guardar_sede_acceso(text,uuid,jsonb)') IS NOT NULL THEN
+    -- Copia del modelo actual: los catálogos se operan solo con funciones.
+    FOREACH tabla IN ARRAY ARRAY['sedes', 'dependencias', 'categorias_bienes'] LOOP
+      IF to_regclass(format('public.%I', tabla)) IS NULL THEN
+        RAISE EXCEPTION 'Falta una tabla del catálogo restaurado.';
+      END IF;
+      IF NOT has_table_privilege(current_user, format('public.%I', tabla), 'SELECT')
+        OR has_table_privilege(current_user, format('public.%I', tabla), 'INSERT')
+        OR has_table_privilege(current_user, format('public.%I', tabla), 'UPDATE')
+        OR has_table_privilege(current_user, format('public.%I', tabla), 'DELETE')
+        OR has_table_privilege(current_user, format('public.%I', tabla), 'TRUNCATE') THEN
+        RAISE EXCEPTION 'Permisos de catálogos incorrectos en la copia restaurada.';
       END IF;
     END LOOP;
-    IF has_table_privilege(current_user, format('public.%I', tabla), 'DELETE')
-        OR has_table_privilege(current_user, format('public.%I', tabla), 'TRUNCATE') THEN
-      RAISE EXCEPTION 'El usuario de aplicación tiene permisos de borrado.';
+    IF NOT has_function_privilege(current_user, 'public.guardar_sede_acceso(text,uuid,jsonb)', 'EXECUTE')
+      OR NOT has_function_privilege(current_user, 'public.guardar_dependencia_acceso(text,uuid,uuid,text,boolean)', 'EXECUTE')
+      OR NOT has_function_privilege(current_user, 'public.guardar_categoria_acceso(text,uuid,text,boolean)', 'EXECUTE') THEN
+      RAISE EXCEPTION 'Faltan las funciones controladas de catálogos en la copia.';
     END IF;
-  END LOOP;
+  ELSE
+    -- Copia del formato anterior: escritura directa permitida para el usuario de aplicación.
+    FOREACH tabla IN ARRAY ARRAY['sedes', 'dependencias', 'categorias_bienes'] LOOP
+      IF to_regclass(format('public.%I', tabla)) IS NULL THEN
+        RAISE EXCEPTION 'Falta una tabla del catálogo restaurado.';
+      END IF;
+      FOREACH privilegio IN ARRAY ARRAY['SELECT', 'INSERT', 'UPDATE'] LOOP
+        IF NOT has_table_privilege(current_user, format('public.%I', tabla), privilegio) THEN
+          RAISE EXCEPTION 'Falta un permiso requerido del usuario de aplicación.';
+        END IF;
+      END LOOP;
+      IF has_table_privilege(current_user, format('public.%I', tabla), 'DELETE')
+          OR has_table_privilege(current_user, format('public.%I', tabla), 'TRUNCATE') THEN
+        RAISE EXCEPTION 'El usuario de aplicación tiene permisos de borrado.';
+      END IF;
+    END LOOP;
+  END IF;
 
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint

@@ -68,7 +68,7 @@ export default async function Usuarios({ searchParams }: {
         <dt>Consulta general / Auditor</dt><dd>Consulta todos los ámbitos, sin modificar registros.</dd>
         <dt>Consulta de establecimiento</dt><dd>Consulta únicamente su sede, sin modificar registros.</dd></dl>
       <p>Debe permanecer al menos un administrador del sistema activo. Los cambios de acceso y sede quedan registrados.</p>
-      <p>Las entregas con actas, préstamos, incidentes y solicitudes se habilitarán en sus próximas etapas.</p>
+      <p>Las entregas con actas, préstamos, incidentes y solicitudes se gestionan desde los módulos de operaciones con los perfiles de administración y de gestión.</p>
     </section>
   </main>;
 }

@@ -17,7 +17,7 @@ export async function guardarSede(
   _anterior: EstadoSede,
   formulario: FormData,
 ): Promise<EstadoSede> {
-  await exigirAdministrador();
+  const actor = await exigirAdministrador();
   const revision = randomUUID();
   const { valores, errores, datos } = validarSede(formulario);
   const respuesta: EstadoSede = {
@@ -33,33 +33,20 @@ export async function guardarSede(
   }
 
   try {
-    const parametros = [
-      datos.tipo, datos.nombre, datos.rbd, datos.direccion,
-      datos.comuna, datos.correoInstitucional, datos.activo,
-    ];
     const base = obtenerBaseDatos();
-
-    if (datos.id) {
-      const resultado = await base.query(`
-        UPDATE public.sedes
-        SET tipo = $1, nombre = $2, rbd = $3, direccion = $4,
-            comuna = $5, correo_institucional = $6, activo = $7
-        WHERE id = $8::uuid
-      `, [...parametros, datos.id]);
-
-      if (resultado.rowCount !== 1) {
-        return {
-          ...respuesta,
-          mensaje: "La sede ya no está disponible. Vuelve al listado y selecciónala nuevamente.",
-        };
-      }
-    } else {
-      await base.query(`
-        INSERT INTO public.sedes
-          (tipo, nombre, rbd, direccion, comuna, correo_institucional, activo)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-      `, parametros);
-    }
+    await base.query("SELECT public.guardar_sede_acceso($1, $2::uuid, $3::jsonb)", [
+      actor.email,
+      datos.id,
+      JSON.stringify({
+        tipo: datos.tipo,
+        nombre: datos.nombre,
+        rbd: datos.rbd,
+        direccion: datos.direccion,
+        comuna: datos.comuna,
+        correoInstitucional: datos.correoInstitucional,
+        activo: datos.activo,
+      }),
+    ]);
   } catch (error: unknown) {
     const errorBase = error as { code?: string; constraint?: string } | null;
     if (errorBase?.code === "23505" && errorBase.constraint === "sedes_rbd_key") {
@@ -67,6 +54,18 @@ export async function guardarSede(
         ...respuesta,
         mensaje: "Ya existe una sede con ese RBD.",
         errores: { rbd: "Este RBD ya está registrado. Revisa el listado de sedes." },
+      };
+    }
+    if (errorBase?.code === "P1006") {
+      return {
+        ...respuesta,
+        mensaje: "La sede ya no está disponible. Vuelve al listado y selecciónala nuevamente.",
+      };
+    }
+    if (errorBase?.code === "42501") {
+      return {
+        ...respuesta,
+        mensaje: "No tienes permiso para modificar esta sede.",
       };
     }
     console.error("No fue posible guardar una sede.", { codigo: errorBase?.code });
