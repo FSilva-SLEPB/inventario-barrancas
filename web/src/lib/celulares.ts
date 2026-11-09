@@ -19,6 +19,6 @@ export async function listarCelulares(f:FiltrosCelulares){
 export async function detalleCelular(id:string){
  const actor=await exigirAcceso(),db=obtenerBaseDatos(),global=!requiereSede(actor.rol);
  const {rows}=await db.query<Celular>(`SELECT ${columnas} ${base} WHERE c.id=$1::uuid AND ($2::boolean OR c.sede_id=$3::uuid)`,[id,global,actor.sedeId]);if(!rows[0])return null;
- const historial=await db.query<{id:string;actor:string;motivo:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>;fecha:string}>(`SELECT h.id::text,h.actor,h.motivo,h.antes,h.despues,h.registrado_en::text AS fecha FROM public.celulares_historial h WHERE h.celular_id=$1::uuid AND ($2::boolean OR (h.despues->>'sedeId'=$3 AND (h.antes IS NULL OR h.antes->>'sedeId'=$3))) ORDER BY h.registrado_en DESC,h.id DESC LIMIT 50`,[id,global,actor.sedeId]);
+ const historial=await db.query<{id:string;actor:string;motivo:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>;fecha:string}>(`SELECT h.id::text,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,h.motivo,h.antes,h.despues,h.registrado_en::text AS fecha FROM public.celulares_historial h LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor WHERE h.celular_id=$1::uuid AND ($2::boolean OR (h.despues->>'sedeId'=$3 AND (h.antes IS NULL OR h.antes->>'sedeId'=$3))) ORDER BY h.registrado_en DESC,h.id DESC LIMIT 50`,[id,global,actor.sedeId]);
  return {celular:rows[0],historial:historial.rows};
 }

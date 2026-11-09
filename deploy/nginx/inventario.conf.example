@@ -1,16 +1,24 @@
 # Ejemplo para http{} / conf.d de nginx. Reemplazar dominio y rutas de certificados.
 # La aplicación permanece en 127.0.0.1:3000; este proxy termina HTTPS.
+#
+# Los límites son deliberadamente holgados: ajustar según el uso real y revisar
+# los rechazos 429 antes de endurecerlos. Los archivos estáticos no se limitan.
+
 limit_req_zone $binary_remote_addr zone=inventario_salud:1m rate=1r/s;
+limit_req_zone $binary_remote_addr zone=inventario_auth:1m rate=30r/m;
+limit_req_zone $binary_remote_addr zone=inventario_general:10m rate=30r/s;
 
 server {
     listen 80;
     server_name inventario.ejemplo.cl;
+    server_tokens off;
     if ($host != inventario.ejemplo.cl) { return 444; }
     return 308 https://inventario.ejemplo.cl$request_uri;
 }
 server {
     listen 443 ssl;
     server_name inventario.ejemplo.cl;
+    server_tokens off;
     if ($host != inventario.ejemplo.cl) { return 444; }
     ssl_certificate /etc/ssl/inventario/fullchain.pem;
     ssl_certificate_key /etc/ssl/inventario/privkey.pem;
@@ -27,12 +35,23 @@ server {
     proxy_cache off;
     proxy_read_timeout 60s;
     proxy_send_timeout 60s;
+    limit_req_status 429;
+    add_header Strict-Transport-Security "max-age=31536000" always;
     location = /api/salud {
         limit_req zone=inventario_salud burst=2 nodelay;
-        limit_req_status 429;
+        proxy_pass http://127.0.0.1:3000;
+    }
+    # Inicio y retorno de OAuth: protege el flujo sin frenar una sesión normal.
+    location ^~ /api/auth/ {
+        limit_req zone=inventario_auth burst=10 nodelay;
+        proxy_pass http://127.0.0.1:3000;
+    }
+    # Recursos inmutables de Next.js: sin límite para no romper la primera carga.
+    location ^~ /_next/static/ {
         proxy_pass http://127.0.0.1:3000;
     }
     location / {
+        limit_req zone=inventario_general burst=60 nodelay;
         proxy_pass http://127.0.0.1:3000;
     }
 }

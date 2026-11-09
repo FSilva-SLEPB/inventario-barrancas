@@ -43,8 +43,10 @@ export async function obtenerEquipo(id:string):Promise<Equipo|null> {
 }
 export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   const acceso=await exigirAcceso();
-  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT h.actor,CASE WHEN h.incidente_id IS NOT NULL AND NOT $4::boolean THEN 'Seguimiento de incidente de robo. Los antecedentes están disponibles para los perfiles de gestión autorizados.' ELSE h.motivo END AS motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
+  // El historial muestra el nombre del actor; el correo queda en la base e historial técnico.
+  return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,CASE WHEN h.incidente_id IS NOT NULL AND NOT $4::boolean THEN 'Seguimiento de incidente de robo. Los antecedentes están disponibles para los perfiles de gestión autorizados.' ELSE h.motivo END AS motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
     FROM public.equipos_historial h JOIN public.equipos e ON e.id=h.equipo_id
+    LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor
     WHERE e.id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND h.despues->>'sede_id'=$3::text AND (h.antes IS NULL OR h.antes->>'sede_id'=$3::text))) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId,puedeGestionarDependencias(acceso.rol)])).rows;
 }
 export function equipoAFormulario(equipo:Equipo):ValoresEquipo {
