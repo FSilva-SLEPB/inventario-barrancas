@@ -137,10 +137,10 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    </div>
   </div>
 
-  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:'1rem',alignItems:'stretch'}}>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,360px),1fr))',gap:'1rem',alignItems:'stretch'}}>
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'.75rem'}}>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,180px),1fr))',gap:'.75rem'}}>
      <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
      <div className="campo-catalogos"><label htmlFor="filtro-categoria">Filtrar por categoría</label><select id="filtro-categoria" value={filtroCategoria} onChange={e=>setFiltroCategoria(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
     </div>
