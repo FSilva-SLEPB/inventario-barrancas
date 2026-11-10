@@ -153,7 +153,8 @@ erDiagram
     uuid lote_id FK
     uuid sede_id FK
     text sede_nombre
-    text sede_rbd
+    
+text sede_rbd
     text comuna
     date fecha_entrega
     text receptor_nombre
@@ -297,7 +298,8 @@ erDiagram
     text actor
     text motivo
     jsonb solicitud
-    jsonb antes
+    js
+onb antes
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
@@ -399,8 +401,6 @@ erDiagram
     integer version
     timestamp_with_time_zone actualizado_en
     uuid sede_id FK
-    text password_hash
-    text run
   }
   usuarios_acceso_historial {
     bigint id PK
@@ -417,7 +417,8 @@ erDiagram
   solicitudes_insumos |o--o{ actas_documentos : "solicitud_insumo_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
   celulares |o--o{ cambios_estados_activo : "celular_id"
-  equipos |o--o{ cambios_estados_activo : "equipo_id"
+  equipos |o--o{ cambios_estados_activo : "
+equipo_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
