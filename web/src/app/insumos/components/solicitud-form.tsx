@@ -89,8 +89,8 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
   <div className="campo-catalogos"><span className="dato-secundario" style={{display:'block',marginBottom:4}}>{label}</span><div style={{fontWeight:600,background:'#fff',border:'1px solid var(--color-borde-suave)',borderRadius:10,padding:'.45rem .65rem'}}>{value||'—'}</div></div>
  );
 
- return <section className="panel-catalogos" style={{display:'grid',gap:'1.25rem'}}>
-  <header>
+ return <section style={{display:'grid',gap:'1.25rem'}}>
+  <header className="panel-catalogos" style={{padding:'1rem'}}>
    <h1 style={{margin:'0 0 .25rem'}}>Solicitud de insumos</h1>
    <p className="descripcion-pagina" style={{margin:0}}>Completa los datos, selecciona insumos por separado y envía la solicitud.</p>
   </header>
