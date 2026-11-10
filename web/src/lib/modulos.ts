@@ -23,5 +23,7 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   {href:'/mantenedores/categorias',titulo:'Categorías de bienes',descripcion:'Tipos de equipos y bienes del inventario.',icono:'CA'},
   {href:'/mantenedores/sedes',titulo:'Sedes',descripcion:'Establecimientos, jardines, salas cunas y Nivel Central.',icono:'SE'},
   {href:'/mantenedores/dependencias',titulo:'Dependencias',descripcion:'Ubicaciones internas de cada sede.',icono:'DE'}
- ]},{id:'solicitudes',titulo:'Solicitudes',href:'/solicitudes',descripcion:'Solicitudes de insumos para establecimientos educacionales, JISC y Nivel Central.',accesos:[]}];
+ ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
+  ...(admin||gestion||local?[{href:'/insumos',titulo:'Solicitudes de insumos',descripcion:'Catálogo, carrito y seguimiento de solicitudes de insumos.',icono:'IN'}]:[]),
+ ]}];
 }
