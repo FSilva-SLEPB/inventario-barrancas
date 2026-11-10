@@ -22,6 +22,10 @@ erDiagram
     timestamp_with_time_zone emitido_en
     uuid entrega_id FK
     uuid operacion_id FK
+    boolean origen_externo
+    text archivo_nombre
+    uuid entrega_insumo_id FK
+    uuid solicitud_insumo_id FK
   }
   actas_envios {
     uuid id PK
@@ -52,6 +56,17 @@ erDiagram
     text sha256
     integer cantidad
     timestamp_with_time_zone registrado_en
+  }
+  catalogo_insumos {
+    uuid id PK
+    text codigo
+    text nombre
+    text categoria
+    text unidad
+    boolean activo
+    timestamp_with_time_zone creado_en
+    timestamp_with_time_zone actualizado_en
+    text foto_url
   }
   categorias_bienes {
     uuid id PK
@@ -148,6 +163,22 @@ erDiagram
     text enlace_acta
     jsonb receptor_datos
     jsonb sede_datos
+  }
+  entregas_insumos {
+    uuid id PK
+    uuid solicitud_id FK
+    text responsable_ti
+    text receptor
+    date fecha_entrega
+    uuid acta_id FK
+    text observaciones
+    timestamp_with_time_zone creado_en
+  }
+  entregas_insumos_detalle {
+    uuid id PK
+    uuid entrega_id FK
+    uuid producto_id FK
+    integer cantidad_entregada
   }
   entregas_lotes {
     uuid id PK
@@ -301,6 +332,15 @@ erDiagram
     uuid movimiento_devolucion_id FK
     date fecha_devolucion
   }
+  reservas_insumos {
+    uuid id PK
+    uuid solicitud_id FK
+    uuid producto_id FK
+    integer cantidad_reservada
+    timestamp_with_time_zone creada_en
+    timestamp_with_time_zone consumida_en
+    timestamp_with_time_zone liberada_en
+  }
   sedes {
     uuid id PK
     text tipo
@@ -312,6 +352,44 @@ erDiagram
     boolean activo
     timestamp_with_time_zone creado_en
   }
+  solicitudes_insumos {
+    uuid id PK
+    uuid sede_id FK
+    text solicitante_correo
+    text estado
+    text motivo
+    timestamp_with_time_zone solicitado_en
+    timestamp_with_time_zone aprobado_en
+    timestamp_with_time_zone entregado_en
+    timestamp_with_time_zone cancelado_en
+    text aprobado_por
+    text cancelado_por
+    text cancelado_motivo
+    uuid acta_id FK
+    timestamp_with_time_zone validado_en
+    text validado_por
+    text observacion_validacion
+    text solicitante_nombre
+    text solicitante_run
+    text solicitante_cargo
+    text solicitante_telefono
+    text modalidad_entrega
+  }
+  solicitudes_insumos_detalle {
+    uuid id PK
+    uuid solicitud_id FK
+    uuid producto_id FK
+    integer cantidad_solicitada
+    integer cantidad_aprobada
+    integer cantidad_entregada
+    text motivo_reduccion
+  }
+  stock_insumos {
+    uuid producto_id PK, FK
+    integer existencia
+    integer reservado
+    timestamp_with_time_zone actualizado_en
+  }
   usuarios_acceso {
     text correo PK
     text rol
@@ -321,6 +399,8 @@ erDiagram
     integer version
     timestamp_with_time_zone actualizado_en
     uuid sede_id FK
+    text password_hash
+    text run
   }
   usuarios_acceso_historial {
     bigint id PK
@@ -331,8 +411,10 @@ erDiagram
     timestamp_with_time_zone registrado_en
   }
   entregas_equipos |o--o| actas_documentos : "entrega_id"
+  entregas_insumos |o--o{ actas_documentos : "entrega_insumo_id"
   movimientos_inventario |o--o| actas_documentos : "movimiento_id"
   operaciones_inventario |o--o| actas_documentos : "operacion_id"
+  solicitudes_insumos |o--o{ actas_documentos : "solicitud_insumo_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
   celulares |o--o{ cambios_estados_activo : "celular_id"
   equipos |o--o{ cambios_estados_activo : "equipo_id"
@@ -346,6 +428,10 @@ erDiagram
   equipos ||--o{ entregas_detalle : "equipo_id"
   entregas_lotes ||--o{ entregas_equipos : "lote_id"
   sedes ||--o{ entregas_equipos : "sede_id"
+  actas_documentos |o--o{ entregas_insumos : "acta_id"
+  solicitudes_insumos ||--o| entregas_insumos : "solicitud_id"
+  entregas_insumos ||--o{ entregas_insumos_detalle : "entrega_id"
+  catalogo_insumos ||--o{ entregas_insumos_detalle : "producto_id"
   cargas_equipos |o--o{ equipos : "carga_id"
   categorias_bienes ||--o{ equipos : "categoria_id"
   sedes ||--o{ equipos : "sede_id"
@@ -373,6 +459,13 @@ erDiagram
   movimientos_inventario ||--o| prestamos_inventario : "id"
   movimientos_inventario |o--o| prestamos_inventario : "movimiento_devolucion_id"
   sedes ||--o{ prestamos_inventario : "origen_sede_id"
+  catalogo_insumos ||--o{ reservas_insumos : "producto_id"
+  solicitudes_insumos ||--o{ reservas_insumos : "solicitud_id"
+  actas_documentos |o--o{ solicitudes_insumos : "acta_id"
+  sedes ||--o{ solicitudes_insumos : "sede_id"
+  catalogo_insumos ||--o{ solicitudes_insumos_detalle : "producto_id"
+  solicitudes_insumos ||--o{ solicitudes_insumos_detalle : "solicitud_id"
+  catalogo_insumos ||--o| stock_insumos : "producto_id"
   sedes |o--o{ usuarios_acceso : "sede_id"
 ```
 
@@ -385,6 +478,7 @@ erDiagram
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
 | cambios_estados_activo | Estados del activo | Transiciones administrativas y de condición confirmadas por UTIC, con solicitud idempotente, versión e instantáneas inmutables. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
+| catalogo_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
 | celulares_historial | Celulares | Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas. |
@@ -394,6 +488,8 @@ erDiagram
 | directorio_sedes | Directorio | Responsable vigente de cada EE/JISC, RUN, contactos y situación del cargo. |
 | entregas_detalle | Entregas | Equipos de cada entrega, con instantáneas anteriores y posteriores. |
 | entregas_equipos | Entregas | Cabecera de entrega por sede, fecha y persona receptora; conserva sus datos históricos. |
+| entregas_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| entregas_insumos_detalle | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
 | equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado/en préstamo y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
@@ -407,7 +503,11 @@ erDiagram
 | operaciones_inventario_detalle | Movimientos | Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
 | prestamos_inventario | Préstamos | Préstamos temporales desde Bodega TI, pertenencia conservada, destino y plazo, devolución vinculada e historial en movimientos. |
+| reservas_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
+| solicitudes_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| solicitudes_insumos_detalle | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| stock_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
 | usuarios_acceso | Acceso | Cuentas autorizadas, perfil, vigencia y sede permitida. |
 | usuarios_acceso_historial | Acceso | Auditoría de cambios de usuarios y permisos. |
 
