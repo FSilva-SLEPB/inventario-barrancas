@@ -2,20 +2,21 @@
 import ModalFicha from '@/components/modal-ficha';
 import {useMemo,useState} from "react";
 import {guardarSolicitudInsumo} from "@/app/insumos/acciones";
+import type {ParticipanteActual} from '@/lib/participante-actual';
 import type {InsumoCatalogo} from "@/lib/insumos";
-import {avisarError,avisarExito,confirmarAccion} from "@/components/confirmacion";
+import {avisarError,confirmarAccion} from "@/components/confirmacion";
 
 export type SolicitudFormProps={
  sedes:{id:string;nombre:string;rbd:string|null;direccion?:string|null;comuna?:string|null}[];
  catalogo:InsumoCatalogo[];
  actor:{email:string;sedeId:string|null;sedeNombre:string|null;sedeRbd:string|null};
- local:boolean;solicitudId:string;
+ local:boolean;solicitudId:string;participante:ParticipanteActual;
 };
 
 type Producto={id:string;codigo:string;nombre:string;categoria:string;unidad:string;foto_url:string|null};
 type ItemCarrito={id:string;n:number;p:Producto};
 
-export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId}:SolicitudFormProps){
+export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,participante}:SolicitudFormProps){
  const sedeInicial=useMemo(()=>{
   if(actor.sedeId){const s=sedes.find(x=>x.id===actor.sedeId); if(s) return s;}
   if(sedes.length===1) return sedes[0];
@@ -23,7 +24,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId}:S
  },[actor.sedeId,sedes]);
  const [sede,setSede]=useState(sedeInicial);
  const [editSede,setEditSede]=useState(!sedeInicial && !local);
- const [solicitante,setSolicitante]=useState({nombre:'',run:'',cargo:'',telefono:'',correo:actor.email||''});
+ const [solicitante,setSolicitante]=useState(participante);
  const [editSolicitante,setEditSolicitante]=useState(false);
 
  const [filtroNombre,setFiltroNombre]=useState('');
@@ -73,17 +74,12 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId}:S
   form.set('datos',JSON.stringify({nombre:solicitante.nombre,run:solicitante.run,cargo:solicitante.cargo,telefono:solicitante.telefono,modalidad:'',motivo:''}));
   try{
    const res=await guardarSolicitudInsumo({estado:'inicial',mensaje:'',revision:'',valores:{},errores:{}},form);
-   if(res?.estado==='error'){await avisarError('No se pudo enviar',res.mensaje);setEnviando(false);return;}
+   if(res.estado!=='guardado'||!res.valores.destino){await avisarError('No se pudo enviar',res.mensaje||'Revisa la solicitud.');setEnviando(false);return;}
+   window.location.assign(res.valores.destino);
   }catch(e:unknown){
-   if(e && typeof e==='object' && 'digest' in e && String((e as {digest?:unknown}).digest).includes('NEXT_REDIRECT')){
-    await avisarExito('Solicitud enviada','Tu solicitud fue enviada correctamente.');
-    window.location.assign('/insumos/seguimiento'); return;
-   }
-   await avisarError('No se pudo enviar', e instanceof Error ? e.message : 'Error inesperado.');
-   setEnviando(false); return;
+   if(e&&typeof e==='object'&&'digest' in e&&String(e.digest).includes('NEXT_REDIRECT'))return;
+   await avisarError('No se pudo enviar',e instanceof Error?e.message:'Error de conexión. Conserva el carrito y vuelve a intentarlo.');setEnviando(false);
   }
-  await avisarExito('Solicitud enviada','Tu solicitud fue enviada correctamente.');
-  window.location.assign('/insumos/seguimiento');
  };
 
  const labelCampo=(label:string,value:string)=>(
@@ -127,7 +123,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId}:S
      <div className="campo-catalogos"><label htmlFor="sol-run">RUN</label><input id="sol-run" value={solicitante.run} onChange={e=>setSolicitante(v=>({...v,run:e.target.value}))}/></div>
      <div className="campo-catalogos"><label htmlFor="sol-cargo">Cargo</label><input id="sol-cargo" value={solicitante.cargo} onChange={e=>setSolicitante(v=>({...v,cargo:e.target.value}))}/></div>
      <div className="campo-catalogos"><label htmlFor="sol-tel">Teléfono</label><input id="sol-tel" value={solicitante.telefono} onChange={e=>setSolicitante(v=>({...v,telefono:e.target.value}))}/></div>
-     <div className="campo-catalogos"><label htmlFor="sol-correo">Correo</label><input id="sol-correo" value={solicitante.correo} onChange={e=>setSolicitante(v=>({...v,correo:e.target.value}))}/></div>
+     <div className="campo-catalogos"><label htmlFor="sol-correo">Correo</label><input id="sol-correo" value={actor.email} readOnly/></div>
     </div> : <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'.75rem'}}>
      {labelCampo('Nombre',solicitante.nombre)}
      {labelCampo('RUN',solicitante.run)}

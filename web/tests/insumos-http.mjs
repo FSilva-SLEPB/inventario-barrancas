@@ -101,8 +101,18 @@ try{
   await assert.rejects(entregar(a,entrega([{producto_id:p1,cantidad_entregada:1}],{fecha_entrega:'2099-01-01'})));
   assert.deepEqual(await stock(p1),antes1);assert.deepEqual(await stock(p2),antes2);assert.equal((await solicitud(a)).estado,'aprobada');assert.equal((await db.query('SELECT count(*) FROM public.entregas_insumos WHERE solicitud_id=$1',[a])).rows[0].count,'0');
  });
+ await caso('validar, aprobar y cancelar conservan filtros sin permitir destinos ajenos',async()=>{
+  const id=await nueva(sedes[0],[{producto_id:p4,cantidad:1}]);const base='/insumos/seguimiento?q='+sufijo+'&limite=100&pagina=2';
+  for(const[paso,marca]of [['validar','name="observacion"'],['aprobar','name="cant_aprobada_'],['cancelar','name="motivo"']]){const ruta=base+'&ver='+id+'&paso='+paso,html=await(await pedir(ruta,ca)).text(),f=formulario(html,marca);if(paso==='cancelar')f.set('motivo','Cancelación de ensayo');const r=await post(ruta,f,ca);assert.equal(r.status,303,await r.text());const u=new URL(r.headers.get('location'),origen);assert.equal(u.pathname,'/insumos/seguimiento');assert.equal(u.searchParams.get('q'),sufijo);assert.equal(u.searchParams.get('limite'),'100');assert.equal(u.searchParams.get('paso'),null);}
+  assert.equal((await solicitud(id)).estado,'cancelada');
+ });
+ await caso('formulario de entrega precarga participantes y no admite cantidades fraccionadas por HTTP',async()=>{
+  for(const rol of ['consulta','consulta_sede']){const r=await pedir('/insumos/solicitud',await cookie(usuarios[rol]));assert.ok([303,307].includes(r.status));assert.equal(new URL(r.headers.get('location'),origen).pathname,'/sin-permiso');}
+  const ruta='/insumos/seguimiento?ver='+a+'&paso=entregar&limite=100&pagina=2',html=await(await pedir(ruta,ca)).text();assert.ok(html.includes('modal-ficha'));const f=formulario(html,'name="responsable_ti"');assert.equal(f.get('responsable_ti'),'Persona ficticia');assert.equal(f.get('receptor'),'Solicitante '+sufijo);assert.equal(f.get('recibeRun'),'12345678-5');assert.equal(f.get('entregaCorreo'),usuarios.administrador_gestion);assert.equal(new URL(f.get('volver'),origen).searchParams.get('limite'),'100');
+  const antes=await stock(p1);f.set('cant_entregada_'+p1,'2');f.set('cant_entregada_'+p2,'1.5');const r=await post(ruta,f,ca);assert.equal(r.status,200);assert.match(await r.text(),/cantidades enteras/);assert.deepEqual(await stock(p1),antes);assert.equal((await solicitud(a)).estado,'aprobada');
+ });
  await caso('fallo del PDF revierte entrega, stock, reservas y folio',async()=>{
-  const ruta='/insumos/seguimiento?ver='+a,f=formulario(await(await pedir(ruta,ca)).text(),'name="responsable_ti"');
+  const ruta='/insumos/seguimiento?ver='+a+'&paso=entregar',f=formulario(await(await pedir(ruta,ca)).text(),'name="responsable_ti"');
   for(const[k,v]of Object.entries({receptor:'Persona receptora original',responsable_ti:'Persona UTIC original',fecha_entrega:fecha,recibeRun:'',recibeCargo:'Director/a',entregaCargo:'UTIC',observaciones:'Entrega parcial finalizada',['cant_entregada_'+p1]:'3',['cant_entregada_'+p2]:'0'}))f.set(k,v);
   const anterior=await solicitud(a),antes1=await stock(p1),antes2=await stock(p2),folio=(await db.query('SELECT ultimo FROM public.actas_contador')).rows[0].ultimo;
   try{await db.query('ALTER FUNCTION public.completar_pdf_acta_acceso(text,uuid,bytea) RENAME TO completar_pdf_insumos_ensayo');const r=await post(ruta,f,ca);assert.equal(r.status,200);}finally{await db.query('ALTER FUNCTION public.completar_pdf_insumos_ensayo(text,uuid,bytea) RENAME TO completar_pdf_acta_acceso');}
@@ -110,13 +120,21 @@ try{
  });
  let acta;
  await caso('contra entrega HTTP parcial cierra y libera toda su reserva sin tocar otras',async()=>{
-  const ruta='/insumos/seguimiento?ver='+a,html=await(await pedir(ruta,ca)).text(),f=formulario(html,'name="responsable_ti"');for(const[k,v]of Object.entries({receptor:'Persona receptora original',responsable_ti:'Persona UTIC original',fecha_entrega:fecha,recibeRun:'',recibeCargo:'Director/a',entregaCargo:'UTIC',observaciones:'Entrega parcial finalizada',['cant_entregada_'+p1]:'3',['cant_entregada_'+p2]:'0'}))f.set(k,v);
+  const ruta='/insumos/seguimiento?ver='+a+'&paso=entregar',html=await(await pedir(ruta,ca)).text(),f=formulario(html,'name="responsable_ti"');for(const[k,v]of Object.entries({receptor:'Persona receptora original',responsable_ti:'Persona UTIC original',fecha_entrega:fecha,recibeRun:'',recibeCargo:'Director/a',entregaCargo:'UTIC',observaciones:'Entrega parcial finalizada',['cant_entregada_'+p1]:'3',['cant_entregada_'+p2]:'0'}))f.set(k,v);
   const r=await post(ruta,f,ca);assert.equal(r.status,303,await r.text());const despues=await solicitud(a);assert.equal(despues.estado,'entregada');assert.ok(despues.acta_id);assert.equal(new URL(r.headers.get('location'),origen).pathname,'/inventario/actas/'+despues.acta_id);
   assert.deepEqual(await stock(p1),{existencia:17,reservado:2});assert.deepEqual(await stock(p2),{existencia:10,reservado:0});assert.equal((await db.query('SELECT count(*) FROM public.reservas_insumos WHERE solicitud_id=$1 AND consumida_en IS NULL AND liberada_en IS NULL',[a])).rows[0].count,'0');assert.equal((await solicitud(b)).estado,'aprobada');
   const repetido=await post(ruta,clonar(f),ca);assert.equal(repetido.status,303,await repetido.text());assert.equal((await solicitud(a)).acta_id,despues.acta_id);assert.deepEqual(await stock(p1),{existencia:17,reservado:2});assert.equal((await db.query('SELECT count(*) FROM public.entregas_insumos WHERE solicitud_id=$1',[a])).rows[0].count,'1');
   acta=(await db.query('SELECT * FROM public.actas_documentos WHERE id=$1',[despues.acta_id])).rows[0];assert.ok(acta?.pdf);
  });
+ await caso('Todos incluye finalizadas y no acepta guardados inventados por URL',async()=>{
+  const todos=await(await pedir('/insumos/seguimiento?q='+sufijo+'&estado=&guardado=1',ca)).text();assert.ok(todos.includes('ver='+a));assert.ok(!todos.includes('Cambios guardados.'));
+  const activas=await(await pedir('/insumos/seguimiento?q='+sufijo+'&estado=activas',ca)).text();assert.ok(!activas.includes('ver='+a));
+ });
+ await caso('acta y correo regresan al listado de insumos conservando sus filtros',async()=>{
+  const volver='/insumos/historial?q='+sufijo+'&limite=100&pagina=2',ruta='/inventario/actas/'+acta.id+'?'+new URLSearchParams({volver});const html=await(await pedir(ruta,ca)).text();assert.ok(html.includes('Volver a insumos'));assert.ok(html.includes('limite=100'));const correo=await(await pedir(ruta+'&correo=si',ca)).text(),f=formulario(correo,'name="destinatarios"');assert.equal(f.get('volver'),volver);assert.equal(f.get('acta'),acta.id);assert.deepEqual((await db.query('SELECT pdf FROM public.actas_documentos WHERE id=$1',[acta.id])).rows[0].pdf,acta.pdf);
+ });
  await caso('acta conserva producto, unidad, cantidad y bytes en consulta/descarga',async()=>{
+  const local=await(await pedir('/insumos/historial?ver='+a,cl)).text();assert.ok(!local.includes('/inventario/actas/'+acta.id),'La sede no ve botones de documentos reservados a UTIC');
   const item=acta.datos.bienes.find(x=>x.producto_id===p1);assert.ok(item);assert.equal(item.nombre,'Insumo 1 '+sufijo);assert.equal(item.unidad,'caja');assert.equal(item.cantidad_entregada,3);assert.equal(acta.datos.bienes.reduce((n,x)=>n+Number(x.cantidad_entregada),0),3);assert.equal(acta.datos.receptorNombre,'Persona receptora original');assert.equal(acta.datos.metadata.entregaNombre,'Persona UTIC original');
   const ficha=await(await pedir('/inventario/actas/'+acta.id,ca)).text();for(const texto of ['Imprimir','Descargar PDF','Enviar por correo'])assert.ok(ficha.includes(texto));
   for(const q of ['', '?descargar=si']){const r=await pedir('/inventario/actas/'+acta.id+'/pdf'+q,ca);assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.match(r.headers.get('cache-control'),/private.*no-store/);const pdf=Buffer.from(await r.arrayBuffer());assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.equal(sha(pdf),acta.sha256);assert.deepEqual(pdf,acta.pdf);}
