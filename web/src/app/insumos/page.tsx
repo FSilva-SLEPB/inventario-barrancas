@@ -19,11 +19,12 @@ export default async function InsumosPage({searchParams}:{searchParams:Promise<R
  const sedes=await listarSedes().catch(()=>[] as Awaited<ReturnType<typeof listarSedes>>);
  const detalle=ver?await obtenerSolicitudInsumo(ver).catch(()=>null):null;
  return <InsumosClient local={local} admin={admin} puedeSolicitar={puedeSolicitar}
-  sedes={sedes.map(s=>({id:s.id,nombre:s.nombre,rbd:s.rbd}))}
+  sedes={sedes.map(s=>({id:s.id,nombre:s.nombre,rbd:s.rbd,direccion:s.direccion,comuna:s.comuna}))}
   catalogo={catalogo} stock={stock}
   solicitudes={solicitudesRes.filas} total={solicitudesRes.total}
   pagina={solicitudesRes.pagina} paginas={solicitudesRes.paginas} limite={limite}
   filtroEstado={filtroEstado} filtroSede={filtroSede} q={q}
   detalle={detalle} guardado={guardado}
+  actor={{email:actor.email,sedeId:actor.sedeId??null,sedeNombre:actor.sedeNombre??null,sedeRbd:actor.sedeRbd??null}}
  />;
 }
