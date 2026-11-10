@@ -1,0 +1,31 @@
+'use client';
+import {useActionState,useEffect,useRef,useState} from 'react';
+import ModalFicha from '@/components/modal-ficha';
+import IconoAccion from '@/components/icono-accion';
+import {useRouter} from 'next/navigation';
+import type {InsumoCatalogo,InsumoStock} from '@/lib/insumos';
+import {mostrarExito} from '@/components/avisos-guardado';
+import {avisarError} from '@/components/confirmacion';
+import {guardarProductoAccion,ingresarStockAccion,type EstadoProducto,type EstadoStock} from './acciones';
+function ProductoEditor({producto,solicitud,cerrar}:{producto:InsumoCatalogo|null;solicitud:string;cerrar:()=>void}){
+ const inicial:EstadoProducto={estado:'inicial',mensaje:'',revision:'',valores:producto?{id:producto.id,codigo:producto.codigo,nombre:producto.nombre,categoria:producto.categoria,unidad:producto.unidad,activo:String(producto.activo),version:String(producto.version),solicitud}:{id:'',codigo:'',nombre:'',categoria:'',unidad:'',activo:'true',version:'0',solicitud}};
+ const [estado,accion,pendiente]=useActionState(guardarProductoAccion,inicial),v=estado.valores,visto=useRef('');
+ useEffect(()=>{if(estado.estado==='ok'&&visto.current!==estado.revision){visto.current=estado.revision;void mostrarExito('Guardado exitoso',estado.mensaje).catch(()=>{});cerrar();}},[estado,cerrar]);
+ return <section className="panel-catalogos"><h2>{producto?'Editar producto':'Ingreso de producto'}</h2><form action={accion} aria-label="Datos del producto" aria-busy={pendiente}>
+ <input type="hidden" name="id" value={v.id}/><input type="hidden" name="version" value={v.version}/><input type="hidden" name="solicitud" value={v.solicitud}/>
+ <fieldset disabled={pendiente} className="border-0 p-0 m-0"><div className="campos-directorio">{([['codigo','Código',60],['nombre','Nombre',200],['categoria','Categoría',120],['unidad','Unidad',60]] as const).map(([k,t,max])=><div key={k} className="campo-catalogos"><label htmlFor={'p-'+k}>{t}</label><input id={'p-'+k} name={k} required maxLength={max} defaultValue={v[k]} key={estado.revision+k}/></div>)}
+ <div className="campo-catalogos"><label htmlFor="p-activo">Estado</label><select id="p-activo" name="activo" defaultValue={v.activo} key={estado.revision}><option value="true">Activo</option><option value="false">Inactivo</option></select></div></div>
+ <div className="acciones-catalogos"><button className="btn btn-primary" disabled={pendiente}>{pendiente?'Guardando…':producto?'Guardar cambios':'Crear producto'}</button>{producto&&<button className="btn btn-outline-primary" type="button" onClick={cerrar}>Cancelar edición</button>}</div></fieldset><p role="alert">{estado.estado==='error'?estado.mensaje:''}</p></form></section>;
+}
+export default function InsumosMantenedor({catalogo,stock,solicitudProducto,solicitudStock}:{catalogo:InsumoCatalogo[];stock:InsumoStock[];solicitudProducto:string;solicitudStock:string}){
+ const router=useRouter(),[editando,setEditando]=useState<InsumoCatalogo|null>(null),[subiendo,setSubiendo]=useState<string|null>(null);
+ const [es,accionStock,pendienteStock]=useActionState(ingresarStockAccion,{estado:'inicial',mensaje:'',revision:''} as EstadoStock),visto=useRef('');
+ useEffect(()=>{if(!es.revision||visto.current===es.revision)return;visto.current=es.revision;if(es.estado==='ok')void mostrarExito('Stock actualizado',es.mensaje).catch(()=>{});},[es]);
+ const subir=async(id:string,file:File)=>{setSubiendo(id);try{const f=new FormData();f.set('imagen',file);const r=await fetch('/api/insumos/imagen',{method:'POST',body:f}),j=await r.json();if(!r.ok)throw new Error(j.error);const p=new FormData();p.set('producto_id',id);p.set('foto_url',j.url);const rp=await fetch('/api/insumos/producto',{method:'POST',body:p});if(!rp.ok)throw new Error('No se pudo asociar la imagen.');await mostrarExito('Foto actualizada','La imagen quedó guardada en el catálogo.');router.refresh();}catch(e){await avisarError('No se pudo guardar la foto',e instanceof Error?e.message:'Error de conexión.');}finally{setSubiendo(null);}};
+ return <section><h1>Catálogo, stock e ingreso de productos</h1><p className="descripcion-pagina">Administra productos, fotografías y existencias de insumos.</p>
+ {editando?<ModalFicha titulo={'Editar producto: '+editando.nombre} alCerrar={()=>setEditando(null)} editando><ProductoEditor key={editando.id+':'+editando.version} producto={editando} solicitud={solicitudProducto} cerrar={()=>setEditando(null)}/></ModalFicha>:<ProductoEditor key={solicitudProducto} producto={null} solicitud={solicitudProducto} cerrar={()=>setEditando(null)}/>}
+ <section className="panel-catalogos"><h2>Catálogo y stock</h2><div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos"><thead><tr><th>Foto</th><th>Producto</th><th>Categoría</th><th>Stock / disponible</th><th>Ingresar stock</th><th>Acciones</th></tr></thead><tbody>{catalogo.map(c=>{const st=stock.find(s=>s.producto_id===c.id);return <tr key={c.id}>
+ <td>{c.foto_url?<img src={c.foto_url} alt={c.nombre} width={52} height={52}/>:<span>Sin foto</span>}</td><td>{c.codigo} · {c.nombre}<small className="dato-secundario">{c.unidad} · {c.activo?'Activo':'Inactivo'}</small></td><td>{c.categoria}</td><td>{st?.existencia??0} / {st?.disponible??0}</td>
+ <td><form action={accionStock} aria-label={'Ingresar stock de '+c.nombre}><input type="hidden" name="solicitud" value={solicitudStock}/><input type="hidden" name="producto_id" value={c.id}/><input type="number" name="cantidad" min={1} max={100000} step={1} required aria-label={'Cantidad a ingresar para '+c.nombre}/><button className="btn btn-outline-primary btn-sm" disabled={pendienteStock}>Ingresar</button></form></td>
+ <td><button type="button" className="btn btn-outline-primary btn-sm accion-icono" aria-label={"Editar: "+c.nombre} title={"Editar: "+c.nombre} onClick={()=>setEditando(c)}><IconoAccion tipo="editar"/></button><label className="btn btn-outline-primary btn-sm">{subiendo===c.id?'Subiendo…':'Foto'}<input type="file" accept="image/jpeg,image/png,image/webp" aria-label={'Subir foto de '+c.nombre} disabled={subiendo===c.id} hidden onChange={e=>{const f=e.target.files?.[0];if(f)void subir(c.id,f);e.target.value='';}}/></label></td></tr>;})}</tbody></table></div><p role="alert">{es.estado==='error'?es.mensaje:''}</p></section></section>;
+}

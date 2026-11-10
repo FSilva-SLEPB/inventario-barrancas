@@ -1,9 +1,9 @@
 'use client';
 import {useEffect,useId,useRef,type ReactNode} from 'react';
 import {useRouter} from 'next/navigation';
-export default function ModalFicha({children,titulo,cerrarHref,editando=false,focoId}:{children:ReactNode;titulo:string;cerrarHref:string;editando?:boolean;focoId?:string}){
+export default function ModalFicha({children,titulo,cerrarHref,editando=false,focoId,alCerrar}:{children:ReactNode;titulo:string;cerrarHref?:string;editando?:boolean;focoId?:string;alCerrar?:()=>void}){
  const ref=useRef<HTMLDialogElement>(null),id=useId(),router=useRouter();
- const cerrar=()=>{if(!ref.current?.querySelector('form[aria-busy="true"]'))router.replace(cerrarHref,{scroll:false});};
+ const cerrar=()=>{if(!ref.current?.querySelector('form[aria-busy="true"]')){if(alCerrar)alCerrar();else if(cerrarHref)router.replace(cerrarHref,{scroll:false});}};
  useEffect(()=>{
   const dialogo=ref.current;if(!dialogo)return;
   const previo=document.activeElement instanceof HTMLElement?document.activeElement:null,overflow=document.body.style.overflow;

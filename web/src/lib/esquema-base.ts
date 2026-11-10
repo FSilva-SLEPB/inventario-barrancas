@@ -29,6 +29,15 @@ export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]
  incidentes_robos:{modulo:'Robos',uso:'Reporte de robo por sede, antecedentes, validación y estado.',fuentes:['src/lib/robos.ts','src/app/inventario/robos/acciones.ts']},
  incidentes_robos_equipos:{modulo:'Robos',uso:'Equipos afectados y recuperación individual dentro de un incidente.',fuentes:['src/lib/robos.ts']},
  incidentes_robos_historial:{modulo:'Robos',uso:'Reporte, revisión y recuperación con usuario, fecha y motivo.',fuentes:['src/lib/robos.ts']},
+ insumos_historial:{modulo:'Insumos',uso:'Historial de catálogo, fotos e ingresos de stock con actor, solicitud idempotente e instantáneas.',fuentes:['migrations/1795536000000_auditoria-estados-insumos.mjs']},
+ imagenes_insumos:{modulo:'Insumos',uso:'Fotografías de catálogo persistidas en PostgreSQL, con tipo, bytes y autor; incluidas en los respaldos.',fuentes:['src/app/api/insumos/imagen/route.ts','migrations/1795536000000_auditoria-estados-insumos.mjs']},
+ catalogo_insumos:{modulo:'Insumos',uso:'Catálogo de insumos solicitables (código, nombre, categoría, unidad, foto y vigencia).',fuentes:['src/lib/insumos.ts','migrations/1795100000000_insumos-catalogo-stock-solicitudes.mjs']},
+ stock_insumos:{modulo:'Insumos',uso:'Existencia y reserva disponible por producto del catálogo de insumos.',fuentes:['src/lib/insumos.ts','migrations/1795100000000_insumos-catalogo-stock-solicitudes.mjs']},
+ solicitudes_insumos:{modulo:'Insumos',uso:'Solicitudes de insumos por sede con datos del solicitante, estado, validación/aprobación, entrega o cancelación.',fuentes:['src/lib/insumos.ts','src/app/insumos/acciones.ts','migrations/1795100000000_insumos-catalogo-stock-solicitudes.mjs']},
+ solicitudes_insumos_detalle:{modulo:'Insumos',uso:'Líneas solicitadas/aprobadas/entregadas de cada solicitud de insumos.',fuentes:['src/lib/insumos.ts','migrations/1795100000000_insumos-catalogo-stock-solicitudes.mjs']},
+ reservas_insumos:{modulo:'Insumos',uso:'Reservas de stock asociadas a solicitudes aprobadas y su consumo al entregar.',fuentes:['migrations/1795200000000_insumos-flujo-validacion-fotos.mjs','migrations/1795400000000_insumos-acta-entrega-completo.mjs']},
+ entregas_insumos:{modulo:'Insumos',uso:'Registro de entregas contra solicitud de insumos, receptor y acta asociada.',fuentes:['src/lib/insumos.ts','migrations/1795400000000_insumos-acta-entrega-completo.mjs']},
+ entregas_insumos_detalle:{modulo:'Insumos',uso:'Detalle de productos y cantidades entregadas en cada entrega de insumos.',fuentes:['src/lib/insumos.ts','migrations/1795400000000_insumos-acta-entrega-completo.mjs']},
  pgmigrations:{modulo:'Migraciones',uso:'Control técnico de las migraciones aplicadas; no es una tabla de negocio.',fuentes:['package.json','migrations/']}
 };
 export type ColumnaModelo={nombre:string;tipo:string;opcional:boolean;primaria:boolean};

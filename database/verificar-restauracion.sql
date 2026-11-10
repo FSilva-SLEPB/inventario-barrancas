@@ -28,6 +28,12 @@ BEGIN
     IF NOT has_table_privilege(current_user,'public.cambios_estados_activo','SELECT') OR has_table_privilege(current_user,'public.cambios_estados_activo','INSERT') OR has_table_privilege(current_user,'public.cambios_estados_activo','UPDATE') OR has_table_privilege(current_user,'public.cambios_estados_activo','DELETE') OR NOT has_function_privilege(current_user,'public.guardar_estados_activo_acceso(text,uuid,jsonb)','EXECUTE') THEN RAISE EXCEPTION 'Permisos de estados restaurados incorrectos';END IF;
     IF (SELECT count(*) FROM pg_trigger WHERE tgname IN ('equipos_proteger_estados','celulares_proteger_estados') AND NOT tgisinternal AND tgenabled='O')<>2 THEN RAISE EXCEPTION 'Faltan guardas de estados restauradas';END IF;
   END IF;
+  IF to_regclass('public.imagenes_insumos') IS NOT NULL THEN
+    FOREACH tabla IN ARRAY ARRAY['catalogo_insumos','stock_insumos','solicitudes_insumos','solicitudes_insumos_detalle','reservas_insumos','entregas_insumos','insumos_historial','imagenes_insumos'] LOOP
+      IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN RAISE EXCEPTION 'Permisos de insumos restaurados incorrectos';END IF;
+    END LOOP;
+    IF NOT has_function_privilege(current_user,'public.guardar_producto_insumo_acceso(text,uuid,jsonb)','EXECUTE') OR NOT has_function_privilege(current_user,'public.guardar_foto_insumo_acceso(text,uuid,text,bytea)','EXECUTE') OR NOT has_function_privilege(current_user,'public.importar_foto_insumo_acceso(text,uuid,uuid,text)','EXECUTE') OR has_function_privilege(current_user,'public.autorizar_insumos_utic(text)','EXECUTE') THEN RAISE EXCEPTION 'Funciones controladas de insumos restauradas incorrectas';END IF;
+  END IF;
   IF to_regclass('public.actas_documentos') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['actas_contador','actas_documentos','actas_envios'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') THEN RAISE EXCEPTION 'Permisos de actas incorrectos';END IF;
@@ -239,6 +245,11 @@ BEGIN
   IF to_regclass('public.cambios_estados_activo') IS NOT NULL THEN
     IF NOT EXISTS(SELECT 1 FROM public.equipos e JOIN public.cambios_estados_activo h ON h.equipo_id=e.id WHERE e.serie='CI-ESTADOS-SERIE' AND e.estado_administrativo='dado_de_baja' AND e.condicion_tecnica='obsoleto' AND e.fecha_baja IS NOT NULL AND h.id='f5000000-0000-4000-8000-000000000001' AND h.antes->>'condicion_tecnica'='sin_verificar' AND h.despues->>'estado_administrativo'='dado_de_baja') OR NOT EXISTS(SELECT 1 FROM public.celulares c JOIN public.cambios_estados_activo h ON h.celular_id=c.id WHERE c.id='f4000000-0000-4000-8000-000000000002' AND c.estado_administrativo='robado' AND c.condicion_tecnica='' AND h.id='f5000000-0000-4000-8000-000000000002') THEN
       RAISE EXCEPTION 'No se recuperaron estados, histórico de baja y auditoría de transición';
+    END IF;
+  END IF;
+  IF to_regclass('public.imagenes_insumos') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.catalogo_insumos c JOIN public.stock_insumos st ON st.producto_id=c.id WHERE c.codigo='CI-INSUMO-RECUPERACION' AND c.foto_url='/api/insumos/imagen?id=a8000000-0000-4000-8000-000000000001' AND st.existencia=7 AND st.reservado=2) OR NOT EXISTS(SELECT 1 FROM public.imagenes_insumos WHERE id='a8000000-0000-4000-8000-000000000001' AND mime='image/png' AND octet_length(contenido)=68) OR NOT EXISTS(SELECT 1 FROM public.actas_documentos a JOIN public.entregas_insumos e ON e.id=a.entrega_insumo_id WHERE a.id='aa000000-0000-4000-8000-000000000001' AND e.acta_id=a.id AND a.datos->'bienes'->0->>'unidad'='caja' AND a.datos->'bienes'->0->>'cantidad_entregada'='3' AND a.sha256=encode(sha256(a.pdf),'hex')) THEN
+      RAISE EXCEPTION 'No se recuperaron stock, foto persistente o acta de insumos';
     END IF;
   END IF;
 END;

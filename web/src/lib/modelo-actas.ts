@@ -1,6 +1,7 @@
 import type {DatosActa} from '@/lib/validacion-actas';
 // Contenido institucional homologado a partir de los modelos Word proporcionados por Felipe.
 export function tituloDocumentoActa(d:DatosActa){
+ if(d.tipo==='entrega_insumo')return 'Acta de entrega de insumos';
  if(d.tipo==='cambio')return d.clase==='celular'?'Acta de cambio de celulares':'Acta de cambio de equipamiento';
  if(d.tipo==='traspaso')return d.clase==='celular'?'Acta de traspaso de celulares':'Acta de traspaso de equipamiento';
  if(d.tipo==='entrega_historica')return 'Acta de entrega registrada';
@@ -11,6 +12,7 @@ export function tituloDocumentoActa(d:DatosActa){
  return base+(d.sedeTipo==='nivel_central'?' · Nivel Central':d.sedeTipo==='establecimiento'?' · Establecimiento educacional':d.sedeTipo==='jardin_infantil'?' · Jardines infantiles y salas cuna':'');
 }
 export function condicionesActa(d:DatosActa){
+ if(d.tipo==='entrega_insumo')return ['Se deja constancia de los insumos y cantidades efectivamente recibidos, según el detalle y las observaciones de esta acta.'];
  if(d.tipo==='devolucion'||d.tipo==='devolucion_prestamo')return ['La Unidad TIC recibe los bienes en el estado indicado y deja constancia de los accesorios faltantes y observaciones.'];
  return [
   'Los bienes se reciben en el estado de funcionamiento indicado en el detalle y en las observaciones.',

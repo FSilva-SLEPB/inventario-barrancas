@@ -153,4 +153,27 @@ BEGIN
 END;
 $estados_ci$;
 
+DO $insumos_ci$
+DECLARE producto uuid;sol uuid;ent jsonb;a jsonb;meta jsonb;
+BEGIN
+ IF to_regprocedure('public.guardar_producto_insumo_acceso(text,uuid,jsonb)') IS NOT NULL THEN
+  producto:=public.guardar_producto_insumo_acceso('felipe.silva@slepb.gob.cl','a7000000-0000-4000-8000-000000000001',jsonb_build_object('codigo','CI-INSUMO-RECUPERACION','nombre','Insumo ficticio de recuperación','categoria','Prueba de respaldo','unidad','caja','activo',true));
+  PERFORM public.ingresar_stock_insumo_acceso('felipe.silva@slepb.gob.cl','a7000000-0000-4000-8000-000000000002',producto,10);
+  PERFORM public.guardar_foto_insumo_acceso('felipe.silva@slepb.gob.cl','a8000000-0000-4000-8000-000000000001','image/png',decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=','base64'));
+  PERFORM public.asignar_foto_insumo_acceso('felipe.silva@slepb.gob.cl',producto,'a8000000-0000-4000-8000-000000000001');
+  sol:=public.crear_solicitud_insumos('felipe.silva@slepb.gob.cl','10000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad',5)),jsonb_build_object('solicitudId','a9000000-0000-4000-8000-000000000001','nombre','Persona ficticia'));
+  PERFORM public.validar_solicitud_insumos('felipe.silva@slepb.gob.cl',sol,'Validación ficticia');
+  PERFORM public.aprobar_solicitud_insumos('felipe.silva@slepb.gob.cl',sol,jsonb_build_object('lineas',jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad_aprobada',5,'motivo_reduccion','')),'motivo','Prueba de recuperación'));
+  ent:=public.entregar_solicitud_insumos('felipe.silva@slepb.gob.cl',sol,jsonb_build_object('receptor','Receptor ficticio','responsable_ti','UTIC ficticio','fecha_entrega','2026-11-02','observaciones','Entrega parcial ficticia','lineas',jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad_entregada',3))));
+  meta:=jsonb_build_object('entregaNombre','UTIC ficticio','entregaRun','','entregaCargo','UTIC','entregaCorreo','persona@example.org','recibeRun','','recibeCargo','','recibeCorreo','','recibeUnidad','','recibeSubdireccion','','accesorios','','observaciones','Solo prueba de recuperación','recibeNombre','Receptor ficticio','fechaEntrega','2026-11-02');
+  a:=public.preparar_acta_insumo_acceso('felipe.silva@slepb.gob.cl','aa000000-0000-4000-8000-000000000001',sol,meta,jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad_entregada',3)));
+  PERFORM public.completar_pdf_acta_acceso('felipe.silva@slepb.gob.cl','aa000000-0000-4000-8000-000000000001',(SELECT pdf FROM public.actas_documentos WHERE id='80000000-0000-4000-8000-000000000001'));
+  PERFORM public.vincular_acta_entrega_insumo_acceso('felipe.silva@slepb.gob.cl','aa000000-0000-4000-8000-000000000001',(ent->>'entrega_id')::uuid);
+  sol:=public.crear_solicitud_insumos('felipe.silva@slepb.gob.cl','10000000-0000-4000-8000-000000000001',jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad',2)),jsonb_build_object('solicitudId','a9000000-0000-4000-8000-000000000002'));
+  PERFORM public.validar_solicitud_insumos('felipe.silva@slepb.gob.cl',sol,'Validación ficticia');
+  PERFORM public.aprobar_solicitud_insumos('felipe.silva@slepb.gob.cl',sol,jsonb_build_object('lineas',jsonb_build_array(jsonb_build_object('producto_id',producto,'cantidad_aprobada',2,'motivo_reduccion',''))));
+ END IF;
+END;
+$insumos_ci$;
+
 COMMIT;

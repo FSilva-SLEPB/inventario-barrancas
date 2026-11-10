@@ -58,6 +58,7 @@ try{
  for(const clase of ['equipo','celular']){
   const id=await crear(clase),inicial=await leer(clase,id);
   await caso(clase+': conserva datos anteriores sin clasificación',async()=>{assert.equal(inicial.estado_administrativo,'activo');assert.equal(inicial.condicion_tecnica,'sin_verificar');assert.equal(inicial.fecha_baja,null);});
+  await caso(clase+': guardar vacío conserva la condición anterior',async()=>{await assert.rejects(guardar(clase,id,'activo',''),codigo('22023'));assert.deepEqual(await leer(clase,id),inicial);});
   await caso(clase+': solo UTIC cambia estados',async()=>{
    const datos={clase,id,version:inicial.version,administrativo:'activo',condicion:'operativo'};
    for(const rol of ['consulta','encargado','consulta_sede'])await assert.rejects(cambiar(usuarios[rol],randomUUID(),datos),codigo('42501'));
