@@ -137,45 +137,47 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    </div>
   </div>
 
-  <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
-   <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'.75rem',maxWidth:720}}>
-    <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
-    <div className="campo-catalogos"><label htmlFor="filtro-categoria">Filtrar por categoría</label><select id="filtro-categoria" value={filtroCategoria} onChange={e=>setFiltroCategoria(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-   </div>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'0.75rem'}}>
-    {filtrados.map(p=>(
-     <button key={p.id} type="button" onClick={()=>abrirModal(p)} title={`Ver ${p.nombre}`} style={{border:'1px solid var(--color-borde-suave)',borderRadius:16,background:'#fff',padding:'.6rem',textAlign:'left',cursor:'pointer',display:'grid',gap:'.4rem'}}>
-      {p.foto_url ? <img src={p.foto_url} alt={p.nombre} loading="lazy" style={{width:'100%',height:140,objectFit:'contain',borderRadius:12,background:'#fff'}}/> : <div aria-hidden="true" style={{width:'100%',height:140,borderRadius:12,border:'1px dashed var(--color-borde-suave)',background:'var(--color-superficie-suave)',display:'grid',placeItems:'center',color:'var(--color-parrafo)'}}>Sin foto</div>}
-      <div style={{fontWeight:700,fontSize:'.95rem',lineHeight:1.2}}>{p.nombre}</div>
-      <div className="dato-secundario" style={{fontSize:'.85rem'}}>{p.categoria||'Sin categoría'}</div>
-     </button>
-    ))}
-    {!filtrados.length&&<div className="dato-secundario" style={{gridColumn:'1/-1',padding:'1rem'}}>No hay insumos para mostrar.</div>}
-   </div>
-  </div>
-
-  <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
-   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',flexWrap:'wrap'}}><h2 style={{margin:0,fontSize:'1.05rem'}}>Carrito de solicitud</h2><span className="badge bg-light text-dark border">{totalItems} ítem(s)</span></div>
-   <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos">
-    <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:140}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:80}}>Editar</th></tr></thead>
-    <tbody>
-     {items.map(i=>(
-      <tr key={i.id}>
-       <td><div style={{fontWeight:600}}>{i.p.nombre}</div><div className="dato-secundario">{i.p.categoria||''}</div></td>
-       <td style={{textAlign:'center'}}>
-        {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center'}}><input type="number" min={1} max={999} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:72}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
-       </td>
-       <td style={{textAlign:'right'}}>
-        <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}>✎</button>
-       </td>
-      </tr>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:'1rem',alignItems:'stretch'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
+    <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'.75rem'}}>
+     <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
+     <div className="campo-catalogos"><label htmlFor="filtro-categoria">Filtrar por categoría</label><select id="filtro-categoria" value={filtroCategoria} onChange={e=>setFiltroCategoria(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:'0.75rem'}}>
+     {filtrados.map(p=>(
+      <button key={p.id} type="button" onClick={()=>abrirModal(p)} title={`Ver ${p.nombre}`} style={{border:'1px solid var(--color-borde-suave)',borderRadius:16,background:'#fff',padding:'.6rem',textAlign:'left',cursor:'pointer',display:'grid',gap:'.4rem'}}>
+       {p.foto_url ? <img src={p.foto_url} alt={p.nombre} loading="lazy" style={{width:'100%',height:130,objectFit:'contain',borderRadius:12,background:'#fff'}}/> : <div aria-hidden="true" style={{width:'100%',height:130,borderRadius:12,border:'1px dashed var(--color-borde-suave)',background:'var(--color-superficie-suave)',display:'grid',placeItems:'center',color:'var(--color-parrafo)'}}>Sin foto</div>}
+       <div style={{fontWeight:700,fontSize:'.95rem',lineHeight:1.2}}>{p.nombre}</div>
+       <div className="dato-secundario" style={{fontSize:'.85rem'}}>{p.categoria||'Sin categoría'}</div>
+      </button>
      ))}
-     {!items.length&&<tr><td colSpan={3} className="text-center text-muted py-4">Aún no hay insumos en el carrito.</td></tr>}
-    </tbody>
-   </table></div>
-   <div style={{display:'flex',justifyContent:'flex-end',gap:'.75rem',flexWrap:'wrap'}}>
-    <button type="button" className="btn btn-primary" onClick={enviar} disabled={!items.length||enviando||!sede?.id}>{enviando?'Enviando…':'Enviar solicitud'}</button>
+     {!filtrados.length&&<div className="dato-secundario" style={{gridColumn:'1/-1',padding:'1rem'}}>No hay insumos para mostrar.</div>}
+    </div>
+   </div>
+
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',flexWrap:'wrap'}}><h2 style={{margin:0,fontSize:'1.05rem'}}>Carrito de solicitud</h2><span className="badge bg-light text-dark border">{totalItems} ítem(s)</span></div>
+    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos">
+     <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:120}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:80}}>Editar</th></tr></thead>
+     <tbody>
+      {items.map(i=>(
+       <tr key={i.id}>
+        <td><div style={{fontWeight:600}}>{i.p.nombre}</div><div className="dato-secundario">{i.p.categoria||''}</div></td>
+        <td style={{textAlign:'center'}}>
+         {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center'}}><input type="number" min={1} max={999} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:72}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
+        </td>
+        <td style={{textAlign:'right'}}>
+         <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}>✎</button>
+        </td>
+       </tr>
+      ))}
+      {!items.length&&<tr><td colSpan={3} className="text-center text-muted py-4">Aún no hay insumos en el carrito.</td></tr>}
+     </tbody>
+    </table></div>
+    <div style={{display:'flex',justifyContent:'flex-end',gap:'.75rem',flexWrap:'wrap',marginTop:'auto'}}>
+     <button type="button" className="btn btn-primary" onClick={enviar} disabled={!items.length||enviando||!sede?.id}>{enviando?'Enviando…':'Enviar solicitud'}</button>
+    </div>
    </div>
   </div>
 
