@@ -1,2 +1,7 @@
 import {redirect} from 'next/navigation';
-export default function Solicitudes(){redirect('/insumos');}
+import {exigirAcceso} from '@/lib/acceso';
+
+export default async function Solicitudes(){
+  await exigirAcceso();
+  redirect('/insumos');
+}
