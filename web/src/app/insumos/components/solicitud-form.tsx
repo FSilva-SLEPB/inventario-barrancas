@@ -158,21 +158,21 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
 
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',flexWrap:'wrap'}}><h2 style={{margin:0,fontSize:'1.05rem'}}>Carrito de solicitud</h2><span className="badge bg-light text-dark border">{totalItems} ítem(s)</span></div>
-    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos">
-     <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:120}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:80}}>Editar</th></tr></thead>
+    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos" style={{width:'100%',tableLayout:'fixed'}}>
+     <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:110}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:70}}>Editar</th></tr></thead>
      <tbody>
       {items.map(i=>(
        <tr key={i.id}>
-        <td><div style={{fontWeight:600}}>{i.p.nombre}</div><div className="dato-secundario">{i.p.categoria||''}</div></td>
+        <td style={{whiteSpace:'normal',overflowWrap:'anywhere'}}><div style={{fontWeight:600}}>{i.p.nombre}</div><div className="dato-secundario">{i.p.categoria||''}</div></td>
         <td style={{textAlign:'center'}}>
-         {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center'}}><input type="number" min={1} max={999} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:72}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
+         {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center',justifyContent:'center'}}><input type="number" min={1} max={999} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:64}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
         </td>
         <td style={{textAlign:'right'}}>
          <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}>✎</button>
         </td>
        </tr>
       ))}
-      {!items.length&&<tr><td colSpan={3} className="text-center text-muted py-4">Aún no hay insumos en el carrito.</td></tr>}
+      {!items.length&&<tr><td colSpan={3} className="text-center text-muted py-4" style={{whiteSpace:'normal'}}>Aún no hay insumos en el carrito.</td></tr>}
      </tbody>
     </table></div>
     <div style={{display:'flex',justifyContent:'flex-end',gap:'.75rem',flexWrap:'wrap',marginTop:'auto'}}>
