@@ -39,10 +39,10 @@ const gobCl = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Inventario 2.0 EE y TI | SLEP Barrancas",
+  title: "Sistema Unidad TIC | SLEP Barrancas",
   description:
-    "Sistema de inventario y solicitudes de insumos para establecimientos educacionales y Nivel Central del SLEP Barrancas.",
-  applicationName: "Inventario 2.0 EE y TI",
+    "Sistema de gestión para la Unidad de Tecnologías de la Información y Comunicaciones del SLEP Barrancas.",
+  applicationName: "Sistema Unidad TIC",
   robots: {
     index: false,
     follow: false,
@@ -61,11 +61,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <a className="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
       <header className="cabecera-institucional">
         <div className="interior-cabecera">
-          <Link href="/" className="marca-institucional" aria-label="Ir al inicio de Inventario SLEP Barrancas">
+          <Link href="/" className="marca-institucional" aria-label="Ir al inicio de Sistema Unidad TIC">
             <Image src={logoBarrancas} alt="SLEP Barrancas" className="logo-institucional" loading="eager" unoptimized />
           </Link>
           <div className="identidad-sistema">
-            <p className="titulo-sistema">Inventario 2.0 EE y TI</p>
+            <p className="titulo-sistema">Sistema Unidad TIC</p>
             <p className="subtitulo-sistema">Servicio Local de Educación Pública Barrancas</p>
           </div>
           <div className="acciones-cabecera">

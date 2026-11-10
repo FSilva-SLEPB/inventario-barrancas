@@ -11,7 +11,7 @@ import { exigirAcceso } from "@/lib/acceso";
 import { puedeAdministrar } from "@/lib/politica-acceso";
 
 export const metadata: Metadata = {
-  title: "Categorías de bienes | Mantenedores | Inventario SLEP Barrancas",
+  title: "Categorías de bienes | Mantenedores | Sistema Unidad TIC",
 };
 
 export const runtime = "nodejs";

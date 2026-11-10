@@ -43,7 +43,7 @@
 .contenido-app .btn-sm { min-height: 2.375rem; padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 0.625rem; }
 .panel-catalogos { border-radius: 1rem; }
 .campo-catalogos input, .campo-catalogos select, .campo-catalogos textarea { border-radius: 0.625rem; }
-.acceso-inicio { border-radius: 1rem; background: linear-gradient(160deg, var(--color-superficie), var(--color-superficie-alterna)); }
+.acceso-inicio { border-radius: 1rem; }
 .app-footer { margin-top: auto; padding: 1rem 1.25rem; border-top: 1px solid var(--color-borde-suave); background: var(--color-superficie); text-align: center; color: var(--color-parrafo); }
 .app-footer p { margin: 0; font-size: 0.75rem; line-height: 1.6; }
 .filtros-inventario { margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-borde-suave); border-radius: 1rem; background: var(--color-superficie-alterna); }

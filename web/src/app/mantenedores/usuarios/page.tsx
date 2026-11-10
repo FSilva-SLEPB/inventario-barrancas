@@ -11,7 +11,7 @@ import { listarSedes } from "@/lib/sedes";
 import { perfilReservado } from "@/lib/politica-acceso";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
 
-export const metadata = { title: "Usuarios y perfiles | Inventario SLEP Barrancas" };
+export const metadata = { title: "Usuarios y perfiles | Sistema Unidad TIC" };
 
 export default async function Usuarios({ searchParams }: {
   searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[]; nuevo?: string | string[] }>;
