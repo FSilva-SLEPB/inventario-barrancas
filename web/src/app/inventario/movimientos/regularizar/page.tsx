@@ -15,7 +15,8 @@ export default async function Regularizar({ searchParams }: ParametrosInventario
   }
   return <main><header><h1>Regularizar entregas de jardines</h1>
     <p className="descripcion-pagina">Registra entregas ya realizadas, agrupadas por jardín, conservando su directora receptora y fecha real. Los equipos dejarán de estar pendientes y pasarán a recibidos en P02.</p>
-    <p><Link href="/inventario/bodega-ti">Volver a Bodega TI</Link></p></header>
+    </header>
+    <div className="acciones-catalogos"><Link className="btn btn-outline-primary btn-sm" href="/inventario/bodega-ti">Volver a Bodega TI</Link></div>
     {equipos ? <FormularioRegularizacion equipos={equipos} solicitud={randomUUID()} hoy={hoyChile()} /> : <p role="alert">{error}</p>}
   </main>;
 }

@@ -14,25 +14,28 @@ import { etiquetaSede } from "@/lib/etiqueta-sede";
 export const metadata = { title: "Usuarios y perfiles | Inventario SLEP Barrancas" };
 
 export default async function Usuarios({ searchParams }: {
-  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[]; nuevo?: string | string[] }>;
 }) {
   const actor = await exigirAdministrador();
   const usuarios = await listarUsuarios();
   const sedes = await listarSedes();
   const sistema = actor.rol === "administrador";
-  const { editar, guardado, ver } = await searchParams;
+  const { editar, guardado, ver, nuevo } = await searchParams;
   const seleccionado = typeof editar === "string" ? usuarios.find(u => u.correo === editar) : undefined;
   const consulta = typeof ver === 'string' ? usuarios.find(u=>u.correo===ver) : undefined;
   const edicionInvalida = editar !== undefined && !seleccionado;
   const reservado = !sistema && seleccionado && perfilReservado(seleccionado.rol);
+  const nuevoParam = nuevo === "1";
   return <main>
 {consulta&&<ModalFicha titulo="Ver registro" cerrarHref="/mantenedores/usuarios" focoId={consulta.correo}><dl className="ficha-datos"><dt>Nombre</dt><dd>{consulta.nombre||'Sin informar'}</dd><dt>Correo</dt><dd>{consulta.correo}</dd><dt>Perfil</dt><dd>{PERFILES[consulta.rol]}</dd><dt>Estado</dt><dd>{consulta.activo?'Activo':'Inactivo'}</dd></dl></ModalFicha>}
     <header><p>SLEP Barrancas</p><h1>Usuarios y perfiles</h1>
       <p className="descripcion-pagina">Autoriza cuentas institucionales y administra sus permisos de acceso.</p>
     </header>
-    <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
+    <div className="acciones-catalogos">
+      <Link className="btn btn-outline-primary btn-sm" href="/mantenedores">Volver a Mantenedores</Link>
+      <Link className="btn btn-primary btn-sm" scroll={false} href="/mantenedores/usuarios?nuevo=1">Registrar usuario</Link>
+    </div>
     {guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
-    <p><Link href="/mantenedores/usuarios#formulario-usuario">Registrar usuario</Link></p>
     <section aria-labelledby="usuarios-listado"><h2 id="usuarios-listado">Usuarios registrados</h2>
       <div className="tabla-usuarios-contenedor" role="region" aria-labelledby="usuarios-listado" tabIndex={0}>
         <table className="tabla-datos tabla-catalogos">
@@ -54,12 +57,12 @@ export default async function Usuarios({ searchParams }: {
     {edicionInvalida ? <p role="alert" className="error-catalogos">
       No se encontró la cuenta. Selecciona Editar desde el listado.
     </p> : reservado ? <p role="alert">Solo el Administrador del sistema puede editar esta cuenta.</p>
-      : guardado==="1" ? null : <VentanaEdicion activa={Boolean(seleccionado)} titulo="Editar acceso de usuario" cerrarHref="/mantenedores/usuarios"><section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
+      : guardado==="1" ? null : (nuevoParam || seleccionado) ? <VentanaEdicion activa={nuevoParam || Boolean(seleccionado)} titulo={nuevoParam ? "Registrar usuario" : "Editar acceso de usuario"} cerrarHref="/mantenedores/usuarios"><section id="formulario-usuario" className="panel-catalogos" aria-labelledby="usuario-titulo">
       <h2 id="usuario-titulo">{seleccionado ? "Editar acceso" : "Registrar usuario"}</h2>
       <p>La cuenta debe pertenecer a slepb.gob.cl. No se crean cuentas ni contraseñas de Google desde este formulario.</p>
       {seleccionado?.correo === actor.email && <p>Otro administrador deberá retirar tu permiso o desactivar tu cuenta.</p>}
       <FormularioUsuario key={seleccionado?.correo ?? "nuevo"} usuario={seleccionado} sedes={sedes} sistema={sistema} />
-    </section></VentanaEdicion>}
+    </section></VentanaEdicion> : null}
     <section aria-labelledby="perfiles-titulo" className="perfiles-ayuda">
       <h2 id="perfiles-titulo">Perfiles disponibles</h2>
       <dl><dt>Administrador del sistema</dt><dd>Administra todos los accesos, incluidos los perfiles administrativos.</dd>

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[]; nuevo?: string | string[] }>;
 };
 
 export default async function Dependencias({ searchParams }: Propiedades) {
@@ -38,6 +38,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
     ? parametros.editar.toLowerCase() : null;
   const seleccionada = id ? dependencias.find((dependencia) => dependencia.id === id) : undefined;
   const edicionInvalida = pideEdicion && !seleccionada;
+  const nuevo = puedeEditar && parametros.nuevo === "1";
 
   const consulta = typeof parametros.ver === 'string' ? dependencias.find(x=>x.id===parametros.ver) : undefined;
 
@@ -52,10 +53,13 @@ export default async function Dependencias({ searchParams }: Propiedades) {
         </p>
       </header>
 
-      <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
-      {puedeEditar ? (
-        <p><Link href="/mantenedores/dependencias#formulario-dependencia">Registrar una dependencia</Link></p>
-      ) : <p>Vista de consulta.</p>}
+      <div className="acciones-catalogos">
+        <Link className="btn btn-outline-primary btn-sm" href="/mantenedores">Volver a Mantenedores</Link>
+        {puedeEditar && (
+          <Link className="btn btn-primary btn-sm" scroll={false} href="/mantenedores/dependencias?nuevo=1">Registrar una dependencia</Link>
+        )}
+      </div>
+      {!puedeEditar && <p>Vista de consulta.</p>}
 
       {edicionInvalida && puedeEditar && (
         <p role="alert" className="error-catalogos">
@@ -102,8 +106,8 @@ export default async function Dependencias({ searchParams }: Propiedades) {
         )}
       </section>
 
-      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
-        <VentanaEdicion activa={Boolean(seleccionada)} titulo="Editar dependencia" cerrarHref="/mantenedores/dependencias"><section
+      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (nuevo || seleccionada) && (
+        <VentanaEdicion activa={nuevo || Boolean(seleccionada)} titulo={nuevo ? "Registrar dependencia" : "Editar dependencia"} cerrarHref="/mantenedores/dependencias"><section
           id="formulario-dependencia" className="panel-catalogos"
           aria-labelledby="titulo-formulario-dependencia"
         >

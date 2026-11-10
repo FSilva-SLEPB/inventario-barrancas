@@ -14,8 +14,8 @@ export default async function Registro() {
   return <main>
     <header><h1>Registro de equipos</h1>
       <p className="descripcion-pagina">Registra equipos en su inventario de destino. Cada ingreso conserva su identidad y su historial.</p>
-      <p><Link href="/inventario">Volver a Inventario</Link></p>
     </header>
+    <div className="acciones-catalogos"><Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link></div>
     <RegistroEquipos sedes={sedes} categorias={categorias} local={requiereSede(actor.rol)} />
     {puedeAdministrar(actor.rol) && <section className="panel-catalogos registro-carga" id="carga-masiva" aria-labelledby="carga-masiva-titulo">
       <h2 id="carga-masiva-titulo">Carga masiva de equipos</h2>
