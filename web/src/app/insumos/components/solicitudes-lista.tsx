@@ -31,7 +31,12 @@ export default function SolicitudesLista(props:Props){
    <p><Link className="btn btn-outline-primary btn-sm" href="/insumos">Volver a insumos</Link></p>
   </header>
   <PanelFiltros ruta={ruta} titulo="Filtrar solicitudes" busqueda={{valor:q,placeholder:'Buscar por sede o solicitante'}} ocultos={{limite}}>
-   <div className="filtro-inventario"><label htmlFor="filtro-estado">Estado</label><select id="filtro-estado" name="estado" defaultValue={filtroEstado}><option value="">Todos</option>{Object.entries(ESTADOS_SOLICITUD_INSUMO).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></div>
+   <div className="filtro-inventario"><label htmlFor="filtro-estado">Estado</label><select id="filtro-estado" name="estado" defaultValue={filtroEstado}>
+    <option value="">Todos</option>
+    <option value="activas">En curso (seguimiento)</option>
+    <option value="finalizadas">Finalizadas (historial)</option>
+    {Object.entries(ESTADOS_SOLICITUD_INSUMO).map(([k,v])=><option key={k} value={k}>{v}</option>)}
+   </select></div>
    <div className="filtro-inventario"><label htmlFor="filtro-sede">Sede</label><select id="filtro-sede" name="sede" defaultValue={filtroSede}><option value="">Todas</option>{sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}{s.rbd&&' ('+s.rbd+')'}</option>)}</select></div>
   </PanelFiltros>
   <PanelResultados total={total} descripcion="solicitudes" ruta={ruta} limite={limite} filtros={filtros} pagina={pagina} paginas={paginas}>

@@ -34,7 +34,9 @@ export async function listarSolicitudesInsumos(f:FiltrosSolicitudes){
  await exigirAcceso();
  const db=obtenerBaseDatos();
  const where=[] as string[];const params:unknown[]=[];let i=1;
- if(f.estado){where.push(`si.estado = $${i++}`);params.push(f.estado);}
+ if(f.estado==='activas'){where.push(`si.estado IN ('solicitada','en_validacion','aprobada')`);}
+ else if(f.estado==='finalizadas'){where.push(`si.estado IN ('entregada','cancelada')`);}
+ else if(f.estado){where.push(`si.estado = $${i++}`);params.push(f.estado);}
  if(f.sede){where.push(`si.sede_id = $${i++}`);params.push(f.sede);}
  if(f.q){where.push(`(si.solicitante_correo ILIKE $${i} OR sd.nombre ILIKE $${i} OR COALESCE(si.solicitante_nombre,'') ILIKE $${i})`);params.push(`%${f.q}%`);i++;}
  const whereSql=where.length?`WHERE ${where.join(' AND ')}`:'';
