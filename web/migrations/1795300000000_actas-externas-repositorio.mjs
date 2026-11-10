@@ -1,6 +1,8 @@
 export const shorthands = undefined;
 export async function up(pgm) {
   pgm.sql(`
+    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS solicitud_insumo_id uuid;
+    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS entrega_insumo_id uuid;
     ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS origen_externo boolean NOT NULL DEFAULT false;
     ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS archivo_nombre text;
     ALTER TABLE public.actas_documentos DROP CONSTRAINT IF EXISTS actas_fuente_unica;

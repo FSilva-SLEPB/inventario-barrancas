@@ -2,8 +2,16 @@ export const shorthands = undefined;
 export async function up(pgm) {
   pgm.sql(`
     -- Actas: externas (repositorio) + acta institucional entrega de insumos (secuencia única)
-    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS solicitud_insumo_id uuid REFERENCES public.solicitudes_insumos(id);
-    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS entrega_insumo_id uuid REFERENCES public.entregas_insumos(id);
+    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS solicitud_insumo_id uuid;
+    ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS entrega_insumo_id uuid;
+    DO $$ BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='actas_documentos_solicitud_insumo_id_fkey') THEN
+        ALTER TABLE public.actas_documentos ADD CONSTRAINT actas_documentos_solicitud_insumo_id_fkey FOREIGN KEY (solicitud_insumo_id) REFERENCES public.solicitudes_insumos(id);
+      END IF;
+      IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='actas_documentos_entrega_insumo_id_fkey') THEN
+        ALTER TABLE public.actas_documentos ADD CONSTRAINT actas_documentos_entrega_insumo_id_fkey FOREIGN KEY (entrega_insumo_id) REFERENCES public.entregas_insumos(id);
+      END IF;
+    END $$;
     ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS origen_externo boolean NOT NULL DEFAULT false;
     ALTER TABLE public.actas_documentos ADD COLUMN IF NOT EXISTS archivo_nombre text;
     ALTER TABLE public.actas_documentos DROP CONSTRAINT IF EXISTS actas_fuente_unica;
