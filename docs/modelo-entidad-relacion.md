@@ -478,7 +478,7 @@ erDiagram
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
 | cambios_estados_activo | Estados del activo | Transiciones administrativas y de condición confirmadas por UTIC, con solicitud idempotente, versión e instantáneas inmutables. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
-| catalogo_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| catalogo_insumos | Insumos | Catálogo de insumos solicitables (código, nombre, categoría, unidad, foto y vigencia). |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
 | celulares_historial | Celulares | Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas. |
@@ -488,8 +488,8 @@ erDiagram
 | directorio_sedes | Directorio | Responsable vigente de cada EE/JISC, RUN, contactos y situación del cargo. |
 | entregas_detalle | Entregas | Equipos de cada entrega, con instantáneas anteriores y posteriores. |
 | entregas_equipos | Entregas | Cabecera de entrega por sede, fecha y persona receptora; conserva sus datos históricos. |
-| entregas_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
-| entregas_insumos_detalle | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| entregas_insumos | Insumos | Registro de entregas contra solicitud de insumos, receptor y acta asociada. |
+| entregas_insumos_detalle | Insumos | Detalle de productos y cantidades entregadas en cada entrega de insumos. |
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
 | equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado/en préstamo y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
@@ -503,11 +503,11 @@ erDiagram
 | operaciones_inventario_detalle | Movimientos | Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
 | prestamos_inventario | Préstamos | Préstamos temporales desde Bodega TI, pertenencia conservada, destino y plazo, devolución vinculada e historial en movimientos. |
-| reservas_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| reservas_insumos | Insumos | Reservas de stock asociadas a solicitudes aprobadas y su consumo al entregar. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
-| solicitudes_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
-| solicitudes_insumos_detalle | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
-| stock_insumos | Por revisar | Sin referencia identificada en el catálogo de uso de esta versión. |
+| solicitudes_insumos | Insumos | Solicitudes de insumos por sede con datos del solicitante, estado, validación/aprobación, entrega o cancelación. |
+| solicitudes_insumos_detalle | Insumos | Líneas solicitadas/aprobadas/entregadas de cada solicitud de insumos. |
+| stock_insumos | Insumos | Existencia y reserva disponible por producto del catálogo de insumos. |
 | usuarios_acceso | Acceso | Cuentas autorizadas, perfil, vigencia y sede permitida. |
 | usuarios_acceso_historial | Acceso | Auditoría de cambios de usuarios y permisos. |
 
