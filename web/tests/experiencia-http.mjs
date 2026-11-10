@@ -51,8 +51,9 @@ try{
   console.error('---MERMAID_DIFF---');
   console.error('len_doc',dmer.length,'len_mer',mer.length,'eq',dmer===mer);
   for(let k=0;k<Math.max(dmer.length,mer.length);k++){ if(dmer[k]!==mer[k]){ console.error('diff_at',k); console.error('DOC:',JSON.stringify(dmer.slice(Math.max(0,k-80),k+80))); console.error('MER:',JSON.stringify(mer.slice(Math.max(0,k-80),k+80))); break; } }
-  console.error('---DOC_MERMAID_START---'); console.error(dmer.slice(0,4000)); console.error('---DOC_MERMAID_END---');
-  console.error('---GEN_MERMAID_START---'); console.error(mer.slice(0,4000)); console.error('---GEN_MERMAID_END---');
+  console.error('---GEN_MERMAID_FULL_START---');
+  for(let o=0;o<mer.length;o+=3000) console.error(mer.slice(o,o+3000));
+  console.error('---GEN_MERMAID_FULL_END---');
  }
  assert.ok(documento.includes(mer));pruebas++;
  const paginaModelo=main(await(await pedir('/documentacion/modelo-datos',ca)).text());assert.ok(paginaModelo.includes('Modelo entidad relación'));assert.ok(paginaModelo.includes('Descargar diagrama SVG'));assert.ok(paginaModelo.includes('directorio_sedes'));pruebas++;
