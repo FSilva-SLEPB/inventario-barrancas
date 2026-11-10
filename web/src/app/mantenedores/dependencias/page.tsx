@@ -20,7 +20,7 @@ import { etiquetaSede } from "@/lib/etiqueta-sede";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  title: "Dependencias | Inventario SLEP Barrancas",
+  title: "Dependencias | Sistema Unidad TIC",
 };
 
 type Propiedades = {

@@ -4,76 +4,81 @@ import { puedeAdministrar } from "@/lib/politica-acceso";
 import { obtenerAcceso, obtenerSesion } from "@/lib/acceso";
 
 const accesos = [
-  {
-    href: "/inventario",
-    titulo: "Inventario",
-    descripcion: "Equipos y bienes del servicio.",
-  },
-  {
-    href: "/solicitudes",
-    titulo: "Solicitudes",
-    descripcion:
-      "Solicitudes de suministros para establecimientos y Nivel Central.",
-  },
-  {
-    href: "/mantenedores",
-    titulo: "Mantenedores",
-    descripcion: "Categorías de bienes y catálogos del sistema.",
-  },
+  { href: "/inventario", titulo: "Inventario", descripcion: "Equipos y bienes del servicio." },
+  { href: "/solicitudes", titulo: "Solicitudes", descripcion: "Solicitudes de suministros para establecimientos y Nivel Central." },
+  { href: "/mantenedores", titulo: "Mantenedores", descripcion: "Categorías de bienes y catálogos del sistema." },
 ];
 
 export default async function Home() {
   const acceso = await obtenerAcceso();
   if (!acceso && (await obtenerSesion())?.accesoDenegado) redirect("/acceso-denegado");
   if (!acceso) return <main className="portal-bienvenida">
-    <section className="portal-presentacion" aria-labelledby="bienvenida-titulo">
-      <p className="portal-etiqueta">SLEP Barrancas · UTIC</p>
-      <h1 id="bienvenida-titulo">Bienvenido al sistema de Inventario</h1>
-      <p className="portal-descripcion">Un espacio para organizar los bienes y las solicitudes
-        de nuestra comunidad educativa.</p>
-      <Link href="/ingresar" className="btn btn-primary portal-acceso">Acceder al sistema <span aria-hidden="true">→</span></Link>
-      <p className="portal-nota">Acceso con cuenta institucional y autorización previa.</p>
+    <section className="portal-hero" aria-labelledby="bienvenida-titulo">
+      <div className="portal-hero-interior">
+        <p className="portal-etiqueta">SLEP Barrancas · Unidad de Tecnologías de la Información y Comunicaciones</p>
+        <h1 id="bienvenida-titulo">Sistema Unidad TIC</h1>
+        <p className="portal-descripcion">Plataforma institucional para la gestión de inventario, solicitudes y servicios tecnológicos de nuestra comunidad educativa.</p>
+        <Link href="/ingresar" className="btn btn-primary portal-acceso">Acceder al sistema <span aria-hidden="true">→</span></Link>
+        <p className="portal-nota">Acceso con cuenta institucional y autorización previa.</p>
+      </div>
     </section>
-    <section aria-labelledby="comunidad-titulo" className="portal-comunidad">
-      <h2 id="comunidad-titulo">Al servicio de nuestra comunidad</h2>
-      <div className="portal-ambitos">
-        <article><span aria-hidden="true" className="portal-numero">01</span><h3>Establecimientos educacionales</h3>
-          <p>Gestión de los bienes que acompañan el aprendizaje.</p></article>
-        <article><span aria-hidden="true" className="portal-numero">02</span><h3>Jardines infantiles</h3>
-          <p>Organización de recursos para la educación inicial.</p></article>
-        <article><span aria-hidden="true" className="portal-numero">03</span><h3>Nivel Central</h3>
-          <p>Coordinación y apoyo a la gestión del servicio.</p></article>
+
+    <section aria-labelledby="servicios-titulo" className="portal-seccion">
+      <div className="portal-seccion-interior">
+        <header className="portal-seccion-cabecera">
+          <h2 id="servicios-titulo">Servicios disponibles</h2>
+          <p>Herramientas para apoyar la gestión tecnológica y administrativa del servicio.</p>
+        </header>
+        <div className="portal-servicios">
+          <article className="portal-servicio"><span className="portal-servicio-icono" aria-hidden="true">01</span><h3>Inventario</h3><p>Registro y seguimiento de equipos y bienes del servicio.</p></article>
+          <article className="portal-servicio"><span className="portal-servicio-icono" aria-hidden="true">02</span><h3>Solicitudes</h3><p>Gestión de solicitudes de insumos y requerimientos tecnológicos.</p></article>
+          <article className="portal-servicio"><span className="portal-servicio-icono" aria-hidden="true">03</span><h3>Soporte y gestión</h3><p>Catálogos y herramientas para la operación de la Unidad TIC.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="nosotros-titulo" className="portal-seccion portal-nosotros">
+      <div className="portal-seccion-interior portal-nosotros-grid">
+        <div>
+          <h2 id="nosotros-titulo">Sobre la Unidad TIC</h2>
+          <p>La Unidad de Tecnologías de la Información y Comunicaciones del SLEP Barrancas apoya el funcionamiento del servicio, los establecimientos educacionales y jardines infantiles, facilitando la gestión de recursos tecnológicos y la continuidad de los procesos.</p>
+          <p>Este sistema permite organizar la información, dar trazabilidad a los bienes y atender las necesidades de nuestra comunidad educativa.</p>
+        </div>
+        <div className="portal-nosotros-destacado" aria-hidden="true">
+          <p>Al servicio de</p>
+          <ul>
+            <li>Establecimientos educacionales</li>
+            <li>Jardines infantiles y salas cuna</li>
+            <li>Nivel Central</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section className="portal-cta" aria-labelledby="cta-titulo">
+      <div className="portal-seccion-interior portal-cta-interior">
+        <h2 id="cta-titulo">Accede con tu cuenta institucional</h2>
+        <p>Ingresa con tu cuenta de Google Workspace autorizada para utilizar los servicios de la Unidad TIC.</p>
+        <Link href="/ingresar" className="btn btn-light portal-acceso">Ingresar al sistema</Link>
       </div>
     </section>
   </main>;
+
   const accesosVisibles = puedeAdministrar(acceso.rol) ? [accesos[0], {href:"/directorio",titulo:"Directorio",descripcion:"Establecimientos, JI/SC y sus directores y directoras."}, ...accesos.slice(1)] : accesos;
   return (
     <main>
       <header>
         <h1>Inicio</h1>
-        <p className="descripcion-pagina">
-          Gestión de inventario y solicitudes de insumos para establecimientos
-          educacionales y Nivel Central.
-        </p>
+        <p className="descripcion-pagina">Sistema Unidad TIC · Gestión de inventario, solicitudes y servicios para la comunidad educativa del SLEP Barrancas.</p>
       </header>
-
       <section aria-labelledby="titulo-accesos">
         <h2 id="titulo-accesos">Accesos principales</h2>
-
         <div className="accesos-inicio">
           {accesosVisibles.map((acceso) => (
-            <Link
-              key={acceso.href}
-              href={acceso.href}
-              className="acceso-inicio"
-            >
+            <Link key={acceso.href} href={acceso.href} className="acceso-inicio">
               <span className="titulo-acceso">{acceso.titulo}</span>
-              <span className="descripcion-acceso">
-                {acceso.descripcion}
-              </span>
-              <span className="enlace-acceso">
-                Ir a {acceso.titulo} <span aria-hidden="true">→</span>
-              </span>
+              <span className="descripcion-acceso">{acceso.descripcion}</span>
+              <span className="enlace-acceso">Ir a {acceso.titulo} <span aria-hidden="true">→</span></span>
             </Link>
           ))}
         </div>

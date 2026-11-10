@@ -459,53 +459,83 @@
 
 .estructura-publica {
   grid-template-columns: minmax(0, 1fr);
-  max-width: 76rem;
+  max-width: 80rem;
 }
 
 .contenido-app > .portal-bienvenida {
   padding: 0;
   overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
-.portal-presentacion {
-  padding: clamp(1.75rem, 6vw, 5rem);
-  background: linear-gradient(125deg, var(--color-superficie), var(--color-seleccion));
-  border-bottom: 1px solid var(--color-borde-suave);
+.portal-hero {
+  background: linear-gradient(120deg, var(--color-cabecera-profundo) 0%, var(--color-primario) 55%, #1b86d6 100%);
+  color: #fff;
+  position: relative;
 }
-
-.portal-etiqueta {
-  color: var(--color-primario);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  font-size: 0.875rem;
+.portal-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 85% 20%, rgb(255 255 255 / 18%), transparent 35%),
+    radial-gradient(circle at 10% 90%, rgb(255 255 255 / 10%), transparent 30%);
+  pointer-events: none;
 }
-
-.portal-presentacion h1 {
-  max-width: 22ch;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1.12;
-  margin-block: 1rem;
+.portal-hero-interior {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 7vw, 5.5rem) clamp(1.5rem, 4vw, 3rem);
 }
+.portal-hero-compacto .portal-hero-interior { padding-block: clamp(2rem, 5vw, 3.5rem); }
+.portal-hero .portal-etiqueta { color: rgb(255 255 255 / 88%); font-weight: 700; letter-spacing: .04em; font-size: .875rem; margin: 0; }
+.portal-hero h1 { color: #fff; font-size: clamp(2.2rem, 5vw, 3.75rem); line-height: 1.1; margin: .75rem 0 1rem; max-width: 20ch; }
+.portal-hero .portal-descripcion { color: rgb(255 255 255 / 92%); font-size: 1.125rem; max-width: 58ch; margin: 0 0 1.5rem; }
+.portal-hero .portal-acceso.btn { background: #fff; color: var(--color-primario); border-color: #fff; font-weight: 700; padding: .875rem 1.5rem; }
+.portal-hero .portal-acceso.btn:hover { background: var(--color-seleccion); border-color: var(--color-seleccion); color: var(--color-primario-hover); }
+.portal-hero .portal-nota { color: rgb(255 255 255 / 82%); font-size: .875rem; margin: .5rem 0 0; }
 
-.portal-descripcion {
-  max-width: 53ch;
-  color: var(--color-parrafo);
-  font-size: 1.125rem;
-}
+.portal-seccion { background: var(--color-superficie); }
+.portal-seccion-interior { max-width: 72rem; margin: 0 auto; padding: clamp(2rem, 5vw, 3.5rem) clamp(1.5rem, 4vw, 3rem); }
+.portal-seccion-cabecera { text-align: center; margin-bottom: 2rem; }
+.portal-seccion-cabecera h2 { font-size: 1.75rem; margin: 0 0 .5rem; }
+.portal-seccion-cabecera p { color: var(--color-parrafo); margin: 0; font-size: 1.05rem; }
 
-.portal-acceso { margin-block: 1rem; padding: 0.875rem 1.5rem; }
-.portal-nota { font-size: 0.875rem; color: var(--color-parrafo); }
-.portal-comunidad { padding: clamp(1.5rem, 4vw, 3rem); }
-.portal-comunidad h2 { font-size: 1.375rem; margin-bottom: 1.5rem; }
-.portal-ambitos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
-.portal-ambitos article { border-top: 2px solid var(--color-primario); padding-top: 1rem; }
-.portal-numero { font-weight: 700; color: var(--color-primario); }
-.portal-ambitos h3 { font-size: 1.125rem; margin-block: 0.75rem; }
-.portal-ambitos p { color: var(--color-parrafo); margin: 0; }
+.portal-servicios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.portal-servicio { background: var(--color-superficie-alterna); border: 1px solid var(--color-borde-suave); border-top: 4px solid var(--color-primario); border-radius: .75rem; padding: 1.5rem; }
+.portal-servicio-icono { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: .5rem; background: var(--color-seleccion); color: var(--color-primario); font-weight: 700; margin-bottom: .75rem; }
+.portal-servicio h3 { font-size: 1.2rem; margin: 0 0 .5rem; }
+.portal-servicio p { color: var(--color-parrafo); margin: 0; }
+
+.portal-nosotros { background: var(--color-superficie-suave); border-top: 1px solid var(--color-borde-suave); border-bottom: 1px solid var(--color-borde-suave); }
+.portal-nosotros-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.portal-nosotros h2 { font-size: 1.75rem; margin: 0 0 1rem; }
+.portal-nosotros p { color: var(--color-parrafo); font-size: 1.02rem; }
+.portal-nosotros-destacado { background: var(--color-superficie); border: 1px solid var(--color-borde-suave); border-radius: .75rem; padding: 1.5rem; }
+.portal-nosotros-destacado p { font-weight: 700; color: var(--color-titulo); margin: 0 0 .75rem; }
+.portal-nosotros-destacado ul { margin: 0; padding-left: 1.2rem; color: var(--color-parrafo); }
+.portal-nosotros-destacado li { margin: .4rem 0; }
+
+.portal-cta { background: var(--color-cabecera-profundo); color: #fff; }
+.portal-cta-interior { text-align: center; padding-block: 3rem; }
+.portal-cta h2 { color: #fff; font-size: 1.75rem; margin: 0 0 .5rem; }
+.portal-cta p { color: rgb(255 255 255 / 88%); margin: 0 0 1.25rem; }
+.portal-cta .btn-light { background: #fff; color: var(--color-primario); border-color: #fff; font-weight: 700; }
+.portal-cta .btn-light:hover { background: var(--color-seleccion); border-color: var(--color-seleccion); }
+
+.portal-ingreso-tarjeta { max-width: 36rem; margin: 0 auto; background: var(--color-superficie); border: 1px solid var(--color-borde-suave); border-radius: 1rem; padding: clamp(1.5rem, 4vw, 2.5rem); box-shadow: var(--sombra-tarjeta); }
+.portal-ingreso-tarjeta h2 { font-size: 1.5rem; margin: 0 0 .5rem; }
+.portal-ingreso-tarjeta p { color: var(--color-parrafo); }
+.portal-ingreso-tarjeta .btn { margin-top: .5rem; min-height: 2.75rem; }
+.portal-alerta { color: var(--color-error); font-weight: 600; }
+.portal-volver { margin: 1.5rem 0 0; }
 .contenido-app > .portal-ingreso { max-width: 38rem; margin: clamp(1rem, 5vh, 4rem) auto; padding: clamp(1.5rem, 4vw, 3rem); }
 .portal-ingreso h1 { margin-block: 1rem; }
 .portal-ingreso .btn { margin-top: 1rem; min-height: 2.75rem; }
-.portal-volver { margin: 2rem 0 0; }
 .denegado-indicador {
   display: inline-grid;
   place-items: center;
@@ -529,5 +559,7 @@
 .perfiles-ayuda { margin-top: 2rem; border-top: 1px solid var(--color-borde-suave); padding-top: 1.5rem; }
 
 @media (max-width: 767.98px) {
-  .portal-ambitos { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .portal-servicios { grid-template-columns: minmax(0, 1fr); }
+  .portal-nosotros-grid { grid-template-columns: minmax(0, 1fr); }
+  .portal-hero h1 { max-width: none; }
 }

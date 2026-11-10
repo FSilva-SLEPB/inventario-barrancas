@@ -17,7 +17,7 @@ import estilos from "./sedes.module.css";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  title: "Sedes | Inventario SLEP Barrancas",
+  title: "Sedes | Sistema Unidad TIC",
 };
 
 type Propiedades = {
