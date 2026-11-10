@@ -86,7 +86,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
  };
 
  const labelCampo=(label:string,value:string)=>(
-  <div className="campo-catalogos"><span className="dato-secundario" style={{display:'block',marginBottom:2}}>{label}</span><div style={{fontWeight:600}}>{value||'—'}</div></div>
+  <div className="campo-catalogos"><span className="dato-secundario" style={{display:'block',marginBottom:4}}>{label}</span><div style={{fontWeight:600,background:'#fff',border:'1px solid var(--color-borde-suave)',borderRadius:10,padding:'.45rem .65rem'}}>{value||'—'}</div></div>
  );
 
  return <section className="panel-catalogos" style={{display:'grid',gap:'1.25rem'}}>
@@ -95,44 +95,46 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    <p className="descripcion-pagina" style={{margin:0}}>Completa los datos, selecciona insumos por separado y envía la solicitud.</p>
   </header>
 
-  <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
-   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
-    <h2 style={{margin:0,fontSize:'1.05rem'}}>Establecimiento</h2>
-    <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar establecimiento" title="Editar establecimiento" onClick={()=>setEditSede(v=>!v)}>✎</button>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'1rem',alignItems:'start'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
+     <h2 style={{margin:0,fontSize:'1.05rem'}}>Establecimiento</h2>
+     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar establecimiento" title="Editar establecimiento" onClick={()=>setEditSede(v=>!v)}>✎</button>
+    </div>
+    {editSede ? <div className="campo-catalogos">
+     <label htmlFor="sel-sede">Establecimiento / RBD</label>
+     <select id="sel-sede" value={sede?.id||''} onChange={e=>{const s=sedes.find(x=>x.id===e.target.value)||null; setSede(s);}} disabled={local && !!actor.sedeId}>
+      <option value="">Seleccione establecimiento...</option>
+      {sedes.map(s=><option key={s.id} value={s.id}>{s.rbd?`${s.rbd} · `:''}{s.nombre}</option>)}
+     </select>
+    </div> : null}
+    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'.75rem'}}>
+     {labelCampo('Establecimiento',sede?.nombre||'')}
+     {labelCampo('RBD',sede?.rbd||'')}
+     {labelCampo('Comuna',sede?.comuna||'')}
+     {labelCampo('Dirección',sede?.direccion||'')}
+    </div>
    </div>
-   {editSede ? <div className="campo-catalogos" style={{maxWidth:420}}>
-    <label htmlFor="sel-sede">Establecimiento / RBD</label>
-    <select id="sel-sede" value={sede?.id||''} onChange={e=>{const s=sedes.find(x=>x.id===e.target.value)||null; setSede(s);}} disabled={local && !!actor.sedeId}>
-     <option value="">Seleccione establecimiento...</option>
-     {sedes.map(s=><option key={s.id} value={s.id}>{s.rbd?`${s.rbd} · `:''}{s.nombre}</option>)}
-    </select>
-   </div> : null}
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'.75rem'}}>
-    {labelCampo('Establecimiento',sede?.nombre||'')}
-    {labelCampo('RBD',sede?.rbd||'')}
-    {labelCampo('Comuna',sede?.comuna||'')}
-    {labelCampo('Dirección',sede?.direccion||'')}
-   </div>
-  </div>
 
-  <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
-   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
-    <h2 style={{margin:0,fontSize:'1.05rem'}}>Datos del solicitante</h2>
-    <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar datos del solicitante" title="Editar datos del solicitante" onClick={()=>setEditSolicitante(v=>!v)}>✎</button>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
+     <h2 style={{margin:0,fontSize:'1.05rem'}}>Datos del solicitante</h2>
+     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar datos del solicitante" title="Editar datos del solicitante" onClick={()=>setEditSolicitante(v=>!v)}>✎</button>
+    </div>
+    {editSolicitante ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'.75rem'}}>
+     <div className="campo-catalogos"><label htmlFor="sol-nombre">Nombre</label><input id="sol-nombre" value={solicitante.nombre} onChange={e=>setSolicitante(v=>({...v,nombre:e.target.value}))}/></div>
+     <div className="campo-catalogos"><label htmlFor="sol-run">RUN</label><input id="sol-run" value={solicitante.run} onChange={e=>setSolicitante(v=>({...v,run:e.target.value}))}/></div>
+     <div className="campo-catalogos"><label htmlFor="sol-cargo">Cargo</label><input id="sol-cargo" value={solicitante.cargo} onChange={e=>setSolicitante(v=>({...v,cargo:e.target.value}))}/></div>
+     <div className="campo-catalogos"><label htmlFor="sol-tel">Teléfono</label><input id="sol-tel" value={solicitante.telefono} onChange={e=>setSolicitante(v=>({...v,telefono:e.target.value}))}/></div>
+     <div className="campo-catalogos"><label htmlFor="sol-correo">Correo</label><input id="sol-correo" value={solicitante.correo} onChange={e=>setSolicitante(v=>({...v,correo:e.target.value}))}/></div>
+    </div> : <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'.75rem'}}>
+     {labelCampo('Nombre',solicitante.nombre)}
+     {labelCampo('RUN',solicitante.run)}
+     {labelCampo('Cargo',solicitante.cargo)}
+     {labelCampo('Teléfono',solicitante.telefono)}
+     {labelCampo('Correo',solicitante.correo)}
+    </div>}
    </div>
-   {editSolicitante ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'.75rem'}}>
-    <div className="campo-catalogos"><label htmlFor="sol-nombre">Nombre</label><input id="sol-nombre" value={solicitante.nombre} onChange={e=>setSolicitante(v=>({...v,nombre:e.target.value}))}/></div>
-    <div className="campo-catalogos"><label htmlFor="sol-run">RUN</label><input id="sol-run" value={solicitante.run} onChange={e=>setSolicitante(v=>({...v,run:e.target.value}))}/></div>
-    <div className="campo-catalogos"><label htmlFor="sol-cargo">Cargo</label><input id="sol-cargo" value={solicitante.cargo} onChange={e=>setSolicitante(v=>({...v,cargo:e.target.value}))}/></div>
-    <div className="campo-catalogos"><label htmlFor="sol-tel">Teléfono</label><input id="sol-tel" value={solicitante.telefono} onChange={e=>setSolicitante(v=>({...v,telefono:e.target.value}))}/></div>
-    <div className="campo-catalogos"><label htmlFor="sol-correo">Correo</label><input id="sol-correo" value={solicitante.correo} onChange={e=>setSolicitante(v=>({...v,correo:e.target.value}))}/></div>
-   </div> : <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',gap:'.75rem'}}>
-    {labelCampo('Nombre',solicitante.nombre)}
-    {labelCampo('RUN',solicitante.run)}
-    {labelCampo('Cargo',solicitante.cargo)}
-    {labelCampo('Teléfono',solicitante.telefono)}
-    {labelCampo('Correo',solicitante.correo)}
-   </div>}
   </div>
 
   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
@@ -185,7 +187,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
     </div>
     {modalProd.foto_url ? <img src={modalProd.foto_url} alt={modalProd.nombre} style={{width:'100%',maxHeight:260,objectFit:'contain',borderRadius:12,background:'#fff'}}/> : <div aria-hidden="true" style={{width:'100%',height:200,borderRadius:12,border:'1px dashed var(--color-borde-suave)',background:'var(--color-superficie-suave)',display:'grid',placeItems:'center',color:'var(--color-parrafo)'}}>Sin foto</div>}
     <div className="dato-secundario">{modalProd.categoria||'Sin categoría'}</div>
-    <div className="campo-catalogos"><label htmlFor="modal-cant">Cantidad</label><input id="modal-cant" type="number" min={1} max={999} value={cantidadModal} onChange={e=>setCantidadModal(e.target.value)}/></div>
+    <div className="campo-catalogos" style={{maxWidth:160,margin:'0 auto',textAlign:'center'}}><label htmlFor="modal-cant">Cantidad</label><input id="modal-cant" type="number" min={1} max={999} value={cantidadModal} onChange={e=>setCantidadModal(e.target.value)} style={{width:120,margin:'0 auto',textAlign:'center'}}/></div>
     <div style={{display:'flex',justifyContent:'flex-end',gap:'.5rem'}}>
      <button type="button" className="btn btn-outline-primary" onClick={()=>setModalProd(null)}>Cancelar</button>
      <button type="button" className="btn btn-primary" onClick={agregarDesdeModal}>Agregar al carrito</button>
