@@ -9,6 +9,7 @@ export function up(pgm){
 
   -- Crea o reemplaza la función de creación de solicitud (carrito).
   -- p_datos (jsonb opcional): {nombre,run,cargo,telefono,modalidad,motivo}
+  DROP FUNCTION IF EXISTS public.crear_solicitud_insumos(text, uuid, jsonb);
   CREATE OR REPLACE FUNCTION public.crear_solicitud_insumos(p_actor text, p_sede_id uuid, p_lineas jsonb, p_datos jsonb DEFAULT '{}'::jsonb)
   RETURNS uuid
   LANGUAGE plpgsql
