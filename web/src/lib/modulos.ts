@@ -19,11 +19,16 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   {href:'/directorio/directoras',titulo:'Directoras JI y SC',descripcion:'Identidad y estado contractual de las directoras.',icono:'DIR'}
  ]}]:[]),{id:'mantenedores',titulo:'Mantenedores',href:'/mantenedores',descripcion:'Catálogos, ubicaciones y accesos al sistema.',accesos:[
   ...(admin?[{href:'/mantenedores/funcionarios',titulo:'Funcionarios de Nivel Central',descripcion:'Fichas de personas, unidad, contacto e historial de cambios.',icono:'NC'},
-   {href:'/mantenedores/usuarios',titulo:'Usuarios y perfiles',descripcion:'Cuentas autorizadas, perfiles y alcance de acceso.',icono:'US'}]:[]),
+   {href:'/mantenedores/usuarios',titulo:'Usuarios y perfiles',descripcion:'Cuentas autorizadas, perfiles y alcance de acceso.',icono:'US'},
+   {href:'/mantenedores/insumos',titulo:'Catálogo de insumos',descripcion:'Catálogo, stock e ingreso/fotos de productos de insumos.',icono:'IN'}]:[]),
   {href:'/mantenedores/categorias',titulo:'Categorías de bienes',descripcion:'Tipos de equipos y bienes del inventario.',icono:'CA'},
   {href:'/mantenedores/sedes',titulo:'Sedes',descripcion:'Establecimientos, jardines, salas cunas y Nivel Central.',icono:'SE'},
   {href:'/mantenedores/dependencias',titulo:'Dependencias',descripcion:'Ubicaciones internas de cada sede.',icono:'DE'}
  ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
-  ...(admin||gestion||local?[{href:'/insumos',titulo:'Solicitudes de insumos',descripcion:'Catálogo, carrito y seguimiento de solicitudes de insumos.',icono:'IN'}]:[]),
+  ...(admin||gestion||local?[
+   {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'},
+   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisar el estado y avance de las solicitudes.',icono:'SG'},
+   {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consultar el historial de solicitudes realizadas.',icono:'HI'},
+  ]:[]),
  ]}];
 }

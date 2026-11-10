@@ -1,30 +1,26 @@
+import Link from "next/link";
 import {exigirAcceso} from "@/lib/acceso";
-import {puedeAdministrar,puedeGestionarDependencias,requiereSede} from "@/lib/politica-acceso";
-import {listarSedes} from "@/lib/sedes";
-import {listarCatalogoInsumos,listarStockInsumos,listarSolicitudesInsumos,obtenerSolicitudInsumo,type InsumoStock} from "@/lib/insumos";
-import {esIdSede} from "@/lib/validacion-sedes";
-import InsumosClient from "./components/insumos-client";
-export const metadata={title:'Solicitudes de insumos | SLEP Barrancas'};
-export default async function InsumosPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const actor=await exigirAcceso();const p=await searchParams;const local=requiereSede(actor.rol);const admin=puedeAdministrar(actor.rol);
- const puedeSolicitar=admin||puedeGestionarDependencias(actor.rol)||requiereSede(actor.rol)||(actor.rol as string)==='consulta_sede';
- const v=(k:string)=>typeof p[k]==='string'?(p[k] as string).trim():'';
- const filtroEstado=v('estado');const filtroSede=v('sede')&&esIdSede(v('sede'))?v('sede'):'';const q=v('q').slice(0,150);
- const limite=[50,100,150].includes(Number(v('limite')))?Number(v('limite')):50;const pagina=/^[1-9]\d{0,6}$/.test(v('pagina'))?Number(v('pagina')):1;
- const ver=v('ver');const guardado=v('guardado')==='1';
- let stock:InsumoStock[]=[];let catalogo=[] as Awaited<ReturnType<typeof listarCatalogoInsumos>>;
- try{[catalogo,stock]=await Promise.all([listarCatalogoInsumos(admin?false:true),listarStockInsumos()]);}catch{}
- let solicitudesRes={filas:[],total:0,pagina:1,paginas:1} as Awaited<ReturnType<typeof listarSolicitudesInsumos>>;
- try{solicitudesRes=await listarSolicitudesInsumos({estado:filtroEstado,sede:filtroSede,q,pagina,limite});}catch{}
- const sedes=await listarSedes().catch(()=>[] as Awaited<ReturnType<typeof listarSedes>>);
- const detalle=ver?await obtenerSolicitudInsumo(ver).catch(()=>null):null;
- return <InsumosClient local={local} admin={admin} puedeSolicitar={puedeSolicitar}
-  sedes={sedes.map(s=>({id:s.id,nombre:s.nombre,rbd:s.rbd,direccion:s.direccion,comuna:s.comuna}))}
-  catalogo={catalogo} stock={stock}
-  solicitudes={solicitudesRes.filas} total={solicitudesRes.total}
-  pagina={solicitudesRes.pagina} paginas={solicitudesRes.paginas} limite={limite}
-  filtroEstado={filtroEstado} filtroSede={filtroSede} q={q}
-  detalle={detalle} guardado={guardado}
-  actor={{email:actor.email,sedeId:actor.sedeId??null,sedeNombre:actor.sedeNombre??null,sedeRbd:actor.sedeRbd??null}}
- />;
+export const metadata={title:'Insumos | SLEP Barrancas'};
+export default async function InsumosLanding(){
+ await exigirAcceso();
+ const cards=[
+  {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crea y envía una nueva solicitud de insumos para tu establecimiento.'},
+  {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisa el estado y avance de las solicitudes en curso.'},
+  {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consulta el historial de solicitudes realizadas y sus resultados.'},
+ ];
+ return <main>
+  <header>
+   <h1>Insumos</h1>
+   <p className="descripcion-pagina">Selecciona una opción para gestionar solicitudes de insumos.</p>
+  </header>
+  <section style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:'1rem',marginTop:'1rem'}}>
+   {cards.map(c=>(
+    <Link key={c.href} href={c.href} className="panel-catalogos" style={{display:'grid',gap:'.5rem',padding:'1.25rem',textDecoration:'none',color:'inherit'}}>
+     <h2 style={{margin:0,fontSize:'1.1rem'}}>{c.titulo}</h2>
+     <p style={{margin:0}} className="descripcion-pagina">{c.descripcion}</p>
+     <span className="btn btn-primary btn-sm" style={{justifySelf:'start',marginTop:'.25rem'}}>Ingresar</span>
+    </Link>
+   ))}
+  </section>
+ </main>;
 }
