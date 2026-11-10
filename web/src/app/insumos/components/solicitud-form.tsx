@@ -137,8 +137,8 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    </div>
   </div>
 
-  <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'1rem',alignItems:'stretch'}}>
-   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,300px),1fr))',gap:'1rem',alignItems:'stretch'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%',minWidth:0}}>
     <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,180px),1fr))',gap:'.75rem'}}>
      <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
@@ -156,9 +156,9 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
     </div>
    </div>
 
-   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%',minWidth:0}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',flexWrap:'wrap'}}><h2 style={{margin:0,fontSize:'1.05rem'}}>Carrito de solicitud</h2><span className="badge bg-light text-dark border">{totalItems} ítem(s)</span></div>
-    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos" style={{width:'100%',tableLayout:'fixed'}}>
+    <div className="tabla-usuarios-contenedor" style={{minWidth:0,overflowX:'auto'}}><table className="tabla-datos tabla-catalogos" style={{width:'100%',tableLayout:'fixed',minWidth:0}}>
      <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:110}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:70}}>Editar</th></tr></thead>
      <tbody>
       {items.map(i=>(
