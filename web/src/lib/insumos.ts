@@ -2,10 +2,11 @@ import 'server-only';
 import {randomUUID} from 'node:crypto';
 import {exigirAcceso,exigirAdministrador} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
+import {requiereSede,puedeGestionarDependencias} from '@/lib/politica-acceso';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {generarPdfActa} from '@/lib/pdf-actas';
 import type {DatosActa} from '@/lib/validacion-actas';
-export type InsumoCatalogo={id:string;codigo:string;nombre:string;categoria:string;unidad:string;activo:boolean;foto_url:string|null};
+export type InsumoCatalogo={id:string;codigo:string;nombre:string;categoria:string;unidad:string;activo:boolean;foto_url:string|null;version:number};
 export type InsumoStock={producto_id:string;existencia:number;reservado:number;disponible:number;nombre:string;codigo:string;unidad:string;categoria:string;activo:boolean;foto_url:string|null};
 export type SolicitudInsumo={id:string;sede_id:string;sede_nombre:string;sede_rbd:string|null;solicitante_correo:string;solicitante_nombre:string;solicitante_run:string;solicitante_cargo:string;solicitante_telefono:string;modalidad_entrega:string;estado:'solicitada'|'en_validacion'|'aprobada'|'entregada'|'cancelada';motivo:string;solicitado_en:string;validado_en:string|null;validado_por:string|null;observacion_validacion:string;aprobado_en:string|null;aprobado_por:string|null;entregado_en:string|null;cancelado_en:string|null;cancelado_por:string|null;cancelado_motivo:string|null;acta_id:string|null;lineas:SolicitudLinea[];};
 export type SolicitudLinea={id:string;producto_id:string;codigo:string;nombre:string;categoria:string;unidad:string;foto_url:string|null;cantidad_solicitada:number;cantidad_aprobada:number;cantidad_entregada:number;motivo_reduccion:string;};
@@ -14,13 +15,13 @@ export async function listarCatalogoInsumos(activosSolo=true){
  await exigirAcceso();
  const db=obtenerBaseDatos();
  const {rows}=await db.query<InsumoCatalogo>(`
-  SELECT id,codigo,nombre,categoria,unidad,activo,foto_url FROM public.catalogo_insumos
+  SELECT id,codigo,nombre,categoria,unidad,activo,foto_url,version FROM public.catalogo_insumos
   ${activosSolo?'WHERE activo':' ORDER BY codigo'}
   ${activosSolo?'ORDER BY codigo':''}`);
  return rows;
 }
 export async function listarStockInsumos(){
- await exigirAcceso();
+ await exigirAdministrador();
  const db=obtenerBaseDatos();
  const {rows}=await db.query<InsumoStock>(`
   SELECT s.producto_id,s.existencia,s.reservado,(s.existencia-s.reservado) AS disponible,
@@ -31,9 +32,10 @@ export async function listarStockInsumos(){
  return rows;
 }
 export async function listarSolicitudesInsumos(f:FiltrosSolicitudes){
- await exigirAcceso();
+ const actor=await exigirAcceso();
  const db=obtenerBaseDatos();
  const where=[] as string[];const params:unknown[]=[];let i=1;
+ if(requiereSede(actor.rol)){where.push(`si.sede_id = $${i++}::uuid`);params.push(actor.sedeId);}
  if(f.estado==='activas'){where.push(`si.estado IN ('solicitada','en_validacion','aprobada')`);}
  else if(f.estado==='finalizadas'){where.push(`si.estado IN ('entregada','cancelada')`);}
  else if(f.estado){where.push(`si.estado = $${i++}`);params.push(f.estado);}
@@ -70,7 +72,7 @@ export async function listarSolicitudesInsumos(f:FiltrosSolicitudes){
  return {filas:rows.map(r=>({...r,lineas:typeof r.lineas_json==='string'?JSON.parse(r.lineas_json):r.lineas_json,lineas_json:undefined})),total,pagina,paginas};
 }
 export async function obtenerSolicitudInsumo(id:string){
- await exigirAcceso();
+ const actor=await exigirAcceso();
  if(!esIdSede(id))return null;
  const db=obtenerBaseDatos();
  const {rows}=await db.query<SolicitudInsumo & {lineas_json:string}>(`
@@ -94,31 +96,35 @@ export async function obtenerSolicitudInsumo(id:string){
     WHERE d.solicitud_id=si.id),'[]'::jsonb) AS lineas_json
   FROM public.solicitudes_insumos si
   JOIN public.sedes sd ON sd.id=si.sede_id
-  WHERE si.id=$1::uuid`,[id]);
+  WHERE si.id=$1::uuid AND ($2::boolean OR si.sede_id=$3::uuid)`,[id,!requiereSede(actor.rol),actor.sedeId]);
  if(!rows[0])return null;
  const r=rows[0];
  return {...r,lineas:typeof r.lineas_json==='string'?JSON.parse(r.lineas_json):r.lineas_json,lineas_json:undefined};
 }
 export async function crearSolicitudInsumo(sedeId:string,solicitanteCorreo:string,lineas:{producto_id:string;cantidad:number}[],datos?:{nombre?:string;run?:string;cargo?:string;telefono?:string;modalidad?:string;motivo?:string}){
- await exigirAcceso();
+ const actor=await exigirAcceso();
+ if(!puedeGestionarDependencias(actor.rol)||actor.email!==solicitanteCorreo||requiereSede(actor.rol)&&actor.sedeId!==sedeId)throw new Error('No tienes permiso para crear esta solicitud.');
  const db=obtenerBaseDatos();
  const r=await db.query<{id:string}>(`SELECT public.crear_solicitud_insumos($1,$2::uuid,$3::jsonb,$4::jsonb) AS id`,[solicitanteCorreo,sedeId,JSON.stringify(lineas),JSON.stringify(datos||{})]);
  return r.rows[0].id;
 }
 export async function validarSolicitudInsumo(actor:string,solicitud:string,observacion:string){
- await exigirAdministrador();
+ const autenticado=await exigirAdministrador();
+ if(actor!==autenticado.email)throw new Error('Actor inválido.');
  const db=obtenerBaseDatos();
  const r=await db.query<{r:JSON}>(`SELECT public.validar_solicitud_insumos($1,$2,$3) AS r`,[actor,solicitud,observacion||'']);
  return r.rows[0].r;
 }
 export async function aprobarSolicitudInsumo(actor:string,solicitud:string,datos:{lineas:{producto_id:string;cantidad_aprobada:number;motivo_reduccion:string}[];motivo:string}){
- await exigirAdministrador();
+ const autenticado=await exigirAdministrador();
+ if(actor!==autenticado.email)throw new Error('Actor inválido.');
  const db=obtenerBaseDatos();
  const r=await db.query<{r:JSON}>(`SELECT public.aprobar_solicitud_insumos($1,$2,$3::jsonb) AS r`,[actor,solicitud,JSON.stringify(datos)]);
  return r.rows[0].r;
 }
 export async function entregarSolicitudInsumo(actor:string,solicitud:string,datos:{receptor:string;responsable_ti:string;fecha_entrega:string;observaciones:string;lineas:{producto_id:string;cantidad_entregada:number}[];acta_id?:string|null}){
- await exigirAdministrador();
+ const autenticado=await exigirAdministrador();
+ if(actor!==autenticado.email)throw new Error('Actor inválido.');
  const db=obtenerBaseDatos();
  const r=await db.query<{r:JSON}>(`SELECT public.entregar_solicitud_insumos($1,$2,$3::jsonb) AS r`,[actor,solicitud,JSON.stringify(datos)]);
  return r.rows[0].r;
@@ -129,10 +135,12 @@ export async function entregarSolicitudInsumoConActa(solicitud:string,datos:{rec
  if(!esIdSede(solicitud)) throw new Error('Solicitud inválida.');
  const pool=obtenerBaseDatos();
  const db=await pool.connect();
- try{ await db.query('ROLLBACK'); }catch{}
  try{
   await db.query('BEGIN');
-  const actaId=randomUUID();
+  const entrega=(await db.query<{r:{entrega_id:string}}>('SELECT public.entregar_solicitud_insumos($1,$2::uuid,$3::jsonb) AS r',[actor.email,solicitud,JSON.stringify(datos)])).rows[0].r;
+  const actual=(await db.query<{acta_id:string|null}>('SELECT acta_id FROM public.solicitudes_insumos WHERE id=$1::uuid',[solicitud])).rows[0];
+  if(!actual)throw new Error('Solicitud no disponible.');
+  const actaId=actual.acta_id??solicitud;
   const metadata={
    entregaNombre: datos.responsable_ti || actor.email,
    entregaRun: datos.entregaRun || '',
@@ -156,42 +164,25 @@ export async function entregarSolicitudInsumoConActa(solicitud:string,datos:{rec
    const pdf=await generarPdfActa(prep.datos);
    await db.query(`SELECT public.completar_pdf_acta_acceso($1,$2::uuid,$3::bytea)`,[actor.email,prep.id,pdf]);
   }
-  const entrega=(await db.query<{r:{entrega_id?:string}}>(`SELECT public.entregar_solicitud_insumos($1,$2::uuid,$3::jsonb) AS r`,[actor.email,solicitud,JSON.stringify({...datos,acta_id:prep.id})])).rows[0].r;
-  if(entrega?.entrega_id){
-   try{ await db.query(`SELECT public.vincular_acta_entrega_insumo_acceso($1,$2::uuid,$3::uuid)`,[actor.email, prep.id, entrega.entrega_id]); }catch{}
-  }
+  await db.query('SELECT public.vincular_acta_entrega_insumo_acceso($1,$2::uuid,$3::uuid)',[actor.email,prep.id,entrega.entrega_id]);
   await db.query('COMMIT');
   return {entrega, actaId: prep.id};
  }catch(e){ try{ await db.query('ROLLBACK'); }catch{} throw e; }
  finally{ db.release(); }
 }
 export async function cancelarSolicitudInsumo(actor:string,solicitud:string,motivo:string){
- await exigirAdministrador();
+ const autenticado=await exigirAdministrador();
+ if(actor!==autenticado.email)throw new Error('Actor inválido.');
  await obtenerBaseDatos().query(`SELECT public.cancelar_solicitud_insumos($1,$2,$3)`,[actor,solicitud,motivo]);
 }
 
-export async function guardarProductoInsumo(datos:{id?:string;codigo:string;nombre:string;categoria:string;unidad:string;activo:boolean}){
- await exigirAdministrador();
- const db=obtenerBaseDatos();
- const id=datos.id&&esIdSede(datos.id)?datos.id:null;
- if(id){
-  await db.query(`UPDATE public.catalogo_insumos SET codigo=$2,nombre=$3,categoria=$4,unidad=$5,activo=$6,actualizado_en=CURRENT_TIMESTAMP WHERE id=$1::uuid`,
-   [id,datos.codigo,datos.nombre,datos.categoria,datos.unidad,datos.activo]);
-  await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,0,0) ON CONFLICT (producto_id) DO NOTHING`,[id]);
-  return id;
- }
- const r=await db.query<{id:string}>(`INSERT INTO public.catalogo_insumos(codigo,nombre,categoria,unidad,activo) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
-  [datos.codigo,datos.nombre,datos.categoria,datos.unidad,datos.activo]);
- const nuevo=r.rows[0].id;
- await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,0,0) ON CONFLICT (producto_id) DO NOTHING`,[nuevo]);
- return nuevo;
+export async function guardarProductoInsumo(datos:{id?:string;codigo:string;nombre:string;categoria:string;unidad:string;activo:boolean;version?:number},solicitud:string=randomUUID()){
+ const actor=await exigirAdministrador();
+ const {rows}=await obtenerBaseDatos().query<{id:string}>('SELECT public.guardar_producto_insumo_acceso($1,$2::uuid,$3::jsonb) AS id',[actor.email,solicitud,JSON.stringify(datos)]);
+ return rows[0].id;
 }
-
-export async function ingresarStockInsumo(productoId:string,cantidad:number){
- await exigirAdministrador();
- if(!esIdSede(productoId)) throw new Error('Producto inválido.');
- if(!Number.isInteger(cantidad)||cantidad<=0||cantidad>100000) throw new Error('Cantidad de ingreso inválida.');
- const db=obtenerBaseDatos();
- await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,$2,0)
-  ON CONFLICT (producto_id) DO UPDATE SET existencia=stock_insumos.existencia+EXCLUDED.existencia, actualizado_en=CURRENT_TIMESTAMP`,[productoId,cantidad]);
+export async function ingresarStockInsumo(productoId:string,cantidad:number,solicitud:string=randomUUID()){
+ const actor=await exigirAdministrador();
+ if(!esIdSede(productoId)||!Number.isInteger(cantidad)||cantidad<1||cantidad>100000)throw new Error('Producto o cantidad inválidos.');
+ await obtenerBaseDatos().query('SELECT public.ingresar_stock_insumo_acceso($1,$2::uuid,$3::uuid,$4)',[actor.email,solicitud,productoId,cantidad]);
 }

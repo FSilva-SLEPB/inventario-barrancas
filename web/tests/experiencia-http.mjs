@@ -44,13 +44,6 @@ try{
  const modelo=await leerModeloDatos(app);assert.equal(modelo.tablas.find(t=>t.nombre==='equipos').registros,String((await db.query('SELECT count(*) FROM public.equipos')).rows[0].count));assert.equal(modelo.relaciones.find(r=>r.origen==='directorio_sedes'&&r.destino==='sedes').unica,true);assert.equal(modelo.relaciones.find(r=>r.origen==='equipos'&&r.destino==='sedes').unica,false);assert.ok(!modelo.relaciones.some(r=>r.origen==='equipos'&&r.destino==='dependencias'));pruebas++;
  const documento=await readFile('../docs/modelo-entidad-relacion.md','utf8');
  const mer=modeloMermaid(modelo);
- if(!documento.includes(mer)){
-  const i=documento.indexOf('```mermaid'); const j=documento.indexOf('```',i+10);
-  const dmer=i>=0&&j>i?documento.slice(i+10,j).trim():'';
-  console.error('---DIFF2---'); console.error('len_doc',dmer.length,'len_mer',mer.length,'eq',dmer===mer);
-  for(let k=0;k<Math.max(dmer.length,mer.length);k++){ if(dmer[k]!==mer[k]){ console.error('at',k); console.error('D:',JSON.stringify(dmer.slice(Math.max(0,k-60),k+60))); console.error('M:',JSON.stringify(mer.slice(Math.max(0,k-60),k+60))); break; } }
-  console.error('---FULL---'); for(let o=0;o<mer.length;o+=3000) console.error(mer.slice(o,o+3000)); console.error('---END---');
- }
  assert.ok(documento.includes(mer));pruebas++;
  const paginaModelo=main(await(await pedir('/documentacion/modelo-datos',ca)).text());assert.ok(paginaModelo.includes('Modelo entidad relación'));assert.ok(paginaModelo.includes('Descargar diagrama SVG'));assert.ok(paginaModelo.includes('directorio_sedes'));pruebas++;
  console.log(`${pruebas} comprobaciones de experiencia: navegación y perfiles, acciones Ver/Editar, carga privada, búsqueda de equipos por sede, reporte mínimo y modelo real de tablas/relaciones.`);

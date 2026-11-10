@@ -3,13 +3,14 @@ export type EstadoSolicitudInsumo='solicitada'|'en_validacion'|'aprobada'|'entre
 export const ESTADOS_SOLICITUD_INSUMO:Record<EstadoSolicitudInsumo,string>={solicitada:'Solicitada',en_validacion:'En validación (TI)',aprobada:'Aprobada · reservada',entregada:'Entregada (contra entrega)',cancelada:'Cancelada'};
 export type LineaSolicitudValidada={producto_id:string;cantidad_solicitada:number;};
 export function validarLineasInsumos(lineas:unknown[]):LineaSolicitudValidada[]{
- if(!Array.isArray(lineas)||!lineas.length)throw new Error('Debe incluir al menos un producto en el carrito.');
+ if(!Array.isArray(lineas)||!lineas.length||lineas.length>100)throw new Error('Debe incluir al menos un producto en el carrito.');
  const resultado:LineaSolicitudValidada[]=[];const vistos=new Set<string>();
  for(const l of lineas){
+  if(!l||typeof l!=='object')throw new Error('Producto inválido en el carrito.');
   const x=l as Record<string,unknown>;const pid=typeof x.producto_id==='string'?x.producto_id:'';
   const cant=typeof x.cantidad==='number'?x.cantidad:typeof x.cantidad==='string'?Number(x.cantidad):NaN;
   if(!esIdSede(pid))throw new Error('Producto inválido en el carrito.');
-  if(!Number.isFinite(cant)||cant<1||cant>10000)throw new Error('Cantidad inválida para un producto.');
+  if(!Number.isInteger(cant)||cant<1||cant>10000)throw new Error('Cantidad inválida para un producto.');
   if(vistos.has(pid))throw new Error('Producto repetido en el carrito.');
   vistos.add(pid);resultado.push({producto_id:pid,cantidad_solicitada:cant});
  }
@@ -20,13 +21,13 @@ export function validarAprobacionInsumos(formulario:FormData):DatosAprobacionIns
  const lineasRaw=formulario.get('lineas');const motivoRaw=formulario.get('motivo');
  if(typeof lineasRaw!=='string')throw new Error('Faltan las líneas de aprobación.');
  let lineas:{producto_id:string;cantidad_aprobada:number;motivo_reduccion:string}[];try{lineas=JSON.parse(lineasRaw);}catch{throw new Error('Líneas de aprobación inválidas.');}
- if(!Array.isArray(lineas)||!lineas.length)throw new Error('Debe incluir al menos un producto aprobado.');
+ if(!Array.isArray(lineas)||!lineas.length||lineas.length>100)throw new Error('Debe incluir al menos un producto aprobado.');
  const motivo=typeof motivoRaw==='string'?motivoRaw.trim():'';
  for(const l of lineas){
   const pid=typeof l.producto_id==='string'?l.producto_id:'';
   const cant=typeof l.cantidad_aprobada==='number'?l.cantidad_aprobada:Number(l.cantidad_aprobada);
   if(!esIdSede(pid))throw new Error('Producto inválido en la aprobación.');
-  if(!Number.isFinite(cant)||cant<0||cant>10000)throw new Error('Cantidad aprobada inválida.');
+  if(!Number.isInteger(cant)||cant<0||cant>10000)throw new Error('Cantidad aprobada inválida.');
  }
  return {lineas,motivo};
 }
@@ -42,12 +43,12 @@ export function validarEntregaInsumos(formulario:FormData):DatosEntregaInsumo{
  if(!responsable_ti)throw new Error('Indica el responsable de TI.');
  if(!/^\d{4}-\d{2}-\d{2}$/.test(fecha_entrega)||!Number.isFinite(Date.parse(fecha_entrega)))throw new Error('Fecha de entrega inválida.');
  let lineas:{producto_id:string;cantidad_entregada:number}[];try{lineas=JSON.parse(lineasRaw);}catch{throw new Error('Líneas de entrega inválidas.');}
- if(!Array.isArray(lineas)||!lineas.length)throw new Error('Debe incluir al menos un producto entregado.');
+ if(!Array.isArray(lineas)||!lineas.length||lineas.length>100)throw new Error('Debe incluir al menos un producto entregado.');
  for(const l of lineas){
   const pid=typeof l.producto_id==='string'?l.producto_id:'';
   const cant=typeof l.cantidad_entregada==='number'?l.cantidad_entregada:Number(l.cantidad_entregada);
   if(!esIdSede(pid))throw new Error('Producto inválido en la entrega.');
-  if(!Number.isFinite(cant)||cant<1||cant>10000)throw new Error('Cantidad entregada inválida.');
+  if(!Number.isInteger(cant)||cant<1||cant>10000)throw new Error('Cantidad entregada inválida.');
  }
  const acta_id=typeof actaRaw==='string'&&esIdSede(actaRaw)?actaRaw:null;
  return {receptor,responsable_ti,fecha_entrega,observaciones,lineas,acta_id};

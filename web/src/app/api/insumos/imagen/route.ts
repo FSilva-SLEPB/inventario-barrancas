@@ -1,29 +1,26 @@
 import {NextResponse} from 'next/server';
-import {exigirAdministrador} from '@/lib/acceso';
-import {writeFile,mkdir} from 'fs/promises';
-import path from 'path';
-import {randomUUID} from 'crypto';
-
-const TIPOS:Record<string,string>={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
-const MAX=5*1024*1024;
-
+import {obtenerAcceso} from '@/lib/acceso';
+import {puedeAdministrar} from '@/lib/politica-acceso';
+import {obtenerBaseDatos} from '@/lib/db';
+import {esIdSede} from '@/lib/validacion-sedes';
+import {randomUUID} from 'node:crypto';
+import {formularioImagenLimitado,imagenInsumoValida,origenInsumoValido} from '@/lib/imagenes-insumos';
 export async function POST(req:Request){
-  try{
-    await exigirAdministrador();
-    const form=await req.formData();
-    const archivo=form.get('imagen');
-    if(!(archivo instanceof File)) return NextResponse.json({error:'Selecciona una imagen.'},{status:400});
-    if(archivo.size>MAX) return NextResponse.json({error:'La imagen supera 5 MB.'},{status:400});
-    const ext=TIPOS[archivo.type];
-    if(!ext) return NextResponse.json({error:'Formato no permitido. Usa JPG, PNG o WEBP.'},{status:400});
-    const nombre=`${Date.now()}-${randomUUID()}.${ext}`;
-    const dir=path.join(process.cwd(),'public','uploads','insumos');
-    await mkdir(dir,{recursive:true});
-    const buf=Buffer.from(await archivo.arrayBuffer());
-    await writeFile(path.join(dir,nombre),buf);
-    return NextResponse.json({url:`/uploads/insumos/${nombre}`});
-  }catch(e){
-    const msg=e instanceof Error?e.message:'No se pudo subir la imagen.';
-    return NextResponse.json({error:msg},{status:400});
-  }
+ const actor=await obtenerAcceso();if(!actor)return NextResponse.json({error:'Inicia sesión.'},{status:401});
+ if(!puedeAdministrar(actor.rol)||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
+ try{
+  const f=await formularioImagenLimitado(req),archivo=f.get('imagen');
+  if(f.getAll('imagen').length!==1||!(archivo instanceof File))return NextResponse.json({error:'Selecciona una imagen.'},{status:400});
+  const contenido=Buffer.from(await archivo.arrayBuffer());
+  if(!imagenInsumoValida(archivo.type,contenido))return NextResponse.json({error:'Usa una imagen JPG, PNG o WEBP válida, de hasta 5 MB.'},{status:400});
+  const id=randomUUID();await obtenerBaseDatos().query('SELECT public.guardar_foto_insumo_acceso($1,$2::uuid,$3,$4::bytea)',[actor.email,id,archivo.type,contenido]);
+  return NextResponse.json({url:'/api/insumos/imagen?id='+id},{headers:{'Cache-Control':'private, no-store'}});
+ }catch{return NextResponse.json({error:'No se pudo guardar la imagen. Revisa su tamaño y formato.'},{status:400});}
+}
+export async function GET(req:Request){
+ const actor=await obtenerAcceso();if(!actor)return new Response(null,{status:401});
+ const id=new URL(req.url).searchParams.get('id');if(typeof id!=='string'||!esIdSede(id))return new Response(null,{status:404});
+ const {rows}=await obtenerBaseDatos().query<{mime:string;contenido:Buffer}>('SELECT mime,contenido FROM public.imagenes_insumos WHERE id=$1::uuid',[id]);
+ if(!rows[0])return new Response(null,{status:404});
+ return new Response(new Uint8Array(rows[0].contenido),{headers:{'Content-Type':rows[0].mime,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'}});
 }

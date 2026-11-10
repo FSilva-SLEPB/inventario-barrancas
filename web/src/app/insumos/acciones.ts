@@ -3,6 +3,7 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import {randomUUID} from "node:crypto";
 import {revalidatePath} from "next/cache";
 import {redirect} from "next/navigation";
+import {esIdSede} from '@/lib/validacion-sedes';
 import {exigirAcceso,exigirAdministrador} from "@/lib/acceso";
 import {puedeGestionarDependencias,requiereSede} from "@/lib/politica-acceso";
 import {crearSolicitudInsumo,validarSolicitudInsumo,aprobarSolicitudInsumo,entregarSolicitudInsumoConActa,cancelarSolicitudInsumo} from "@/lib/insumos";
@@ -12,7 +13,7 @@ function relanzarRedirect(e:unknown){ if(e && typeof e==='object' && 'digest' in
 export async function guardarSolicitudInsumo(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
  const actor=await exigirAcceso();const revision=randomUUID();const valores:Record<string,string>={};const errores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores,errores});
- if(!puedeGestionarDependencias(actor.rol) && !requiereSede(actor.rol)) return fallo('No tienes permiso para crear solicitudes de insumos.');
+ if(!puedeGestionarDependencias(actor.rol)) return fallo('No tienes permiso para crear solicitudes de insumos.');
  const sedeIdVal=formulario.get('sede_id');const sedeId=typeof sedeIdVal==='string'?sedeIdVal:'';
  const lineasRawVal=formulario.get('lineas');const lineasRaw=typeof lineasRawVal==='string'?lineasRawVal:'';
  const datosRawVal=formulario.get('datos');const datosRaw=typeof datosRawVal==='string'?datosRawVal:'';
@@ -20,9 +21,12 @@ export async function guardarSolicitudInsumo(_anterior:EstadoSolicitud,formulari
  if(requiereSede(actor.rol) && actor.sedeId && sedeId!==actor.sedeId) return fallo('Solo puedes solicitar insumos para tu sede autorizada.');
  let lineas:{producto_id:string;cantidad:number}[];try{lineas=JSON.parse(lineasRaw);}catch{return fallo('Carrito inválido. Vuelve a armarlo.');}
  let datos:{nombre?:string;run?:string;cargo?:string;telefono?:string;modalidad?:string;motivo?:string}={};
- try{ if(datosRaw) datos=JSON.parse(datosRaw) as typeof datos; }catch{}
+ try{ if(datosRaw) datos=JSON.parse(datosRaw) as typeof datos; }catch{return fallo('Datos del solicitante inválidos.');}
+ if(!datos||typeof datos!=='object'||Array.isArray(datos))return fallo('Datos del solicitante inválidos.');
+ const solicitud=formulario.get('solicitud');if(typeof solicitud!=='string'||!esIdSede(solicitud)||formulario.getAll('solicitud').length!==1)return fallo('Vuelve a abrir la solicitud.');
+ Object.assign(datos,{solicitudId:solicitud});
  try{validarLineasInsumos(lineas);}catch(e){return fallo(e instanceof Error?e.message:'Carrito inválido.');}
- try{const id=await crearSolicitudInsumo(sedeId,actor.email,lineas,datos);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos?ver=${id}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo crear la solicitud.');}
+ try{const id=await crearSolicitudInsumo(sedeId,actor.email,lineas,datos);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos/seguimiento?ver=${id}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo crear la solicitud.');}
 }
 export async function validarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
  const actor=await exigirAdministrador();const revision=randomUUID();
@@ -30,7 +34,7 @@ export async function validarSolicitudInsumoAccion(_anterior:EstadoSolicitud,for
  const solicitudVal=formulario.get('solicitud');const solicitud=typeof solicitudVal==='string'?solicitudVal:'';
  const observacion=typeof formulario.get('observacion')==='string'?(formulario.get('observacion') as string).trim():'';
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(solicitud))return fallo('Solicitud inválida.');
- try{await validarSolicitudInsumo(actor.email,solicitud,observacion);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo validar la solicitud.');}
+ try{await validarSolicitudInsumo(actor.email,solicitud,observacion);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos/seguimiento?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo validar la solicitud.');}
 }
 function lineasAprobacionDesdeFormData(f:FormData):{producto_id:string;cantidad_aprobada:number;motivo_reduccion:string}[]{
  const resultado:{producto_id:string;cantidad_aprobada:number;motivo_reduccion:string}[]=[];const vistos=new Set<string>();
@@ -38,7 +42,7 @@ function lineasAprobacionDesdeFormData(f:FormData):{producto_id:string;cantidad_
   if(!k.startsWith('cant_aprobada_'))continue;const id=k.slice('cant_aprobada_'.length);if(vistos.has(id))continue;vistos.add(id);
   if(typeof v!=='string')continue;const cantidad=Number(v);const motivoVal=f.get(`motivo_redu_${id}`);const motivo=typeof motivoVal==='string'?motivoVal.trim():'';
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id))continue;
-  if(!Number.isFinite(cantidad)||cantidad<0||cantidad>10000)continue;
+  if(!Number.isInteger(cantidad)||cantidad<0||cantidad>10000)continue;
   resultado.push({producto_id:id,cantidad_aprobada:cantidad,motivo_reduccion:motivo});
  }
  return resultado;
@@ -49,7 +53,7 @@ function lineasEntregaDesdeFormData(f:FormData):{producto_id:string;cantidad_ent
   if(!k.startsWith('cant_entregada_'))continue;const id=k.slice('cant_entregada_'.length);if(vistos.has(id))continue;vistos.add(id);
   if(typeof v!=='string')continue;const cantidad=Number(v);
   if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id))continue;
-  if(!Number.isFinite(cantidad)||cantidad<1||cantidad>10000)continue;
+  if(!Number.isInteger(cantidad)||cantidad<1||cantidad>10000)continue;
   resultado.push({producto_id:id,cantidad_entregada:cantidad});
  }
  return resultado;
@@ -61,7 +65,7 @@ export async function aprobarSolicitudInsumoAccion(_anterior:EstadoSolicitud,for
  const motivoVal=formulario.get('motivo');const motivo=typeof motivoVal==='string'?motivoVal.trim():'';
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(solicitud))return fallo('Solicitud inválida.');
  const lineas=lineasAprobacionDesdeFormData(formulario);if(!lineas.length)return fallo('Debe incluir al menos un producto aprobado.');
- try{await aprobarSolicitudInsumo(actor.email,solicitud,{lineas,motivo});revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo aprobar la solicitud.');}
+ try{await aprobarSolicitudInsumo(actor.email,solicitud,{lineas,motivo});revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos/seguimiento?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo aprobar la solicitud.');}
 }
 export async function entregarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
  await exigirAdministrador();const revision=randomUUID();const valores:Record<string,string>={};const errores:Record<string,string>={};
@@ -82,7 +86,7 @@ export async function entregarSolicitudInsumoAccion(_anterior:EstadoSolicitud,fo
  try{
   const res=await entregarSolicitudInsumoConActa(solicitud,{receptor,responsable_ti,fecha_entrega,observaciones,recibeRun,recibeCargo,entregaCargo,lineas});
   revalidatePath('/insumos','layout');revalidatePath('/inventario/actas','layout');
-  redirect(`/inventario/actas/${res.actaId}`);
+  redirect(destinoConExito(`/inventario/actas/${res.actaId}`));
  }catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo entregar la solicitud ni generar el acta.');}
 }
 export async function cancelarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
@@ -92,5 +96,5 @@ export async function cancelarSolicitudInsumoAccion(_anterior:EstadoSolicitud,fo
  const motivoVal=formulario.get('motivo');const motivo=typeof motivoVal==='string'?motivoVal.trim():'';
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(solicitud))return fallo('Solicitud inválida.');
  if(!motivo)return fallo('Indica el motivo de la cancelación.');
- try{await cancelarSolicitudInsumo(actor.email,solicitud,motivo);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo cancelar la solicitud.');}
+ try{await cancelarSolicitudInsumo(actor.email,solicitud,motivo);revalidatePath('/insumos','layout');redirect(destinoConExito(`/insumos/historial?ver=${solicitud}&guardado=1`));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo cancelar la solicitud.');}
 }

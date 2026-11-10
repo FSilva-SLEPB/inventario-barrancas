@@ -1,4 +1,5 @@
 "use client";
+import ModalFicha from '@/components/modal-ficha';
 import {useMemo,useState} from "react";
 import {guardarSolicitudInsumo} from "@/app/insumos/acciones";
 import type {InsumoCatalogo} from "@/lib/insumos";
@@ -8,13 +9,13 @@ export type SolicitudFormProps={
  sedes:{id:string;nombre:string;rbd:string|null;direccion?:string|null;comuna?:string|null}[];
  catalogo:InsumoCatalogo[];
  actor:{email:string;sedeId:string|null;sedeNombre:string|null;sedeRbd:string|null};
- local:boolean;
+ local:boolean;solicitudId:string;
 };
 
 type Producto={id:string;codigo:string;nombre:string;categoria:string;unidad:string;foto_url:string|null};
 type ItemCarrito={id:string;n:number;p:Producto};
 
-export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudFormProps){
+export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId}:SolicitudFormProps){
  const sedeInicial=useMemo(()=>{
   if(actor.sedeId){const s=sedes.find(x=>x.id===actor.sedeId); if(s) return s;}
   if(sedes.length===1) return sedes[0];
@@ -50,12 +51,12 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
  const abrirModal=(p:Producto)=>{ setModalProd(p); setCantidadModal(String(carrito[p.id]||1)); };
  const agregarDesdeModal=()=>{
   if(!modalProd) return;
-  const cant=Math.max(1,Math.min(999,Math.floor(Number(cantidadModal)||1)));
+  const cant=Number(cantidadModal);if(!Number.isInteger(cant)||cant<1||cant>10000){void avisarError('Cantidad inválida','Indica una cantidad entera entre 1 y 10.000.');return;}
   setCarrito(c=>({...c,[modalProd.id]:cant}));
   setModalProd(null);
  };
  const guardarEdicion=(id:string)=>{
-  const cant=Math.max(1,Math.min(999,Math.floor(Number(editCantVal)||1)));
+  const cant=Number(editCantVal);if(!Number.isInteger(cant)||cant<1||cant>10000){void avisarError('Cantidad inválida','Indica una cantidad entera entre 1 y 10.000.');return;}
   setCarrito(c=>({...c,[id]:cant}));
   setEditCantId(null);
  };
@@ -67,7 +68,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
   if(!ok) return;
   setEnviando(true);
   const form=new FormData();
-  form.set('sede_id',sede.id);
+  form.set('sede_id',sede.id);form.set('solicitud',solicitudId);
   form.set('lineas',JSON.stringify(items.map(i=>({producto_id:i.id,cantidad:i.n}))));
   form.set('datos',JSON.stringify({nombre:solicitante.nombre,run:solicitante.run,cargo:solicitante.cargo,telefono:solicitante.telefono,modalidad:'',motivo:''}));
   try{
@@ -76,13 +77,13 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
   }catch(e:unknown){
    if(e && typeof e==='object' && 'digest' in e && String((e as {digest?:unknown}).digest).includes('NEXT_REDIRECT')){
     await avisarExito('Solicitud enviada','Tu solicitud fue enviada correctamente.');
-    window.location.assign('/insumos'); return;
+    window.location.assign('/insumos/seguimiento'); return;
    }
    await avisarError('No se pudo enviar', e instanceof Error ? e.message : 'Error inesperado.');
    setEnviando(false); return;
   }
   await avisarExito('Solicitud enviada','Tu solicitud fue enviada correctamente.');
-  window.location.assign('/insumos');
+  window.location.assign('/insumos/seguimiento');
  };
 
  const labelCampo=(label:string,value:string)=>(
@@ -165,7 +166,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
        <tr key={i.id}>
         <td style={{whiteSpace:'normal',overflowWrap:'anywhere'}}><div style={{fontWeight:600}}>{i.p.nombre}</div><div className="dato-secundario">{i.p.categoria||''}</div></td>
         <td style={{textAlign:'center'}}>
-         {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center',justifyContent:'center'}}><input type="number" min={1} max={999} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:64}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
+         {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center',justifyContent:'center'}}><input type="number" min={1} max={10000} step={1} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:64}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
         </td>
         <td style={{textAlign:'right'}}>
          <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}>✎</button>
@@ -181,20 +182,16 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    </div>
   </div>
 
-  {modalProd && <div role="dialog" aria-modal="true" aria-label={modalProd.nombre} onClick={()=>setModalProd(null)} style={{position:'fixed',inset:0,background:'rgba(15,23,42,.45)',display:'grid',placeItems:'center',padding:'1rem',zIndex:1000}}>
-   <div onClick={e=>e.stopPropagation()} className="panel-catalogos" style={{width:'min(520px,100%)',background:'#fff',borderRadius:16,padding:'1rem',display:'grid',gap:'.75rem'}}>
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'start',gap:'.5rem'}}>
-     <h3 style={{margin:0}}>{modalProd.nombre}</h3>
-     <button type="button" className="btn btn-outline-primary btn-sm" onClick={()=>setModalProd(null)} aria-label="Cerrar">✕</button>
-    </div>
+  {modalProd && <ModalFicha titulo={modalProd.nombre} alCerrar={()=>setModalProd(null)} editando>
+   <div style={{display:'grid',gap:'.75rem'}}>
     {modalProd.foto_url ? <img src={modalProd.foto_url} alt={modalProd.nombre} style={{width:'100%',maxHeight:260,objectFit:'contain',borderRadius:12,background:'#fff'}}/> : <div aria-hidden="true" style={{width:'100%',height:200,borderRadius:12,border:'1px dashed var(--color-borde-suave)',background:'var(--color-superficie-suave)',display:'grid',placeItems:'center',color:'var(--color-parrafo)'}}>Sin foto</div>}
     <div className="dato-secundario">{modalProd.categoria||'Sin categoría'}</div>
-    <div className="campo-catalogos" style={{maxWidth:160,margin:'0 auto',textAlign:'center'}}><label htmlFor="modal-cant">Cantidad</label><input id="modal-cant" type="number" min={1} max={999} value={cantidadModal} onChange={e=>setCantidadModal(e.target.value)} style={{width:120,margin:'0 auto',textAlign:'center'}}/></div>
+    <div className="campo-catalogos" style={{maxWidth:160,margin:'0 auto',textAlign:'center'}}><label htmlFor="modal-cant">Cantidad</label><input id="modal-cant" type="number" min={1} max={10000} step={1} value={cantidadModal} onChange={e=>setCantidadModal(e.target.value)} style={{width:120,margin:'0 auto',textAlign:'center'}}/></div>
     <div style={{display:'flex',justifyContent:'flex-end',gap:'.5rem'}}>
      <button type="button" className="btn btn-outline-primary" onClick={()=>setModalProd(null)}>Cancelar</button>
      <button type="button" className="btn btn-primary" onClick={agregarDesdeModal}>Agregar al carrito</button>
     </div>
    </div>
-  </div>}
+  </ModalFicha>}
  </section>;
 }

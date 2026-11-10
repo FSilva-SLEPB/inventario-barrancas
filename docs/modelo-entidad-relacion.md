@@ -67,6 +67,7 @@ erDiagram
     timestamp_with_time_zone creado_en
     timestamp_with_time_zone actualizado_en
     text foto_url
+    integer version
   }
   categorias_bienes {
     uuid id PK
@@ -153,8 +154,7 @@ erDiagram
     uuid lote_id FK
     uuid sede_id FK
     text sede_nombre
-    
-text sede_rbd
+    text sede_rbd
     text comuna
     date fecha_entrega
     text receptor_nombre
@@ -174,6 +174,8 @@ text sede_rbd
     uuid acta_id FK
     text observaciones
     timestamp_with_time_zone creado_en
+    jsonb solicitud_original
+    text actor
   }
   entregas_insumos_detalle {
     uuid id PK
@@ -251,6 +253,13 @@ text sede_rbd
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
+  imagenes_insumos {
+    uuid id PK
+    text mime
+    bytea contenido
+    text creado_por
+    timestamp_with_time_zone creado_en
+  }
   incidentes_robos {
     uuid id PK
     uuid sede_id FK
@@ -286,6 +295,16 @@ text sede_rbd
     jsonb datos
     timestamp_with_time_zone registrado_en
   }
+  insumos_historial {
+    uuid id PK
+    uuid producto_id FK
+    text actor
+    text accion
+    jsonb solicitud
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   movimientos_inventario {
     uuid id PK
     uuid equipo_id FK
@@ -298,8 +317,7 @@ text sede_rbd
     text actor
     text motivo
     jsonb solicitud
-    js
-onb antes
+    jsonb antes
     jsonb despues
     timestamp_with_time_zone registrado_en
   }
@@ -376,6 +394,8 @@ onb antes
     text solicitante_cargo
     text solicitante_telefono
     text modalidad_entrega
+    jsonb solicitud_original
+    jsonb solicitud_aprobacion
   }
   solicitudes_insumos_detalle {
     uuid id PK
@@ -417,8 +437,7 @@ onb antes
   solicitudes_insumos |o--o{ actas_documentos : "solicitud_insumo_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
   celulares |o--o{ cambios_estados_activo : "celular_id"
-  equipos |o--o{ cambios_estados_activo : "
-equipo_id"
+  equipos |o--o{ cambios_estados_activo : "equipo_id"
   sedes ||--o{ celulares : "sede_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
@@ -446,6 +465,7 @@ equipo_id"
   incidentes_robos ||--o{ incidentes_robos_equipos : "incidente_id"
   equipos |o--o{ incidentes_robos_historial : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_historial : "incidente_id"
+  catalogo_insumos |o--o{ insumos_historial : "producto_id"
   celulares |o--o{ movimientos_inventario : "celular_id"
   sedes |o--o{ movimientos_inventario : "destino_sede_id"
   equipos |o--o{ movimientos_inventario : "equipo_id"
@@ -496,9 +516,11 @@ equipo_id"
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
 | funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
 | funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
+| imagenes_insumos | Insumos | Fotografías de catálogo persistidas en PostgreSQL, con tipo, bytes y autor; incluidas en los respaldos. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
+| insumos_historial | Insumos | Historial de catálogo, fotos e ingresos de stock con actor, solicitud idempotente e instantáneas. |
 | movimientos_inventario | Movimientos | Asignaciones, devoluciones, préstamos y traspasos directos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
 | operaciones_inventario | Movimientos | Cambio con grupos devueltos y reemplazos, o traspaso entre sedes; ruta real directa educativa o vía Bodega TI, solicitud y procedencia inmutables. |
 | operaciones_inventario_detalle | Movimientos | Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos. |

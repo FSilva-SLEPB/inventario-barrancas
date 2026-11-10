@@ -35,7 +35,7 @@ async function comprobarFallo(contenedor){
  throw new Error('La imagen incompleta no rechazó la comprobación de salud como se esperaba.');
 }
 try{
- const principal=iniciar('',{},true),salud=await esperar(origen+'/api/salud',200);assert.deepEqual(await salud.json(),{estado:'ok'});
+ const principal=iniciar('',{REVISION_SIN_OAUTH:'1'},true),salud=await esperar(origen+'/api/salud',200);assert.deepEqual(await salud.json(),{estado:'ok'});
  const cmd=JSON.parse(docker(['inspect','--format','{{json .Config.Cmd}}',principal]).stdout);assert.deepEqual(cmd,['node','server.js']);
  docker(['exec',principal,'node','-e',"const fs=require('fs');if(process.getuid()!==1000)process.exit(1);let bloqueado=false;try{fs.writeFileSync('/app/escritura-no-permitida','prueba')}catch(e){bloqueado=['EROFS','EACCES'].includes(e.code)}if(!bloqueado)process.exit(1);fs.writeFileSync('/tmp/prueba-imagen','ok');fs.writeFileSync('/app/.next/cache/prueba-imagen','ok')"]);
  console.log('Imagen compilada: usuario no privilegiado, raíz de solo lectura, caché temporal y salud comprobados.');
@@ -43,7 +43,7 @@ try{
  const metadatos=docker(['exec',principal,'node','-e',"const fs=require('fs');const m=JSON.parse(fs.readFileSync('/app/.next/server/server-reference-manifest.json','utf8'));console.log(JSON.stringify({node:Object.fromEntries(Object.entries(m.node).map(([id,a])=>[id,{exportedName:a.exportedName,filename:a.filename}]))}))"]).stdout;
  const manifiesto=join(temporal,'acciones.json');await writeFile(manifiesto,metadatos,{mode:0o600});
  const entorno={...process.env,NEXTAUTH_URL:canonico,NEXTAUTH_SECRET:clave,GOOGLE_CLIENT_ID:'id-ficticio',GOOGLE_CLIENT_SECRET:'secreto-ficticio',ACCESO_HTTP_URL:origen,TEST_ACTION_MANIFEST:manifiesto};
- const archivos=['acceso','perfiles','equipos','entregas','directorio','directorio-completo','robos','experiencia','funcionarios','produccion','seguridad','directorios-separados','celulares','movimientos-inventario','actas','actas-historicas','operacion-acta','prestamos','operaciones-inventario','estados-inventario'];
+ const archivos=['acceso','perfiles','equipos','entregas','directorio','directorio-completo','robos','experiencia','funcionarios','produccion','seguridad','directorios-separados','celulares','movimientos-inventario','actas','actas-historicas','operacion-acta','prestamos','operaciones-inventario','estados-inventario','insumos'];
  for(const a of archivos){const p=spawn(process.execPath,['tests/'+a+'-http.mjs'],{cwd:raiz+'web',env:entorno,stdio:'inherit'});const codigo=await new Promise(r=>p.once('exit',r));assert.equal(codigo,0,'Falló prueba de imagen: '+a);}
  retirar(principal);
  const sinConfig=iniciar('-config',{NEXTAUTH_URL:'http://ejemplo-no-permitido.invalid'});await comprobarFallo(sinConfig);retirar(sinConfig);
