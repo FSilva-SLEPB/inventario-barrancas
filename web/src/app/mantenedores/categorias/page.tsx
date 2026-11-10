@@ -19,7 +19,7 @@ export const runtime = "nodejs";
 export default async function Catalogos({
   searchParams,
 }: {
-  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[]; nuevo?: string | string[] }>;
 }) {
   await connection();
   const acceso = await exigirAcceso();
@@ -30,6 +30,7 @@ export default async function Catalogos({
   const categoriaEditar = categorias.find(
     (categoria) => categoria.id === parametros.editar,
   );
+  const nuevo = edicionHabilitada && parametros.nuevo === "1";
 
   const consulta = typeof parametros.ver === 'string' ? categorias.find(x=>x.id===parametros.ver) : undefined;
 
@@ -39,11 +40,13 @@ export default async function Catalogos({
       <header>
         <p>SLEP Barrancas</p>
         <h1>Categorías de bienes</h1>
-        <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
       </header>
 
       {parametros.guardado==="1"&&<p role="status">Cambios guardados. La edición está cerrada.</p>}
-      {edicionHabilitada&&<p><Link href="/mantenedores/categorias#formulario-categoria">Registrar categoría</Link></p>}
+      <div className="acciones-catalogos">
+        <Link className="btn btn-outline-primary btn-sm" href="/mantenedores">Volver a Mantenedores</Link>
+        {edicionHabilitada && <Link className="btn btn-primary btn-sm" scroll={false} href="/mantenedores/categorias?nuevo=1">Registrar categoría</Link>}
+      </div>
       <section aria-labelledby="titulo-categorias">
         <h2 id="titulo-categorias">Listado</h2>
         <p>Administra las categorías que usarás para registrar los bienes.</p>
@@ -73,8 +76,8 @@ export default async function Catalogos({
         )}
       </section>
 
-      {edicionHabilitada && parametros.guardado!=="1" && (
-        <VentanaEdicion activa={Boolean(categoriaEditar)} titulo="Editar categoría" cerrarHref="/mantenedores/categorias"><section
+      {edicionHabilitada && parametros.guardado!=="1" && (nuevo || categoriaEditar || parametros.editar) && (
+        <VentanaEdicion activa={nuevo || Boolean(categoriaEditar)} titulo={nuevo ? "Registrar categoría" : "Editar categoría"} cerrarHref="/mantenedores/categorias"><section
           id="formulario-categoria"
           className="panel-catalogos"
           aria-labelledby="titulo-formulario"

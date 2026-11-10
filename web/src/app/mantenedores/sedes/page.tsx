@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 type Propiedades = {
-  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[] }>;
+  searchParams: Promise<{ ver?: string | string[]; editar?: string | string[]; guardado?: string | string[]; nuevo?: string | string[] }>;
 };
 
 export default async function Sedes({ searchParams }: Propiedades) {
@@ -35,6 +35,7 @@ export default async function Sedes({ searchParams }: Propiedades) {
     ? parametros.editar.toLowerCase() : null;
   const seleccionada = id ? sedes.find((sede) => sede.id === id) : undefined;
   const edicionInvalida = pideEdicion && !seleccionada;
+  const nuevo = puedeEditar && parametros.nuevo === "1";
 
   const consulta = typeof parametros.ver === 'string' ? sedes.find(x=>x.id===parametros.ver) : undefined;
 
@@ -49,10 +50,13 @@ export default async function Sedes({ searchParams }: Propiedades) {
         </p>
       </header>
 
-      <p><Link href="/mantenedores">Volver a Mantenedores</Link></p>
-      {puedeEditar ? (
-        <p><Link href="/mantenedores/sedes#formulario-sede">Registrar una sede</Link></p>
-      ) : <p>Vista de consulta.</p>}
+      <div className="acciones-catalogos">
+        <Link className="btn btn-outline-primary btn-sm" href="/mantenedores">Volver a Mantenedores</Link>
+        {puedeEditar && (
+          <Link className="btn btn-primary btn-sm" scroll={false} href="/mantenedores/sedes?nuevo=1">Registrar una sede</Link>
+        )}
+      </div>
+      {!puedeEditar && <p>Vista de consulta.</p>}
 
       {edicionInvalida && puedeEditar && (
         <p role="alert" className="error-catalogos">
@@ -97,8 +101,8 @@ export default async function Sedes({ searchParams }: Propiedades) {
         )}
       </section>
 
-      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (
-        <VentanaEdicion activa={Boolean(seleccionada)} titulo="Editar sede" cerrarHref="/mantenedores/sedes"><section id="formulario-sede" className="panel-catalogos" aria-labelledby="titulo-formulario-sede">
+      {puedeEditar && !edicionInvalida && parametros.guardado!=="1" && (nuevo || seleccionada) && (
+        <VentanaEdicion activa={nuevo || Boolean(seleccionada)} titulo={nuevo ? "Registrar sede" : "Editar sede"} cerrarHref="/mantenedores/sedes"><section id="formulario-sede" className="panel-catalogos" aria-labelledby="titulo-formulario-sede">
           <h2 id="titulo-formulario-sede">{seleccionada ? "Editar sede" : "Registrar sede"}</h2>
           <p>El tipo y el nombre son obligatorios. El RBD y los datos de contacto son opcionales.</p>
           <FormularioSede key={seleccionada?.id ?? "nueva"} sede={seleccionada} />
