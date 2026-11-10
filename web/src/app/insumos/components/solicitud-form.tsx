@@ -95,8 +95,8 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
    <p className="descripcion-pagina" style={{margin:0}}>Completa los datos, selecciona insumos por separado y envía la solicitud.</p>
   </header>
 
-  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'1rem',alignItems:'start'}}>
-   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
+  <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'1rem',alignItems:'stretch'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
      <h2 style={{margin:0,fontSize:'1.05rem'}}>Establecimiento</h2>
      <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar establecimiento" title="Editar establecimiento" onClick={()=>setEditSede(v=>!v)}>✎</button>
@@ -116,7 +116,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
     </div>
    </div>
 
-   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
+   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
      <h2 style={{margin:0,fontSize:'1.05rem'}}>Datos del solicitante</h2>
      <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar datos del solicitante" title="Editar datos del solicitante" onClick={()=>setEditSolicitante(v=>!v)}>✎</button>
@@ -139,7 +139,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local}:SolicitudForm
 
   <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem'}}>
    <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
-   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'.75rem'}}>
+   <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:'.75rem',maxWidth:720}}>
     <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
     <div className="campo-catalogos"><label htmlFor="filtro-categoria">Filtrar por categoría</label><select id="filtro-categoria" value={filtroCategoria} onChange={e=>setFiltroCategoria(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
    </div>
