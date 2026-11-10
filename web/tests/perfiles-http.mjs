@@ -72,12 +72,12 @@ try {
     comprobaciones++;
   }
   for (const tipo of ['gestion','general']) {
-    const html = await (await pedir('/mantenedores/sedes',cookies[tipo])).text();
+    const html = await (await pedir('/mantenedores/sedes?nuevo=1',cookies[tipo])).text();
     for (const prefijo of ['Escuela A ','Jardin B ','Central ']) assert.ok(html.includes(prefijo+sufijo));
     assert.equal(html.includes('id="formulario-sede"'),tipo==='gestion');
     comprobaciones++;
   }
-  const paginaGestion = await (await pedir('/mantenedores/usuarios',cookies.gestion)).text();
+  const paginaGestion = await (await pedir('/mantenedores/usuarios?nuevo=1',cookies.gestion)).text();
   const accionUsuario = accion(paginaGestion);
   assert.ok(!paginaGestion.includes('value="administrador"'));
   assert.ok(!paginaGestion.includes('value="administrador_gestion"'));
@@ -106,7 +106,7 @@ try {
   await assert.rejects(app.query('SELECT public.guardar_usuario_acceso($1,$2,$3,$4,$5,$6)',
     [correos.gestion,correos.gestion2,'','administrador',true,0]),e=>e.code==='P1004');
   comprobaciones++;
-  const paginaDependencias = await (await pedir('/mantenedores/dependencias',cookies.encargado)).text();
+  const paginaDependencias = await (await pedir('/mantenedores/dependencias?nuevo=1',cookies.encargado)).text();
   const accionDep = accion(paginaDependencias);
   const valoresDep = {id:'',sedeId:ids[0],nombre:'Nueva sala '+sufijo,activo:'true'};
   await guardar('/mantenedores/dependencias',accionDep,valoresDep,cookies.encargado);
@@ -124,7 +124,7 @@ try {
     assert.equal(await contar('Solo lectura '+sufijo),0);comprobaciones++;
   }
   // Reutilizar una acción global tampoco deja escribir al encargado.
-  const accionSede = accion(await (await pedir('/mantenedores/sedes',admin)).text());
+  const accionSede = accion(await (await pedir('/mantenedores/sedes?nuevo=1',admin)).text());
   const r = await guardar('/mantenedores/sedes',accionSede,{},cookies.encargado);
   assert.equal(new URL(r.headers.get('location'),origen).pathname,'/sin-permiso');comprobaciones++;
   // Cambio de sede en la base: la misma cookie deja de ver la anterior inmediatamente.

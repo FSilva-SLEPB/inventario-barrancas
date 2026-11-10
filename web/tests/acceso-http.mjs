@@ -86,17 +86,19 @@ try {
   } finally {
     await Promise.all(conexiones.map(c => c.end()));
   }
+  // El panel de edición se abre como ventana con ?nuevo=1; la cuenta de
+  // consulta no lo obtiene ni siquiera pidiéndolo de forma explícita.
   for (const ruta of ["/mantenedores/categorias", "/mantenedores/sedes", "/mantenedores/dependencias"]) {
-    const respuestaAdmin = await pedir(ruta, admin);
+    const respuestaAdmin = await pedir(`${ruta}?nuevo=1`, admin);
     assert.equal(respuestaAdmin.status, 200);
     const htmlAdmin = await respuestaAdmin.text();
     if (ruta.endsWith("/categorias")) formularioCategoria = htmlAdmin;
     assert.ok(/id="formulario-(categoria|sede|dependencia)"/.test(htmlAdmin),
-      `El administrador debe tener el panel de edición: ${ruta}`);
-    const respuestaConsulta = await pedir(ruta, consulta);
+      `El administrador debe tener el panel de edición: ${ruta}?nuevo=1`);
+    const respuestaConsulta = await pedir(`${ruta}?nuevo=1`, consulta);
     assert.equal(respuestaConsulta.status, 200);
     assert.ok(!/id="formulario-(categoria|sede|dependencia)"/.test(await respuestaConsulta.text()),
-      `Consulta no debe tener panel de edición: ${ruta}`);
+      `Consulta no debe tener panel de edición: ${ruta}?nuevo=1`);
     verificaciones += 2;
   }
   // Reutilizar la referencia real de una acción obtenida por un administrador
@@ -149,7 +151,7 @@ try {
     assert.equal(denegado.headers.get('location'), destino);
     verificaciones++;
   }
-  const pantallaUsuarios = await pedir('/mantenedores/usuarios', admin);
+  const pantallaUsuarios = await pedir('/mantenedores/usuarios?nuevo=1', admin);
   assert.equal(pantallaUsuarios.status, 200);
   const accionUsuario = camposAccion(await pantallaUsuarios.text());
   const valores = { correo: usuarioGestion, nombre: 'Persona ficticia', rol: 'consulta', activo: 'true', version: '0', sedeId: '' };
