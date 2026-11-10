@@ -167,3 +167,29 @@ export async function cancelarSolicitudInsumo(actor:string,solicitud:string,moti
  await exigirAdministrador();
  await obtenerBaseDatos().query(`SELECT public.cancelar_solicitud_insumos($1,$2,$3)`,[actor,solicitud,motivo]);
 }
+
+export async function guardarProductoInsumo(datos:{id?:string;codigo:string;nombre:string;categoria:string;unidad:string;activo:boolean}){
+ await exigirAdministrador();
+ const db=obtenerBaseDatos();
+ const id=datos.id&&esIdSede(datos.id)?datos.id:null;
+ if(id){
+  await db.query(`UPDATE public.catalogo_insumos SET codigo=$2,nombre=$3,categoria=$4,unidad=$5,activo=$6,actualizado_en=CURRENT_TIMESTAMP WHERE id=$1::uuid`,
+   [id,datos.codigo,datos.nombre,datos.categoria,datos.unidad,datos.activo]);
+  await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,0,0) ON CONFLICT (producto_id) DO NOTHING`,[id]);
+  return id;
+ }
+ const r=await db.query<{id:string}>(`INSERT INTO public.catalogo_insumos(codigo,nombre,categoria,unidad,activo) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+  [datos.codigo,datos.nombre,datos.categoria,datos.unidad,datos.activo]);
+ const nuevo=r.rows[0].id;
+ await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,0,0) ON CONFLICT (producto_id) DO NOTHING`,[nuevo]);
+ return nuevo;
+}
+
+export async function ingresarStockInsumo(productoId:string,cantidad:number){
+ await exigirAdministrador();
+ if(!esIdSede(productoId)) throw new Error('Producto inválido.');
+ if(!Number.isInteger(cantidad)||cantidad<=0||cantidad>100000) throw new Error('Cantidad de ingreso inválida.');
+ const db=obtenerBaseDatos();
+ await db.query(`INSERT INTO public.stock_insumos(producto_id,existencia,reservado) VALUES ($1::uuid,$2,0)
+  ON CONFLICT (producto_id) DO UPDATE SET existencia=stock_insumos.existencia+EXCLUDED.existencia, actualizado_en=CURRENT_TIMESTAMP`,[productoId,cantidad]);
+}
