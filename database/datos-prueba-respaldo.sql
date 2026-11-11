@@ -200,4 +200,10 @@ DO $gestor_ci$ BEGIN
   PERFORM public.guardar_usuario_acceso('felipe.silva@slepb.gob.cl','ci-gestor-recuperacion@slepb.gob.cl','Gestor ficticio de recuperación','gestor_insumos',true,0,NULL);
  END IF;
 END;$gestor_ci$;
+DO $fotos_sedes_ci$ BEGIN
+ IF to_regclass('public.fotografias_sedes') IS NOT NULL THEN
+  INSERT INTO public.sedes(id,tipo,nombre,activo) VALUES('be700000-0000-4000-8000-000000000001','establecimiento','Sede ficticia para fotografía de recuperación',true);
+  PERFORM public.guardar_fotografia_sede_acceso('felipe.silva@slepb.gob.cl','be700000-0000-4000-8000-000000000002','be700000-0000-4000-8000-000000000001',0,'image/png',decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jE1sAAAAASUVORK5CYII=','base64'));
+ END IF;
+END;$fotos_sedes_ci$;
 COMMIT;

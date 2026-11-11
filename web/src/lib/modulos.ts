@@ -28,7 +28,7 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
  ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
   ...(puedeSolicitarInsumos(rol)?[
    {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'}]:[]),
-   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:puedeGestionarInsumos(rol)?'Validar solicitudes, aprobar cantidades y confirmar entregas.':'Revisar el estado y avance de las solicitudes.',icono:'SG'},
+   {href:'/insumos/seguimiento',titulo:puedeGestionarInsumos(rol)?'Gestor de insumos':'Seguimiento de insumos',descripcion:puedeGestionarInsumos(rol)?'Validar solicitudes, aprobar cantidades y confirmar entregas.':'Revisar el estado y avance de las solicitudes.',icono:'SG'},
    {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consultar el historial de solicitudes realizadas.',icono:'HI'},
  ]}];
  return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'||m.id==='mantenedores'):modulos;

@@ -23,7 +23,7 @@ Bodega TI, robos o préstamos. Los dos administradores mantienen sus permisos.
 La autorización se comprueba también en servidor, SQL y peticiones directas.
 
 El menú y su Inicio muestran Solicitudes de insumos y Mantenedores. Solicitudes
-contiene Solicitud, Seguimiento e Historial. El catálogo aparece únicamente en
+contiene Solicitud, Gestor de insumos (Seguimiento para consultas) e Historial. El catálogo aparece únicamente en
 Mantenedores, también para el gestor: conserva su pantalla canónica y este perfil
 no ve ni puede abrir los otros mantenedores. Esta corrección evita duplicar el acceso.
 El Auditor y Consulta de establecimiento ven Seguimiento e Historial según su
@@ -32,7 +32,7 @@ alcance, sin enlace a crear solicitudes ni botones de aprobación o entrega.
 ## Validar, aprobar y entregar
 
 1. El solicitante arma su carrito y envía. Queda **Solicitada**, sin reservar stock.
-2. En **Seguimiento de insumos**, el gestor abre el icono **Validar**. Revisa sede,
+2. En **Gestor de insumos**, el gestor abre el icono **Validar**. Revisa sede,
    solicitante y productos; puede dejar una observación. **Pasar a aprobación**
    registra quién revisó y cambia a **En validación**.
 3. El icono **Aprobar** permite revisar las cantidades solicitadas y disponibles.
@@ -88,3 +88,15 @@ Para habilitar a una persona como gestor: un administrador entra en Mantenedores
 → Usuarios y perfiles, registra o edita su cuenta institucional, elige Gestor de
 insumos y guarda. El perfil no se asigna automáticamente a ninguna cuenta. Estos
 ajustes de Inicio y navegación no agregan migraciones ni cambian perfiles existentes.
+
+## Acceso visible al gestor
+
+Los dos administradores y el perfil Gestor de insumos ven una tarjeta **Gestor de
+insumos** en Inicio y una entrada con ese nombre dentro de Solicitudes de insumos.
+Abre `/insumos/seguimiento`, cuya pantalla de gestión también muestra ese título.
+Es el mismo flujo de validar, aprobar y entregar; no se duplica la operación.
+Las cuentas sin facultades de gestión mantienen **Seguimiento de insumos**.
+La gestión no requiere cambiar un perfil administrador a Gestor de insumos.
+
+El título de la identificación local ahora es **Datos del establecimiento**, con
+[espacio para fotografía persistente](fotografias-establecimientos.md).
