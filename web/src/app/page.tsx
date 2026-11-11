@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {modulosSistema} from "@/lib/modulos";
+import {URL_TICKETS} from "@/lib/enlaces-institucionales";
+import {modulosSistema,type AccesoModulo} from "@/lib/modulos";
+import {requiereSede} from '@/lib/politica-acceso';
+import {listarSedes} from '@/lib/sedes';
+import IdentificacionSede from '@/components/identificacion-sede';
 import AccesosModulo from "@/components/accesos-modulo";
 import { obtenerAcceso, obtenerSesion } from "@/lib/acceso";
 
@@ -59,13 +63,16 @@ export default async function Home() {
     </section>
   </main>;
 
-  const accesosVisibles = modulosSistema(acceso.rol).map(m=>({href:m.href,titulo:m.titulo,descripcion:m.descripcion,icono:({inventario:'INV',directorio:'DIR',solicitudes:'IN',mantenedores:'ADM'})[m.id]}));
+  const sede=requiereSede(acceso.rol)?(await listarSedes()).find(s=>s.id===acceso.sedeId):null;
+  const accesosVisibles:AccesoModulo[] = modulosSistema(acceso.rol).map(m=>({href:m.href,titulo:m.titulo,descripcion:m.descripcion,icono:({inventario:'INV',directorio:'DIR',solicitudes:'IN',mantenedores:'ADM'})[m.id]}));
+  if(requiereSede(acceso.rol))accesosVisibles.push({href:URL_TICKETS,titulo:'Sistema de tickets',descripcion:'Solicita soporte y consulta tus requerimientos en la mesa de ayuda TI.',icono:'ST',externo:true});
   return (
     <main>
       <header>
         <h1>Inicio</h1>
         <p className="descripcion-pagina">Sistema Unidad TIC · Gestión de inventario, solicitudes y servicios para la comunidad educativa del SLEP Barrancas.</p>
       </header>
+      {sede&&<IdentificacionSede sede={sede}/>}
       <AccesosModulo id="titulo-accesos" titulo="Accesos principales" accesos={accesosVisibles}/>
     </main>
   );
