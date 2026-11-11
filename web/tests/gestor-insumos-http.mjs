@@ -77,8 +77,13 @@ try{
   const r=await post('/insumos/seguimiento',f,cg);assert.equal(r.status,303);acta=/\/actas\/([a-f0-9-]{36})/.exec(r.headers.get('location'))?.[1];assert.ok(acta);assert.match(r.headers.get('location'),/volver=/);assert.deepEqual(await stock(producto),{existencia:8,reservado:0});assert.equal((await solicitud(id)).estado,'entregada');
   const original=(await db.query('SELECT pdf,actor FROM public.actas_documentos WHERE id=$1',[acta])).rows[0];assert.equal(original.actor,gestor);const pdf=Buffer.from(await(await pedir('/inventario/actas/'+acta+'/pdf',cg)).arrayBuffer());assert.equal(sha(pdf),sha(original.pdf));assert.equal((await pedir('/inventario/actas/'+acta,cg)).status,200);
  });
- await caso('impresión y correo del acta de insumos con SMTP local',async()=>{
-  const h=await(await pedir('/inventario/actas/'+acta+'?correo=si',cg)).text();assert.match(h,/Imprimir/);const f=formulario(h,'name="destinatarios"');f.set('destinatarios','persona@example.org');const r=await post('/inventario/actas/'+acta,f,cg);assert.equal(r.status,303);const envios=(await db.query('SELECT estado,actor FROM public.actas_envios WHERE acta_id=$1',[acta])).rows;assert.equal(envios.length,1);assert.equal(envios[0].estado,'aceptado');assert.equal(envios[0].actor,gestor);
+ await caso('impresión y correo con SMTP local o transporte deshabilitado',async()=>{
+  const h=await(await pedir('/inventario/actas/'+acta+'?correo=si',cg)).text();assert.match(h,/Imprimir/);
+  const f=formulario(h,'name="destinatarios"');f.set('destinatarios','persona@example.org');
+  const r=await post('/inventario/actas/'+acta,f,cg);
+  const envios=(await db.query('SELECT estado,actor FROM public.actas_envios WHERE acta_id=$1',[acta])).rows;
+  if(process.env.ACTAS_TEST_MAIL_DIR){assert.equal(r.status,303);assert.equal(envios.length,1);assert.equal(envios[0].estado,'aceptado');assert.equal(envios[0].actor,gestor);}
+  else{assert.equal(r.status,200);assert.match(h,/El envío de actas aún no está habilitado/);assert.match(h,/<fieldset disabled=/);assert.equal(envios.length,0,'Sin transporte no se inicia ningún envío');}
  });
  await caso('otras actas quedan inaccesibles por página, PDF, SQL y envío HTTP',async()=>{
   const otraActa=(await db.query('SELECT id FROM public.actas_documentos WHERE solicitud_insumo_id IS NULL AND pdf IS NOT NULL LIMIT 1')).rows[0];assert.ok(otraActa,'Fixture de acta de equipo');
