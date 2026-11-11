@@ -42,3 +42,26 @@ Filtros, Mostrar 50/100/150, acciones con iconos, ventanas, permisos UTIC y conf
 Se mantienen los filtros futuros solicitados: año, robos, tipo de compra, empresa y OC. Falta definir qué fecha representa el año y el dato que identifica la empresa; no se incorporan interpretaciones financieras por suposición.
 
 La carga/subida de inventario será otra etapa, con revisión del formato y la clasificación previa. La depreciación, el alta contable y la baja formal requieren antecedentes e integración propios.
+
+
+## Próxima etapa preparada: ubicaciones físicas
+
+Implementar primero las ubicaciones y su trazabilidad; después los resúmenes. Este orden permite que el dashboard use datos registrados, sin deducir un piso o BOX a partir de la sede de pertenencia.
+
+- Ofrecer las cinco bodegas confirmadas a equipos y celulares, con las mismas ventanas, filtros y permisos UTIC.
+- Conservar la ubicación desconocida de los registros anteriores. Elegir una bodega registra su ubicación física, sin cambiar inventario, condición o administrativo.
+- Registrar cambios de ubicación con versión, autor, fecha e historial. Un reintento no duplica el movimiento; cerrar sin confirmar conserva la ubicación anterior.
+- Identificar el registro del antiguo establecimiento por RBD 31288 antes de regularizarlo. Conservar referencias y documentos; no mover bienes por inferencia.
+
+Criterios para revisar esa implementación:
+
+| Caso | Resultado esperado |
+| --- | --- |
+| Equipos NC y P02 en el mismo BOX | Comparten ubicación; cada uno conserva su inventario |
+| Traslado entre bodegas | Cambia ubicación, con historial; no crea otro bien ni un traspaso de pertenencia |
+| Envío a Bicentenario | No da de baja ni cambia automáticamente la condición |
+| Ubicación anterior desconocida | Sigue sin identificar hasta una confirmación de UTIC |
+| Cuenta de sede intenta trasladar | El servidor rechaza la operación |
+| Dos cambios simultáneos | La versión anterior no sobrescribe el cambio ya confirmado |
+
+La fecha del filtro Año y la fuente de Empresa/OC siguen pendientes de definir. No se implementan métricas financieras ni un dashboard separado de Robos por aproximación.

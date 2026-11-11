@@ -1,6 +1,6 @@
 # Trabajo preparado y próxima instalación
 
-Corte: 10 de noviembre de 2026, hora de Chile. Felipe trabaja desde casa y la instalación en CentOS queda para cuando recupere el acceso. La auditoría del PR63 está fusionada. La homologación adicional está preparada para revisión en una rama posterior; una prueba en GitHub no acredita que el servidor esté actualizado.
+Corte: 10 de noviembre de 2026, hora de Chile. Felipe trabaja desde casa y la instalación en CentOS queda para cuando recupere el acceso. La auditoría y la homologación están integradas en main mediante los PR63 y PR64. La instalación real sigue pendiente de comprobar; una prueba en GitHub no acredita que el servidor esté actualizado.
 
 ## Preparado en el proyecto
 
@@ -82,6 +82,19 @@ python3 scripts/revisar-instalacion.py --prueba-local \
 ```
 
 La salud HTTP no sustituye la prueba de Google: entrar con una cuenta autorizada, comprobar UTIC y cuentas de sede, ventanas y filtros, conservar datos al fallar, consultar PDFs anteriores e imprimir. Las pruebas de entrega/stock deben hacerse con registros de ensayo identificados; no modificar stock real para probar. Antes de cualquier envío, comprobar modo de prueba y la lista explícita del buzón autorizado.
+
+### Comprobación funcional después de instalar
+
+| Proceso | Resultado esperado |
+| --- | --- |
+| Acceso y perfiles | Google permite cuentas autorizadas; una cuenta de sede no consulta datos de otra |
+| Estados | Robado/No encontrado vacían y bloquean condición; Baja fija Obsoleto y solo lectura; Activo permite seleccionar condición |
+| Datos anteriores | Guardar sin seleccionar condición no borra la clasificación anterior; PDFs antiguos conservan su contenido |
+| Insumos | Solicitante/emisor precargados, cantidades inválidas conservadas para corregir, reserva y existencia coherentes al entregar o cancelar |
+| Navegación | Ventanas, iconos, confirmación real de éxito y retorno con filtros; Todos incluye finalizadas |
+| Documentos y fotos | PDF con producto, unidad y cantidad; imágenes disponibles después de reemplazar el contenedor |
+
+Las comprobaciones que escriban se hacen únicamente con registros de ensayo controlados. No enviar correos a establecimientos para comprobar botones. Registrar cualquier diferencia y su revisión instalada antes de corregirla; no borrar el historial de las pruebas.
 
 ### 5. Fotos anteriores y cierre
 
