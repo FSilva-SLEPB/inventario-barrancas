@@ -186,4 +186,13 @@ BEGIN
   PERFORM public.ubicar_bien_bodega_acceso('felipe.silva@slepb.gob.cl','bb000000-0000-4000-8000-000000000002',jsonb_build_object('tipo','celular','bienId','bc000000-0000-4000-8000-000000000002','version',1,'ubicacion','b0de0000-0000-4000-8000-000000000005'));
  END IF;
 END;$bodegas_ci$;
+DO $compras_ci$
+DECLARE p public.catalogo_insumos%ROWTYPE;r jsonb;
+BEGIN
+ IF to_regclass('public.ingresos_insumos') IS NOT NULL THEN
+  SELECT * INTO p FROM public.catalogo_insumos WHERE codigo='CI-INSUMO-RECUPERACION';
+  r:=public.registrar_compra_insumo_acceso('felipe.silva@slepb.gob.cl','bd000000-0000-4000-8000-000000000001',jsonb_build_object('productoId',p.id,'version',p.version,'nombre',p.nombre,'categoria',p.categoria,'unidad',p.unidad,'cantidad',2,'oc','OC-CI-RECUPERACION','fechaCompra','2026-11-01'));
+  r:=public.registrar_compra_insumo_acceso('felipe.silva@slepb.gob.cl','bd000000-0000-4000-8000-000000000002',jsonb_build_object('productoId','','version',0,'nombre','Insumo automático de recuperación','categoria','Prueba de compra recuperación','unidad','unidad','cantidad',3,'oc','OC-CI-AUTOMATICO','fechaCompra','2026-11-01'));
+ END IF;
+END;$compras_ci$;
 COMMIT;

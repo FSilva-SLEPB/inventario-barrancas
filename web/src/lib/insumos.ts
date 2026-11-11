@@ -186,3 +186,16 @@ export async function ingresarStockInsumo(productoId:string,cantidad:number,soli
  if(!esIdSede(productoId)||!Number.isInteger(cantidad)||cantidad<1||cantidad>100000)throw new Error('Producto o cantidad inválidos.');
  await obtenerBaseDatos().query('SELECT public.ingresar_stock_insumo_acceso($1,$2::uuid,$3::uuid,$4)',[actor.email,solicitud,productoId,cantidad]);
 }
+
+export type DatosCompraInsumo={productoId:string;version:number;nombre:string;categoria:string;unidad:string;cantidad:number;oc:string;fechaCompra:string};
+export type IngresoInsumo={id:string;clase:'compra'|'saldo_anterior';cantidad:number;oc:string|null;fechaCompra:string|null;actor:string;registradoEn:string;producto:{codigo:string;nombre:string;categoria:string;unidad:string}};
+export async function registrarCompraInsumo(solicitud:string,datos:DatosCompraInsumo){
+ const actor=await exigirAdministrador();
+ return (await obtenerBaseDatos().query<{r:{id:string;productoId:string;codigo:string;repetida:boolean}}>('SELECT public.registrar_compra_insumo_acceso($1,$2::uuid,$3::jsonb) AS r',[actor.email,solicitud,JSON.stringify(datos)])).rows[0].r;
+}
+export async function listarCategoriasCodigosInsumos(){await exigirAdministrador();return (await obtenerBaseDatos().query<{nombre:string;prefijo:string}>('SELECT nombre,prefijo FROM public.categorias_insumos_codigos ORDER BY lower(nombre)')).rows;}
+export async function listarIngresosInsumo(productoId:string,pagina:number,limite:number){
+ await exigirAdministrador();if(!esIdSede(productoId))throw new Error('Producto inválido.');
+ const db=obtenerBaseDatos(),total=Number((await db.query<{n:string}>('SELECT count(*) AS n FROM public.ingresos_insumos WHERE producto_id=$1',[productoId])).rows[0].n),paginas=Math.max(1,Math.ceil(total/limite)),actual=Math.min(pagina,paginas);
+ const {rows}=await db.query<IngresoInsumo>('SELECT id,clase,cantidad,oc,fecha_compra::text AS "fechaCompra",actor,registrado_en::text AS "registradoEn",producto FROM public.ingresos_insumos WHERE producto_id=$1 ORDER BY registrado_en DESC,id DESC LIMIT $2 OFFSET $3',[productoId,limite,(actual-1)*limite]);return {filas:rows,total,pagina:actual,paginas};
+}

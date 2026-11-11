@@ -68,12 +68,19 @@ erDiagram
     timestamp_with_time_zone actualizado_en
     text foto_url
     integer version
+    text categoria_codigo FK
   }
   categorias_bienes {
     uuid id PK
     text nombre
     boolean activo
     timestamp_with_time_zone creado_en
+  }
+  categorias_insumos_codigos {
+    text clave PK
+    text nombre
+    text prefijo
+    bigint ultimo
   }
   celulares {
     uuid id PK
@@ -297,6 +304,18 @@ erDiagram
     jsonb datos
     timestamp_with_time_zone registrado_en
   }
+  ingresos_insumos {
+    uuid id PK
+    uuid producto_id FK
+    text clase
+    integer cantidad
+    text oc
+    date fecha_compra
+    text actor
+    jsonb producto
+    jsonb solicitud
+    timestamp_with_time_zone registrado_en
+  }
   insumos_historial {
     uuid id PK
     uuid producto_id FK
@@ -457,6 +476,7 @@ erDiagram
   actas_documentos ||--o{ actas_envios : "acta_id"
   celulares |o--o{ cambios_estados_activo : "celular_id"
   equipos |o--o{ cambios_estados_activo : "equipo_id"
+  categorias_insumos_codigos |o--o{ catalogo_insumos : "categoria_codigo"
   sedes ||--o{ celulares : "sede_id"
   ubicaciones_bodega |o--o{ celulares : "ubicacion_bodega_id"
   celulares ||--o{ celulares_historial : "celular_id"
@@ -486,6 +506,7 @@ erDiagram
   incidentes_robos ||--o{ incidentes_robos_equipos : "incidente_id"
   equipos |o--o{ incidentes_robos_historial : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_historial : "incidente_id"
+  catalogo_insumos ||--o{ ingresos_insumos : "producto_id"
   catalogo_insumos |o--o{ insumos_historial : "producto_id"
   celulares |o--o{ movimientos_inventario : "celular_id"
   sedes |o--o{ movimientos_inventario : "destino_sede_id"
@@ -524,6 +545,7 @@ erDiagram
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | catalogo_insumos | Insumos | Catálogo de insumos solicitables (código, nombre, categoría, unidad, foto y vigencia). |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
+| categorias_insumos_codigos | Insumos | Prefijos únicos y correlativos por categoría para códigos automáticos de productos nuevos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
 | celulares_historial | Celulares | Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas. |
 | dependencias | Catálogos | Ubicaciones internas de una sede. Todavía no hay una FK desde equipos a dependencias. |
@@ -543,6 +565,7 @@ erDiagram
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
+| ingresos_insumos | Insumos | Compras por producto, cantidad, OC y fecha con instantánea; conserva saldos anteriores sin inventar documentos. |
 | insumos_historial | Insumos | Historial de catálogo, fotos e ingresos de stock con actor, solicitud idempotente e instantáneas. |
 | movimientos_inventario | Movimientos | Asignaciones, devoluciones, préstamos y traspasos directos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
 | operaciones_inventario | Movimientos | Cambio con grupos devueltos y reemplazos, o traspaso entre sedes; ruta real directa educativa o vía Bodega TI, solicitud y procedencia inmutables. |
