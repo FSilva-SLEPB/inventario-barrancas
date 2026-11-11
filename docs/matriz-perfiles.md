@@ -3,14 +3,15 @@
 Acuerdo funcional con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance y plan](alcance-y-plan.md).
 
-**Estado: perfiles y alcance instalados y comprobados por Felipe en CentOS.**
-Se implementan los cinco perfiles,
-la vinculación local a una única sede EE/JI, los filtros de sedes/dependencias y
-la administración delegada de usuarios. La ficha, registro, historial y carga
-histórica de equipos se incorporan en la rama de inventario con comprobaciones
-de alcance. Entregas, actas, préstamos, incidentes y funcionarios siguen
-pendientes: sus permisos de esta matriz son el diseño para esas etapas. La migración conserva los accesos generales previos;
-no crea perfiles de gestión ni importa sedes automáticamente.
+La matriz original se complementa con los módulos incorporados posteriormente.
+**Actualización del 11/11/2026:** existe un sexto perfil, **Gestor de insumos**,
+limitado a catálogo, compras/stock, solicitudes, entregas y documentos de insumos.
+No equivale a Administrador de gestión. Ver [permisos y flujo actuales de Insumos](gestor-y-flujo-insumos.md).
+La asignación de este nuevo perfil requiere instalar la migración 30 y elegirlo
+explícitamente desde Usuarios y perfiles; esta documentación no acredita instalación.
+Las facultades históricas indicadas para encargados no habilitan movimientos UTIC:
+las devoluciones, asignaciones y préstamos de equipos/celulares siguen reservados
+a los dos administradores. Las actas generales también; el gestor solo accede a las de insumos.
 
 ## 1. Tres dimensiones independientes
 
@@ -30,6 +31,7 @@ del menú acompañará estos permisos; no será el control de seguridad.
 | --- | --- | --- |
 | Administrador del sistema | Felipe: administra las autorizaciones de mayor nivel y la operación completa | Nivel Central y todos los EE/JI |
 | Administrador de gestión | Jefatura y compañero de la unidad que Felipe autorice: autonomía completa para administrar la operación, incluidos usuarios operativos | Nivel Central y todos los EE/JI |
+| Gestor de insumos | Administra catálogo, compras, stock, validación, aprobación, entregas y actas de insumos | Todas las sedes, exclusivamente Insumos |
 | Encargado de EE/JI | Administra el inventario propio, sus asignaciones, ubicaciones, préstamos, solicitudes y reportes | Solo la sede asignada |
 | Consulta general / Auditor | Consulta los inventarios y su historial sin modificar datos | Nivel Central y todos los EE/JI |
 | Consulta de establecimiento | Consulta el inventario de su sede sin modificar datos | Una única sede, EE o JI |

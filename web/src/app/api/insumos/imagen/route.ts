@@ -1,13 +1,13 @@
 import {NextResponse} from 'next/server';
 import {obtenerAcceso} from '@/lib/acceso';
-import {puedeAdministrar} from '@/lib/politica-acceso';
+import {puedeGestionarInsumos} from '@/lib/politica-acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {randomUUID} from 'node:crypto';
 import {formularioImagenLimitado,imagenInsumoValida,origenInsumoValido} from '@/lib/imagenes-insumos';
 export async function POST(req:Request){
  const actor=await obtenerAcceso();if(!actor)return NextResponse.json({error:'Inicia sesión.'},{status:401});
- if(!puedeAdministrar(actor.rol)||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
+ if(!puedeGestionarInsumos(actor.rol)||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
  try{
   const f=await formularioImagenLimitado(req),archivo=f.get('imagen');
   if(f.getAll('imagen').length!==1||!(archivo instanceof File))return NextResponse.json({error:'Selecciona una imagen.'},{status:400});

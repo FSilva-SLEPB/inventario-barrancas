@@ -1,9 +1,9 @@
-import {puedeAdministrar,puedeGestionarDependencias,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
+import {puedeAdministrar,puedeGestionarDependencias,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
 export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string};
 export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
 export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
  const admin=puedeAdministrar(rol),gestion=puedeGestionarDependencias(rol),local=requiereSede(rol);
- return [{id:'inventario',titulo:'Inventario',href:'/inventario',descripcion:'Equipos, entregas e incidentes, con identificación e historial de cada bien.',accesos:[
+ const modulos:ModuloSistema[]=[{id:'inventario',titulo:'Inventario',href:'/inventario',descripcion:'Equipos, entregas e incidentes, con identificación e historial de cada bien.',accesos:[
   ...(!local?[{href:'/inventario/nivel-central',titulo:'Inventario Nivel Central',descripcion:'Equipos y bienes de Nivel Central.',icono:'NC'}]:[]),
   {href:'/inventario/p02',titulo:local?'Inventario de mi sede':'Inventario P02',descripcion:'Establecimientos educacionales, jardines infantiles y salas cunas.',icono:'P02'},
   ...(gestion?[{href:'/inventario/registro',titulo:'Registro de equipos',descripcion:admin?'Ingreso individual y carga masiva de equipos.':'Registrar equipos propios de la sede.',icono:'+'}]:[]),
@@ -25,10 +25,11 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   {href:'/mantenedores/sedes',titulo:'Sedes',descripcion:'Establecimientos, jardines, salas cunas y Nivel Central.',icono:'SE'},
   {href:'/mantenedores/dependencias',titulo:'Dependencias',descripcion:'Ubicaciones internas de cada sede.',icono:'DE'}
  ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
-  ...(admin||gestion||local?[
-   {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'},
-   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisar el estado y avance de las solicitudes.',icono:'SG'},
+  ...(puedeSolicitarInsumos(rol)?[
+   {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'}]:[]),
+   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:puedeGestionarInsumos(rol)?'Validar solicitudes, aprobar cantidades y confirmar entregas.':'Revisar el estado y avance de las solicitudes.',icono:'SG'},
    {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consultar el historial de solicitudes realizadas.',icono:'HI'},
-  ]:[]),
+  ...(puedeGestionarInsumos(rol)?[{href:'/mantenedores/insumos',titulo:'Catálogo de insumos',descripcion:'Productos, stock e ingresos por orden de compra.',icono:'IN'}]:[]),
  ]}];
+ return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'):modulos;
 }

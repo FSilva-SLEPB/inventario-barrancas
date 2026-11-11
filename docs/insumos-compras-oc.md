@@ -1,6 +1,6 @@
 # Insumos: catálogo e ingresos por compra
 
-UTIC inicia el ingreso desde **Crear insumo e ingresar cantidad**. El botón abre
+UTIC o el Gestor de insumos inicia el ingreso desde **Crear insumo e ingresar cantidad**. El botón abre
 la misma ventana de edición compartida del sistema. Se completan categoría,
 producto, unidad, cantidad, OC y fecha de compra. Al guardar, la ventana se cierra
 y aparece la confirmación de éxito; un error conserva los valores para corregirlos.
@@ -53,3 +53,6 @@ El navegador comprobó tres compras de una ficha (10 + 5 + 2), edición, mensaje
 éxito, errores conservados, bloqueo durante el guardado, historial, paginación,
 Escape y vista móvil. Una revisión independiente de código comprobó el identificador
 nuevo por apertura, sin depender de la velocidad de actualización del listado.
+
+El perfil específico y el circuito de aprobación y entrega se describen en
+[Gestor y flujo de Insumos](gestor-y-flujo-insumos.md).

@@ -195,4 +195,9 @@ BEGIN
   r:=public.registrar_compra_insumo_acceso('felipe.silva@slepb.gob.cl','bd000000-0000-4000-8000-000000000002',jsonb_build_object('productoId','','version',0,'nombre','Insumo automático de recuperación','categoria','Prueba de compra recuperación','unidad','unidad','cantidad',3,'oc','OC-CI-AUTOMATICO','fechaCompra','2026-11-01'));
  END IF;
 END;$compras_ci$;
+DO $gestor_ci$ BEGIN
+ IF EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.usuarios_acceso'::regclass AND conname='usuarios_acceso_rol_check' AND pg_get_constraintdef(oid) LIKE '%gestor_insumos%') THEN
+  PERFORM public.guardar_usuario_acceso('felipe.silva@slepb.gob.cl','ci-gestor-recuperacion@slepb.gob.cl','Gestor ficticio de recuperación','gestor_insumos',true,0,NULL);
+ END IF;
+END;$gestor_ci$;
 COMMIT;

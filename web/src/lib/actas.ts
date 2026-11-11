@@ -1,5 +1,6 @@
 import 'server-only';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirAdministrador,exigirGestionInsumos} from '@/lib/acceso';
+import {puedeAdministrar} from '@/lib/politica-acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import type {AccionMovimiento} from '@/lib/validacion-movimientos-inventario';
 import {esIdSede} from '@/lib/validacion-sedes';
@@ -16,14 +17,14 @@ export async function emitirActa(id:string,movimiento:string,metadata:MetadataAc
  try{await db.query('BEGIN');const resultado=await completarActaEnTransaccion(db,actor.email,id,movimiento,metadata,historica);await db.query('COMMIT');return resultado;}
  catch(e){await db.query('ROLLBACK');throw e;}finally{db.release();}
 }
-export async function obtenerActa(id:string,conPdf=false){await exigirAdministrador();if(!esIdSede(id))return null;return(await obtenerBaseDatos().query<ActaDocumento>(`SELECT id,movimiento_id AS "movimientoId",entrega_id AS "entregaId",operacion_id AS "operacionId",folio::text,version,datos,sha256,actor,emitido_en::text AS "emitidoEn"${conPdf?',pdf':''} FROM public.actas_documentos WHERE id=$1 AND pdf IS NOT NULL`,[id])).rows[0]??null;}
+export async function obtenerActa(id:string,conPdf=false){const acceso=await exigirGestionInsumos();if(!esIdSede(id))return null;return(await obtenerBaseDatos().query<ActaDocumento>(`SELECT id,movimiento_id AS "movimientoId",entrega_id AS "entregaId",operacion_id AS "operacionId",folio::text,version,datos,sha256,actor,emitido_en::text AS "emitidoEn"${conPdf?',pdf':''} FROM public.actas_documentos WHERE id=$1 AND pdf IS NOT NULL AND ($2::boolean OR (solicitud_insumo_id IS NOT NULL AND entrega_insumo_id IS NOT NULL))`,[id,puedeAdministrar(acceso.rol)])).rows[0]??null;}
 export async function listarActas(f:{q:string;pagina:number;limite:number}){
  await exigirAdministrador();const db=obtenerBaseDatos(),where=`WHERE pdf IS NOT NULL AND ($1='' OR 'ACT-'||lpad(folio::text,GREATEST(6,length(folio::text)),'0') ILIKE '%'||$1||'%' OR datos->>'receptorNombre' ILIKE '%'||$1||'%' OR datos->>'sedeNombre' ILIKE '%'||$1||'%')`;
  const total=Number((await db.query<{n:string}>('SELECT count(*) AS n FROM public.actas_documentos '+where,[f.q])).rows[0].n),paginas=Math.max(1,Math.ceil(total/f.limite)),pagina=Math.min(f.pagina,paginas);
  const filas=(await db.query<ActaDocumento>(`SELECT id,movimiento_id AS "movimientoId",entrega_id AS "entregaId",operacion_id AS "operacionId",folio::text,version,datos,sha256,actor,emitido_en::text AS "emitidoEn" FROM public.actas_documentos ${where} ORDER BY folio DESC LIMIT $2 OFFSET $3`,[f.q,f.limite,(pagina-1)*f.limite])).rows;return {filas,total,pagina,paginas};
 }
 export type EnvioActa={id:string;estado:string;actor:string;destinatarios:string[];remitente:string;creadoEn:string;terminadoEn:string|null;resultado:Record<string,unknown>};
-export async function enviosActa(id:string){await exigirAdministrador();return(await obtenerBaseDatos().query<EnvioActa>(`SELECT id,CASE WHEN estado='en_curso' AND creado_en<CURRENT_TIMESTAMP-INTERVAL '2 minutes' THEN 'no_confirmado' ELSE estado END AS estado,actor,destinatarios,remitente,creado_en::text AS "creadoEn",terminado_en::text AS "terminadoEn",resultado FROM public.actas_envios WHERE acta_id=$1 ORDER BY creado_en DESC,id DESC LIMIT 50`,[id])).rows;}
+export async function enviosActa(id:string){if(!await obtenerActa(id))return [];return(await obtenerBaseDatos().query<EnvioActa>(`SELECT id,CASE WHEN estado='en_curso' AND creado_en<CURRENT_TIMESTAMP-INTERVAL '2 minutes' THEN 'no_confirmado' ELSE estado END AS estado,actor,destinatarios,remitente,creado_en::text AS "creadoEn",terminado_en::text AS "terminadoEn",resultado FROM public.actas_envios WHERE acta_id=$1 ORDER BY creado_en DESC,id DESC LIMIT 50`,[id])).rows;}
 export const ESTADOS_ENVIO:Record<string,string>={en_curso:'Envío en curso',aceptado:'Aceptado por el servidor de correo',parcial:'Envío aceptado parcialmente',fallido:'No enviado',no_confirmado:'Resultado por confirmar'};
 
 export async function fuenteActaEntrega(id:string){

@@ -1,7 +1,7 @@
 # Regla de homologación del inventario
 
 Felipe estableció esta regla funcional: **un mismo proceso debe verse y funcionar
-igual en todos los módulos**. Se aplica a cambios nuevos y al corregir pantallas
+igual en todos los módulos**. Todos los trabajos deben mantener el mismo estilo visual y reutilizar componentes compartidos; no diseñar una variante por pantalla. Se aplica a cambios nuevos y al corregir pantallas
 existentes, incluyendo equipos, celulares, Bodega TI, Robos y directorios.
 
 - Usar los componentes compartidos de filtros, resultados, paginación, fichas,
@@ -64,8 +64,11 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
 
 - Estados integrados: la migración 20 y el adaptador operativo guardan la transición administrativa antes del bloqueo histórico; errores conservan el estado anterior. Compartir controles, confirmación y guardas de salidas. Mantener devolución de averiados, datos anteriores sin reclasificación automática y PDFs emitidos. Una baja de celular conserva su teléfono histórico y permite reutilizar el número en su reemplazo. Ver docs/estados-integrados-y-flujo-actas.md.
 
-- Insumos: lectura de solicitudes limitada a la sede autorizada; catálogo/stock y confirmación de entregas solo UTIC. Una entrega parcial cierra la solicitud y libera su reserva restante. Entrega, cantidades y acta se confirman juntas. Fotos persistentes en PostgreSQL, sin escribir en public; conservar originales al importar fotos anteriores. No reintroducir acceso sin OAuth. Ver docs/auditoria-insumos-2026-11-10.md.
+- Insumos: lectura de solicitudes limitada a la sede autorizada; catálogo/stock y confirmación de entregas por los dos administradores o el perfil Gestor de insumos, limitado a este módulo. Una entrega parcial cierra la solicitud y libera su reserva restante. Entrega, cantidades y acta se confirman juntas. Fotos persistentes en PostgreSQL, sin escribir en public; conservar originales al importar fotos anteriores. No reintroducir acceso sin OAuth. Ver docs/auditoria-insumos-2026-11-10.md.
 
 - Ingreso de insumos: botón y modal compartido con categoría, producto, unidad, cantidad, OC y fecha de compra. Código automático por abreviatura y correlativo al crear, permanente al editar. Reutilizar la ficha del mismo producto/categoría/unidad y conservar cada compra por separado; no duplicar stock por reintentos. Datos anteriores sin OC/fecha se conservan como saldo anterior sin volver a sumar existencias. Ver docs/insumos-compras-oc.md.
 
 - Ubicaciones físicas: confirmar desde Ubicar en Bodega TI para equipos/celulares, solo UTIC, versión e idempotencia. Pertenencia y estados se conservan; salir a asignación/préstamo/entrega limpia ubicación, y devolver no recupera una anterior por suposición. Confirmar Bicentenario no da de baja. No asignar ubicaciones a datos anteriores ni regularizar RBD 31288 sin revisar su registro. Ver docs/bodegas-fisicas.md.
+
+- Gestor de insumos, confirmado el 11/11: puede crear productos, ingresar compras/stock, validar, aprobar, cancelar y entregar solicitudes de todas las sedes, y consultar/imprimir/descargar/enviar sus actas de insumos. No concede administración de usuarios, inventarios, Bodega TI de equipos, funcionarios ni otras actas. Asignación explícita desde Usuarios y perfiles; nunca convertir cuentas existentes automáticamente. Preservar permisos en servidor y SQL, reservas, idempotencia y PDFs. Ver docs/gestor-y-flujo-insumos.md.
+- Las portadas e Inicio comparten tarjetas; Solicitudes de insumos usa PortadaModulo, filtros/resultados/modales comunes y los accesos corresponden a los permisos. Quitar el rótulo «Gestión institucional» de las portadas. No confundir el nuevo gestor con Administrador de gestión.
