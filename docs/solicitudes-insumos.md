@@ -4,7 +4,7 @@ Reglas acordadas con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance del sistema](alcance-y-plan.md) y la
 [matriz de perfiles](matriz-perfiles.md).
 
-**Estado: diseño funcional acordado; módulo pendiente de implementación.**
+**Corte histórico del diseño: 29 de octubre.** El módulo del PR63 y su homologación posterior están preparados, pendientes de instalar. Consultar [puesta en marcha y pendientes](puesta-en-marcha-pendiente.md) y [correcciones de auditoría](auditoria-insumos-2026-11-10.md) para el comportamiento implementado: una sola entrega por solicitud, con liberación de cualquier reserva no consumida y sin saldos pendientes. Las secciones siguientes conservan la definición inicial.
 No se han importado datos de las planillas ni modificado existencias.
 
 ## 1. Alcance y fuente revisada

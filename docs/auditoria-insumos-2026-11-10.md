@@ -30,11 +30,21 @@ Pruebas de perfiles/sedes, cantidades, concurrencia y reintentos, stock, rollbac
 
 Resultados locales sobre la rama revisada:
 
-- Compilación completa y ESLint: sin errores (10 advertencias de imágenes/navegación).
-- 152 pruebas unitarias aprobadas; suite integral HTTP/SQL/PDF aprobada, incluidos 36 escenarios de estados y 19 de insumos, usando el rol limitado.
+- Compilación completa y ESLint: sin errores (8 advertencias de imágenes/navegación).
+- 154 pruebas unitarias aprobadas; suite integral HTTP/SQL/PDF aprobada, incluidos 36 escenarios de estados y 23 de insumos, usando el rol limitado.
 - Actualización desde las primeras 26 migraciones: registros de equipos, celulares, movimientos y actas/PDFs idénticos antes/después.
 - Respaldo y recuperación en otro contenedor comprobados con stock, reserva abierta, foto y acta de insumos.
 - Navegador Chromium: edición en modal, éxito del guardado/stock, subida de foto, Escape, catálogo/carrito, cantidad, vista móvil y envío persistido.
 - Importador de fotos: revisión sin escrituras, importación autorizada, bytes originales conservados y reintento sin duplicado.
 
 La instalación real en CentOS, la configuración de correo, HTTPS y accesos Google del servidor deben verificarse allí. Estas pruebas locales no acreditan cambios en ese equipo.
+
+## Homologación final sin acceso al servidor
+
+El detalle de solicitudes usa la ventana compartida; los formularios se abren desde acciones con iconos según estado y perfil. Solicitar solo aparece a perfiles con permiso de gestión. Los enlaces de actas se muestran a UTIC, conforme a los permisos existentes del repositorio documental.
+
+Se precargan el solicitante y quien entrega desde los datos de la cuenta autenticada, y quien recibe desde la solicitud. Los campos desconocidos quedan vacíos; el lápiz permite corregir participantes. El correo autor de la solicitud sigue ligado a la sesión. Las entregas muestran RUN y cargo junto a cada persona, separados de la institución.
+
+La creación navega una sola vez a su detalle y usa la confirmación firmada común. No basta escribir `guardado=1` en la URL. Validar, aprobar, cancelar y regresar desde acta/correo conservan filtros, página y tamaño; Todos incluye solicitudes finalizadas. Cantidades fraccionadas, vacías o repetidas rechazan el formulario completo y conservan los valores, sin ignorar líneas ni registrar una entrega por omisión.
+
+Chromium comprobó también solicitar→validar→aprobar→entregar→PDF, participantes precargados/editables, stock final y regreso desde el documento y su ventana de correo. No se envió correo institucional. No se añade otra migración. La [puesta en marcha pendiente](puesta-en-marcha-pendiente.md) separa lo preparado de lo que necesita CentOS o definición posterior.

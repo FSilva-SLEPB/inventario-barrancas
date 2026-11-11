@@ -1,13 +1,14 @@
+import {puedeGestionarDependencias} from '@/lib/politica-acceso';
 import Link from "next/link";
 import {exigirAcceso} from "@/lib/acceso";
 export const metadata={title:'Insumos | SLEP Barrancas'};
 export default async function InsumosLanding(){
- await exigirAcceso();
+ const actor=await exigirAcceso();
  const cards=[
   {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crea y envía una nueva solicitud de insumos para tu establecimiento.'},
   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisa el estado y avance de las solicitudes en curso.'},
   {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consulta el historial de solicitudes realizadas y sus resultados.'},
- ];
+ ].filter(c=>c.href!=='/insumos/solicitud'||puedeGestionarDependencias(actor.rol));
  return <main>
   <header>
    <h1>Insumos</h1>
