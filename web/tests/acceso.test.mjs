@@ -315,6 +315,6 @@ test('la guarda de Insumos no abre módulos generales al gestor',async()=>{
 
 test('el menú de Insumos respeta creación y lectura por perfil',async()=>{
  const e=await entorno(),{modulosSistema}=await e.importar('@/lib/modulos');
- const g=modulosSistema('gestor_insumos');assert.equal(g.length,1);assert.equal(g[0].id,'solicitudes');assert.ok(g[0].accesos.some(a=>a.href==='/mantenedores/insumos'));
+ const g=modulosSistema('gestor_insumos');assert.deepEqual(Array.from(g,m=>m.id),['mantenedores','solicitudes']);assert.equal(g.flatMap(m=>m.accesos).filter(a=>a.href==='/mantenedores/insumos').length,1);assert.deepEqual(Array.from(g.find(m=>m.id==='mantenedores').accesos,a=>a.href),['/mantenedores/insumos']);assert.equal(g.find(m=>m.id==='solicitudes').accesos.some(a=>a.href==='/mantenedores/insumos'),false);
  for(const rol of ['consulta','consulta_sede']){const m=modulosSistema(rol).find(m=>m.id==='solicitudes');assert.ok(m);assert.ok(m.accesos.some(a=>a.href==='/insumos/seguimiento'));assert.ok(m.accesos.some(a=>a.href==='/insumos/historial'));assert.equal(m.accesos.some(a=>a.href==='/insumos/solicitud'),false);}
 });

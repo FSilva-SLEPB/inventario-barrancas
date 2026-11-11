@@ -1,5 +1,5 @@
 import {puedeAdministrar,puedeGestionarDependencias,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
-export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string};
+export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string;externo?:boolean};
 export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
 export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
  const admin=puedeAdministrar(rol),gestion=puedeGestionarDependencias(rol),local=requiereSede(rol);
@@ -19,17 +19,17 @@ export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
   {href:'/directorio/directoras',titulo:'Directoras JI y SC',descripcion:'Identidad y estado contractual de las directoras.',icono:'DIR'}
  ]}]:[]),{id:'mantenedores',titulo:'Mantenedores',href:'/mantenedores',descripcion:'Catálogos, ubicaciones y accesos al sistema.',accesos:[
   ...(admin?[{href:'/mantenedores/funcionarios',titulo:'Funcionarios de Nivel Central',descripcion:'Fichas de personas, unidad, contacto e historial de cambios.',icono:'NC'},
-   {href:'/mantenedores/usuarios',titulo:'Usuarios y perfiles',descripcion:'Cuentas autorizadas, perfiles y alcance de acceso.',icono:'US'},
-   {href:'/mantenedores/insumos',titulo:'Catálogo de insumos',descripcion:'Catálogo, stock e ingreso/fotos de productos de insumos.',icono:'IN'}]:[]),
+   {href:'/mantenedores/usuarios',titulo:'Usuarios y perfiles',descripcion:'Cuentas autorizadas, perfiles y alcance de acceso.',icono:'US'}]:[]),
+  ...(puedeGestionarInsumos(rol)?[{href:'/mantenedores/insumos',titulo:'Catálogo de insumos',descripcion:'Productos, stock e ingresos por orden de compra.',icono:'IN'}]:[]),
+  ...(rol!=='gestor_insumos'?[
   {href:'/mantenedores/categorias',titulo:'Categorías de bienes',descripcion:'Tipos de equipos y bienes del inventario.',icono:'CA'},
   {href:'/mantenedores/sedes',titulo:'Sedes',descripcion:'Establecimientos, jardines, salas cunas y Nivel Central.',icono:'SE'},
-  {href:'/mantenedores/dependencias',titulo:'Dependencias',descripcion:'Ubicaciones internas de cada sede.',icono:'DE'}
+  {href:'/mantenedores/dependencias',titulo:'Dependencias',descripcion:'Ubicaciones internas de cada sede.',icono:'DE'}]:[]),
  ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
   ...(puedeSolicitarInsumos(rol)?[
    {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'}]:[]),
    {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:puedeGestionarInsumos(rol)?'Validar solicitudes, aprobar cantidades y confirmar entregas.':'Revisar el estado y avance de las solicitudes.',icono:'SG'},
    {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consultar el historial de solicitudes realizadas.',icono:'HI'},
-  ...(puedeGestionarInsumos(rol)?[{href:'/mantenedores/insumos',titulo:'Catálogo de insumos',descripcion:'Productos, stock e ingresos por orden de compra.',icono:'IN'}]:[]),
  ]}];
- return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'):modulos;
+ return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'||m.id==='mantenedores'):modulos;
 }

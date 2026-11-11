@@ -22,9 +22,10 @@ actas, usuarios, funcionarios, directorios ni inventarios de equipos/celulares,
 Bodega TI, robos o préstamos. Los dos administradores mantienen sus permisos.
 La autorización se comprueba también en servidor, SQL y peticiones directas.
 
-El menú y su Inicio muestran Solicitudes de insumos con cuatro accesos:
-Solicitud, Seguimiento, Historial y Catálogo. El catálogo sigue usando su misma
-pantalla canónica; el menú conserva seleccionado Insumos para este perfil.
+El menú y su Inicio muestran Solicitudes de insumos y Mantenedores. Solicitudes
+contiene Solicitud, Seguimiento e Historial. El catálogo aparece únicamente en
+Mantenedores, también para el gestor: conserva su pantalla canónica y este perfil
+no ve ni puede abrir los otros mantenedores. Esta corrección evita duplicar el acceso.
 El Auditor y Consulta de establecimiento ven Seguimiento e Historial según su
 alcance, sin enlace a crear solicitudes ni botones de aprobación o entrega.
 
@@ -70,3 +71,20 @@ avisos, ventanas, menús y vista móvil. La actualización 29→30 conservó las
 de catorce tablas existentes; el respaldo restauró el perfil ficticio de prueba,
 compras, existencias, reservas, fotos y documentos. No se cambió CentOS ni se
 usaron cuentas reales o correos de establecimientos para los ensayos.
+
+## Inicio de establecimientos y jardines
+
+Los perfiles Encargado EE/JI y Consulta de establecimiento ven en Inicio la
+identificación de su sede autorizada: nombre, RBD, tipo, comuna, dirección y correo
+institucional. Los datos se leen del registro existente; no se selecciona otra sede
+mediante URL ni se toma la primera sede global. Los faltantes dicen Sin informar.
+Los perfiles globales conservan Inicio general, sin atribuirles una sede ficticia.
+
+El atajo Sistema de tickets abre https://soporteti.slepb.gob.cl/ en otra pestaña,
+sin enviar datos de la sede, credenciales ni sesión del inventario. Es un enlace al
+servicio existente; no incorpora sincronización de tickets ni autenticación única.
+
+Para habilitar a una persona como gestor: un administrador entra en Mantenedores
+→ Usuarios y perfiles, registra o edita su cuenta institucional, elige Gestor de
+insumos y guarda. El perfil no se asigna automáticamente a ninguna cuenta. Estos
+ajustes de Inicio y navegación no agregan migraciones ni cambian perfiles existentes.
