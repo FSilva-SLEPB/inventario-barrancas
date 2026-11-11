@@ -1,5 +1,8 @@
 # Solicitudes, reservas y entrega de insumos
 
+Para el nuevo ingreso al catálogo con código automático, cantidad, OC y fecha de
+compra, consultar [Ingresos por compra](insumos-compras-oc.md).
+
 Reglas acordadas con Felipe Silva, 29 de octubre de 2026, hora de Chile.
 Complementa el [alcance del sistema](alcance-y-plan.md) y la
 [matriz de perfiles](matriz-perfiles.md).
