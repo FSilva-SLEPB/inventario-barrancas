@@ -13,3 +13,7 @@ test('la vuelta conserva filtros y pagina sin aceptar URLs ajenas o ventanas enc
 test('el acta vuelve al inventario con todos los filtros sin admitir otra ventana ni origen ajeno',()=>{const ruta='/inventario/bodega-ti?tipo=establecimiento&sede='+id+'&rbd=123&q=serie+con+espacio&clase=equipo&pagina=2&limite=100',u=new URL(enlaceActaInventario(ruta,id),'http://prueba');assert.equal(u.pathname,'/inventario/bodega-ti');assert.equal(u.searchParams.get('acta'),id);for(const[k,v]of new URL(ruta,'http://prueba').searchParams)assert.equal(u.searchParams.get(k),v);for(const invalida of ['https://otro.example','//otro.example','/inventario/bodega-ti?acta='+id,'/inventario/bodega-ti?ver='+id,'/inventario/movimientos'])assert.throws(()=>enlaceActaInventario(invalida,id));assert.throws(()=>enlaceActaInventario(ruta,'incorrecto'));});
 
 test('acepta motivo vacío sin inventar una justificación',()=>{assert.equal(validarMovimiento(form({motivo:'  '})).datos.motivo,'');assert.throws(()=>validarMovimiento(form({motivo:'x'.repeat(501)})));});
+
+test('movimientos conservan ubicación al volver a Bodega TI y rechazan usarla en otro listado',()=>{
+ const ruta='/inventario/bodega-ti?ubicacion='+id+'&limite=100';assert.ok(retornoMovimiento(ruta));assert.equal(new URL(enlaceMovimiento(ruta,'equipo',id,'asignacion'),'http://local').searchParams.get('ubicacion'),id);assert.equal(retornoMovimiento('/inventario/p02?ubicacion='+id),null);assert.equal(retornoMovimiento('/inventario/bodega-ti?ubicacion=incorrecta'),null);
+});

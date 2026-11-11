@@ -19,7 +19,7 @@ existentes, incluyendo equipos, celulares, Bodega TI, Robos y directorios.
   Guardar cierra la edición y confirma éxito; los errores conservan los valores.
 - Asignación y devolución de equipos/celulares usan el mismo flujo de movimientos
   y el estado lógico En Bodega TI. Las cinco ubicaciones físicas confirmadas por
-  Felipe se detallan al final; su incorporación sigue pendiente. No crear sedes,
+  Felipe se detallan al final; la migración 28 y el flujo compartido de Bodega TI incorporan su ubicación física, con instalación pendiente. No crear sedes,
   direcciones ni bodegas ficticias.
 - Respetar permisos, versiones, historial e idempotencia en servidor y base.
   Archivar una ficha, su funcionamiento y su custodia son conceptos distintos.
@@ -65,3 +65,5 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
 - Estados integrados: la migración 20 y el adaptador operativo guardan la transición administrativa antes del bloqueo histórico; errores conservan el estado anterior. Compartir controles, confirmación y guardas de salidas. Mantener devolución de averiados, datos anteriores sin reclasificación automática y PDFs emitidos. Una baja de celular conserva su teléfono histórico y permite reutilizar el número en su reemplazo. Ver docs/estados-integrados-y-flujo-actas.md.
 
 - Insumos: lectura de solicitudes limitada a la sede autorizada; catálogo/stock y confirmación de entregas solo UTIC. Una entrega parcial cierra la solicitud y libera su reserva restante. Entrega, cantidades y acta se confirman juntas. Fotos persistentes en PostgreSQL, sin escribir en public; conservar originales al importar fotos anteriores. No reintroducir acceso sin OAuth. Ver docs/auditoria-insumos-2026-11-10.md.
+
+- Ubicaciones físicas: confirmar desde Ubicar en Bodega TI para equipos/celulares, solo UTIC, versión e idempotencia. Pertenencia y estados se conservan; salir a asignación/préstamo/entrega limpia ubicación, y devolver no recupera una anterior por suposición. Confirmar Bicentenario no da de baja. No asignar ubicaciones a datos anteriores ni regularizar RBD 31288 sin revisar su registro. Ver docs/bodegas-fisicas.md.

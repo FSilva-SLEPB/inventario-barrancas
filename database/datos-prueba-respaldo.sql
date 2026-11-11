@@ -176,4 +176,14 @@ BEGIN
 END;
 $insumos_ci$;
 
+DO $bodegas_ci$
+DECLARE equipo uuid;
+BEGIN
+ IF to_regclass('public.ubicaciones_bodega') IS NOT NULL THEN
+  equipo:=public.guardar_equipo_acceso('felipe.silva@slepb.gob.cl',jsonb_build_object('id','','sedeId','10000000-0000-4000-8000-000000000001','categoriaId','30000000-0000-4000-8000-000000000001','marca','Marca ficticia','modelo','Bodega de recuperación','serie','CI-BODEGA-PERSISTENCIA','inventario','CI-BODEGA-001','origen','compra_utic','condicionTecnica','operativo','custodiaInicial','en_bodega'),0,'Alta ficticia de recuperación');
+  PERFORM public.ubicar_bien_bodega_acceso('felipe.silva@slepb.gob.cl','bb000000-0000-4000-8000-000000000001',jsonb_build_object('tipo','equipo','bienId',equipo,'version',1,'ubicacion','b0de0000-0000-4000-8000-000000000003'));
+  PERFORM public.guardar_celular_acceso('felipe.silva@slepb.gob.cl','bc000000-0000-4000-8000-000000000002',jsonb_build_object('sedeId','10000000-0000-4000-8000-000000000001','telefono','+56900000099','marca','Marca ficticia','modelo','Bodega de recuperación','imei','','inventario','CI-BODEGA-CEL','condicionTecnica','operativo','responsable','','observaciones','','activo',true,'custodiaInicial','en_bodega'),0,'Alta ficticia de recuperación');
+  PERFORM public.ubicar_bien_bodega_acceso('felipe.silva@slepb.gob.cl','bb000000-0000-4000-8000-000000000002',jsonb_build_object('tipo','celular','bienId','bc000000-0000-4000-8000-000000000002','version',1,'ubicacion','b0de0000-0000-4000-8000-000000000005'));
+ END IF;
+END;$bodegas_ci$;
 COMMIT;

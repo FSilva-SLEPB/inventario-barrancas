@@ -25,6 +25,8 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "@/components/actas/ventana-acta-emitida": {default:()=>null},
     "@/components/ventana-movimiento": {default:()=>null,AccionesCustodia:()=>null},
     "@/components/ficha-celular": {default:()=>null},
+    "@/components/ventana-ubicacion-bodega": {default:()=>null},
+    "@/lib/ubicaciones-bodega": {listarUbicacionesBodega:async()=>[]},
     "@/lib/celulares": {detalleCelular:async()=>null},
     "@/lib/inventario-bodega": {listarBodega:async f=>{consulta=f;return {filas:equipos,total,pagina:1,paginas:Math.max(1,Math.ceil(total/f.limite))};}},
     "@/lib/acceso": {
@@ -63,10 +65,10 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     } });
     const modulo = new SourceTextModule(outputText, { identifier: base });
     modulos.set(nombre, modulo);
-    await modulo.link(cargar);
     return modulo;
   }
   const modulo = await cargar(`@/app/inventario/${ruta ? ruta + "/" : ""}page`);
+  await modulo.link(cargar);
   await modulo.evaluate();
   const html = renderToStaticMarkup(await modulo.namespace.default({ searchParams: Promise.resolve(parametros) }));
   return { html, consulta };

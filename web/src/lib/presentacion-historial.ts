@@ -1,7 +1,7 @@
 import {CUSTODIAS} from '@/lib/validacion-movimientos-inventario';
 import { CAMPOS_COMPRA, CONDICIONES, ORIGENES, SITUACIONES } from "@/lib/validacion-equipos";
 import {ESTADOS_ADMINISTRATIVOS_ACTIVO} from '@/lib/estados-activo';
-const etiquetas:Record<string,string>={estado_administrativo:'Estado administrativo',fecha_baja:'Fecha de archivo',custodia:'Estado',sedeNombre:'Sede',marca:'Marca',modelo:'Modelo',serie:'Número de serie',numero_inventario:'Número de inventario',motivo_identificacion:'Dato de identificación pendiente',categoria_id:'Categoría',condicion_tecnica:'Estado de funcionamiento',observaciones:'Observaciones',situacion:'Situación de entrega',fecha_entrega:'Fecha de entrega',enlace_acta:'Acta existente',origen:'Origen'};
+const etiquetas:Record<string,string>={ubicacionBodega:'Ubicación Bodega TI',estado_administrativo:'Estado administrativo',fecha_baja:'Fecha de archivo',custodia:'Estado',sedeNombre:'Sede',marca:'Marca',modelo:'Modelo',serie:'Número de serie',numero_inventario:'Número de inventario',motivo_identificacion:'Dato de identificación pendiente',categoria_id:'Categoría',condicion_tecnica:'Estado de funcionamiento',observaciones:'Observaciones',situacion:'Situación de entrega',fecha_entrega:'Fecha de entrega',enlace_acta:'Acta existente',origen:'Origen'};
 const valor=(v:unknown)=>v===null||v===undefined||v===''?'Sin informar':String(v);
 export type CambioHistorial={campo:string;antes:string;despues:string};
 export function cambiosHistorial(antes:Record<string,unknown>|null,despues:Record<string,unknown>,categorias:{id:string;nombre:string}[]):CambioHistorial[]{

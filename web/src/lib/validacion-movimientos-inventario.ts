@@ -19,8 +19,8 @@ export function validarMovimiento(f:FormData,hoy=hoyChile()){
 export function retornoMovimiento(v:string){
  if(!v.startsWith('/inventario/')||v.length>2000||/[\p{Cc}\\]/u.test(v))return null;
  try{const u=new URL(v,'http://inventario.local');if(u.origin!=='http://inventario.local'||u.hash||!['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti','/inventario/celulares','/inventario/prestamos'].includes(u.pathname))return null;
- const p=new URLSearchParams();for(const[k,max]of [['vista',20],['q',150],['pagina',7],['tipo',30],['sede',36],['rbd',120],['limite',3],['estado',20],['clase',10]] as const){const valores=u.searchParams.getAll(k);if(valores.length>1)return null;const valor=valores[0];if(valor!==undefined){if(valor.length>max)return null;p.set(k,valor);}}
- if([...u.searchParams.keys()].some(k=>!['vista','q','pagina','tipo','sede','rbd','limite','estado','clase'].includes(k)))return null;
+ const p=new URLSearchParams();for(const[k,max]of [['ubicacion',36],['vista',20],['q',150],['pagina',7],['tipo',30],['sede',36],['rbd',120],['limite',3],['estado',20],['clase',10]] as const){const valores=u.searchParams.getAll(k);if(valores.length>1)return null;const valor=valores[0];if(valor!==undefined){if(valor.length>max||k==='ubicacion'&&(u.pathname!=='/inventario/bodega-ti'||valor&&valor!=='sin_ubicacion'&&!esIdSede(valor)))return null;p.set(k,valor);}}
+ if([...u.searchParams.keys()].some(k=>!['ubicacion','vista','q','pagina','tipo','sede','rbd','limite','estado','clase'].includes(k)))return null;
  return u.pathname+(p.size?'?'+p:'');}catch{return null;}
 }
 export function enlaceMovimiento(ruta:string,tipo:TipoBien,id:string,accion:AccionMovimiento|'cambio'|'traspaso',prestamoId?:string){

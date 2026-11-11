@@ -125,7 +125,7 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 .tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:12rem}
 
 /* Acciones compartidas: icono, nombre accesible y ayuda al pasar el cursor. */
-.accion-icono.btn{display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;min-width:2.75rem;padding:.5rem;flex-shrink:0;transition:none}
+.accion-icono.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;min-width:2.75rem;padding:.5rem;flex-shrink:0;transition:none}
 .accion-icono svg{flex-shrink:0}
 .operacion-seccion{margin-block:1rem;padding:1rem;border:1px solid var(--borde,#cad8e3);border-radius:12px}
 .operacion-seccion h3{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:0}
