@@ -29,6 +29,8 @@ export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]
  incidentes_robos:{modulo:'Robos',uso:'Reporte de robo por sede, antecedentes, validación y estado.',fuentes:['src/lib/robos.ts','src/app/inventario/robos/acciones.ts']},
  incidentes_robos_equipos:{modulo:'Robos',uso:'Equipos afectados y recuperación individual dentro de un incidente.',fuentes:['src/lib/robos.ts']},
  incidentes_robos_historial:{modulo:'Robos',uso:'Reporte, revisión y recuperación con usuario, fecha y motivo.',fuentes:['src/lib/robos.ts']},
+ ubicaciones_bodega:{modulo:'Bodega TI',uso:'Cinco ubicaciones físicas compartidas por los inventarios; no sustituyen sede, custodia ni estados.',fuentes:['src/lib/ubicaciones-bodega.ts']},
+ ubicaciones_bodega_historial:{modulo:'Bodega TI',uso:'Confirmaciones de ubicación física con actor, versión e instantáneas; conserva pertenencia y estados.',fuentes:['migrations/1795622400000_ubicaciones-bodega-ti.mjs']},
  insumos_historial:{modulo:'Insumos',uso:'Historial de catálogo, fotos e ingresos de stock con actor, solicitud idempotente e instantáneas.',fuentes:['migrations/1795536000000_auditoria-estados-insumos.mjs']},
  imagenes_insumos:{modulo:'Insumos',uso:'Fotografías de catálogo persistidas en PostgreSQL, con tipo, bytes y autor; incluidas en los respaldos.',fuentes:['src/app/api/insumos/imagen/route.ts','migrations/1795536000000_auditoria-estados-insumos.mjs']},
  catalogo_insumos:{modulo:'Insumos',uso:'Catálogo de insumos solicitables (código, nombre, categoría, unidad, foto y vigencia).',fuentes:['src/lib/insumos.ts','migrations/1795100000000_insumos-catalogo-stock-solicitudes.mjs']},

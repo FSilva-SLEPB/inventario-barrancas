@@ -19,7 +19,7 @@ Corte: 10 de noviembre de 2026, hora de Chile. Felipe trabaja desde casa y la in
 | Publicación HTTPS | Dominio, DNS, proxy/TLS, callback Google y cookies del origen definitivo |
 | Fotos anteriores | Confirmar si sus archivos existen y respaldarlos; una URL no recupera un archivo perdido |
 | Carga del inventario | Revisar la planilla actual y duplicados; previsualizar antes de confirmar, sin inventar datos |
-| Bodegas físicas | Incorporar las cinco ubicaciones acordadas, conservar desconocidas las ubicaciones antiguas y regularizar por RBD 31288 sin borrar historial |
+| Bodegas físicas | Instalar la migración 1795622400000 y confirmar ubicaciones reales; las anteriores siguen desconocidas. La regularización por RBD 31288 se revisará por separado, sin borrar historial |
 | Dos dashboards NC/P02 | Misma presentación y separación de pertenencia; disponibilidad exige condición y custodia adecuadas. Definir fecha del filtro Año y fuente de Empresa/OC antes de métricas de compras |
 | FirmaGob | Evaluar más adelante el servicio conservado; todavía no se afirma integración ni firma electrónica |
 
@@ -66,7 +66,7 @@ docker compose -p inventario-barrancas -f compose.produccion.yaml \
   run --build --rm migrar
 ```
 
-Las migraciones de insumos y `1795536000000_auditoria-estados-insumos` deben quedar aplicadas. Esta homologación adicional no añade otra migración. Si un paso falla, revisar la salida antes de continuar. No editar una migración registrada ni ejecutar una reversión improvisada: las actas emitidas y la existencia física deben conservarse.
+Las migraciones de insumos y `1795536000000_auditoria-estados-insumos` deben quedar aplicadas. La homologación de insumos no añade otra migración; las bodegas físicas requieren además `1795622400000_ubicaciones-bodega-ti`. Si un paso falla, revisar la salida antes de continuar. No editar una migración registrada ni ejecutar una reversión improvisada: las actas emitidas y la existencia física deben conservarse.
 
 ### 4. Compilar y comprobar
 

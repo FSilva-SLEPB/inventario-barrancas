@@ -1,6 +1,6 @@
 # Definición de dashboards y bodegas TI
 
-Requisitos acordados por Felipe después de instalar el PR #53. Los dashboards y las ubicaciones de esta definición todavía no están implementados en la aplicación.
+Requisitos acordados por Felipe después de instalar el PR #53. Las cinco ubicaciones físicas están preparadas en la aplicación; su instalación en CentOS está pendiente. Los dashboards todavía no están implementados. Ver [bodegas físicas](bodegas-fisicas.md).
 
 ## Dos dashboards
 
@@ -44,7 +44,7 @@ Se mantienen los filtros futuros solicitados: año, robos, tipo de compra, empre
 La carga/subida de inventario será otra etapa, con revisión del formato y la clasificación previa. La depreciación, el alta contable y la baja formal requieren antecedentes e integración propios.
 
 
-## Próxima etapa preparada: ubicaciones físicas
+## Criterios de la etapa de ubicaciones físicas
 
 Implementar primero las ubicaciones y su trazabilidad; después los resúmenes. Este orden permite que el dashboard use datos registrados, sin deducir un piso o BOX a partir de la sede de pertenencia.
 

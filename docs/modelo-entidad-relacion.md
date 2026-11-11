@@ -95,6 +95,7 @@ erDiagram
     text custodia
     text estado_administrativo
     timestamp_with_time_zone fecha_baja
+    uuid ubicacion_bodega_id FK
   }
   celulares_historial {
     bigint id PK
@@ -215,6 +216,7 @@ erDiagram
     text custodia
     text estado_administrativo
     timestamp_with_time_zone fecha_baja
+    uuid ubicacion_bodega_id FK
   }
   equipos_historial {
     bigint id PK
@@ -412,6 +414,23 @@ erDiagram
     integer reservado
     timestamp_with_time_zone actualizado_en
   }
+  ubicaciones_bodega {
+    uuid id PK
+    text codigo
+    text nombre
+    text referencia
+    boolean activo
+  }
+  ubicaciones_bodega_historial {
+    uuid id PK
+    uuid equipo_id FK
+    uuid celular_id FK
+    text actor
+    jsonb solicitud
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   usuarios_acceso {
     text correo PK
     text rol
@@ -439,6 +458,7 @@ erDiagram
   celulares |o--o{ cambios_estados_activo : "celular_id"
   equipos |o--o{ cambios_estados_activo : "equipo_id"
   sedes ||--o{ celulares : "sede_id"
+  ubicaciones_bodega |o--o{ celulares : "ubicacion_bodega_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
   sedes ||--o{ dependencias : "sede_id"
@@ -455,6 +475,7 @@ erDiagram
   cargas_equipos |o--o{ equipos : "carga_id"
   categorias_bienes ||--o{ equipos : "categoria_id"
   sedes ||--o{ equipos : "sede_id"
+  ubicaciones_bodega |o--o{ equipos : "ubicacion_bodega_id"
   entregas_equipos |o--o{ equipos_historial : "entrega_id"
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
@@ -487,6 +508,8 @@ erDiagram
   catalogo_insumos ||--o{ solicitudes_insumos_detalle : "producto_id"
   solicitudes_insumos ||--o{ solicitudes_insumos_detalle : "solicitud_id"
   catalogo_insumos ||--o| stock_insumos : "producto_id"
+  celulares |o--o{ ubicaciones_bodega_historial : "celular_id"
+  equipos |o--o{ ubicaciones_bodega_historial : "equipo_id"
   sedes |o--o{ usuarios_acceso : "sede_id"
 ```
 
@@ -531,6 +554,8 @@ erDiagram
 | solicitudes_insumos | Insumos | Solicitudes de insumos por sede con datos del solicitante, estado, validación/aprobación, entrega o cancelación. |
 | solicitudes_insumos_detalle | Insumos | Líneas solicitadas/aprobadas/entregadas de cada solicitud de insumos. |
 | stock_insumos | Insumos | Existencia y reserva disponible por producto del catálogo de insumos. |
+| ubicaciones_bodega | Bodega TI | Cinco ubicaciones físicas compartidas por los inventarios; no sustituyen sede, custodia ni estados. |
+| ubicaciones_bodega_historial | Bodega TI | Confirmaciones de ubicación física con actor, versión e instantáneas; conserva pertenencia y estados. |
 | usuarios_acceso | Acceso | Cuentas autorizadas, perfil, vigencia y sede permitida. |
 | usuarios_acceso_historial | Acceso | Auditoría de cambios de usuarios y permisos. |
 

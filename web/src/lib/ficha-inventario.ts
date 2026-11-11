@@ -7,10 +7,11 @@ export function retornoInventario(valor:unknown):string|null {
   const u=new URL(valor,'http://inventario.local');
   if(u.origin!=='http://inventario.local'||!RUTAS_INVENTARIO.some(r=>r===u.pathname)||!valor.startsWith('/inventario/')||u.hash)return null;
   const salida=new URLSearchParams();
-  const limites:Record<string,number>={vista:20,q:150,pagina:7,tipo:30,clase:10,claseBien:10,sede:36,rbd:120,limite:3};
+  const limites:Record<string,number>={ubicacion:36,vista:20,q:150,pagina:7,tipo:30,clase:10,claseBien:10,sede:36,rbd:120,limite:3};
   for(const [k,max] of Object.entries(limites)){
    const entradas=u.searchParams.getAll(k);if(entradas.length>1)return null;
    const v=entradas[0];if(v===undefined)continue;if(v.length>max||/\p{Cc}/u.test(v))return null;
+   if(k==='ubicacion'&&(u.pathname!=='/inventario/bodega-ti'||v&&v!=='sin_ubicacion'&&!esIdSede(v)))return null;
    if(k==='vista'&&!['inventario','pendientes'].includes(v))return null;
    if(k==='tipo'&&(!['','nivel_central','establecimiento','jardin_infantil'].includes(v)||(v==='nivel_central'&&u.pathname!=='/inventario/bodega-ti')))return null;
    if(['clase','claseBien'].includes(k)&&!['','equipo','celular'].includes(v))return null;

@@ -34,6 +34,13 @@ BEGIN
     END LOOP;
     IF NOT has_function_privilege(current_user,'public.guardar_producto_insumo_acceso(text,uuid,jsonb)','EXECUTE') OR NOT has_function_privilege(current_user,'public.guardar_foto_insumo_acceso(text,uuid,text,bytea)','EXECUTE') OR NOT has_function_privilege(current_user,'public.importar_foto_insumo_acceso(text,uuid,uuid,text)','EXECUTE') OR has_function_privilege(current_user,'public.autorizar_insumos_utic(text)','EXECUTE') THEN RAISE EXCEPTION 'Funciones controladas de insumos restauradas incorrectas';END IF;
   END IF;
+  IF to_regclass('public.ubicaciones_bodega') IS NOT NULL THEN
+    FOREACH tabla IN ARRAY ARRAY['ubicaciones_bodega','ubicaciones_bodega_historial'] LOOP
+      IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN RAISE EXCEPTION 'Permisos incorrectos de ubicaciones restauradas';END IF;
+    END LOOP;
+    IF NOT has_function_privilege(current_user,'public.ubicar_bien_bodega_acceso(text,uuid,jsonb)','EXECUTE') OR has_function_privilege(current_user,'public.limpiar_ubicacion_bodega()','EXECUTE') THEN RAISE EXCEPTION 'Funciones de ubicaciones restauradas incorrectas';END IF;
+    IF (SELECT count(*) FROM pg_trigger WHERE tgname IN ('equipos_limpiar_ubicacion_bodega','celulares_limpiar_ubicacion_bodega') AND NOT tgisinternal AND tgenabled='O')<>2 THEN RAISE EXCEPTION 'Faltan guardas de ubicación restauradas';END IF;
+  END IF;
   IF to_regclass('public.actas_documentos') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['actas_contador','actas_documentos','actas_envios'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') THEN RAISE EXCEPTION 'Permisos de actas incorrectos';END IF;
@@ -246,6 +253,9 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM public.equipos e JOIN public.cambios_estados_activo h ON h.equipo_id=e.id WHERE e.serie='CI-ESTADOS-SERIE' AND e.estado_administrativo='dado_de_baja' AND e.condicion_tecnica='obsoleto' AND e.fecha_baja IS NOT NULL AND h.id='f5000000-0000-4000-8000-000000000001' AND h.antes->>'condicion_tecnica'='sin_verificar' AND h.despues->>'estado_administrativo'='dado_de_baja') OR NOT EXISTS(SELECT 1 FROM public.celulares c JOIN public.cambios_estados_activo h ON h.celular_id=c.id WHERE c.id='f4000000-0000-4000-8000-000000000002' AND c.estado_administrativo='robado' AND c.condicion_tecnica='' AND h.id='f5000000-0000-4000-8000-000000000002') THEN
       RAISE EXCEPTION 'No se recuperaron estados, histórico de baja y auditoría de transición';
     END IF;
+  END IF;
+  IF to_regclass('public.ubicaciones_bodega') IS NOT NULL THEN
+    IF (SELECT count(*) FROM public.ubicaciones_bodega)<>5 OR NOT EXISTS(SELECT 1 FROM public.equipos WHERE serie='CI-BODEGA-PERSISTENCIA' AND ubicacion_bodega_id='b0de0000-0000-4000-8000-000000000003' AND custodia='en_bodega' AND sede_id='10000000-0000-4000-8000-000000000001') OR NOT EXISTS(SELECT 1 FROM public.celulares WHERE id='bc000000-0000-4000-8000-000000000002' AND ubicacion_bodega_id='b0de0000-0000-4000-8000-000000000005' AND estado_administrativo='activo' AND condicion_tecnica='operativo') OR (SELECT count(*) FROM public.ubicaciones_bodega_historial WHERE id IN ('bb000000-0000-4000-8000-000000000001','bb000000-0000-4000-8000-000000000002') AND antes->>'ubicacion_bodega_id' IS NULL AND despues->>'ubicacion_bodega_id' IS NOT NULL)<>2 THEN RAISE EXCEPTION 'No se recuperaron las ubicaciones e historial de los bienes';END IF;
   END IF;
   IF to_regclass('public.imagenes_insumos') IS NOT NULL THEN
     IF NOT EXISTS(SELECT 1 FROM public.catalogo_insumos c JOIN public.stock_insumos st ON st.producto_id=c.id WHERE c.codigo='CI-INSUMO-RECUPERACION' AND c.foto_url='/api/insumos/imagen?id=a8000000-0000-4000-8000-000000000001' AND st.existencia=7 AND st.reservado=2) OR NOT EXISTS(SELECT 1 FROM public.imagenes_insumos WHERE id='a8000000-0000-4000-8000-000000000001' AND mime='image/png' AND octet_length(contenido)=68) OR NOT EXISTS(SELECT 1 FROM public.actas_documentos a JOIN public.entregas_insumos e ON e.id=a.entrega_insumo_id WHERE a.id='aa000000-0000-4000-8000-000000000001' AND e.acta_id=a.id AND a.datos->'bienes'->0->>'unidad'='caja' AND a.datos->'bienes'->0->>'cantidad_entregada'='3' AND a.sha256=encode(sha256(a.pdf),'hex')) THEN

@@ -22,3 +22,8 @@ test('abrir una ficha respeta Nivel Central, P02 y la separación entre recibido
  assert.equal(equipoEnVista(ee,'eeji','inventario'),true);assert.equal(equipoEnVista(ee,'eeji','pendientes'),false);
  assert.equal(equipoEnVista(ji,'eeji','pendientes'),true);assert.equal(equipoEnVista(ji,'eeji','inventario'),false);
 });
+
+test('ubicación física se conserva solo en el regreso de Bodega TI',()=>{
+ for(const ubicacion of [id,'sin_ubicacion','']){const ruta='/inventario/bodega-ti?ubicacion='+ubicacion+'&limite=100';assert.ok(retornoInventario(ruta));assert.equal(new URL(enlaceFichaInventario(ruta,'ver',id),'http://local').searchParams.get('ubicacion'),ubicacion);}
+ for(const ruta of ['/inventario/p02?ubicacion='+id,'/inventario/bodega-ti?ubicacion=invalida','/inventario/bodega-ti?ubicacion='+id+'&ubicacion='+id])assert.equal(retornoInventario(ruta),null);
+});
