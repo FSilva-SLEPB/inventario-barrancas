@@ -318,3 +318,11 @@ test('el menú de Insumos respeta creación y lectura por perfil',async()=>{
  const g=modulosSistema('gestor_insumos');assert.deepEqual(Array.from(g,m=>m.id),['mantenedores','solicitudes']);assert.equal(g.flatMap(m=>m.accesos).filter(a=>a.href==='/mantenedores/insumos').length,1);assert.deepEqual(Array.from(g.find(m=>m.id==='mantenedores').accesos,a=>a.href),['/mantenedores/insumos']);assert.equal(g.find(m=>m.id==='solicitudes').accesos.some(a=>a.href==='/mantenedores/insumos'),false);
  for(const rol of ['consulta','consulta_sede']){const m=modulosSistema(rol).find(m=>m.id==='solicitudes');assert.ok(m);assert.ok(m.accesos.some(a=>a.href==='/insumos/seguimiento'));assert.ok(m.accesos.some(a=>a.href==='/insumos/historial'));assert.equal(m.accesos.some(a=>a.href==='/insumos/solicitud'),false);}
 });
+
+test('fotografías: encargado solo edita su sede, consultas solo leen y gestor no hereda permisos',async()=>{
+ const e=await entorno(),p=await e.importar('@/lib/politica-fotos-sedes');
+ for(const rol of ['administrador','administrador_gestion']){assert.equal(p.puedeEditarFotoSede(rol,null,'sede-a'),true);assert.equal(p.puedeVerFotoSede(rol,null,'sede-a'),true);}
+ assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-a'),true);assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-b'),false);
+ for(const rol of ['consulta_sede','consulta','gestor_insumos'])assert.equal(p.puedeEditarFotoSede(rol,'sede-a','sede-a'),false);
+ assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-a'),true);assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-b'),false);assert.equal(p.puedeVerFotoSede('consulta',null,'sede-b'),true);assert.equal(p.puedeVerFotoSede('gestor_insumos',null,'sede-b'),false);
+});

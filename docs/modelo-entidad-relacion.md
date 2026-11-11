@@ -237,6 +237,15 @@ erDiagram
     uuid incidente_id FK
     uuid movimiento_id FK
   }
+  fotografias_sedes {
+    uuid id PK
+    uuid sede_id FK
+    integer version
+    text actor
+    text mime
+    bytea contenido
+    timestamp_with_time_zone registrado_en
+  }
   funcionarios_nc {
     uuid id PK
     text nombre
@@ -500,6 +509,7 @@ erDiagram
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
   movimientos_inventario |o--o{ equipos_historial : "movimiento_id"
+  sedes ||--o{ fotografias_sedes : "sede_id"
   funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
   sedes ||--o{ incidentes_robos : "sede_id"
   equipos ||--o{ incidentes_robos_equipos : "equipo_id"
@@ -561,6 +571,7 @@ erDiagram
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
 | funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
 | funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
+| fotografias_sedes | Sedes | Fotografías de establecimientos y jardines, versiones persistentes con autor y permisos por sede. |
 | imagenes_insumos | Insumos | Fotografías de catálogo persistidas en PostgreSQL, con tipo, bytes y autor; incluidas en los respaldos. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |

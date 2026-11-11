@@ -41,6 +41,9 @@ BEGIN
     IF NOT has_function_privilege(current_user,'public.ubicar_bien_bodega_acceso(text,uuid,jsonb)','EXECUTE') OR has_function_privilege(current_user,'public.limpiar_ubicacion_bodega()','EXECUTE') THEN RAISE EXCEPTION 'Funciones de ubicaciones restauradas incorrectas';END IF;
     IF (SELECT count(*) FROM pg_trigger WHERE tgname IN ('equipos_limpiar_ubicacion_bodega','celulares_limpiar_ubicacion_bodega') AND NOT tgisinternal AND tgenabled='O')<>2 THEN RAISE EXCEPTION 'Faltan guardas de ubicación restauradas';END IF;
   END IF;
+  IF to_regclass('public.fotografias_sedes') IS NOT NULL THEN
+    IF NOT has_table_privilege(current_user,'public.fotografias_sedes','SELECT') OR has_table_privilege(current_user,'public.fotografias_sedes','INSERT') OR has_table_privilege(current_user,'public.fotografias_sedes','UPDATE') OR has_table_privilege(current_user,'public.fotografias_sedes','DELETE') OR has_table_privilege(current_user,'public.fotografias_sedes','TRUNCATE') OR NOT has_function_privilege(current_user,'public.guardar_fotografia_sede_acceso(text,uuid,uuid,integer,text,bytea)','EXECUTE') THEN RAISE EXCEPTION 'Permisos de fotografías de sedes incorrectos';END IF;
+  END IF;
   IF to_regclass('public.ingresos_insumos') IS NOT NULL THEN
     FOREACH tabla IN ARRAY ARRAY['ingresos_insumos','categorias_insumos_codigos'] LOOP
       IF NOT has_table_privilege(current_user,format('public.%I',tabla),'SELECT') OR has_table_privilege(current_user,format('public.%I',tabla),'INSERT') OR has_table_privilege(current_user,format('public.%I',tabla),'UPDATE') OR has_table_privilege(current_user,format('public.%I',tabla),'DELETE') OR has_table_privilege(current_user,format('public.%I',tabla),'TRUNCATE') THEN RAISE EXCEPTION 'Permisos incorrectos de compras restauradas';END IF;
@@ -262,6 +265,9 @@ BEGIN
   END IF;
   IF to_regclass('public.ubicaciones_bodega') IS NOT NULL THEN
     IF (SELECT count(*) FROM public.ubicaciones_bodega)<>5 OR NOT EXISTS(SELECT 1 FROM public.equipos WHERE serie='CI-BODEGA-PERSISTENCIA' AND ubicacion_bodega_id='b0de0000-0000-4000-8000-000000000003' AND custodia='en_bodega' AND sede_id='10000000-0000-4000-8000-000000000001') OR NOT EXISTS(SELECT 1 FROM public.celulares WHERE id='bc000000-0000-4000-8000-000000000002' AND ubicacion_bodega_id='b0de0000-0000-4000-8000-000000000005' AND estado_administrativo='activo' AND condicion_tecnica='operativo') OR (SELECT count(*) FROM public.ubicaciones_bodega_historial WHERE id IN ('bb000000-0000-4000-8000-000000000001','bb000000-0000-4000-8000-000000000002') AND antes->>'ubicacion_bodega_id' IS NULL AND despues->>'ubicacion_bodega_id' IS NOT NULL)<>2 THEN RAISE EXCEPTION 'No se recuperaron las ubicaciones e historial de los bienes';END IF;
+  END IF;
+  IF to_regclass('public.fotografias_sedes') IS NOT NULL THEN
+    IF NOT EXISTS(SELECT 1 FROM public.fotografias_sedes WHERE id='be700000-0000-4000-8000-000000000002' AND sede_id='be700000-0000-4000-8000-000000000001' AND version=1 AND mime='image/png' AND actor='felipe.silva@slepb.gob.cl' AND contenido=decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jE1sAAAAASUVORK5CYII=','base64')) THEN RAISE EXCEPTION 'No se recuperó la fotografía de sede';END IF;
   END IF;
   IF EXISTS(SELECT 1 FROM pg_constraint WHERE conrelid='public.usuarios_acceso'::regclass AND conname='usuarios_acceso_rol_check' AND pg_get_constraintdef(oid) LIKE '%gestor_insumos%') AND NOT EXISTS(SELECT 1 FROM public.usuarios_acceso WHERE correo='ci-gestor-recuperacion@slepb.gob.cl' AND rol='gestor_insumos' AND sede_id IS NULL AND activo) THEN RAISE EXCEPTION 'No se recuperó el perfil gestor de insumos';END IF;
   IF to_regclass('public.ingresos_insumos') IS NOT NULL THEN
