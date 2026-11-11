@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { puedeAdministrar } from "@/lib/politica-acceso";
+import {modulosSistema} from "@/lib/modulos";
+import AccesosModulo from "@/components/accesos-modulo";
 import { obtenerAcceso, obtenerSesion } from "@/lib/acceso";
-
-const accesos = [
-  { href: "/inventario", titulo: "Inventario", descripcion: "Equipos y bienes del servicio." },
-  { href: "/solicitudes", titulo: "Solicitudes", descripcion: "Solicitudes de suministros para establecimientos y Nivel Central." },
-  { href: "/mantenedores", titulo: "Mantenedores", descripcion: "Categorías de bienes y catálogos del sistema." },
-];
 
 export default async function Home() {
   const acceso = await obtenerAcceso();
@@ -64,25 +59,14 @@ export default async function Home() {
     </section>
   </main>;
 
-  const accesosVisibles = puedeAdministrar(acceso.rol) ? [accesos[0], {href:"/directorio",titulo:"Directorio",descripcion:"Establecimientos, JI/SC y sus directores y directoras."}, ...accesos.slice(1)] : accesos;
+  const accesosVisibles = modulosSistema(acceso.rol).map(m=>({href:m.href,titulo:m.titulo,descripcion:m.descripcion,icono:({inventario:'INV',directorio:'DIR',solicitudes:'IN',mantenedores:'ADM'})[m.id]}));
   return (
     <main>
       <header>
         <h1>Inicio</h1>
         <p className="descripcion-pagina">Sistema Unidad TIC · Gestión de inventario, solicitudes y servicios para la comunidad educativa del SLEP Barrancas.</p>
       </header>
-      <section aria-labelledby="titulo-accesos">
-        <h2 id="titulo-accesos">Accesos principales</h2>
-        <div className="accesos-inicio">
-          {accesosVisibles.map((acceso) => (
-            <Link key={acceso.href} href={acceso.href} className="acceso-inicio">
-              <span className="titulo-acceso">{acceso.titulo}</span>
-              <span className="descripcion-acceso">{acceso.descripcion}</span>
-              <span className="enlace-acceso">Ir a {acceso.titulo} <span aria-hidden="true">→</span></span>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <AccesosModulo id="titulo-accesos" titulo="Accesos principales" accesos={accesosVisibles}/>
     </main>
   );
 }

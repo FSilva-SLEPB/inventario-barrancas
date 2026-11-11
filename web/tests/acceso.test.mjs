@@ -295,3 +295,26 @@ for(const rol of ["consulta","consulta_sede","encargado"]) {
   }
  });
 }
+
+test('Gestor de insumos es operativo sin facultades administrativas o de inventario',async()=>{
+ const e=await entorno();const p=await e.importar('@/lib/politica-acceso');
+ assert.equal(p.rolValido('gestor_insumos'),true);assert.equal(p.puedeGestionarInsumos('gestor_insumos'),true);assert.equal(p.puedeSolicitarInsumos('gestor_insumos'),true);assert.equal(p.puedeAdministrar('gestor_insumos'),false);assert.equal(p.puedeGestionarDependencias('gestor_insumos'),false);assert.equal(p.requiereSede('gestor_insumos'),false);assert.equal(p.perfilReservado('gestor_insumos'),false);
+ for(const rol of ['consulta','consulta_sede','encargado',null])assert.equal(p.puedeGestionarInsumos(rol),false);
+});
+
+test('la guarda de Insumos no abre módulos generales al gestor',async()=>{
+ const e=await entorno(),originales={...process.env};
+ try{
+  Object.assign(process.env,{NEXTAUTH_URL:'http://localhost:3000',NEXTAUTH_SECRET:'x'.repeat(32),GOOGLE_CLIENT_ID:'id-ficticio',GOOGLE_CLIENT_SECRET:'secreto-ficticio'});
+  e.sesion({user:{email:perfil.email,rol:'gestor_insumos'}});const a=await e.importar('@/lib/acceso');
+  assert.equal((await a.exigirGestionInsumos()).rol,'gestor_insumos');assert.equal((await a.exigirAcceso('insumos')).rol,'gestor_insumos');
+  await assert.rejects(a.exigirAcceso(),{message:'REDIRECT:/sin-permiso'});await assert.rejects(a.exigirAdministrador(),{message:'REDIRECT:/sin-permiso'});await assert.rejects(a.exigirGestionDependencias(),{message:'REDIRECT:/sin-permiso'});
+  e.sesion({user:{email:perfil.email,rol:'consulta'}});await assert.rejects(a.exigirGestionInsumos(),{message:'REDIRECT:/sin-permiso'});
+ }finally{for(const k of ['NEXTAUTH_URL','NEXTAUTH_SECRET','GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET']){if(originales[k]===undefined)delete process.env[k];else process.env[k]=originales[k];}}
+});
+
+test('el menú de Insumos respeta creación y lectura por perfil',async()=>{
+ const e=await entorno(),{modulosSistema}=await e.importar('@/lib/modulos');
+ const g=modulosSistema('gestor_insumos');assert.equal(g.length,1);assert.equal(g[0].id,'solicitudes');assert.ok(g[0].accesos.some(a=>a.href==='/mantenedores/insumos'));
+ for(const rol of ['consulta','consulta_sede']){const m=modulosSistema(rol).find(m=>m.id==='solicitudes');assert.ok(m);assert.ok(m.accesos.some(a=>a.href==='/insumos/seguimiento'));assert.ok(m.accesos.some(a=>a.href==='/insumos/historial'));assert.equal(m.accesos.some(a=>a.href==='/insumos/solicitud'),false);}
+});

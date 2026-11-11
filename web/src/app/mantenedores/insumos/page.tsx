@@ -1,5 +1,5 @@
 import {notFound} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirGestionInsumos} from '@/lib/acceso';
 import {listarCatalogoInsumos,listarStockInsumos,listarCategoriasCodigosInsumos,listarIngresosInsumo} from '@/lib/insumos';
 import {esIdSede} from '@/lib/validacion-sedes';
 import ModalFicha from '@/components/modal-ficha';
@@ -7,7 +7,7 @@ import PanelResultados from '@/components/panel-resultados';
 import InsumosMantenedor from './insumos-mantenedor';
 export const metadata={title:'Catálogo de insumos | Mantenedores'};
 export default async function MantenedorInsumosPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- await exigirAdministrador();const p=await searchParams;
+ await exigirGestionInsumos();const p=await searchParams;
  const [catalogo,stock,categorias]=await Promise.all([listarCatalogoInsumos(false),listarStockInsumos(),listarCategoriasCodigosInsumos()]);
  const compras=typeof p.compras==='string'?p.compras:'',producto=compras?catalogo.find(c=>c.id===compras):null;if(compras&&(!esIdSede(compras)||!producto))notFound();
  const limite=[50,100,150].includes(Number(p.limite))?Number(p.limite):50,pagina=typeof p.pagina==='string'&&/^[1-9]\d{0,6}$/.test(p.pagina)?Number(p.pagina):1,historial=producto?await listarIngresosInsumo(producto.id,pagina,limite):null;

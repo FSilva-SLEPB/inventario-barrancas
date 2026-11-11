@@ -1,5 +1,8 @@
 "use client";
 import ModalFicha from '@/components/modal-ficha';
+import IconoAccion from '@/components/icono-accion';
+import PanelFiltros from '@/components/panel-filtros';
+import PanelResultados from '@/components/panel-resultados';
 import {useMemo,useState} from "react";
 import {guardarSolicitudInsumo} from "@/app/insumos/acciones";
 import type {ParticipanteActual} from '@/lib/participante-actual';
@@ -29,6 +32,8 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
 
  const [filtroNombre,setFiltroNombre]=useState('');
  const [filtroCategoria,setFiltroCategoria]=useState('');
+ const [categoriaBorrador,setCategoriaBorrador]=useState('');
+ const [limite,setLimite]=useState(50),[pagina,setPagina]=useState(1);
  const [modalProd,setModalProd]=useState<Producto|null>(null);
  const [cantidadModal,setCantidadModal]=useState('1');
  const [carrito,setCarrito]=useState<Record<string,number>>({});
@@ -87,16 +92,16 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
  );
 
  return <section style={{display:'grid',gap:'1.25rem'}}>
-  <header className="panel-catalogos" style={{padding:'1rem'}}>
-   <h1 style={{margin:'0 0 .25rem'}}>Solicitud de insumos</h1>
-   <p className="descripcion-pagina" style={{margin:0}}>Completa los datos, selecciona insumos por separado y envía la solicitud.</p>
+  <header>
+   <h1>Solicitud de insumos</h1>
+   <p className="descripcion-pagina">Completa los datos, selecciona insumos por separado y envía la solicitud.</p>
   </header>
 
   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:'1rem',alignItems:'stretch'}}>
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
      <h2 style={{margin:0,fontSize:'1.05rem'}}>Establecimiento</h2>
-     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar establecimiento" title="Editar establecimiento" onClick={()=>setEditSede(v=>!v)}>✎</button>
+     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar establecimiento" title="Editar establecimiento" onClick={()=>setEditSede(v=>!v)}><IconoAccion tipo="editar"/></button>
     </div>
     {editSede ? <div className="campo-catalogos">
      <label htmlFor="sel-sede">Establecimiento / RBD</label>
@@ -116,7 +121,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%'}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem'}}>
      <h2 style={{margin:0,fontSize:'1.05rem'}}>Datos del solicitante</h2>
-     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar datos del solicitante" title="Editar datos del solicitante" onClick={()=>setEditSolicitante(v=>!v)}>✎</button>
+     <button type="button" className="btn btn-outline-primary btn-sm" aria-label="Editar datos del solicitante" title="Editar datos del solicitante" onClick={()=>setEditSolicitante(v=>!v)}><IconoAccion tipo="editar"/></button>
     </div>
     {editSolicitante ? <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:'.75rem'}}>
      <div className="campo-catalogos"><label htmlFor="sol-nombre">Nombre</label><input id="sol-nombre" value={solicitante.nombre} onChange={e=>setSolicitante(v=>({...v,nombre:e.target.value}))}/></div>
@@ -137,12 +142,10 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,300px),1fr))',gap:'1rem',alignItems:'stretch'}}>
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%',minWidth:0}}>
     <h2 style={{margin:0,fontSize:'1.05rem'}}>Catálogo</h2>
-    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,180px),1fr))',gap:'.75rem'}}>
-     <div className="campo-catalogos"><label htmlFor="filtro-nombre">Filtrar por nombre</label><input id="filtro-nombre" placeholder="Nombre del insumo..." value={filtroNombre} onChange={e=>setFiltroNombre(e.target.value)}/></div>
-     <div className="campo-catalogos"><label htmlFor="filtro-categoria">Filtrar por categoría</label><select id="filtro-categoria" value={filtroCategoria} onChange={e=>setFiltroCategoria(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-    </div>
+    <PanelFiltros ruta="/insumos/solicitud" titulo="Filtrar insumos" busqueda={{id:'solicitud-buscar',valor:filtroNombre,placeholder:'Buscar por producto o código'}} local={{buscar:valor=>{setFiltroNombre(valor);setFiltroCategoria(categoriaBorrador);setPagina(1);},limpiar:()=>{setFiltroNombre('');setFiltroCategoria('');setCategoriaBorrador('');setPagina(1);}}}><div className="filtro-inventario"><label htmlFor="filtro-categoria">Categoría</label><select id="filtro-categoria" value={categoriaBorrador} onChange={e=>setCategoriaBorrador(e.target.value)}><option value="">Todas las categorías</option>{categorias.map(c=><option key={c} value={c}>{c}</option>)}</select></div></PanelFiltros>
+    <PanelResultados total={filtrados.length} descripcion="insumos" ruta="/insumos/solicitud" filtros={{}} limite={limite} pagina={pagina} paginas={Math.max(1,Math.ceil(filtrados.length/limite))} local={{id:'productos-por-pagina',cambiarPagina:setPagina,cambiarLimite:n=>{setLimite(n);setPagina(1);}}}>
     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:'0.75rem'}}>
-     {filtrados.map(p=>(
+     {filtrados.slice((pagina-1)*limite,pagina*limite).map(p=>(
       <button key={p.id} type="button" onClick={()=>abrirModal(p)} title={`Ver ${p.nombre}`} style={{border:'1px solid var(--color-borde-suave)',borderRadius:16,background:'#fff',padding:'.6rem',textAlign:'left',cursor:'pointer',display:'grid',gap:'.4rem'}}>
        {p.foto_url ? <img src={p.foto_url} alt={p.nombre} loading="lazy" style={{width:'100%',height:130,objectFit:'contain',borderRadius:12,background:'#fff'}}/> : <div aria-hidden="true" style={{width:'100%',height:130,borderRadius:12,border:'1px dashed var(--color-borde-suave)',background:'var(--color-superficie-suave)',display:'grid',placeItems:'center',color:'var(--color-parrafo)'}}>Sin foto</div>}
        <div style={{fontWeight:700,fontSize:'.95rem',lineHeight:1.2}}>{p.nombre}</div>
@@ -151,12 +154,13 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
      ))}
      {!filtrados.length&&<div className="dato-secundario" style={{gridColumn:'1/-1',padding:'1rem'}}>No hay insumos para mostrar.</div>}
     </div>
+    </PanelResultados>
    </div>
 
    <div className="panel-catalogos" style={{display:'grid',gap:'.75rem',padding:'1rem',alignContent:'start',height:'100%',minWidth:0}}>
     <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'.5rem',flexWrap:'wrap'}}><h2 style={{margin:0,fontSize:'1.05rem'}}>Carrito de solicitud</h2><span className="badge bg-light text-dark border">{totalItems} ítem(s)</span></div>
     <div className="tabla-usuarios-contenedor" style={{minWidth:0,overflowX:'auto'}}><table className="tabla-datos tabla-catalogos" style={{width:'100%',tableLayout:'fixed',minWidth:0}}>
-     <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:110}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:70}}>Editar</th></tr></thead>
+     <thead><tr><th scope="col">Descripción</th><th scope="col" style={{textAlign:'center',width:110}}>Cantidad</th><th scope="col" style={{textAlign:'right',width:70}}>Acciones</th></tr></thead>
      <tbody>
       {items.map(i=>(
        <tr key={i.id}>
@@ -165,7 +169,7 @@ export default function SolicitudForm({sedes,catalogo,actor,local,solicitudId,pa
          {editCantId===i.id ? <span style={{display:'inline-flex',gap:4,alignItems:'center',justifyContent:'center'}}><input type="number" min={1} max={10000} step={1} value={editCantVal} onChange={e=>setEditCantVal(e.target.value)} style={{width:64}} aria-label={`Cantidad de ${i.p.nombre}`}/><button type="button" className="btn btn-primary btn-sm" onClick={()=>guardarEdicion(i.id)}>OK</button></span> : <strong>{i.n}</strong>}
         </td>
         <td style={{textAlign:'right'}}>
-         <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}>✎</button>
+         <button type="button" className="btn btn-outline-primary btn-sm" aria-label={`Editar cantidad de ${i.p.nombre}`} title="Editar cantidad" onClick={()=>{setEditCantId(i.id);setEditCantVal(String(i.n));}}><IconoAccion tipo="editar"/></button>
         </td>
        </tr>
       ))}

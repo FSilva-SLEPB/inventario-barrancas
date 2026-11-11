@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { opcionesAuth } from "@/lib/opciones-auth";
 import { autenticacionConfigurada } from "@/lib/configuracion-auth";
-import { puedeAdministrar, puedeGestionarDependencias } from "@/lib/politica-acceso";
+import { puedeAdministrar, puedeGestionarDependencias, puedeGestionarInsumos } from "@/lib/politica-acceso";
 
 // React cache dura una petición de renderizado; no conserva permisos entre usuarios.
 export const obtenerSesion = cache(async () => {
@@ -17,13 +17,21 @@ export const obtenerAcceso = cache(async () => {
   return sesion?.user ?? null;
 });
 
-export async function exigirAcceso() {
+// Los módulos existentes mantienen su alcance. El gestor solo entra por Insumos.
+export async function exigirAcceso(ambito:'general'|'insumos'='general') {
   const acceso = await obtenerAcceso();
   if (!acceso) {
     const sesion = await obtenerSesion();
     redirect(sesion?.accesoDenegado ? "/acceso-denegado" : "/ingresar");
   }
+  if(acceso.rol==='gestor_insumos'&&ambito!=='insumos')redirect('/sin-permiso');
   return acceso;
+}
+
+export async function exigirGestionInsumos(){
+ const acceso=await exigirAcceso('insumos');
+ if(!puedeGestionarInsumos(acceso.rol))redirect('/sin-permiso');
+ return acceso;
 }
 
 export async function exigirAdministrador() {

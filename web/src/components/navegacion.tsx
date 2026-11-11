@@ -9,7 +9,7 @@ function Icono({tipo}:{tipo:keyof typeof trazos}){return <svg width="22" height=
 export default function Navegacion({rol,administrador=false,soloLectura=false}:{rol?:RolAcceso;administrador?:boolean;soloLectura?:boolean}){
  const alternarMovil=useRef<HTMLButtonElement>(null);
  const ruta=usePathname(),[movil,setMovil]=useState(false),[eleccion,setEleccion]=useState<{ruta:string;id:string|null}|null>(null),modulos=modulosSistema(rol??(administrador?'administrador':'consulta')).sort((a,b)=>['inventario','directorio','solicitudes','mantenedores'].indexOf(a.id)-['inventario','directorio','solicitudes','mantenedores'].indexOf(b.id));
- const activo=modulos.find(m=>ruta===m.href||ruta.startsWith(m.href+'/'))?.id??null;
+ const activo=(modulos.find(m=>ruta===m.href||ruta.startsWith(m.href+'/'))??modulos.find(m=>m.accesos.some(a=>ruta===a.href||ruta.startsWith(a.href+'/'))))?.id??(rol==='gestor_insumos'&&ruta.startsWith('/inventario/actas/')?'solicitudes':null);
  const abierto=eleccion?.ruta===ruta?eleccion.id:activo;
  const cerrar=()=>setMovil(false);
  return <nav className="navegacion-principal" aria-label="Principal" onKeyDown={e=>{if(e.key==='Escape'&&movil){e.preventDefault();setMovil(false);alternarMovil.current?.focus();}}}><div className="cabecera-menu"><span className="insignia-menu" aria-hidden="true"><Icono tipo="inventario"/></span><div><p className="titulo-menu">Menú del sistema</p><p className="subtitulo-menu">Navegación institucional</p></div><button ref={alternarMovil} type="button" className="btn btn-outline-primary menu-alternar" aria-expanded={movil} aria-controls="contenido-menu" onClick={()=>setMovil(v=>!v)}>{movil?'Cerrar':'Menú'}</button></div>

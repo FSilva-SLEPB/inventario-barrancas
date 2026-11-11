@@ -3,6 +3,7 @@ export const PERFILES = {
   administrador: "Administrador del sistema",
   administrador_gestion: "Administrador de gestión",
   encargado: "Encargado de EE/JI",
+  gestor_insumos: "Gestor de insumos",
   consulta: "Consulta general / Auditor",
   consulta_sede: "Consulta de establecimiento",
 } as const;
@@ -38,3 +39,7 @@ export function rolValido(rol: unknown): rol is RolAcceso {
 export function puedeAdministrar(rol: unknown): boolean {
   return rol === "administrador" || rol === "administrador_gestion";
 }
+
+/** Facultad exclusiva del módulo Insumos; no concede administración del inventario. */
+export function puedeGestionarInsumos(rol:unknown):boolean{return puedeAdministrar(rol)||rol==='gestor_insumos';}
+export function puedeSolicitarInsumos(rol:unknown):boolean{return puedeGestionarDependencias(rol)||rol==='gestor_insumos';}

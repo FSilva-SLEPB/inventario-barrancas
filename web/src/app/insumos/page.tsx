@@ -1,27 +1,6 @@
-import {puedeGestionarDependencias} from '@/lib/politica-acceso';
-import Link from "next/link";
-import {exigirAcceso} from "@/lib/acceso";
-export const metadata={title:'Insumos | SLEP Barrancas'};
-export default async function InsumosLanding(){
- const actor=await exigirAcceso();
- const cards=[
-  {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crea y envía una nueva solicitud de insumos para tu establecimiento.'},
-  {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisa el estado y avance de las solicitudes en curso.'},
-  {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consulta el historial de solicitudes realizadas y sus resultados.'},
- ].filter(c=>c.href!=='/insumos/solicitud'||puedeGestionarDependencias(actor.rol));
- return <main>
-  <header>
-   <h1>Insumos</h1>
-   <p className="descripcion-pagina">Selecciona una opción para gestionar solicitudes de insumos.</p>
-  </header>
-  <section style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(240px,1fr))',gap:'1rem',marginTop:'1rem'}}>
-   {cards.map(c=>(
-    <Link key={c.href} href={c.href} className="panel-catalogos" style={{display:'grid',gap:'.5rem',padding:'1.25rem',textDecoration:'none',color:'inherit'}}>
-     <h2 style={{margin:0,fontSize:'1.1rem'}}>{c.titulo}</h2>
-     <p style={{margin:0}} className="descripcion-pagina">{c.descripcion}</p>
-     <span className="btn btn-primary btn-sm" style={{justifySelf:'start',marginTop:'.25rem'}}>Ingresar</span>
-    </Link>
-   ))}
-  </section>
- </main>;
-}
+import {exigirAcceso} from '@/lib/acceso';
+import {modulosSistema} from '@/lib/modulos';
+import {puedeGestionarInsumos} from '@/lib/politica-acceso';
+import PortadaModulo from '@/components/portada-modulo';
+export const metadata={title:'Solicitudes de insumos | SLEP Barrancas'};
+export default async function InsumosLanding(){const actor=await exigirAcceso('insumos');return <PortadaModulo modulo={modulosSistema(actor.rol).find(m=>m.id==='solicitudes')!}>{puedeGestionarInsumos(actor.rol)&&<p className="ayuda-catalogos">En Seguimiento de insumos puedes validar la solicitud, aprobar cantidades y reservar stock. Al confirmar la entrega se descuentan las cantidades entregadas y se genera el acta para imprimir, descargar o enviar por correo.</p>}</PortadaModulo>;}

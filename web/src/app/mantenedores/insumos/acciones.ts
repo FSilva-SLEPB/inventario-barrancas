@@ -1,13 +1,13 @@
 'use server';
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirGestionInsumos} from '@/lib/acceso';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {guardarProductoInsumo,registrarCompraInsumo} from '@/lib/insumos';
 export type EstadoProducto={estado:'inicial'|'error'|'ok';mensaje:string;revision:string;valores:Record<string,string>};
 const mensajeError=(e:unknown)=>{const c=(e as {code?:string})?.code;return c==='23505'?'Ya existe un producto con ese código.':c==='P3101'?'El producto cambió o la solicitud ya se utilizó. Recarga antes de continuar.':'No se pudo guardar. Revisa los datos y conserva esta ventana para corregirlos.';};
 export async function guardarProductoAccion(_anterior:EstadoProducto,f:FormData):Promise<EstadoProducto>{
- await exigirAdministrador();const revision=randomUUID(),valores:Record<string,string>={};
+ await exigirGestionInsumos();const revision=randomUUID(),valores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoProducto=>({estado:'error',mensaje,revision,valores});
  for(const k of ['id','codigo','nombre','categoria','unidad','activo','version','solicitud']){const v=f.get(k);if(f.getAll(k).length!==1||typeof v!=='string')return fallo('Formulario inválido.');valores[k]=v.normalize('NFC').trim();}
  if(!esIdSede(valores.solicitud)||!esIdSede(valores.id)||!['true','false'].includes(valores.activo)||!/^\d{1,10}$/.test(valores.version))return fallo('Formulario inválido.');
@@ -17,7 +17,7 @@ export async function guardarProductoAccion(_anterior:EstadoProducto,f:FormData)
  }catch(e){return fallo(mensajeError(e));}
 }
 export async function registrarCompraAccion(_anterior:EstadoProducto,f:FormData):Promise<EstadoProducto>{
- await exigirAdministrador();const revision=randomUUID(),valores:Record<string,string>={};const fallo=(mensaje:string):EstadoProducto=>({estado:'error',mensaje,revision,valores});
+ await exigirGestionInsumos();const revision=randomUUID(),valores:Record<string,string>={};const fallo=(mensaje:string):EstadoProducto=>({estado:'error',mensaje,revision,valores});
  const campos=['solicitud','productoId','version','nombre','categoria','unidad','cantidad','oc','fechaCompra'];
  if([...f.keys()].some(k=>!campos.includes(k)&&!k.startsWith('$ACTION')))return fallo('Formulario inválido.');
  for(const k of campos){const raw=f.get(k);if(f.getAll(k).length!==1||typeof raw!=='string')return fallo('Formulario inválido.');valores[k]=raw.normalize('NFC').trim();}

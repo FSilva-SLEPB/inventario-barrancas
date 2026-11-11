@@ -6,7 +6,7 @@ import type { Sede } from "@/lib/validacion-sedes";
 import { requiereSede } from "@/lib/politica-acceso";
 
 export async function listarSedes(): Promise<Sede[]> {
-  const acceso = await exigirAcceso();
+  const acceso = await exigirAcceso('insumos');
   const resultado = await obtenerBaseDatos().query<Sede>(`
     SELECT id, tipo, nombre, rbd, direccion, comuna,
            correo_institucional AS "correoInstitucional", activo

@@ -2,10 +2,10 @@ import Link from "next/link";
 import { exigirAcceso } from "@/lib/acceso";
 
 export default async function SinPermiso() {
-  await exigirAcceso();
+  await exigirAcceso('insumos');
   return <main>
     <h1>Permiso insuficiente</h1>
-    <p>Tu cuenta permite consultar los catálogos. Para modificarlos necesitas permiso de administración.</p>
+    <p>Tu perfil no tiene permiso para acceder a esta pantalla o realizar esta acción.</p>
     <Link href="/">Volver al inicio</Link>
   </main>;
 }

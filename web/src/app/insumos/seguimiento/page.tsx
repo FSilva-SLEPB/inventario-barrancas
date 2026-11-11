@@ -1,13 +1,13 @@
 import {obtenerParticipanteActual} from '@/lib/participante-actual';
 import {exigirAcceso} from "@/lib/acceso";
-import {puedeAdministrar} from "@/lib/politica-acceso";
+import {puedeGestionarInsumos} from "@/lib/politica-acceso";
 import {listarSedes} from "@/lib/sedes";
 import {listarStockInsumos,listarSolicitudesInsumos,obtenerSolicitudInsumo,type InsumoStock} from "@/lib/insumos";
 import {esIdSede} from "@/lib/validacion-sedes";
 import SolicitudesLista from "../components/solicitudes-lista";
 export const metadata={title:'Seguimiento de insumos | SLEP Barrancas'};
 export default async function SeguimientoPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const actor=await exigirAcceso();const p=await searchParams;const admin=puedeAdministrar(actor.rol);
+ const actor=await exigirAcceso('insumos');const p=await searchParams;const admin=puedeGestionarInsumos(actor.rol);
  const v=(k:string)=>typeof p[k]==='string'?(p[k] as string).trim():'';
  const filtroEstado=p.estado===undefined?'activas':v('estado');const filtroSede=v('sede')&&esIdSede(v('sede'))?v('sede'):'';const q=v('q').slice(0,150);
  const limite=[50,100,150].includes(Number(v('limite')))?Number(v('limite')):50;const pagina=/^[1-9]\d{0,6}$/.test(v('pagina'))?Number(v('pagina')):1;
