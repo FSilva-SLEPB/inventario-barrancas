@@ -79,7 +79,7 @@ table.tabla-funcionarios{min-width:65rem}table.tabla-funcionarios td:first-child
 @media(max-width:767.98px){.filtros-celulares {grid-template-columns:minmax(0,1fr);}}
 .filtros-directorio.filtros-celulares {display:grid;}
 .tabla-celulares.tabla-datos td:nth-child(3) {min-width:12rem;}
-.tabla-celulares.tabla-datos th:last-child,.tabla-celulares.tabla-datos td:last-child {position:sticky;right:0;min-width:7rem;text-align:center;background:var(--color-superficie);box-shadow:-6px 0 12px rgb(15 23 42 / 4%);}
+.tabla-celulares.tabla-datos th:last-child,.tabla-celulares.tabla-datos td:last-child {position:static;min-width:8.5rem;text-align:left;box-shadow:none;}
 .tabla-celulares.tabla-datos th:last-child {background:var(--color-superficie-suave);}
 
 /* Regla común para filtros y resultados de todos los módulos. */
@@ -114,18 +114,18 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 .visor-acta-pdf{width:100%;height:75vh;min-height:30rem;border:1px solid var(--color-borde-suave);border-radius:.75rem;background:var(--color-superficie-alterna)}
 .acciones-documento{flex-wrap:wrap}.comprobacion-envio{display:flex;gap:.6rem;align-items:flex-start;margin-block:1rem}.comprobacion-envio input{width:auto;flex:0 0 auto}
 /* Un mismo grupo de acciones en todos los listados; Bootstrap controla sus estados. */
-.acciones-registro{display:flex;flex-wrap:nowrap;align-items:center;gap:.5rem;min-width:max-content}
-.acciones-registro .btn{white-space:nowrap;min-height:2.5rem;text-decoration:none}
-.tabla-directorio-separado th:last-child,.tabla-bodega th:last-child{width:12rem;min-width:12rem}
-.tabla-inventario-contenedor th:last-child,.tabla-inventario-contenedor td:last-child{min-width:12rem}
+.acciones-registro{display:flex;flex-wrap:wrap;align-items:center;align-content:center;gap:.375rem;width:7.5rem;max-width:100%;min-width:0}
+.acciones-registro .btn{white-space:normal;min-height:2.25rem;max-width:100%;text-decoration:none}
+.tabla-directorio-separado th:last-child,.tabla-bodega th:last-child{width:8.5rem;min-width:8.5rem}
+.tabla-inventario-contenedor th:last-child,.tabla-inventario-contenedor td:last-child{min-width:8.5rem}
 
 .accion-imprimir{display:inline-flex;gap:.5rem;align-items:center;flex-wrap:wrap}.marco-impresion-acta{position:fixed;left:-10000px;top:0;width:800px;height:600px;border:0}.alternativa-impresion{font-size:.85rem;white-space:nowrap}
 .tabla-movimientos.tabla-datos{min-width:75rem;table-layout:auto;word-break:normal}
 .tabla-movimientos.tabla-datos td{overflow-wrap:normal;min-width:6.5rem}
-.tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:12rem}
+.tabla-movimientos.tabla-datos th:last-child,.tabla-movimientos.tabla-datos td:last-child{min-width:8.5rem}
 
 /* Acciones compartidas: icono, nombre accesible y ayuda al pasar el cursor. */
-.accion-icono.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;min-width:2.75rem;padding:.5rem;flex-shrink:0;transition:none}
+.accion-icono.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;width:2.25rem;height:2.25rem;min-width:2.25rem;min-height:2.25rem;padding:.375rem;flex:0 0 2.25rem;transition:none}
 .accion-icono svg{flex-shrink:0}
 .operacion-seccion{margin-block:1rem;padding:1rem;border:1px solid var(--borde,#cad8e3);border-radius:12px}
 .operacion-seccion h3{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:0}
@@ -143,3 +143,8 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 
 /* Datos y fotografía: dos columnas dentro del mismo recuadro. */
 .datos-sede-con-foto{grid-template-columns:minmax(0,1fr) minmax(240px,1fr);gap:2rem}.datos-sede-con-foto>.ficha-datos{grid-template-columns:minmax(0,1fr);align-content:start}.datos-sede-con-foto>section{min-width:0}@media(max-width:700px){.datos-sede-con-foto{grid-template-columns:minmax(0,1fr)}}
+
+/* Conservar todas las columnas en el desplazamiento de la tabla, sin superponer Acciones. */
+.tabla-contenedor,.tabla-usuarios-contenedor{overscroll-behavior-inline:contain;scrollbar-gutter:stable;touch-action:pan-x pan-y;}
+.acciones-registro .accion-icono svg{width:1rem;height:1rem;}
+@media(pointer:coarse){.acciones-registro{width:9rem;}.acciones-registro .accion-icono.btn{width:2.75rem;height:2.75rem;min-width:2.75rem;min-height:2.75rem;flex-basis:2.75rem;}}

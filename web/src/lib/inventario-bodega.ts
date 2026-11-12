@@ -1,14 +1,14 @@
 import 'server-only';
 import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
-export type BienBodega={id:string;clase:'equipo'|'celular';sedeId:string;sedeNombre:string;sedeTipo:string;sedeRbd:string|null;categoriaNombre:string;marca:string;modelo:string;serie:string;inventario:string;telefono:string;condicionTecnica:string;situacion:string;version:number;estadoAdministrativo:string;roboEstado:string|null;ubicacionId:string|null;ubicacionNombre:string|null};
+export type BienBodega={id:string;clase:'equipo'|'celular';sedeId:string;sedeNombre:string;sedeTipo:string;sedeRbd:string|null;categoriaNombre:string;marca:string;modelo:string;serie:string;inventario:string;telefono:string;condicionTecnica:string;situacion:string;version:number;estadoAdministrativo:string;roboEstado:string|null;ubicacionId:string|null;ubicacionNombre:string|null;bajaPendienteTI?:boolean};
 export type FiltrosBodega={tipo:string;sede:string;rbd:string;clase:string;q:string;pagina:number;limite:number;ubicacion?:string};
 const base=`WITH bienes AS (
- SELECT e.id,'equipo'::text AS clase,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.tipo AS "sedeTipo",s.rbd AS "sedeRbd",c.nombre AS "categoriaNombre",e.marca,e.modelo,COALESCE(e.serie,'') AS serie,COALESCE(e.numero_inventario,'') AS inventario,''::text AS telefono,e.condicion_tecnica AS "condicionTecnica",e.situacion,e.version,e.estado_administrativo AS "estadoAdministrativo",
+ SELECT e.id,'equipo'::text AS clase,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.tipo AS "sedeTipo",s.rbd AS "sedeRbd",c.nombre AS "categoriaNombre",e.marca,e.modelo,COALESCE(e.serie,'') AS serie,COALESCE(e.numero_inventario,'') AS inventario,''::text AS telefono,e.condicion_tecnica AS "condicionTecnica",e.situacion,e.version,e.estado_administrativo AS "estadoAdministrativo",COALESCE(e.datos_compra->'bajaPendienteTI'='true'::jsonb,false) AS "bajaPendienteTI",
  (SELECT i.estado FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id WHERE d.equipo_id=e.id AND i.estado IN ('reportado','validado') AND d.recuperado_fecha IS NULL LIMIT 1) AS "roboEstado",e.ubicacion_bodega_id AS "ubicacionId",u.nombre AS "ubicacionNombre"
  FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id JOIN public.categorias_bienes c ON c.id=e.categoria_id LEFT JOIN public.ubicaciones_bodega u ON u.id=e.ubicacion_bodega_id WHERE e.custodia='en_bodega'
  UNION ALL
- SELECT c.id,'celular'::text,c.sede_id,s.nombre,s.tipo,s.rbd,'Celular'::text,c.marca,c.modelo,COALESCE(c.imei,''),COALESCE(c.numero_inventario,''),c.telefono,c.condicion_tecnica,'en_bodega'::text,c.version,c.estado_administrativo,NULL::text,c.ubicacion_bodega_id,u.nombre
+ SELECT c.id,'celular'::text,c.sede_id,s.nombre,s.tipo,s.rbd,'Celular'::text,c.marca,c.modelo,COALESCE(c.imei,''),COALESCE(c.numero_inventario,''),c.telefono,c.condicion_tecnica,'en_bodega'::text,c.version,c.estado_administrativo,false,NULL::text,c.ubicacion_bodega_id,u.nombre
  FROM public.celulares c JOIN public.sedes s ON s.id=c.sede_id LEFT JOIN public.ubicaciones_bodega u ON u.id=c.ubicacion_bodega_id WHERE c.custodia='en_bodega' AND c.activo
 ) `;
 export async function listarBodega(f:FiltrosBodega){

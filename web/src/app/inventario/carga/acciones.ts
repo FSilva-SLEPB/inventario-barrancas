@@ -1,5 +1,6 @@
 "use server";
 import {redirect} from "next/navigation";
+import {tienePermiso} from '@/lib/rbac';
 import {requiereSede} from "@/lib/politica-acceso";
 import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
@@ -10,7 +11,7 @@ import { prepararCargaEquipos } from "@/lib/preparar-carga-equipos";
 import { obtenerBaseDatos } from "@/lib/db";
 import { ErrorCargaCsv } from "@/lib/csv-equipos";
 export type EstadoCarga={estado:"inicial"|"error"|"previa"|"guardado";mensaje:string;hash:string;total:number;
-  errores:string[];avisos:string[];cantidadAvisos:number;vistas:{fila:number;rbd:string;categoria:string;marca:string;modelo:string;serie:string;inventario:string;estado:string}[]};
+  filas?:number;errores:string[];avisos:string[];cantidadAvisos:number;vistas:{fila:number;rbd:string;categoria:string;marca:string;modelo:string;serie:string;inventario:string;estado:string;cantidad?:number;antecedentes?:Record<string,string>}[]};
 export async function procesarCarga(_anterior:EstadoCarga,f:FormData):Promise<EstadoCarga> {
   const actor=await exigirPermiso('equipos','registrar');if(requiereSede(actor)||actor.alcance==='propios')redirect('/sin-permiso');
   const base:EstadoCarga={estado:"error",mensaje:"",hash:"",total:0,errores:[],avisos:[],cantidadAvisos:0,vistas:[]};
@@ -23,13 +24,14 @@ export async function procesarCarga(_anterior:EstadoCarga,f:FormData):Promise<Es
     const texto=new TextDecoder("utf-8",{fatal:true}).decode(buffer);
     const [sedes,categorias]=await Promise.all([listarSedes(),listarCategorias()]);
     const preparado=prepararCargaEquipos(texto,sedes,categorias);
+    if(preparado.datos.some(d=>['robado','no_encontrado'].includes(d.estadoAdministrativo))&&!tienePermiso(actor,'bajas','confirmar'))return {...base,mensaje:'Los registros Robado o No encontrado deben ser cargados por TI con permiso de confirmar estados.'};
     const db=obtenerBaseDatos();
     // Un archivo ya confirmado no vuelve a crear equipos, aunque se reenvíe la petición.
     const existente=await db.query("SELECT cantidad FROM public.cargas_equipos WHERE sha256=$1",[hash]);
     if(existente.rows[0])return {...base,estado:"guardado",mensaje:`Este archivo ya fue cargado: ${existente.rows[0].cantidad} equipos. No se duplicaron.`,hash};
     const duplicados=await db.query(`SELECT count(*) FROM public.equipos WHERE upper(serie)=ANY($1::text[]) OR upper(numero_inventario)=ANY($2::text[])`,[preparado.series,preparado.inventarios]);
     if(Number(duplicados.rows[0].count))preparado.errores.push("Hay identificadores ya registrados en el sistema. No se sobrescriben equipos ni se muestran datos de otra ficha.");
-    const estado={...base,hash,total:preparado.total,errores:preparado.errores.slice(0,100),avisos:preparado.avisos.slice(0,30),cantidadAvisos:preparado.avisos.length,vistas:preparado.vistas};
+    const estado={...base,hash,total:preparado.total,filas:preparado.filas,errores:preparado.errores.slice(0,100),avisos:preparado.avisos.slice(0,30),cantidadAvisos:preparado.avisos.length,vistas:preparado.vistas};
     if(preparado.errores.length)return {...estado,mensaje:`Hay ${preparado.errores.length} errores. Corrige el archivo; no se guardó ninguna fila.`};
     if(operacion[0]==="previa")return {...estado,estado:"previa",mensaje:"Vista previa preparada. Revisa los avisos antes de confirmar."};
     if(hashes.length!==1 || hashes[0]!==hash)return {...base,mensaje:"El archivo cambió. Genera nuevamente la vista previa."};

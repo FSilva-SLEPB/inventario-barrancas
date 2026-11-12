@@ -5,12 +5,12 @@ import { obtenerBaseDatos } from "@/lib/db";
 import { CAMPOS_COMPRA, valoresEquipo, type ValoresEquipo, type DatosEquipo } from "@/lib/validacion-equipos";
 export type Equipo = DatosEquipo & { estadoAdministrativo:import('@/lib/estados-activo').EstadoAdministrativoActivo;fechaBaja:string|null;version:number; situacion:string; custodia:string; sedeNombre:string; sedeRbd:string|null;
   sedeTipo:string; categoriaNombre:string; fechaEntrega:string|null; enlaceActa:string|null; cargaId:string|null;
-  archivoOrigen:string|null;filaOrigen:number|null;roboEstado:string|null };
+  archivoOrigen:string|null;filaOrigen:number|null;roboEstado:string|null;bajaPendienteTI?:boolean };
 export type HistorialEquipo = { actor:string; motivo:string; registradoEn:string; entregaId:string|null; incidenteId:string|null; antes:Record<string,unknown>|null; despues:Record<string,unknown> };
 const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaId",e.marca,e.modelo,
   COALESCE(e.serie,'') AS serie,COALESCE(e.numero_inventario,'') AS inventario,
   e.motivo_identificacion AS "motivoIdentificacion",e.origen,e.condicion_tecnica AS "condicionTecnica",
-  e.estado_administrativo AS "estadoAdministrativo",e.fecha_baja::text AS "fechaBaja",e.datos_compra AS compra,e.observaciones,e.version,e.situacion,e.custodia,
+  COALESCE(e.datos_compra->'bajaPendienteTI'='true'::jsonb,false) AS "bajaPendienteTI",e.estado_administrativo AS "estadoAdministrativo",e.fecha_baja::text AS "fechaBaja",e.datos_compra AS compra,e.observaciones,e.version,e.situacion,e.custodia,
   e.fecha_entrega::text AS "fechaEntrega",e.enlace_acta AS "enlaceActa",e.carga_id AS "cargaId",
   e.fila_origen AS "filaOrigen",l.archivo AS "archivoOrigen",
   (SELECT i.estado FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id
