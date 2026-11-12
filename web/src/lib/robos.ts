@@ -6,7 +6,7 @@ export type FiltrosRobos={ambito:string;sede:string;comuna:string;estado:string;
 export type FilaRobo={incidenteId:string;equipoId:string;sedeNombre:string;rbd:string|null;sedeTipo:string;comuna:string|null;fecha:string;estado:keyof typeof import('./validacion-robos').ESTADOS_ROBO;marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};
 export type EquipoRobo={id:string;version:number;marca:string;modelo:string;serie:string|null;inventario:string|null;incidenteAbierto:boolean;sedeId:string;sedeNombre:string;rbd:string|null;comuna:string|null};
 const estado="CASE WHEN d.recuperado_fecha IS NOT NULL THEN 'recuperado' ELSE i.estado END";
-const filtros=`WHERE NOT EXISTS(SELECT 1 FROM public.reportes_incidentes_inventario r WHERE r.legado_id=i.id) AND ($1::boolean OR i.sede_id=$2::uuid) AND ($3='' OR ($3='nc' AND i.sede_tipo='nivel_central') OR ($3='eeji' AND i.sede_tipo<>'nivel_central'))
+const filtros=`WHERE ($1::boolean OR NOT EXISTS(SELECT 1 FROM public.reportes_incidentes_inventario r WHERE r.legado_id=i.id)) AND ($1::boolean OR i.sede_id=$2::uuid) AND ($3='' OR ($3='nc' AND i.sede_tipo='nivel_central') OR ($3='eeji' AND i.sede_tipo<>'nivel_central'))
  AND ($4::uuid IS NULL OR i.sede_id=$4::uuid) AND ($5='' OR i.comuna=$5) AND ($6='' OR ${estado}=$6)
  AND ($7::date IS NULL OR i.fecha>=$7::date) AND ($8::date IS NULL OR i.fecha<=$8::date)
  AND ($9='' OR i.sede_nombre ILIKE '%'||$9||'%' OR i.sede_rbd ILIKE '%'||$9||'%' OR d.identificacion->>'serie' ILIKE '%'||$9||'%'
