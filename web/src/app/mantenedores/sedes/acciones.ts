@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { obtenerBaseDatos } from "@/lib/db";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirAlguno } from "@/lib/acceso";
 import {
   validarSede,
   valoresInicialesSede,
@@ -17,7 +17,7 @@ export async function guardarSede(
   _anterior: EstadoSede,
   formulario: FormData,
 ): Promise<EstadoSede> {
-  const actor = await exigirAdministrador();
+  const actor = await exigirAlguno('sedes.registrar','sedes.editar');
   const revision = randomUUID();
   const { valores, errores, datos } = validarSede(formulario);
   const respuesta: EstadoSede = {

@@ -2,7 +2,7 @@
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirAlguno} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {retornoMovimiento} from '@/lib/validacion-movimientos-inventario';
@@ -10,7 +10,7 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import {CAMPOS_CELULAR,celularVacio,validarCelular,enlaceCelulares,type DatosCelular} from '@/lib/validacion-celulares';
 export type EstadoCelular={estado:'inicial'|'error';mensaje:string;valores:DatosCelular;id:string;version:number;revision:string;motivo:string;custodiaInicial?:string};
 export async function guardarCelular(_anterior:EstadoCelular,f:FormData):Promise<EstadoCelular>{
- const actor=await exigirAdministrador(),revision=randomUUID(),crudos:Record<string,unknown>={},valores=celularVacio();
+ const actor=await exigirAlguno('celulares.registrar','celulares.editar'),revision=randomUUID(),crudos:Record<string,unknown>={},valores=celularVacio();
  for(const k of CAMPOS_CELULAR){crudos[k]=f.get(k);valores[k]=typeof crudos[k]==='string'?crudos[k].slice(0,2500):'';}
  crudos.activo=f.get('activo')==='si'?true:f.get('activo')==='no'?false:null;valores.activo=crudos.activo===true;
  const id=f.get('id'),version=Number(f.get('version')),motivo=f.get('motivo'),filtros=f.get('filtros');

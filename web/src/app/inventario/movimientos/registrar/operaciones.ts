@@ -2,7 +2,7 @@
 import {randomUUID} from 'node:crypto';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {CAMPOS_OPERACION_INVENTARIO,validarOperacionInventario} from '@/lib/validacion-operaciones-inventario';
 import {CAMPOS_ACTA,metadatosActa,type MetadataActa} from '@/lib/validacion-actas';
@@ -11,7 +11,7 @@ import {completarActaEnTransaccion} from '@/lib/actas';
 import {destinoConExito} from '@/lib/aviso-exito';
 import type {EstadoMovimiento} from './acciones';
 export async function registrarOperacion(_anterior:EstadoMovimiento,f:FormData):Promise<EstadoMovimiento>{
- const actor=await exigirAdministrador(),campos=[...CAMPOS_OPERACION_INVENTARIO,'actaSolicitud','funcionario',...Object.keys(CAMPOS_ACTA)],valores:Record<string,string>={};
+ const actor=await exigirPermiso('movimientos','confirmar'),campos=[...CAMPOS_OPERACION_INVENTARIO,'actaSolicitud','funcionario',...Object.keys(CAMPOS_ACTA)],valores:Record<string,string>={};
  for(const k of campos){const v=f.get(k);valores[k]=typeof v==='string'?v.slice(0,k==='devoluciones'||k==='entregas'?150000:2500):'';}
  const error=(mensaje:string):EstadoMovimiento=>({estado:'error',mensaje,valores,revision:randomUUID()});
  let p:ReturnType<typeof validarOperacionInventario>,metadata:MetadataActa;

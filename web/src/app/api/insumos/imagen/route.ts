@@ -1,13 +1,14 @@
+import {tienePermiso} from '@/lib/rbac';
 import {NextResponse} from 'next/server';
 import {obtenerAcceso} from '@/lib/acceso';
-import {puedeGestionarInsumos} from '@/lib/politica-acceso';
+
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {randomUUID} from 'node:crypto';
 import {formularioImagenLimitado,imagenInsumoValida,origenInsumoValido} from '@/lib/imagenes-insumos';
 export async function POST(req:Request){
  const actor=await obtenerAcceso();if(!actor)return NextResponse.json({error:'Inicia sesión.'},{status:401});
- if(!puedeGestionarInsumos(actor.rol)||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
+ if(!tienePermiso(actor,'catalogo_insumos','editar')||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
  try{
   const f=await formularioImagenLimitado(req),archivo=f.get('imagen');
   if(f.getAll('imagen').length!==1||!(archivo instanceof File))return NextResponse.json({error:'Selecciona una imagen.'},{status:400});
@@ -19,6 +20,7 @@ export async function POST(req:Request){
 }
 export async function GET(req:Request){
  const actor=await obtenerAcceso();if(!actor)return new Response(null,{status:401});
+ if(!tienePermiso(actor,'catalogo_insumos')&&!tienePermiso(actor,'solicitudes_insumos','registrar')&&!tienePermiso(actor,'seguimiento_insumos'))return new Response(null,{status:403});
  const id=new URL(req.url).searchParams.get('id');if(typeof id!=='string'||!esIdSede(id))return new Response(null,{status:404});
  const {rows}=await obtenerBaseDatos().query<{mime:string;contenido:Buffer}>('SELECT mime,contenido FROM public.imagenes_insumos WHERE id=$1::uuid',[id]);
  if(!rows[0])return new Response(null,{status:404});

@@ -23,7 +23,7 @@ export async function listarDependencias(): Promise<DependenciaListado[]> {
     JOIN public.sedes AS s ON s.id = d.sede_id
     WHERE ($1::boolean OR d.sede_id = $2::uuid)
     ORDER BY lower(s.nombre), s.id, lower(d.nombre), d.id
-  `, [!requiereSede(acceso.rol), acceso.sedeId]);
+  `, [!requiereSede(acceso), acceso.sedeId]);
 
   return resultado.rows;
 }

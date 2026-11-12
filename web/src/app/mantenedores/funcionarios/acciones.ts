@@ -3,13 +3,13 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirAlguno} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {CAMPOS_FUNCIONARIO,validarFuncionario,type DatosFuncionario} from '@/lib/validacion-funcionarios';
 export type EstadoFuncionario={estado:'inicial'|'error'|'guardado';mensaje:string;id:string;version:number;valores:DatosFuncionario;revision:string;motivo:string};
 export async function guardarFuncionario(_anterior:EstadoFuncionario,f:FormData):Promise<EstadoFuncionario>{
- const actor=await exigirAdministrador(),revision=randomUUID(),crudos:Record<string,unknown>={};for(const k of CAMPOS_FUNCIONARIO)crudos[k]=f.get(k);
+ const actor=await exigirAlguno('funcionarios.registrar','funcionarios.editar'),revision=randomUUID(),crudos:Record<string,unknown>={};for(const k of CAMPOS_FUNCIONARIO)crudos[k]=f.get(k);
  crudos.activo=f.get('activo')==='si'?true:f.get('activo')==='no'?false:null;
  const valores={...Object.fromEntries(CAMPOS_FUNCIONARIO.map(k=>[k,typeof crudos[k]==='string'?crudos[k].slice(0,500):''])),activo:crudos.activo===true} as DatosFuncionario;
  const id=f.get('id'),version=Number(f.get('version')),motivo=f.get('motivo'),idSeguro=typeof id==='string'&&esIdSede(id)?id:randomUUID();

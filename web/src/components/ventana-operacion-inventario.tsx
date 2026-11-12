@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerEquipo} from '@/lib/equipos';
 import {detalleCelular} from '@/lib/celulares';
 import {listarSedes} from '@/lib/sedes';
@@ -16,7 +16,7 @@ import type {FuncionarioMovimiento} from '@/components/formulario-movimiento-inv
 import FormularioOperacion from '@/components/formulario-operacion-inventario';
 import ModalFicha from '@/components/modal-ficha';
 export default async function VentanaOperacion({parametros:p,volver}:{parametros:Record<string,string|string[]|undefined>;volver:string}){
- const actor=await exigirAdministrador(),tipo=p.movimiento,clase=p.claseBien,id=p.bien;
+ const actor=await exigirPermiso('movimientos','confirmar'),tipo=p.movimiento,clase=p.claseBien,id=p.bien;
  if(!['cambio','traspaso'].includes(String(tipo))||!['equipo','celular'].includes(String(clase))||typeof id!=='string'||!esIdSede(id))notFound();
  const bien=clase==='equipo'?await obtenerEquipo(id):(await detalleCelular(id))?.celular;if(!bien)notFound();
  const sedes=await listarSedes(),origen=sedes.find(s=>s.id===bien.sedeId),directa=tipo==='traspaso'&&bien.custodia==='asignado';

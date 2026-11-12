@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { randomUUID } from "node:crypto";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirPermiso } from "@/lib/acceso";
 import { seleccionarEntregas, ErrorSeleccionEntrega } from "@/lib/entregas";
 import { hoyChile } from "@/lib/validacion-entregas";
 import FormularioRegularizacion from "@/components/formulario-regularizacion";
 import type { ParametrosInventario } from "@/components/vista-inventario";
 export const metadata = { title: "Regularizar entregas | Inventario" };
 export default async function Regularizar({ searchParams }: ParametrosInventario) {
-  await exigirAdministrador();
+  await exigirPermiso('movimientos','consultar');
   let equipos; let error = "";
   try { equipos = await seleccionarEntregas(await searchParams); } catch (e) {
     error = e instanceof ErrorSeleccionEntrega ? e.message : "No se pudo preparar la selección. Inténtalo nuevamente.";

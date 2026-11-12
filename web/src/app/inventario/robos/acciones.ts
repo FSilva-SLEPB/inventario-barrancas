@@ -2,7 +2,7 @@
 import {destinoConExito} from '@/lib/aviso-exito';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
-import {exigirAdministrador,exigirGestionDependencias} from '@/lib/acceso';
+import {exigirPermiso,exigirGestionDependencias} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {validarReporteRobo,fechaRobo,textoRobo} from '@/lib/validacion-robos';
@@ -21,7 +21,7 @@ export async function reportarRobo(_estado:EstadoRobo,f:FormData):Promise<Estado
  revalidatePath('/inventario','layout');redirect(destinoConExito('/inventario/robos/'+id, 'robo'));
 }
 export async function actualizarRobo(_estado:EstadoRobo,f:FormData):Promise<EstadoRobo>{
- const actor=await exigirAdministrador();let id:string;
+ const actor=await exigirPermiso('incidentes','aprobar');let id:string;
  try{
   for(const k of ['id','version','operacion','motivo'])if(f.getAll(k).length!==1)throw new Error('Formulario inválido. Recarga la página.');
   const valor=f.get('id'),version=Number(f.get('version')),operacion=f.get('operacion');

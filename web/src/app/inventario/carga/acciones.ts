@@ -1,7 +1,9 @@
 "use server";
+import {redirect} from "next/navigation";
+import {requiereSede} from "@/lib/politica-acceso";
 import { createHash } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirPermiso } from "@/lib/acceso";
 import { listarSedes } from "@/lib/sedes";
 import { listarCategorias } from "@/lib/catalogos";
 import { prepararCargaEquipos } from "@/lib/preparar-carga-equipos";
@@ -10,7 +12,7 @@ import { ErrorCargaCsv } from "@/lib/csv-equipos";
 export type EstadoCarga={estado:"inicial"|"error"|"previa"|"guardado";mensaje:string;hash:string;total:number;
   errores:string[];avisos:string[];cantidadAvisos:number;vistas:{fila:number;rbd:string;categoria:string;marca:string;modelo:string;serie:string;inventario:string;estado:string}[]};
 export async function procesarCarga(_anterior:EstadoCarga,f:FormData):Promise<EstadoCarga> {
-  const actor=await exigirAdministrador();
+  const actor=await exigirPermiso('equipos','registrar');if(requiereSede(actor)||actor.alcance==='propios')redirect('/sin-permiso');
   const base:EstadoCarga={estado:"error",mensaje:"",hash:"",total:0,errores:[],avisos:[],cantidadAvisos:0,vistas:[]};
   const archivo=f.get("archivo");const operacion=f.getAll("operacion");const hashes=f.getAll("hash");
   if(!(archivo instanceof File) || !/\.csv$/i.test(archivo.name) || archivo.size===0 || archivo.size>2*1024*1024

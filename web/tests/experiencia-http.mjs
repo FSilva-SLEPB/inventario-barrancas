@@ -43,7 +43,7 @@ try{
  const documento=await readFile('../docs/modelo-entidad-relacion.md','utf8');
  const mer=modeloMermaid(modelo);
  assert.ok(documento.includes(mer));pruebas++;
- const paginaModelo=main(await(await pedir('/documentacion/modelo-datos',ca)).text());assert.ok(paginaModelo.includes('Modelo entidad relación'));assert.ok(paginaModelo.includes('Descargar diagrama SVG'));assert.ok(paginaModelo.includes('directorio_sedes'));pruebas++;
+ const paginaModelo=main(await(await pedir('/documentacion/modelo-datos',await cookie('felipe.silva@slepb.gob.cl'))).text());assert.ok(paginaModelo.includes('Modelo entidad relación'));assert.ok(paginaModelo.includes('Descargar diagrama SVG'));assert.ok(paginaModelo.includes('directorio_sedes'));pruebas++;
  console.log(`${pruebas} comprobaciones de experiencia: navegación y perfiles, acciones Ver/Editar, carga privada, búsqueda de equipos por sede, reporte mínimo y modelo real de tablas/relaciones.`);
 }finally{
  await db.query('DELETE FROM public.equipos_historial WHERE equipo_id=ANY($1::uuid[])',[equipos]);await db.query('DELETE FROM public.incidentes_robos_historial WHERE incidente_id=ANY($1::uuid[])',[incidentes]);await db.query('DELETE FROM public.incidentes_robos_equipos WHERE incidente_id=ANY($1::uuid[])',[incidentes]);await db.query('DELETE FROM public.incidentes_robos WHERE id=ANY($1::uuid[])',[incidentes]);await db.query('DELETE FROM public.equipos WHERE id=ANY($1::uuid[])',[equipos]);await db.query('DELETE FROM public.directorio_historial WHERE sede_id=ANY($1::uuid[])',[sedes]);await db.query('DELETE FROM public.directorio_sedes WHERE sede_id=ANY($1::uuid[])',[sedes]);await db.query('DELETE FROM public.directorio_cargas WHERE sha256=ANY($1)',[hashes]);

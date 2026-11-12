@@ -8,18 +8,16 @@ import { autenticacionConfigurada } from "@/lib/configuracion-auth";
 
 async function consultarAcceso(correo: string) {
   const { rows } = await obtenerBaseDatos().query<{
-    rol: unknown; sedeId: string | null; sedeNombre: string | null; sedeRbd: string | null;
+    autorizacion?:import('@/lib/rbac').AutorizacionRbac & {funcionarioId:string|null};rol: unknown; sedeId: string | null; sedeNombre: string | null; sedeRbd: string | null;
   }>(
-    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre", s.rbd AS "sedeRbd"
-     FROM public.usuarios_acceso u LEFT JOIN public.sedes s ON s.id = u.sede_id
-     WHERE u.correo = $1 AND u.activo
-       AND (u.rol NOT IN ('encargado', 'consulta_sede')
-            OR (s.activo AND s.tipo IN ('establecimiento', 'jardin_infantil')))`,
+    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre", s.rbd AS "sedeRbd",public.rbac_contexto(u.correo) AS autorizacion
+     FROM public.usuarios_acceso u LEFT JOIN public.sedes s ON s.id=u.sede_id
+     WHERE u.correo=$1 AND public.rbac_contexto(u.correo) IS NOT NULL`,
     [correo],
   );
   const fila = rows[0];
-  if (!rolValido(fila?.rol) || (requiereSede(fila.rol) && !fila.sedeId)) return null;
-  return { rol: fila.rol, sedeId: fila.sedeId ?? null, sedeNombre: fila.sedeNombre ?? null,
+  if (!rolValido(fila?.rol) || (requiereSede(fila.autorizacion??fila.rol) && !fila.sedeId)) return null;
+  return { ...fila.autorizacion,rol: fila.rol, sedeId: fila.sedeId ?? null, sedeNombre: fila.sedeNombre ?? null,
     sedeRbd: fila.sedeRbd ?? null };
 }
 

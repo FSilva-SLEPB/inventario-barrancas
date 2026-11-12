@@ -1,7 +1,17 @@
+import {esAutorizacionRbac,tienePermiso,type AutorizacionRbac} from '@/lib/rbac';
+import {permisoRuta} from '@/lib/rbac-rutas';
 import {puedeAdministrar,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
 export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string;externo?:boolean};
 export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
-export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
+export function modulosSistema(entrada:RolAcceso|(Partial<AutorizacionRbac>&{rol:RolAcceso})):ModuloSistema[]{
+ if(esAutorizacionRbac(entrada)){
+  const todos=modulosSistema('administrador');
+  todos.find(m=>m.id==='inventario')!.accesos.push({href:'/inventario/actas',titulo:'Actas emitidas',descripcion:'Consultar documentos conservados, imprimir y descargar según permisos.',icono:'ACT'});
+  todos.find(m=>m.id==='mantenedores')!.accesos.push({href:'/mantenedores/perfiles',titulo:'Perfiles y permisos',descripcion:'Permisos por recurso y acción, alcances e historial.',icono:'PR'});
+  if(['sistema','utic'].includes(entrada.clasePerfil)&&tienePermiso(entrada,'funcionarios','editar'))todos.find(m=>m.id==='mantenedores')!.accesos.push({href:'/mantenedores/asignaciones',titulo:'Vínculos de inventario personal',descripcion:'Vincular registros previos a su funcionario, con revisión e historial.',icono:'VP'});
+  return todos.map(m=>({...m,accesos:m.accesos.filter(a=>{if(a.href==='/inventario/nivel-central'&&entrada.alcance!=='global')return false;const p=permisoRuta(a.href);return p?entrada.permisos.includes(p):false;}).map(a=>a.href==='/insumos/seguimiento'&&!tienePermiso(entrada,'seguimiento_insumos','aprobar')&&!tienePermiso(entrada,'seguimiento_insumos','confirmar')?{...a,titulo:'Seguimiento de insumos',descripcion:'Consulta del avance de solicitudes autorizadas.'}:a.href==='/inventario/p02'&&entrada.alcance==='sede'?{...a,titulo:'Inventario de mi sede'}:a)})).filter(m=>m.accesos.length>0);
+ }
+ const rol=typeof entrada==='string'?entrada:entrada.rol;
  const admin=puedeAdministrar(rol),local=requiereSede(rol);
  const modulos:ModuloSistema[]=[{id:'inventario',titulo:'Inventario',href:'/inventario',descripcion:'Equipos, entregas e incidentes, con identificación e historial de cada bien.',accesos:[
   ...(!local?[{href:'/inventario/nivel-central',titulo:'Inventario Nivel Central',descripcion:'Equipos y bienes de Nivel Central.',icono:'NC'}]:[]),

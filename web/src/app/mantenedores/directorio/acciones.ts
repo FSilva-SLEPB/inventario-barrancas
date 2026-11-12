@@ -3,14 +3,14 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirAlguno} from '@/lib/acceso';
 import {listarDirectorio} from '@/lib/directorio';
 import {obtenerBaseDatos} from '@/lib/db';
 import {datosDesdeSede,validarDatosDirectorio} from '@/lib/validacion-directorio';
 import {SECCIONES_DIRECTORIO,esSeccionDirectorio,enlaceDirectorio} from '@/lib/secciones-directorio';
 export type EstadoFichaDirectorio={estado:'inicial'|'error';mensaje:string;valores:Record<string,string>;revision:string};
 export async function guardarFichaDirectorio(_anterior:EstadoFichaDirectorio,f:FormData):Promise<EstadoFichaDirectorio>{
- const actor=await exigirAdministrador(),revision=randomUUID(),valores:Record<string,string>={};
+ const actor=await exigirAlguno('directorio_institucional.editar','directorio_personas.editar'),revision=randomUUID(),valores:Record<string,string>={};
  for(const k of ['rbd','sedeNombre','direccion','comuna','correoInstitucional','nombres','apellidos','rut','correo','situacion','motivo']){const v=f.get(k);valores[k]=typeof v==='string'?v.slice(0,2000):'';}
  const fallo=(mensaje:string):EstadoFichaDirectorio=>({estado:'error',mensaje,valores,revision});
  const seccion=f.get('seccion'),sede=f.get('sede'),sedeVersion=f.get('sedeVersion'),version=Number(f.get('version')),filtros=f.get('filtros');

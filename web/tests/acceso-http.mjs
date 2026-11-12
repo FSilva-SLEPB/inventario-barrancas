@@ -22,25 +22,6 @@ const cookie = async (email, extras = {}) => "next-auth.session-token=" + await 
 async function pedir(ruta, sesion) {
   return fetch(origen + ruta, { redirect: "manual", headers: sesion ? { Cookie: sesion } : {} });
 }
-function camposAccion(html) {
-  const decodificar = (s) => s.replaceAll('&quot;', '"').replaceAll('&#x27;', "'")
-    .replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&');
-  const campos = [];
-  for (const [input] of html.matchAll(/<input\b[^>]*>/g)) {
-    if (!input.includes('type="hidden"')) continue;
-    const nombre = /\bname="([^"]+)"/.exec(input)?.[1];
-    if (nombre?.startsWith('$ACTION')) campos.push([decodificar(nombre),
-      decodificar(/\bvalue="([^"]*)"/.exec(input)?.[1] ?? '')]);
-  }
-  assert.ok(campos.length, 'Se requiere una referencia real de acción.');
-  return campos;
-}
-async function guardar(ruta, campos, valores, sesion) {
-  const datos = new FormData();
-  for (const [nombre, valor] of [...campos, ...Object.entries(valores)]) datos.append(nombre, valor);
-  return fetch(origen + ruta, { method: 'POST', body: datos, redirect: 'manual',
-    headers: { Origin: new URL(origen).origin, ...(sesion ? { Cookie: sesion } : {}) } });
-}
 await base.connect();
 let verificaciones = 0;
 try {
@@ -96,7 +77,7 @@ try {
     assert.ok(/id="formulario-(categoria|sede|dependencia)"/.test(htmlAdmin),
       `El administrador debe tener el panel de edición: ${ruta}?nuevo=1`);
     const respuestaConsulta = await pedir(`${ruta}?nuevo=1`, consulta);
-    assert.equal(respuestaConsulta.status, 200);
+    assert.equal(respuestaConsulta.status, ruta.endsWith("/dependencias")?307:200);
     assert.ok(!/id="formulario-(categoria|sede|dependencia)"/.test(await respuestaConsulta.text()),
       `Consulta no debe tener panel de edición: ${ruta}?nuevo=1`);
     verificaciones += 2;
@@ -153,33 +134,23 @@ try {
   }
   const pantallaUsuarios = await pedir('/mantenedores/usuarios?nuevo=1', admin);
   assert.equal(pantallaUsuarios.status, 200);
-  const accionUsuario = camposAccion(await pantallaUsuarios.text());
-  const valores = { correo: usuarioGestion, nombre: 'Persona ficticia', rol: 'consulta', activo: 'true', version: '0', sedeId: '' };
-  for (const [sesion, destino] of [[null, '/ingresar'], [consulta, '/sin-permiso']]) {
-    const denegado = await guardar('/mantenedores/usuarios', accionUsuario, valores, sesion);
-    assert.equal(denegado.status, 303);
-    assert.equal(new URL(denegado.headers.get('location'), origen).pathname, destino);
-    verificaciones++;
+  // Obtener la acción RBAC del código cliente servido, también en la imagen final.
+  const htmlUsuarios=await pantallaUsuarios.text();let idAccion;
+  for(const [,src]of htmlUsuarios.matchAll(/<script[^>]+src="([^"]+)"/g)){
+    const js=await(await fetch(origen+src.replaceAll('&amp;','&'))).text();
+    const m=/createServerReference\)\("([0-9a-f]+)"[^)]*?"guardarCuentaRbac"/.exec(js);if(m){idAccion=m[1];break;}
   }
-  const creado = await guardar('/mantenedores/usuarios', accionUsuario, valores, admin);
-  assert.equal(creado.status, 200);
-  const leerGestion = async () => (await base.query('SELECT rol, activo, version FROM public.usuarios_acceso WHERE correo = $1', [usuarioGestion])).rows[0];
-  assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: true, version: 1 });
-  const historial = await base.query('SELECT actor, antes, despues FROM public.usuarios_acceso_historial WHERE correo = $1', [usuarioGestion]);
-  assert.equal(historial.rows.length, 1);
-  assert.equal(historial.rows[0].actor, 'felipe.silva@slepb.gob.cl');
-  assert.equal(historial.rows[0].antes, null);
-  assert.equal(historial.rows[0].despues.rol, 'consulta');
-  verificaciones += 2;
-  const editado = await guardar('/mantenedores/usuarios', accionUsuario,
-    { ...valores, version: '1', activo: 'false' }, admin);
-  assert.equal(editado.status, 303);
-  assert.equal(new URL(editado.headers.get('location'),origen).pathname,'/mantenedores/usuarios');assert.equal(new URL(editado.headers.get('location'),origen).searchParams.get('guardado'),'1');assert.ok(new URL(editado.headers.get('location'),origen).searchParams.get('aviso'));
-  assert.deepEqual(await leerGestion(), { rol: 'consulta', activo: false, version: 2 });
-  const obsoleto = await guardar('/mantenedores/usuarios', accionUsuario, { ...valores, version: '1' }, admin);
-  assert.equal(obsoleto.status, 200);
-  assert.equal((await leerGestion()).activo, false, 'Un formulario obsoleto no debe reactivar la cuenta.');
-  verificaciones += 2;
+  assert.ok(idAccion,'Referencia real de guardarCuentaRbac en el código servido');
+  const perfil=(await base.query("SELECT id FROM public.rbac_perfiles WHERE codigo='auditor'")).rows[0].id;
+  const datos={nombre:'Persona ficticia',activo:true,perfilId:perfil,alcance:'global',sedeId:'',funcionarioId:'',motivo:'Prueba del editor RBAC'};
+  const guardarCuenta=(sesion,version,extra={})=>fetch(origen+'/mantenedores/usuarios',{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,'Next-Action':idAccion,'Content-Type':'text/plain;charset=UTF-8',...(sesion?{Cookie:sesion}:{})},body:JSON.stringify([randomUUID(),usuarioGestion,version,{...datos,...extra}])});
+  for(const [sesion,destino]of [[null,'/ingresar'],[consulta,'/sin-permiso']]){const r=await guardarCuenta(sesion,0);assert.ok([200,303].includes(r.status));assert.equal(new URL((r.headers.get('location')??r.headers.get('x-action-redirect')??'').split(';')[0],origen).pathname,destino);verificaciones++;}
+  const creado=await guardarCuenta(admin,0);assert.equal(creado.status,200);assert.ok((await creado.text()).includes('"ok":true'));
+  const leerGestion=async()=>(await base.query('SELECT rol,activo,version,perfil_id FROM public.usuarios_acceso WHERE correo=$1',[usuarioGestion])).rows[0];
+  assert.deepEqual(await leerGestion(),{rol:'consulta',activo:true,version:1,perfil_id:perfil});
+  const historial=await base.query('SELECT actor,antes,despues FROM public.usuarios_acceso_historial WHERE correo=$1',[usuarioGestion]);assert.equal(historial.rows.length,1);assert.equal(historial.rows[0].actor,'felipe.silva@slepb.gob.cl');assert.equal(historial.rows[0].antes,null);verificaciones+=2;
+  const editado=await guardarCuenta(admin,1,{activo:false});assert.equal(editado.status,200);assert.ok((await editado.text()).includes('"ok":true'));assert.equal((await leerGestion()).activo,false);
+  const obsoleto=await guardarCuenta(admin,1);assert.equal(obsoleto.status,200);assert.ok((await obsoleto.text()).includes('"ok":false'));assert.equal((await leerGestion()).activo,false,'Una versión obsoleta no reactiva la cuenta');verificaciones+=2;
   await base.query("UPDATE public.usuarios_acceso SET activo = false WHERE correo = $1", [correo]);
   for (const ruta of ['/mantenedores/sedes', '/', '/ingresar']) {
     const revocada = await pedir(ruta, consulta);

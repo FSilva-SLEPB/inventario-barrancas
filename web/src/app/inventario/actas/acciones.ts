@@ -2,7 +2,7 @@
 import {randomUUID} from 'node:crypto';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
-import {exigirAdministrador,exigirGestionInsumos} from '@/lib/acceso';
+import {exigirPermiso,exigirAlguno} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {retornoDocumento,enlaceDocumentoConRetorno} from '@/lib/navegacion-actas';
@@ -13,7 +13,7 @@ import {destinoConExito} from '@/lib/aviso-exito';
 export type EstadoActa={estado:'inicial'|'error'|'resultado';mensaje:string;revision:string;valores:Record<string,string>};
 function retornoFormulario(f:FormData){const v=f.get('volver');if(f.getAll('volver').length>1||v!==null&&(typeof v!=='string'||v!==''&&!retornoDocumento(v)))throw new Error('Regreso al inventario inválido.');return typeof v==='string'&&v?retornoDocumento(v):null;}
 export async function guardarActa(_previo:EstadoActa,f:FormData):Promise<EstadoActa>{
- await exigirAdministrador();const revision=randomUUID(),valores:Record<string,string>={};for(const k of Object.keys(CAMPOS_ACTA)){const x=f.get(k);valores[k]=typeof x==='string'?x.slice(0,2500):'';}
+ await exigirPermiso('actas','registrar');const revision=randomUUID(),valores:Record<string,string>={};for(const k of Object.keys(CAMPOS_ACTA)){const x=f.get(k);valores[k]=typeof x==='string'?x.slice(0,2500):'';}
  const error=(mensaje:string):EstadoActa=>({estado:'error',mensaje,revision,valores});const historica=f.has('entrega'),fuente=historica?'entrega':'movimiento',permitidos=['solicitud',fuente,...Object.keys(CAMPOS_ACTA)],id=f.get('solicitud'),mov=f.get(fuente);
  if(permitidos.some(k=>f.getAll(k).length!==1)||[...f.keys()].some(k=>!permitidos.includes(k)&&k!=='volver'&&!k.startsWith('$ACTION'))||typeof id!=='string'||!esIdSede(id)||typeof mov!=='string'||!esIdSede(mov))return error('Formulario inválido. Vuelve a abrir el acta.');
  let retorno:string|null;try{retorno=retornoFormulario(f);}catch{return error('El regreso al inventario no es válido.');}
@@ -21,7 +21,7 @@ export async function guardarActa(_previo:EstadoActa,f:FormData):Promise<EstadoA
  revalidatePath('/inventario/actas');revalidatePath('/inventario/movimientos');redirect(destinoConExito(retorno?enlaceDocumentoConRetorno(retorno,id):'/inventario/actas/'+id,'acta'));
 }
 export async function enviarActa(_previo:EstadoActa,f:FormData):Promise<EstadoActa>{
- const actor=await exigirGestionInsumos(),revision=randomUUID(),raw=f.get('destinatarios'),valores={destinatarios:typeof raw==='string'?raw.slice(0,1500):''},fallo=(mensaje:string):EstadoActa=>({estado:'error',mensaje,revision,valores});
+ const actor=await exigirAlguno('actas.enviar','actas_insumos.enviar'),revision=randomUUID(),raw=f.get('destinatarios'),valores={destinatarios:typeof raw==='string'?raw.slice(0,1500):''},fallo=(mensaje:string):EstadoActa=>({estado:'error',mensaje,revision,valores});
  const id=f.get('acta'),solicitud=f.get('solicitud'),revisado=f.get('revisado');const campos=['acta','solicitud','destinatarios'];if(campos.some(k=>f.getAll(k).length!==1)||f.getAll('revisado').length>1||[...f.keys()].some(k=>!campos.includes(k)&&k!=='revisado'&&k!=='volver'&&!k.startsWith('$ACTION'))||typeof id!=='string'||!esIdSede(id)||typeof solicitud!=='string'||!esIdSede(solicitud)||typeof raw!=='string'||raw.length>1500||(revisado!==null&&revisado!=='si'))return fallo('Formulario inválido. Vuelve a abrir el envío.');
  let retorno:string|null;try{retorno=retornoFormulario(f);}catch{return fallo('El regreso al inventario no es válido.');}
  let destinos:string[],config:ReturnType<typeof configuracionCorreoActas>;try{destinos=destinatariosActa(raw);config=configuracionCorreoActas();destinos=validarDestinosCorreoActas(config,destinos);}catch(e){return fallo(e instanceof Error?e.message:'Revisa los destinatarios.');}

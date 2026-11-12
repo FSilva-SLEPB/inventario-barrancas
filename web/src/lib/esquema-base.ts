@@ -1,5 +1,14 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ rbac_permisos:{modulo:'Acceso',uso:'Acciones existentes por recurso.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ rbac_perfiles:{modulo:'Acceso',uso:'Perfiles configurables, clasificación protegida, alcances, vigencia y versión.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ rbac_perfil_permisos:{modulo:'Acceso',uso:'Permisos efectivos de cada perfil.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ rbac_limites_perfiles:{modulo:'Acceso',uso:'Límites protegidos de los perfiles predefinidos.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ rbac_historial:{modulo:'Acceso',uso:'Auditoría inmutable de perfiles, cuentas, vínculos y correcciones.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ rbac_anteriores:{modulo:'Acceso',uso:'Compatibilidad explícita de perfiles anteriores sin reasignar usuarios.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ asignaciones_funcionarios:{modulo:'Acceso',uso:'Vínculos explícitos del equipamiento con su funcionario; vigencia e historial.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+ correcciones_personales:{modulo:'Acceso',uso:'Solicitud de corrección propia y resolución autorizada con versión.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
+
  reportes_incidentes_inventario:{modulo:'Incidentes',uso:'Borrador, envío y validación TI de robo, sustracción o daño; parte y denunciante, selección y versiones, sin cambiar estados hasta validar.',fuentes:['migrations/1796054400000_reportes-incidentes-ti.cjs','src/lib/reportes-incidentes.ts']},
  reportes_incidentes_operaciones:{modulo:'Incidentes',uso:'Operaciones idempotentes y auditoría de guardar, enviar y resolver, con actor y solicitud original.',fuentes:['migrations/1796054400000_reportes-incidentes-ti.cjs']},
  reportes_incidentes_adjuntos:{modulo:'Incidentes',uso:'Denuncia o informe privado persistente por reporte, autor y bytes originales; se puede aportar después del envío.',fuentes:['src/app/api/inventario/incidentes/adjuntos/route.ts']},

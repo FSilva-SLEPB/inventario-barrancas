@@ -39,6 +39,19 @@ erDiagram
     timestamp_with_time_zone creado_en
     timestamp_with_time_zone terminado_en
   }
+  asignaciones_funcionarios {
+    uuid id PK
+    uuid solicitud
+    jsonb solicitud_datos
+    uuid funcionario_id FK
+    uuid equipo_id FK
+    uuid celular_id FK
+    uuid movimiento_id FK
+    text actor FK
+    text motivo
+    timestamp_with_time_zone registrado_en
+    timestamp_with_time_zone finalizado_en
+  }
   cambios_estados_activo {
     uuid id PK
     uuid equipo_id FK
@@ -113,6 +126,19 @@ erDiagram
     jsonb despues
     timestamp_with_time_zone registrado_en
     uuid movimiento_id FK
+  }
+  correcciones_personales {
+    uuid id PK
+    text actor FK
+    uuid funcionario_id FK
+    integer version
+    jsonb solicitud
+    jsonb datos_anteriores
+    text estado
+    text resolucion
+    text resuelto_por FK
+    timestamp_with_time_zone registrado_en
+    timestamp_with_time_zone resuelto_en
   }
   dependencias {
     uuid id PK
@@ -382,6 +408,44 @@ erDiagram
     uuid movimiento_devolucion_id FK
     date fecha_devolucion
   }
+  rbac_anteriores {
+    text rol PK
+    text__ permisos
+  }
+  rbac_historial {
+    uuid id PK
+    uuid solicitud
+    text actor FK
+    text tipo
+    text objetivo
+    text motivo
+    jsonb antes
+    jsonb despues
+    jsonb entrada
+    timestamp_with_time_zone registrado_en
+  }
+  rbac_limites_perfiles {
+    text codigo PK
+    text__ permisos
+  }
+  rbac_perfil_permisos {
+    uuid perfil_id PK, FK
+    text permiso PK, FK
+  }
+  rbac_perfiles {
+    uuid id PK
+    text codigo
+    text nombre
+    text clase
+    boolean activo
+    text__ alcances
+    integer version
+  }
+  rbac_permisos {
+    text codigo PK
+    text recurso
+    text accion
+  }
   reportes_incidentes_adjuntos {
     uuid id PK
     uuid reporte_id FK
@@ -498,6 +562,9 @@ erDiagram
     integer version
     timestamp_with_time_zone actualizado_en
     uuid sede_id FK
+    uuid perfil_id FK
+    text alcance_rbac
+    uuid funcionario_id FK
   }
   usuarios_acceso_historial {
     bigint id PK
@@ -513,6 +580,11 @@ erDiagram
   operaciones_inventario |o--o| actas_documentos : "operacion_id"
   solicitudes_insumos |o--o{ actas_documentos : "solicitud_insumo_id"
   actas_documentos ||--o{ actas_envios : "acta_id"
+  usuarios_acceso ||--o{ asignaciones_funcionarios : "actor"
+  celulares |o--o{ asignaciones_funcionarios : "celular_id"
+  equipos |o--o{ asignaciones_funcionarios : "equipo_id"
+  funcionarios_nc ||--o{ asignaciones_funcionarios : "funcionario_id"
+  movimientos_inventario |o--o{ asignaciones_funcionarios : "movimiento_id"
   celulares |o--o{ cambios_estados_activo : "celular_id"
   equipos |o--o{ cambios_estados_activo : "equipo_id"
   categorias_insumos_codigos |o--o{ catalogo_insumos : "categoria_codigo"
@@ -520,6 +592,9 @@ erDiagram
   ubicaciones_bodega |o--o{ celulares : "ubicacion_bodega_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
+  usuarios_acceso ||--o{ correcciones_personales : "actor"
+  funcionarios_nc ||--o{ correcciones_personales : "funcionario_id"
+  usuarios_acceso |o--o{ correcciones_personales : "resuelto_por"
   sedes ||--o{ dependencias : "sede_id"
   sedes ||--o{ directorio_historial : "sede_id"
   sedes ||--o| directorio_sedes : "sede_id"
@@ -562,6 +637,9 @@ erDiagram
   movimientos_inventario ||--o| prestamos_inventario : "id"
   movimientos_inventario |o--o| prestamos_inventario : "movimiento_devolucion_id"
   sedes ||--o{ prestamos_inventario : "origen_sede_id"
+  usuarios_acceso ||--o{ rbac_historial : "actor"
+  rbac_perfiles ||--o{ rbac_perfil_permisos : "perfil_id"
+  rbac_permisos ||--o{ rbac_perfil_permisos : "permiso"
   reportes_incidentes_inventario ||--o{ reportes_incidentes_adjuntos : "reporte_id"
   usuarios_acceso ||--o{ reportes_incidentes_inventario : "actor"
   incidentes_robos |o--o{ reportes_incidentes_inventario : "legado_id"
@@ -577,6 +655,8 @@ erDiagram
   catalogo_insumos ||--o| stock_insumos : "producto_id"
   celulares |o--o{ ubicaciones_bodega_historial : "celular_id"
   equipos |o--o{ ubicaciones_bodega_historial : "equipo_id"
+  funcionarios_nc |o--o{ usuarios_acceso : "funcionario_id"
+  rbac_perfiles |o--o{ usuarios_acceso : "perfil_id"
   sedes |o--o{ usuarios_acceso : "sede_id"
 ```
 

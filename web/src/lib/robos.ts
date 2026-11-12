@@ -15,7 +15,7 @@ const filtros=`WHERE ($1::boolean OR NOT EXISTS(SELECT 1 FROM public.reportes_in
 const base='FROM public.incidentes_robos i JOIN public.incidentes_robos_equipos d ON d.incidente_id=i.id';
 export async function consolidadoRobos(f:FiltrosRobos){
  const actor=await exigirAcceso(),db=obtenerBaseDatos();
- const parametros=[!requiereSede(actor.rol),actor.sedeId,f.ambito,f.sede||null,f.comuna,f.estado,f.desde||null,f.hasta||null,f.q];
+ const parametros=[!requiereSede(actor),actor.sedeId,f.ambito,f.sede||null,f.comuna,f.estado,f.desde||null,f.hasta||null,f.q];
  const [resumen,grupos]=await Promise.all([
   db.query<{filas:string;equipos:string;incidentes:string;reportados:string;robados:string;recuperados:string}>(`SELECT count(*) AS filas,count(DISTINCT d.equipo_id) AS equipos,count(DISTINCT i.id) AS incidentes,
    count(DISTINCT d.equipo_id) FILTER(WHERE i.estado='reportado') AS reportados,
@@ -40,13 +40,13 @@ export async function equiposParaRobo(sede:string|null,q:string,equipo:string|nu
  EXISTS(SELECT 1 FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id WHERE d.equipo_id=e.id AND i.estado IN ('reportado','validado') AND d.recuperado_fecha IS NULL) AS "incidenteAbierto"
  FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id WHERE ($1::uuid IS NULL OR e.sede_id=$1::uuid) AND s.activo AND ($2::boolean OR e.sede_id=$3::uuid)
  AND ($4='' OR e.marca ILIKE '%'||$4||'%' OR e.modelo ILIKE '%'||$4||'%' OR e.serie ILIKE '%'||$4||'%' OR e.numero_inventario ILIKE '%'||$4||'%')
- AND ($5::uuid IS NULL OR e.id=$5::uuid) ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 51`,[sede,!requiereSede(actor.rol),actor.sedeId,q,equipo])).rows;
+ AND ($5::uuid IS NULL OR e.id=$5::uuid) ORDER BY lower(s.nombre),e.numero_inventario NULLS LAST,e.id LIMIT 51`,[sede,!requiereSede(actor),actor.sedeId,q,equipo])).rows;
 }
 export type IncidenteRobo={id:string;sedeId:string;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;lugar:string;descripcion:string;enlace:string|null;estado:string;version:number;reportadoPor:string};
 export type DetalleRobo={equipoId:string;identificacion:{marca:string;modelo:string;serie:string|null;inventario:string|null;categoria:string};recuperadoFecha:string|null;recuperadoPor:string|null;motivo:string|null};
 export async function detalleRobo(id:string){
  const actor=await exigirGestionDependencias(),db=obtenerBaseDatos();
- const {rows}=await db.query<IncidenteRobo>(`SELECT i.id,i.sede_id AS "sedeId",i.sede_nombre AS "sedeNombre",i.sede_rbd AS rbd,i.comuna,i.fecha::text,i.lugar,i.descripcion,i.enlace,i.estado,i.version,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS "reportadoPor" FROM public.incidentes_robos i LEFT JOIN public.usuarios_acceso u ON u.correo=i.reportado_por WHERE i.id=$1::uuid AND ($2::boolean OR i.sede_id=$3::uuid)`,[id,!requiereSede(actor.rol),actor.sedeId]);
+ const {rows}=await db.query<IncidenteRobo>(`SELECT i.id,i.sede_id AS "sedeId",i.sede_nombre AS "sedeNombre",i.sede_rbd AS rbd,i.comuna,i.fecha::text,i.lugar,i.descripcion,i.enlace,i.estado,i.version,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS "reportadoPor" FROM public.incidentes_robos i LEFT JOIN public.usuarios_acceso u ON u.correo=i.reportado_por WHERE i.id=$1::uuid AND ($2::boolean OR i.sede_id=$3::uuid)`,[id,!requiereSede(actor),actor.sedeId]);
  if(!rows[0])return null;
  const [equipos,historial]=await Promise.all([
   db.query<DetalleRobo>('SELECT equipo_id AS "equipoId",identificacion,recuperado_fecha::text AS "recuperadoFecha",recuperado_por AS "recuperadoPor",recuperacion_motivo AS motivo FROM public.incidentes_robos_equipos WHERE incidente_id=$1::uuid ORDER BY equipo_id',[id]),
@@ -56,5 +56,5 @@ export async function detalleRobo(id:string){
 export async function robosEquipo(id:string){
  const actor=await exigirAcceso();
  return(await obtenerBaseDatos().query<{id:string;estado:string;fecha:string;recuperadoFecha:string|null}>(`SELECT i.id,i.estado,i.fecha::text,d.recuperado_fecha::text AS "recuperadoFecha" ${base}
- JOIN public.equipos e ON e.id=d.equipo_id WHERE d.equipo_id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND i.sede_id=$3::uuid)) ORDER BY i.fecha DESC,i.id`,[id,!requiereSede(actor.rol),actor.sedeId])).rows;
+ JOIN public.equipos e ON e.id=d.equipo_id WHERE d.equipo_id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND i.sede_id=$3::uuid)) ORDER BY i.fecha DESC,i.id`,[id,!requiereSede(actor),actor.sedeId])).rows;
 }

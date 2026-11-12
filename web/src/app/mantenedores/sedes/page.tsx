@@ -10,7 +10,7 @@ import { connection } from "next/server";
 import FormularioSede from "@/components/formulario-sede";
 import { listarSedes } from "@/lib/sedes";
 import { exigirAcceso } from "@/lib/acceso";
-import { puedeAdministrar } from "@/lib/politica-acceso";
+import {tienePermiso} from "@/lib/rbac";
 import { esIdSede, TIPOS_SEDE } from "@/lib/validacion-sedes";
 import estilos from "./sedes.module.css";
 
@@ -29,13 +29,13 @@ export default async function Sedes({ searchParams }: Propiedades) {
   const acceso = await exigirAcceso();
   const parametros = await searchParams;
   const sedes = await listarSedes();
-  const puedeEditar = puedeAdministrar(acceso.rol);
+  const puedeEditar=tienePermiso(acceso,'sedes','editar');const puedeCrear=tienePermiso(acceso,'sedes','registrar');
   const pideEdicion = parametros.editar !== undefined;
   const id = typeof parametros.editar === "string" && esIdSede(parametros.editar)
     ? parametros.editar.toLowerCase() : null;
   const seleccionada = id ? sedes.find((sede) => sede.id === id) : undefined;
   const edicionInvalida = pideEdicion && !seleccionada;
-  const nuevo = puedeEditar && parametros.nuevo === "1";
+  const nuevo = puedeCrear && parametros.nuevo === "1";
 
   const consulta = typeof parametros.ver === 'string' ? sedes.find(x=>x.id===parametros.ver) : undefined;
 

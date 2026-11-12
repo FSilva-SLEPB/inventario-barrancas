@@ -4,12 +4,12 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirPermiso } from "@/lib/acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { validarUsuario, valoresUsuario, type EstadoUsuario } from "@/lib/validacion-usuarios";
 
 export async function guardarUsuario(_anterior: EstadoUsuario, formulario: FormData): Promise<EstadoUsuario> {
-  const actor = await exigirAdministrador();
+  const actor = await exigirPermiso('usuarios_operativos','administrar');
   const revision = randomUUID();
   if (!(formulario instanceof FormData)) return { resultado: "error", mensaje: "El formulario no es válido.",
     valores: valoresUsuario(), errores: {}, revision };

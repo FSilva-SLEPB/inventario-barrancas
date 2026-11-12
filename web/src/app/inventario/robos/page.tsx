@@ -13,7 +13,7 @@ import {consolidadoRobos,type FiltrosRobos} from '@/lib/robos';
 import {ESTADOS_ROBO,fechaRobo} from '@/lib/validacion-robos';
 export const metadata={title:'Consolidado de robos | Inventario'};
 export default async function Robos({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){
- const actor=await exigirAcceso(),p=await searchParams,local=requiereSede(actor.rol),gestiona=puedeGestionarDependencias(actor.rol);
+ const actor=await exigirAcceso(),p=await searchParams,local=requiereSede(actor),gestiona=puedeGestionarDependencias(actor);
  const valor=(k:string,max=150)=>typeof p[k]==='string'?p[k].trim().slice(0,max):'';
  const anio=/^\d{4}$/.test(valor('anio'))?valor('anio'):'',parte=valor('parte',120);
  const fecha=(k:string)=>{try{return fechaRobo(valor(k),'9999-12-31');}catch{return '';}};

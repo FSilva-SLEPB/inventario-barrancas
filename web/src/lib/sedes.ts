@@ -18,7 +18,7 @@ export async function listarSedes(): Promise<Sede[]> {
                ELSE 2
              END,
              lower(nombre), id
-  `, [!requiereSede(acceso.rol), acceso.sedeId]);
+  `, [!requiereSede(acceso), acceso.sedeId]);
 
   return resultado.rows;
 }

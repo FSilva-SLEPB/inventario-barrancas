@@ -8,8 +8,8 @@ import {listarCatalogoInsumos} from "@/lib/insumos";
 import SolicitudForm from "../components/solicitud-form";
 export const metadata={title:'Solicitud de insumos | SLEP Barrancas'};
 export default async function SolicitudPage(){
- const actor=await exigirAcceso('insumos');if(!puedeSolicitarInsumos(actor.rol))redirect('/sin-permiso');
- const local=requiereSede(actor.rol);
+ const actor=await exigirAcceso('insumos');if(!puedeSolicitarInsumos(actor))redirect('/sin-permiso');
+ const local=requiereSede(actor);
  const [catalogo,participante]=await Promise.all([listarCatalogoInsumos(true),obtenerParticipanteActual()]);
  const sedes=await listarSedes();
  return <main><SolicitudForm solicitudId={randomUUID()}

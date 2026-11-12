@@ -30,6 +30,7 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "@/lib/celulares": {detalleCelular:async()=>null},
     "@/lib/inventario-bodega": {listarBodega:async f=>{consulta=f;return {filas:equipos,total,pagina:1,paginas:Math.max(1,Math.ceil(total/f.limite))};}},
     "@/lib/acceso": {
+      exigirPermiso:async(recurso)=>{if(recurso==='bodega'&&!["administrador","administrador_gestion"].includes(rol))throw new Error("REDIRECT:/sin-permiso");return {rol,sedeId:local?escuela.id:null};},
       exigirAdministrador:async()=>{if(!["administrador","administrador_gestion"].includes(rol))throw new Error("REDIRECT:/sin-permiso");return {rol};},
       exigirAcceso: async () => ({ rol, sedeId: local ? escuela.id : null }),
       exigirGestionDependencias: async () => {
@@ -40,6 +41,7 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
     "@/lib/sedes": { listarSedes: async () => local ? [escuela] : [escuela, jardin, central] },
     "@/lib/catalogos": { listarCategorias: async () => [] },
     "@/lib/equipos": { obtenerEquipo: async () => null, listarEquipos: async (...args) => { consulta = args; return { equipos, total, pagina: 1 }; } },
+    "@/components/exportar-inventario": {default:()=>null},
     "@/components/ficha-equipo": {default:()=>null},
     "@/components/formulario-equipo": { default: () => null },
     "@/components/formulario-carga-equipos": { default: () => React.createElement("form", { "aria-label": "Carga masiva" }) },

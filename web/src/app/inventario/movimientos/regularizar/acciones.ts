@@ -2,13 +2,13 @@
 import {destinoConExito} from '@/lib/aviso-exito';
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirPermiso } from "@/lib/acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { validarRegularizacion } from "@/lib/validacion-entregas";
 export type EstadoRegularizacion = { estado: "inicial" | "error"; mensaje: string; valores: Record<string,string> };
 
 export async function regularizarEntregas(_anterior: EstadoRegularizacion, f: FormData): Promise<EstadoRegularizacion> {
-  const actor = await exigirAdministrador();
+  const actor = await exigirPermiso('movimientos','confirmar');
   const valores: Record<string,string> = {};
   f.forEach((v,k) => { if (typeof v === "string" && /^(fecha|receptora|acta|rut|correo)-[a-f0-9-]{36}$/i.test(k)) valores[k]=v.slice(0,1500); });
   let datos: ReturnType<typeof validarRegularizacion>;

@@ -1,3 +1,4 @@
+import {esAutorizacionRbac,tienePermiso} from '@/lib/rbac';
 export const DOMINIO_INSTITUCIONAL = "slepb.gob.cl";
 export const PERFILES = {
   administrador: "Administrador del sistema",
@@ -10,15 +11,18 @@ export const PERFILES = {
 export type RolAcceso = keyof typeof PERFILES;
 
 export function requiereSede(rol: unknown): boolean {
-  return rol === "encargado" || rol === "consulta_sede";
+  if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;
+  return esAutorizacionRbac(rol)?rol.alcance==='sede':rol === "encargado" || rol === "consulta_sede";
 }
 
 export function puedeGestionarDependencias(rol: unknown): boolean {
-  return puedeAdministrar(rol) || rol === "encargado";
+  if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;
+  return esAutorizacionRbac(rol)?tienePermiso(rol,'dependencias','editar')||tienePermiso(rol,'dependencias','registrar'):puedeAdministrar(rol) || rol === "encargado";
 }
 
 export function perfilReservado(rol: unknown): boolean {
-  return rol === "administrador" || rol === "administrador_gestion";
+  if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;
+  return esAutorizacionRbac(rol)?['sistema','utic'].includes(rol.clasePerfil):rol === "administrador" || rol === "administrador_gestion";
 }
 
 export function correoInstitucional(perfil: {
@@ -37,9 +41,10 @@ export function rolValido(rol: unknown): rol is RolAcceso {
 }
 
 export function puedeAdministrar(rol: unknown): boolean {
-  return rol === "administrador" || rol === "administrador_gestion";
+  if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;
+  return esAutorizacionRbac(rol)?['sistema','utic'].includes(rol.clasePerfil):rol === "administrador" || rol === "administrador_gestion";
 }
 
 /** Facultad exclusiva del módulo Insumos; no concede administración del inventario. */
-export function puedeGestionarInsumos(rol:unknown):boolean{return puedeAdministrar(rol)||rol==='gestor_insumos';}
-export function puedeSolicitarInsumos(rol:unknown):boolean{return puedeGestionarDependencias(rol)||rol==='gestor_insumos';}
+export function puedeGestionarInsumos(rol:unknown):boolean{if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;return esAutorizacionRbac(rol)?tienePermiso(rol,'seguimiento_insumos','aprobar')||tienePermiso(rol,'seguimiento_insumos','confirmar'):puedeAdministrar(rol)||rol==='gestor_insumos';}
+export function puedeSolicitarInsumos(rol:unknown):boolean{if(rol&&typeof rol==='object'&&!esAutorizacionRbac(rol))rol=(rol as {rol?:unknown}).rol;return esAutorizacionRbac(rol)?tienePermiso(rol,'solicitudes_insumos','registrar'):puedeGestionarDependencias(rol)||rol==='gestor_insumos';}

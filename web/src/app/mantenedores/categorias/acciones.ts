@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { obtenerBaseDatos } from "@/lib/db";
-import { exigirAdministrador } from "@/lib/acceso";
+import { exigirAlguno } from "@/lib/acceso";
 
 export type EstadoCategoria = {
   resultado: "inicial" | "error" | "guardado";
@@ -19,7 +19,7 @@ export async function guardarCategoria(
   _estadoAnterior: EstadoCategoria,
   datos: FormData,
 ): Promise<EstadoCategoria> {
-  const actor = await exigirAdministrador();
+  const actor = await exigirAlguno('categorias.registrar','categorias.editar');
 
   const id = datos.get("id");
   const nombreRecibido = datos.get("nombre");

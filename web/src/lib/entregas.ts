@@ -1,5 +1,6 @@
 import "server-only";
-import { exigirAdministrador } from "@/lib/acceso";
+import {redirect} from "next/navigation";
+import { exigirPermiso } from "@/lib/acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { esIdSede } from "@/lib/validacion-sedes";
 export class ErrorSeleccionEntrega extends Error {}
@@ -7,7 +8,7 @@ export type EquipoEntrega = { id: string; version: number; sedeId: string; sedeN
   directoraNombre: string | null; directoraRut:string|null;directoraCorreo:string|null;direccion:string|null;correoInstitucional:string|null;sedeVersion:string; marca: string; modelo: string; serie: string | null; inventario: string | null };
 
 export async function seleccionarEntregas(p: Record<string,string|string[]|undefined>): Promise<EquipoEntrega[]> {
-  await exigirAdministrador();
+  const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance&&actor.alcance!=='global')redirect('/sin-permiso');
   const todos = p.todos === "si";
   const ids = typeof p.equipo === "string" ? [p.equipo] : p.equipo ?? [];
   if (!todos && (!ids.length || ids.length > 2500 || ids.some(id => !esIdSede(id)) || new Set(ids.map(id=>id.toLowerCase())).size !== ids.length))
@@ -29,7 +30,7 @@ export async function seleccionarEntregas(p: Record<string,string|string[]|undef
   return rows;
 }
 export async function listarEntregas() {
-  await exigirAdministrador();
+  const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance&&actor.alcance!=='global')redirect('/sin-permiso');
   return (await obtenerBaseDatos().query<{id:string;actaId:string|null;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;actor:string;registrado:string;cantidad:number}>(`
     SELECT g.id,(SELECT a.id FROM public.actas_documentos a WHERE a.entrega_id=g.id AND a.pdf IS NOT NULL) AS "actaId",g.sede_nombre AS "sedeNombre",g.sede_rbd AS rbd,g.comuna,g.fecha_entrega::text AS fecha,g.receptor_nombre AS receptora,
       COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,l.registrado_en::text AS registrado,count(*)::integer AS cantidad
@@ -37,7 +38,7 @@ export async function listarEntregas() {
     GROUP BY g.id,l.id,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC'),l.registrado_en ORDER BY l.registrado_en DESC,g.sede_nombre,g.id LIMIT 100`)).rows;
 }
 export async function detalleEntrega(id: string) {
-  await exigirAdministrador();
+  const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance&&actor.alcance!=='global')redirect('/sin-permiso');
   if (!esIdSede(id)) return null;
   const { rows } = await obtenerBaseDatos().query<{id:string;actaId:string|null;sedeNombre:string;rbd:string|null;comuna:string|null;fecha:string;receptora:string;cargo:string;enlace:string|null;actor:string;registrado:string;receptorDatos:{rut?:string;correo?:string};sedeDatos:{direccion?:string;correoInstitucional?:string}}>(`
     SELECT g.id,(SELECT a.id FROM public.actas_documentos a WHERE a.entrega_id=g.id AND a.pdf IS NOT NULL) AS "actaId",g.sede_nombre AS "sedeNombre",g.sede_rbd AS rbd,g.comuna,g.fecha_entrega::text AS fecha,g.receptor_nombre AS receptora,
@@ -49,7 +50,7 @@ export async function detalleEntrega(id: string) {
 }
 
 export async function resumenLote(id: string) {
-  await exigirAdministrador();
+  const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance&&actor.alcance!=='global')redirect('/sin-permiso');
   if (!esIdSede(id)) return null;
   return (await obtenerBaseDatos().query<{cantidad:number}>("SELECT cantidad FROM public.entregas_lotes WHERE id=$1::uuid",[id])).rows[0] ?? null;
 }
