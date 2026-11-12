@@ -1,3 +1,3 @@
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
-export default async function CargarAnterior(){await exigirAdministrador();redirect('/directorio/cargar');}
+import {exigirPermiso} from '@/lib/acceso';
+export default async function CargarAnterior(){await exigirPermiso('directorio_institucional','registrar');redirect('/directorio/cargar');}

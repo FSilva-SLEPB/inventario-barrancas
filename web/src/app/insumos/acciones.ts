@@ -5,7 +5,7 @@ import {randomUUID} from "node:crypto";
 import {revalidatePath} from "next/cache";
 import {redirect} from "next/navigation";
 import {esIdSede} from '@/lib/validacion-sedes';
-import {exigirAcceso,exigirGestionInsumos} from "@/lib/acceso";
+import {exigirAcceso,exigirPermiso} from "@/lib/acceso";
 import {puedeSolicitarInsumos,requiereSede} from "@/lib/politica-acceso";
 import {crearSolicitudInsumo,validarSolicitudInsumo,aprobarSolicitudInsumo,entregarSolicitudInsumoConActa,cancelarSolicitudInsumo} from "@/lib/insumos";
 import {validarLineasInsumos} from "@/lib/validacion-insumos";
@@ -15,12 +15,12 @@ function relanzarRedirect(e:unknown){ if(e && typeof e==='object' && 'digest' in
 export async function guardarSolicitudInsumo(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
  const actor=await exigirAcceso('insumos');const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores,errores});
- if(!puedeSolicitarInsumos(actor.rol)) return fallo('No tienes permiso para crear solicitudes de insumos.');
+ if(!puedeSolicitarInsumos(actor)) return fallo('No tienes permiso para crear solicitudes de insumos.');
  const sedeIdVal=formulario.get('sede_id');const sedeId=typeof sedeIdVal==='string'?sedeIdVal:'';
  const lineasRawVal=formulario.get('lineas');const lineasRaw=typeof lineasRawVal==='string'?lineasRawVal:'';
  const datosRawVal=formulario.get('datos');const datosRaw=typeof datosRawVal==='string'?datosRawVal:'';
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(sedeId))return fallo('Selecciona una sede válida.');
- if(requiereSede(actor.rol) && actor.sedeId && sedeId!==actor.sedeId) return fallo('Solo puedes solicitar insumos para tu sede autorizada.');
+ if(requiereSede(actor) && actor.sedeId && sedeId!==actor.sedeId) return fallo('Solo puedes solicitar insumos para tu sede autorizada.');
  let lineas:{producto_id:string;cantidad:number}[];try{lineas=JSON.parse(lineasRaw);}catch{return fallo('Carrito inválido. Vuelve a armarlo.');}
  let datos:{nombre?:string;run?:string;cargo?:string;telefono?:string;modalidad?:string;motivo?:string}={};
  try{ if(datosRaw) datos=JSON.parse(datosRaw) as typeof datos; }catch{return fallo('Datos del solicitante inválidos.');}
@@ -31,7 +31,7 @@ export async function guardarSolicitudInsumo(_anterior:EstadoSolicitud,formulari
  try{const id=await crearSolicitudInsumo(sedeId,actor.email,lineas,datos);revalidatePath('/insumos','layout');return {estado:'guardado',mensaje:'Solicitud enviada.',revision,valores:{destino:destinoConExito(`/insumos/seguimiento?ver=${id}`)},errores:{}};}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo crear la solicitud.');}
 }
 export async function validarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
- const actor=await exigirGestionInsumos();const revision=randomUUID();
+ const actor=await exigirPermiso('seguimiento_insumos','aprobar');const revision=randomUUID();
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores:valoresFormulario(formulario),errores:{}});
  const solicitudVal=formulario.get('solicitud');const solicitud=typeof solicitudVal==='string'?solicitudVal:'';
  const observacion=typeof formulario.get('observacion')==='string'?(formulario.get('observacion') as string).trim():'';
@@ -61,7 +61,7 @@ function lineasEntregaDesdeFormData(f:FormData):{producto_id:string;cantidad_ent
  return resultado;
 }
 export async function aprobarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
- const actor=await exigirGestionInsumos();const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
+ const actor=await exigirPermiso('seguimiento_insumos','aprobar');const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores,errores});
  const solicitudVal=formulario.get('solicitud');const solicitud=typeof solicitudVal==='string'?solicitudVal:'';
  const motivoVal=formulario.get('motivo');const motivo=typeof motivoVal==='string'?motivoVal.trim():'';
@@ -70,7 +70,7 @@ export async function aprobarSolicitudInsumoAccion(_anterior:EstadoSolicitud,for
  try{await aprobarSolicitudInsumo(actor.email,solicitud,{lineas,motivo});revalidatePath('/insumos','layout');redirect(destinoConExito(destinoSolicitudInsumo(formulario.get('volver'),solicitud)));}catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo aprobar la solicitud.');}
 }
 export async function entregarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
- await exigirGestionInsumos();const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
+ await exigirPermiso('seguimiento_insumos','confirmar');const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores,errores});
  const solicitudVal=formulario.get('solicitud');const solicitud=typeof solicitudVal==='string'?solicitudVal:'';
  const receptor=typeof formulario.get('receptor')==='string'?(formulario.get('receptor') as string).trim():'';
@@ -96,7 +96,7 @@ export async function entregarSolicitudInsumoAccion(_anterior:EstadoSolicitud,fo
  }catch(e){relanzarRedirect(e);return fallo(e instanceof Error?e.message:'No se pudo entregar la solicitud ni generar el acta.');}
 }
 export async function cancelarSolicitudInsumoAccion(_anterior:EstadoSolicitud,formulario:FormData):Promise<EstadoSolicitud>{
- const actor=await exigirGestionInsumos();const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
+ const actor=await exigirPermiso('seguimiento_insumos','aprobar');const revision=randomUUID();const valores=valoresFormulario(formulario);const errores:Record<string,string>={};
  const fallo=(mensaje:string):EstadoSolicitud=>({estado:'error',mensaje,revision,valores,errores});
  const solicitudVal=formulario.get('solicitud');const solicitud=typeof solicitudVal==='string'?solicitudVal:'';
  const motivoVal=formulario.get('motivo');const motivo=typeof motivoVal==='string'?motivoVal.trim():'';

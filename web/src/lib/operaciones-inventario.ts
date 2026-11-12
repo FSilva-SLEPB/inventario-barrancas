@@ -1,14 +1,14 @@
 import 'server-only';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import type {TipoBien} from '@/lib/validacion-movimientos-inventario';
 export type CandidatoOperacion={id:string;version:number;sedeId:string;custodia:string;descripcion:string;inventario:string;serie:string;telefono:string;};
 export async function candidatosOperacion(clase:TipoBien,sede:string,custodia:string,permitirAveriados=false){
- await exigirAdministrador();
+ const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance==='sede')sede=actor.sedeId??'00000000-0000-4000-8000-000000000000';if(actor.alcance==='propios')return [];
  const eq=clase==='equipo';
  return(await obtenerBaseDatos().query<CandidatoOperacion>(eq?`SELECT e.id,e.version,e.sede_id AS "sedeId",e.custodia,concat_ws(' · ',c.nombre,e.marca,e.modelo) AS descripcion,COALESCE(e.numero_inventario,'') AS inventario,COALESCE(e.serie,'') AS serie,'' AS telefono FROM public.equipos e JOIN public.categorias_bienes c ON c.id=e.categoria_id JOIN public.sedes s ON s.id=e.sede_id WHERE e.estado_administrativo='activo' AND ($3::boolean OR e.condicion_tecnica IN ('operativo','bodega_ti','sin_verificar')) AND s.activo AND e.custodia=$2 AND ($1::uuid IS NULL OR e.sede_id=$1) AND NOT EXISTS(SELECT 1 FROM public.incidentes_robos_equipos d JOIN public.incidentes_robos i ON i.id=d.incidente_id WHERE d.equipo_id=e.id AND i.estado IN ('reportado','validado') AND d.recuperado_fecha IS NULL) ORDER BY e.numero_inventario,e.serie,e.id`:`SELECT c.id,c.version,c.sede_id AS "sedeId",c.custodia,concat_ws(' · ','Celular',c.marca,c.modelo) AS descripcion,COALESCE(c.numero_inventario,'') AS inventario,COALESCE(c.imei,'') AS serie,c.telefono FROM public.celulares c JOIN public.sedes s ON s.id=c.sede_id WHERE c.estado_administrativo='activo' AND ($3::boolean OR c.condicion_tecnica IN ('operativo','bodega_ti','sin_verificar')) AND c.activo AND s.activo AND c.custodia=$2 AND ($1::uuid IS NULL OR c.sede_id=$1) ORDER BY c.numero_inventario,c.telefono,c.id`,[sede||null,custodia,permitirAveriados])).rows;
 }
 
 export async function ultimaEntregaBien(tipo:TipoBien,id:string){
- await exigirAdministrador();return(await obtenerBaseDatos().query<{receptor:string;metadata:Record<string,string>}>(`SELECT m.receptor,a.datos->'metadata' AS metadata FROM public.movimientos_inventario m LEFT JOIN public.operaciones_inventario_detalle d ON d.movimiento_id=m.id LEFT JOIN public.actas_documentos a ON a.movimiento_id=m.id OR a.operacion_id=d.operacion_id WHERE ${tipo==='equipo'?'m.equipo_id':'m.celular_id'}=$1 AND m.accion IN ('asignacion','traspaso') ORDER BY m.registrado_en DESC,m.id DESC LIMIT 1`,[id])).rows[0];
+ const actor=await exigirPermiso('movimientos','consultar');if(actor.alcance&&actor.alcance!=='global')return undefined;return(await obtenerBaseDatos().query<{receptor:string;metadata:Record<string,string>}>(`SELECT m.receptor,a.datos->'metadata' AS metadata FROM public.movimientos_inventario m LEFT JOIN public.operaciones_inventario_detalle d ON d.movimiento_id=m.id LEFT JOIN public.actas_documentos a ON a.movimiento_id=m.id OR a.operacion_id=d.operacion_id WHERE ${tipo==='equipo'?'m.equipo_id':'m.celular_id'}=$1 AND m.accion IN ('asignacion','traspaso') ORDER BY m.registrado_en DESC,m.id DESC LIMIT 1`,[id])).rows[0];
 }

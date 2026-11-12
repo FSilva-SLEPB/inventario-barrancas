@@ -16,6 +16,7 @@ import EnlaceAccion from "@/components/enlace-accion";
 export type Props={
  modo:'seguimiento'|'historial';
  ruta:string;titulo:string;descripcion:string;
+ permisos:{aprobar:boolean;confirmar:boolean;actas:boolean;descargar:boolean};
  admin:boolean;sedes:{id:string;nombre:string;rbd:string|null}[];
  solicitudes:SolicitudInsumo[];stock:InsumoStock[];
  total:number;pagina:number;paginas:number;limite:number;
@@ -24,7 +25,7 @@ export type Props={
 };
 
 export default function SolicitudesLista(props:Props){
- const {ruta,titulo,descripcion,admin,sedes,solicitudes,stock,total,pagina,paginas,limite,filtroEstado,filtroSede,q,detalle,paso,emisor}=props;
+ const {ruta,titulo,descripcion,admin,permisos,sedes,solicitudes,stock,total,pagina,paginas,limite,filtroEstado,filtroSede,q,detalle,paso,emisor}=props;
  const filtros={q,estado:filtroEstado,sede:filtroSede};
  const base=new URLSearchParams({q,estado:filtroEstado,sede:filtroSede,limite:String(limite),pagina:String(pagina)});
  const volver=ruta+'?'+base.toString();
@@ -48,10 +49,10 @@ export default function SolicitudesLista(props:Props){
    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos"><caption className="visually-hidden">Solicitudes ({total})</caption><thead><tr><th scope="col">Sede</th><th scope="col">Solicitante</th><th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Ítems</th><th scope="col">Acciones</th></tr></thead><tbody>{solicitudes.map((s)=>{
     const nombre=`solicitud ${s.sede_nombre}`;
     const solicitante=(s.solicitante_nombre||s.solicitante_correo||'').trim();
-    return <tr key={s.id}><td>{s.sede_nombre}{s.sede_rbd&&` (${s.sede_rbd})`}</td><td>{solicitante}{s.solicitante_nombre&&s.solicitante_correo?` · ${s.solicitante_correo}`:''}</td><td><span className={'estado-solicitud estado-'+s.estado}>{ESTADOS_SOLICITUD_INSUMO[s.estado]||s.estado}</span></td><td>{new Date(s.solicitado_en).toLocaleDateString('es-CL')}</td><td>{s.lineas.length}</td><td><AccionesRegistro id={s.id} nombre={nombre} verTexto="Ver solicitud" verHref={verHref(s.id)}>{admin&&s.estado==='solicitada'&&<EnlaceAccion href={verHref(s.id)+'&paso=validar'} etiqueta={'Validar: '+nombre} icono="editar"/>}{admin&&s.estado==='en_validacion'&&<EnlaceAccion href={verHref(s.id)+'&paso=aprobar'} etiqueta={'Aprobar: '+nombre} icono="editar"/>}{admin&&s.estado==='aprobada'&&<EnlaceAccion href={verHref(s.id)+'&paso=entregar'} etiqueta={'Entregar: '+nombre} icono="asignar"/>}{admin&&s.acta_id&&<EnlaceAccion href={enlaceActaInsumos(s.acta_id,volver)} etiqueta={'Ver acta: '+nombre} icono="acta"/>}</AccionesRegistro></td></tr>;
+    return <tr key={s.id}><td>{s.sede_nombre}{s.sede_rbd&&` (${s.sede_rbd})`}</td><td>{solicitante}{s.solicitante_nombre&&s.solicitante_correo?` · ${s.solicitante_correo}`:''}</td><td><span className={'estado-solicitud estado-'+s.estado}>{ESTADOS_SOLICITUD_INSUMO[s.estado]||s.estado}</span></td><td>{new Date(s.solicitado_en).toLocaleDateString('es-CL')}</td><td>{s.lineas.length}</td><td><AccionesRegistro id={s.id} nombre={nombre} verTexto="Ver solicitud" verHref={verHref(s.id)}>{permisos.aprobar&&s.estado==='solicitada'&&<EnlaceAccion href={verHref(s.id)+'&paso=validar'} etiqueta={'Validar: '+nombre} icono="editar"/>}{permisos.aprobar&&s.estado==='en_validacion'&&<EnlaceAccion href={verHref(s.id)+'&paso=aprobar'} etiqueta={'Aprobar: '+nombre} icono="editar"/>}{permisos.confirmar&&s.estado==='aprobada'&&<EnlaceAccion href={verHref(s.id)+'&paso=entregar'} etiqueta={'Entregar: '+nombre} icono="asignar"/>}{permisos.actas&&s.acta_id&&<EnlaceAccion href={enlaceActaInsumos(s.acta_id,volver)} etiqueta={'Ver acta: '+nombre} icono="acta"/>}</AccionesRegistro></td></tr>;
    })}{!solicitudes.length&&<tr><td colSpan={6}>No hay solicitudes para mostrar.</td></tr>}</tbody></table></div>
   </PanelResultados>
-  {detalle&&<ModalFicha titulo={'Solicitud '+detalle.id.slice(0,8)} cerrarHref={volver} focoId={detalle.id} editando={Boolean(paso)}><DetalleSolicitud key={detalle.id+':'+detalle.estado+':'+paso} solicitud={detalle} stock={stock} admin={admin} paso={paso} emisor={emisor} volver={volver} gestionarHref={p=>verHref(detalle.id)+'&paso='+p}/></ModalFicha>}
+  {detalle&&<ModalFicha titulo={'Solicitud '+detalle.id.slice(0,8)} cerrarHref={volver} focoId={detalle.id} editando={Boolean(paso)}><DetalleSolicitud key={detalle.id+':'+detalle.estado+':'+paso} solicitud={detalle} stock={stock} admin={admin} permisos={permisos} paso={paso} emisor={emisor} volver={volver} gestionarHref={p=>verHref(detalle.id)+'&paso='+p}/></ModalFicha>}
  </main>;
 }
 
@@ -60,7 +61,7 @@ function FotoMini({url,nombre}:{url?:string|null;nombre:string}){
  return <img src={url} alt={nombre} loading="lazy" style={{width:52,height:52,objectFit:'cover',borderRadius:14,border:'1px solid var(--color-borde-suave)',background:'#fff'}}/>;
 }
 
-function DetalleSolicitud({solicitud,stock,admin,paso,emisor,volver,gestionarHref}:{solicitud:SolicitudInsumo;stock:InsumoStock[];admin:boolean;paso:string;emisor:ParticipanteActual|null;volver:string;gestionarHref:(paso:string)=>string}){
+function DetalleSolicitud({solicitud,stock,admin,permisos,paso,emisor,volver,gestionarHref}:{solicitud:SolicitudInsumo;stock:InsumoStock[];admin:boolean;permisos:Props['permisos'];paso:string;emisor:ParticipanteActual|null;volver:string;gestionarHref:(paso:string)=>string}){
  const mod=solicitud.modalidad_entrega==='DESPACHO'?'Despacho al establecimiento':solicitud.modalidad_entrega==='RETIRO_SERVICIO'?'Retiro en el servicio':(solicitud.modalidad_entrega||'');
  return <section className="panel-catalogos detalle-solicitud">
   <h3>Datos de la solicitud</h3>
@@ -79,23 +80,23 @@ function DetalleSolicitud({solicitud,stock,admin,paso,emisor,volver,gestionarHre
    {solicitud.entregado_en&&<div><dt>Entregado</dt><dd>{new Date(solicitud.entregado_en).toLocaleString('es-CL')}</dd></div>}
    {solicitud.cancelado_en&&<div><dt>Cancelado</dt><dd>{new Date(solicitud.cancelado_en).toLocaleString('es-CL')} — {solicitud.cancelado_motivo}</dd></div>}
   </dl>
-  {admin&&solicitud.acta_id&&<div className="acciones-catalogos">
+  {permisos.actas&&solicitud.acta_id&&<div className="acciones-catalogos">
    <strong>Acta de entrega:</strong>
    <Link className="btn btn-primary btn-sm" href={enlaceActaInsumos(solicitud.acta_id,volver)}>Ver acta</Link>
-   <a className="btn btn-outline-primary btn-sm" href={`/inventario/actas/${solicitud.acta_id}/pdf?descargar=si`}>Descargar PDF</a>
+   {permisos.descargar&&<a download className="btn btn-outline-primary btn-sm" href={`/inventario/actas/${solicitud.acta_id}/pdf?descargar=si`}>Descargar PDF</a>}
   </div>}
-  {!admin&&solicitud.acta_id&&<p>Acta de entrega registrada.</p>}
+  {!permisos.actas&&solicitud.acta_id&&<p>Acta de entrega registrada.</p>}
   <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos"><caption>{solicitud.lineas.length} producto(s)</caption><thead><tr><th scope="col">Foto</th><th scope="col">Producto</th><th scope="col">Solicitada</th><th scope="col">Aprobada</th><th scope="col">Entregada</th><th scope="col">Motivo reducción</th></tr></thead><tbody>{solicitud.lineas.map(l=><tr key={l.id}><td><FotoMini url={l.foto_url} nombre={l.nombre}/></td><td>{l.codigo} · {l.nombre}</td><td>{l.cantidad_solicitada}</td><td>{l.cantidad_aprobada}</td><td>{l.cantidad_entregada}</td><td>{l.motivo_reduccion||'—'}</td></tr>)}</tbody></table></div>
   {admin&&<div className="acciones-catalogos">
-   {solicitud.estado==='solicitada'&&<EnlaceAccion href={gestionarHref('validar')} etiqueta="Validar solicitud" icono="editar"/>}
-   {solicitud.estado==='en_validacion'&&<EnlaceAccion href={gestionarHref('aprobar')} etiqueta="Aprobar solicitud" icono="editar"/>}
-   {solicitud.estado==='aprobada'&&<EnlaceAccion href={gestionarHref('entregar')} etiqueta="Entregar insumos y generar acta" icono="asignar"/>}
-   {!['entregada','cancelada'].includes(solicitud.estado)&&<EnlaceAccion href={gestionarHref('cancelar')} etiqueta="Cancelar solicitud" icono="devolver"/>}
+   {permisos.aprobar&&solicitud.estado==='solicitada'&&<EnlaceAccion href={gestionarHref('validar')} etiqueta="Validar solicitud" icono="editar"/>}
+   {permisos.aprobar&&solicitud.estado==='en_validacion'&&<EnlaceAccion href={gestionarHref('aprobar')} etiqueta="Aprobar solicitud" icono="editar"/>}
+   {permisos.confirmar&&solicitud.estado==='aprobada'&&<EnlaceAccion href={gestionarHref('entregar')} etiqueta="Entregar insumos y generar acta" icono="asignar"/>}
+   {permisos.aprobar&&!['entregada','cancelada'].includes(solicitud.estado)&&<EnlaceAccion href={gestionarHref('cancelar')} etiqueta="Cancelar solicitud" icono="devolver"/>}
   </div>}
-  {admin&&paso==='validar'&&solicitud.estado==='solicitada'&&<FormularioValidacion solicitud={solicitud} volver={volver}/>}
-  {admin&&paso==='aprobar'&&solicitud.estado==='en_validacion'&&<FormularioAprobacion solicitud={solicitud} stock={stock} volver={volver}/>}
-  {admin&&paso==='entregar'&&emisor&&solicitud.estado==='aprobada'&&<FormularioEntrega solicitud={solicitud} emisor={emisor} volver={volver}/>}
-  {admin&&paso==='cancelar'&&!['entregada','cancelada'].includes(solicitud.estado)&&<FormularioCancelacion solicitud={solicitud} volver={volver}/>}
+  {permisos.aprobar&&paso==='validar'&&solicitud.estado==='solicitada'&&<FormularioValidacion solicitud={solicitud} volver={volver}/>}
+  {permisos.aprobar&&paso==='aprobar'&&solicitud.estado==='en_validacion'&&<FormularioAprobacion solicitud={solicitud} stock={stock} volver={volver}/>}
+  {permisos.confirmar&&paso==='entregar'&&emisor&&solicitud.estado==='aprobada'&&<FormularioEntrega solicitud={solicitud} emisor={emisor} volver={volver}/>}
+  {permisos.aprobar&&paso==='cancelar'&&!['entregada','cancelada'].includes(solicitud.estado)&&<FormularioCancelacion solicitud={solicitud} volver={volver}/>}
  </section>;
 }
 

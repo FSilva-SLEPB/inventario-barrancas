@@ -5,7 +5,7 @@ import VentanaOperacion from '@/components/ventana-operacion-inventario';
 import EnlaceAccion from '@/components/enlace-accion';
 import {notFound} from 'next/navigation';
 import {randomUUID} from 'node:crypto';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {obtenerEquipo} from '@/lib/equipos';
 import {detalleCelular} from '@/lib/celulares';
@@ -26,7 +26,7 @@ export async function AccionesCustodia({tipo,id,custodia,volver,permitido,tipoSe
  const accion=custodia==='en_bodega'?'asignacion':'devolucion',salida=accion==='asignacion';return <><EnlaceAccion href={enlaceMovimiento(volver,tipo,id,accion)} etiqueta={salida?'Asignar / entregar':'Devolver a Bodega TI'} icono={salida?'asignar':'devolver'}/>{custodia==='asignado'&&<EnlaceAccion href={enlaceMovimiento(volver,tipo,id,'cambio')} etiqueta="Cambiar equipamiento" icono="cambio"/>}{salidaPermitida&&(custodia==='en_bodega'||tipoSede!=='nivel_central')&&<EnlaceAccion href={enlaceMovimiento(volver,tipo,id,'traspaso')} etiqueta="Traspasar a otra sede" icono="traspaso"/>}{custodia==='en_bodega'&&<EnlaceAccion href={enlaceMovimiento(volver,tipo,id,'prestamo')} etiqueta="Prestar desde Bodega TI" icono="prestar"/>}</>;
 }
 export default async function VentanaMovimiento({parametros,volver}:{parametros:Record<string,string|string[]|undefined>;volver:string}){
- if(!parametros.movimiento)return null;if(['cambio','traspaso'].includes(String(parametros.movimiento)))return <VentanaOperacion parametros={parametros} volver={volver}/>;const actor=await exigirAdministrador();
+ if(!parametros.movimiento)return null;if(['cambio','traspaso'].includes(String(parametros.movimiento)))return <VentanaOperacion parametros={parametros} volver={volver}/>;const actor=await exigirPermiso('movimientos','confirmar');
  const accion=parametros.movimiento,tipo=parametros.claseBien,id=parametros.bien;
  if(!['devolucion','asignacion','prestamo','devolucion_prestamo'].includes(String(accion))||!['equipo','celular'].includes(String(tipo))||typeof id!=='string'||!esIdSede(id))notFound();
  const bien=tipo==='equipo'?await obtenerEquipo(id):(await detalleCelular(id))?.celular;if(!bien)notFound();const sedes=await listarSedes(),salida=accion==='asignacion'||accion==='prestamo',prestamo=accion==='devolucion_prestamo'&&typeof parametros.prestamoId==='string'?await detallePrestamo(parametros.prestamoId):null;if(accion==='devolucion_prestamo'&&(!prestamo||prestamo.bienId!==id||prestamo.clase!==tipo))notFound();const estadoPermite=bien.estadoAdministrativo==='activo'&&(!salida||condicionPermiteSalida(bien.condicionTecnica));const posible=estadoPermite&&(accion==='devolucion_prestamo'?bien.custodia==='en_prestamo'&&prestamo?.estado==='abierto':accion==='devolucion'?bien.custodia==='asignado':bien.custodia==='en_bodega');

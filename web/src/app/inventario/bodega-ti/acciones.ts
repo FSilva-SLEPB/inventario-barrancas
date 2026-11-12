@@ -2,14 +2,14 @@
 import {randomUUID} from 'node:crypto';
 import {redirect} from 'next/navigation';
 import {revalidatePath} from 'next/cache';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {retornoMovimiento} from '@/lib/validacion-movimientos-inventario';
 import {destinoConExito} from '@/lib/aviso-exito';
 export type EstadoUbicacion={estado:'inicial'|'error';mensaje:string;revision:string;ubicacion:string};
 export async function guardarUbicacionBodega(_previo:EstadoUbicacion,f:FormData):Promise<EstadoUbicacion>{
- const actor=await exigirAdministrador(),revision=randomUUID(),v:Record<string,string>={},campos=['solicitud','tipo','bienId','version','ubicacion','volver'];
+ const actor=await exigirPermiso('bodega','confirmar'),revision=randomUUID(),v:Record<string,string>={},campos=['solicitud','tipo','bienId','version','ubicacion','volver'];
  const fallo=(mensaje:string):EstadoUbicacion=>({estado:'error',mensaje,revision,ubicacion:v.ubicacion??''});
  if([...f.keys()].some(k=>!campos.includes(k)&&!k.startsWith('$ACTION')))return fallo('Formulario inválido. Vuelve a abrir la ventana.');
  for(const k of campos){const raw=f.get(k);if(f.getAll(k).length!==1||typeof raw!=='string'||raw.length>(k==='volver'?2000:50)||/\p{Cc}/u.test(raw))return fallo('Formulario inválido. Vuelve a abrir la ventana.');v[k]=raw;}

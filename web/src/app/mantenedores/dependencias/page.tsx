@@ -32,7 +32,7 @@ export default async function Dependencias({ searchParams }: Propiedades) {
   const acceso = await exigirAcceso();
   const parametros = await searchParams;
   const [dependencias, sedes] = await Promise.all([listarDependencias(), listarSedes()]);
-  const puedeEditar = puedeGestionarDependencias(acceso.rol);
+  const puedeEditar = puedeGestionarDependencias(acceso);
   const pideEdicion = parametros.editar !== undefined;
   const id = typeof parametros.editar === "string" && esIdDependencia(parametros.editar)
     ? parametros.editar.toLowerCase() : null;

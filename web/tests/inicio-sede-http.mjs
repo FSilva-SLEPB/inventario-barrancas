@@ -22,7 +22,7 @@ try{
  for(const k of ['gestor','admin']){const h=await(await pedir('/',cuentas[k])).text();assert.doesNotMatch(h,/Datos del establecimiento/);assert.equal(h.includes('EE-'+suf)||h.includes('JI-'+suf),false);}
  for(const k of ['gestor','admin']){
   const p=await(await pedir('/insumos',cuentas[k])).text();assert.doesNotMatch(/<main\b[^>]*>([\s\S]*?)<\/main>/.exec(p)?.[1]??'',/Catálogo de insumos/,'El catálogo no se repite en Solicitudes');
-  const r=await pedir('/mantenedores',cuentas[k]);assert.equal(r.status,200);const h=await r.text();assert.match(h,/Catálogo de insumos/);const tarjetas=h.match(/class="acceso-modulo"/g)||[];assert.equal(tarjetas.length,k==='gestor'?1:6);
+  const r=await pedir('/mantenedores',cuentas[k]);assert.equal(r.status,200);const h=await r.text();assert.match(h,/Catálogo de insumos/);const tarjetas=h.match(/class="acceso-modulo"/g)||[];assert.equal(tarjetas.length,k==='gestor'?1:7);
  }
  console.log('Inicio por sede: EE/JI con identidad propia, datos faltantes explícitos, aislamiento ante URL alterada, acceso externo a tickets y catálogo único en Mantenedores comprobados.');
 }finally{await db.query('UPDATE public.usuarios_acceso SET activo=false WHERE correo=ANY($1::text[])',[Object.values(cuentas)]);await app.end();await db.end();}

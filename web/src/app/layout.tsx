@@ -1,3 +1,4 @@
+import ActualizarPermisos from '@/components/actualizar-permisos';
 import { Suspense } from "react";
 import AvisosGuardado from "@/components/avisos-guardado";
 import type { Metadata } from "next";
@@ -73,7 +74,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <div className="sesion-datos">
                 <span className="sesion-etiqueta">Sesión institucional</span>
                 <span className="sesion-correo">{acceso.email}</span>
-                <span className="sesion-perfil">{PERFILES[acceso.rol]}</span>
+                <span className="sesion-perfil">{acceso.perfilNombre??PERFILES[acceso.rol]}</span>
                 {acceso.sedeNombre && <span className="sesion-sede">{etiquetaSede({ nombre: acceso.sedeNombre, rbd: acceso.sedeRbd })}</span>}
               </div>
               <BotonSalir />
@@ -83,7 +84,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </div>
       </header>
       <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
-        {acceso && <Navegacion rol={acceso.rol} administrador={puedeAdministrar(acceso.rol)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
+        {acceso?.revisionAcceso&&<ActualizarPermisos revision={acceso.revisionAcceso}/>}
+        {acceso && <Navegacion autorizacion={acceso} rol={acceso.rol} administrador={puedeAdministrar(acceso)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
         <div id="contenido-principal" className="contenido-app" tabIndex={-1}>{children}</div>
       </div>
       <footer className="app-footer">

@@ -52,7 +52,6 @@ async function entorno() {
     } });
     const modulo = new SourceTextModule(outputText, { identifier: archivo });
     modulos.set(nombre, modulo);
-    await modulo.link(cargar);
     return modulo;
   }
   async function importar(nombre) {
@@ -324,4 +323,11 @@ test('fotografías: solo administradores editan, consultas solo leen y gestor no
  assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-a'),false);assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-b'),false);
  for(const rol of ['consulta_sede','consulta','gestor_insumos'])assert.equal(p.puedeEditarFotoSede(rol,'sede-a','sede-a'),false);
  assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-a'),true);assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-b'),false);assert.equal(p.puedeVerFotoSede('consulta',null,'sede-b'),true);assert.equal(p.puedeVerFotoSede('gestor_insumos',null,'sede-b'),false);
+});
+
+
+test('menú RBAC: sede sin Nivel Central y consultas sin Nueva solicitud ni Gestor',async()=>{
+ const e=await entorno(),{modulosSistema}=await e.importar('@/lib/modulos');
+ const a={rol:'consulta',permisos:['equipos.consultar','celulares.consultar','seguimiento_insumos.consultar','historial_insumos.consultar'],alcance:'sede',clasePerfil:'operativo',perfilId:'ficticio',perfilNombre:'Director EE',revisionAcceso:'1:1'};
+ const enlaces=modulosSistema(a).flatMap(m=>m.accesos);assert.ok(!enlaces.some(x=>x.href==='/inventario/nivel-central'||x.href==='/insumos/solicitud'));assert.ok(enlaces.some(x=>x.href==='/insumos/seguimiento'&&x.titulo==='Seguimiento de insumos'));assert.ok(enlaces.some(x=>x.href==='/insumos/historial'));assert.ok(!enlaces.some(x=>x.titulo==='Gestor de insumos'));
 });

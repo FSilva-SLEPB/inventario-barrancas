@@ -19,7 +19,7 @@ const seleccion=`SELECT e.id,e.sede_id AS "sedeId",e.categoria_id AS "categoriaI
   FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id JOIN public.categorias_bienes c ON c.id=e.categoria_id
   LEFT JOIN public.cargas_equipos l ON l.id=e.carga_id`;
 export async function listarEquipos(ambito:string,vista:string,pagina:number,busqueda:string,tipo:string,sedeId:string|null,rbd="",tamano=50) {
-  const acceso=await exigirAcceso();const local=requiereSede(acceso.rol);
+  const acceso=await exigirAcceso();const local=requiereSede(acceso);
   const limite=[50,100,150].includes(tamano)?tamano:50;
   const filtros=`WHERE ($1::boolean OR e.sede_id=$2::uuid)
     AND (($3='nc' AND s.tipo='nivel_central') OR ($3='eeji' AND s.tipo<>'nivel_central'))
@@ -39,7 +39,7 @@ export async function listarEquipos(ambito:string,vista:string,pagina:number,bus
 export async function obtenerEquipo(id:string):Promise<Equipo|null> {
   const acceso=await exigirAcceso();
   const {rows}=await obtenerBaseDatos().query<Equipo>(`${seleccion} WHERE e.id=$1::uuid AND ($2::boolean OR e.sede_id=$3::uuid)`,
-    [id,!requiereSede(acceso.rol),acceso.sedeId]);return rows[0]??null;
+    [id,!requiereSede(acceso),acceso.sedeId]);return rows[0]??null;
 }
 export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   const acceso=await exigirAcceso();
@@ -47,7 +47,7 @@ export async function historialEquipo(id:string):Promise<HistorialEquipo[]> {
   return (await obtenerBaseDatos().query<HistorialEquipo>(`SELECT COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,CASE WHEN h.incidente_id IS NOT NULL AND NOT $4::boolean THEN 'Seguimiento de incidente de robo. Los antecedentes están disponibles para los perfiles de gestión autorizados.' ELSE h.motivo END AS motivo,h.registrado_en::text AS "registradoEn",h.entrega_id AS "entregaId",h.incidente_id AS "incidenteId",h.antes,h.despues
     FROM public.equipos_historial h JOIN public.equipos e ON e.id=h.equipo_id
     LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor
-    WHERE e.id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND h.despues->>'sede_id'=$3::text AND (h.antes IS NULL OR h.antes->>'sede_id'=$3::text))) ORDER BY h.id`,[id,!requiereSede(acceso.rol),acceso.sedeId,puedeGestionarDependencias(acceso.rol)])).rows;
+    WHERE e.id=$1::uuid AND ($2::boolean OR (e.sede_id=$3::uuid AND h.despues->>'sede_id'=$3::text AND (h.antes IS NULL OR h.antes->>'sede_id'=$3::text))) ORDER BY h.id`,[id,!requiereSede(acceso),acceso.sedeId,puedeGestionarDependencias(acceso)])).rows;
 }
 export function equipoAFormulario(equipo:Equipo):ValoresEquipo {
   const valores=valoresEquipo();

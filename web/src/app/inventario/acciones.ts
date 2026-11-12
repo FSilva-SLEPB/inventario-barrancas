@@ -4,11 +4,11 @@ import {destinoConExito} from '@/lib/aviso-exito';
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { exigirGestionDependencias } from "@/lib/acceso";
+import { exigirAlguno } from "@/lib/acceso";
 import { obtenerBaseDatos } from "@/lib/db";
 import { validarEquipo, valoresEquipo, type EstadoEquipo } from "@/lib/validacion-equipos";
 export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):Promise<EstadoEquipo> {
-  const actor=await exigirGestionDependencias();const revision=randomUUID();
+  const actor=await exigirAlguno('equipos.registrar','equipos.editar');const revision=randomUUID();
   const {datos,valores,errores}=validarEquipo(formulario);
   const fallo:EstadoEquipo={resultado:"error",mensaje:"Revisa los campos indicados.",valores,errores,revision,custodiaInicial:formulario.get('custodiaInicial')==='asignado'?'asignado':'en_bodega'};
   if(!datos)return fallo;

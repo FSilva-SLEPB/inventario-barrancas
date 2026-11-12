@@ -59,7 +59,7 @@ try {
   // Lectura local: no se filtran nombres/IDs ajenos ni al forzar parámetros de edición.
   for (const tipo of ['encargado','local']) {
     for (const ruta of ['/mantenedores/sedes?editar='+ids[1], '/mantenedores/dependencias?editar='+deps[1]]) {
-      const r = await pedir(ruta,cookies[tipo]); assert.equal(r.status,200);
+      const r = await pedir(ruta,cookies[tipo]);if(tipo==='local'&&ruta.startsWith('/mantenedores/dependencias')){assert.equal(r.headers.get('location'),'/sin-permiso');comprobaciones++;continue;}assert.equal(r.status,200);
       const html = await r.text();
       assert.ok(html.includes('Escuela A '+sufijo));
       assert.ok(!html.includes('Jardin B '+sufijo));
@@ -78,33 +78,26 @@ try {
     comprobaciones++;
   }
   const paginaGestion = await (await pedir('/mantenedores/usuarios?nuevo=1',cookies.gestion)).text();
-  const accionUsuario = accion(paginaGestion);
-  assert.ok(!paginaGestion.includes('value="administrador"'));
-  assert.ok(!paginaGestion.includes('value="administrador_gestion"'));
-  comprobaciones++;
-  const reservada = await (await pedir('/mantenedores/usuarios?editar=felipe.silva%40slepb.gob.cl',cookies.gestion)).text();
-  assert.ok(!reservada.includes('id="formulario-usuario"'));
-  comprobaciones++;
-  const valores = { correo: correos.nuevo, nombre: 'Persona ficticia', rol: 'consulta_sede', activo: 'true', version: '0', sedeId: ids[1] };
-  assert.equal((await guardar('/mantenedores/usuarios',accionUsuario,valores,cookies.gestion)).status,200);
-  assert.equal((await db.query('SELECT sede_id FROM public.usuarios_acceso WHERE correo=$1',[correos.nuevo])).rows[0].sede_id,ids[1]);
-  comprobaciones++;
-  // Referencia de acción legítima y payload modificado: no permite elevar perfil.
-  await guardar('/mantenedores/usuarios',accionUsuario,{...valores,rol:'administrador',sedeId:'',version:'1'},cookies.gestion);
-  assert.equal((await db.query('SELECT rol FROM public.usuarios_acceso WHERE correo=$1',[correos.nuevo])).rows[0].rol,'consulta_sede');
-  comprobaciones++;
+  let accionUsuario;for(const[,src]of paginaGestion.matchAll(/<script[^>]+src="([^"]+)"/g)){const js=await(await fetch(origen+src.replaceAll('&amp;','&'))).text();const m=/createServerReference\)\("([0-9a-f]+)"[^)]*?"guardarCuentaRbac"/.exec(js);if(m){accionUsuario=m[1];break;}}assert.ok(accionUsuario);
+  const ji=(await db.query("SELECT id FROM public.rbac_perfiles WHERE codigo='directora_ji'")).rows[0].id,sistema=(await db.query("SELECT id FROM public.rbac_perfiles WHERE codigo='sistema'")).rows[0].id;
+  assert.ok(!paginaGestion.includes('value="'+sistema+'"'));comprobaciones++;
+  assert.equal((await pedir('/mantenedores/usuarios?editar=felipe.silva%40slepb.gob.cl',cookies.gestion)).status,404);comprobaciones++;
+  const valores={nombre:'Persona ficticia',perfilId:ji,activo:true,alcance:'sede',sedeId:ids[1],funcionarioId:'',motivo:'Prueba de delegación'};
+  const guardarCuenta=(version,extra={})=>fetch(origen+'/mantenedores/usuarios',{method:'POST',redirect:'manual',headers:{Origin:new URL(origen).origin,Cookie:cookies.gestion,'Next-Action':accionUsuario,'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify([randomUUID(),correos.nuevo,version,{...valores,...extra}])});
+  const creado=await guardarCuenta(0);assert.equal(creado.status,200);assert.ok((await creado.text()).includes('"ok":true'));assert.equal((await db.query('SELECT sede_id FROM public.usuarios_acceso WHERE correo=$1',[correos.nuevo])).rows[0].sede_id,ids[1]);comprobaciones++;
+  const elevado=await guardarCuenta(1,{perfilId:sistema,alcance:'global',sedeId:''});assert.ok((await elevado.text()).includes('"ok":false'));assert.equal((await db.query('SELECT perfil_id FROM public.usuarios_acceso WHERE correo=$1',[correos.nuevo])).rows[0].perfil_id,ji);comprobaciones++;
   for (const rol of ['administrador','administrador_gestion']) {
-    await fallaSql([correos.gestion,correos.gestion2,'',rol,true,0,null],'P1004');
+    await fallaSql([correos.gestion,correos.gestion2,'',rol,true,0,null],'42501');
   }
-  await fallaSql([correos.gestion,correos.gestion,'','consulta',false,1,null],'P1004');
-  await fallaSql([correos.gestion,'felipe.silva@slepb.gob.cl','','consulta',false,1,null],'P1004');
+  await fallaSql([correos.gestion,correos.gestion,'','consulta',false,1,null],'42501');
+  await fallaSql([correos.gestion,'felipe.silva@slepb.gob.cl','','consulta',false,1,null],'42501');
   for (const sede of [null,ids[2],ids[3],randomUUID()]) {
     await fallaSql([correos.gestion,correos.gestion2,'','encargado',true,0,sede],'P1005');
   }
   await fallaSql([correos.gestion,correos.gestion2,'','consulta',true,0,ids[0]],'P1005');
   // El gestor tampoco elude restricciones mediante la firma antigua de seis parámetros.
   await assert.rejects(app.query('SELECT public.guardar_usuario_acceso($1,$2,$3,$4,$5,$6)',
-    [correos.gestion,correos.gestion2,'','administrador',true,0]),e=>e.code==='P1004');
+    [correos.gestion,correos.gestion2,'','administrador',true,0]),e=>e.code==='42501');
   comprobaciones++;
   const paginaDependencias = await (await pedir('/mantenedores/dependencias?nuevo=1',cookies.encargado)).text();
   const accionDep = accion(paginaDependencias);
@@ -145,9 +138,9 @@ try {
   assert.equal((await pedir('/mantenedores/sedes',cookies.encargado)).headers.get('location'),'/acceso-denegado');comprobaciones++;
   console.log(`${comprobaciones} comprobaciones de perfiles/sedes: aislamiento, escritura local, solo lectura, delegación, historial y cambio inmediato.`);
 } finally {
-  await db.query('DELETE FROM public.usuarios_acceso_historial WHERE correo=ANY($1)',[Object.values(correos)]);
-  await db.query('DELETE FROM public.usuarios_acceso WHERE correo=ANY($1)',[Object.values(correos)]);
+  // Conservar actores referenciados por la auditoría RBAC; solo desactivarlos.
+  await db.query('UPDATE public.usuarios_acceso SET activo=false WHERE correo=ANY($1)',[Object.values(correos)]);
   await db.query('DELETE FROM public.dependencias WHERE sede_id=ANY($1::uuid[])',[ids]);
-  await db.query('DELETE FROM public.sedes WHERE id=ANY($1::uuid[])',[ids]);
+  await db.query('UPDATE public.sedes SET activo=false WHERE id=ANY($1::uuid[])',[ids]);
   await Promise.all([app.end(),db.end()]);
 }

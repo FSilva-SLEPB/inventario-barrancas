@@ -2,14 +2,14 @@
 import {createHash,randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {listarDirectorio} from '@/lib/directorio';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {validarDatosDirectorio,prepararDirectorio,CAMPOS_DIRECTORIO,type DatosDirectorio,type VistaDirectorio} from '@/lib/validacion-directorio';
 export type EstadoDirector={estado:'inicial'|'error'|'guardado';mensaje:string;valores:DatosDirectorio;version:number;sedeVersion:string;revision:string};
 export async function guardarDirector(_anterior:EstadoDirector,f:FormData):Promise<EstadoDirector>{
- const actor=await exigirAdministrador(),revision=randomUUID(),version=Number(f.get('version')),sedeVersion=f.get('sedeVersion'),sede=f.get('sede');
+ const actor=await exigirPermiso('directorio_personas','editar'),revision=randomUUID(),version=Number(f.get('version')),sedeVersion=f.get('sedeVersion'),sede=f.get('sede');
  const crudos:Record<string,unknown>={};for(const k of CAMPOS_DIRECTORIO)crudos[k]=f.get(k);
  const valores=Object.fromEntries(Object.entries(crudos).map(([k,v])=>[k,typeof v==='string'?v.slice(0,2000):''])) as DatosDirectorio;
  const fallo=(mensaje:string):EstadoDirector=>({estado:'error',mensaje,valores,version,sedeVersion:typeof sedeVersion==='string'?sedeVersion:'',revision});
@@ -25,7 +25,7 @@ export async function guardarDirector(_anterior:EstadoDirector,f:FormData):Promi
 }
 export type EstadoCargaDirectorio={estado:'inicial'|'error'|'previa'|'guardado';mensaje:string;hash:string;versiones:string;vista:VistaDirectorio[];omitidas:{fila:number;rbd:string;sede:string;motivo:string}[]};
 export async function cargarDirectorio(_anterior:EstadoCargaDirectorio,f:FormData):Promise<EstadoCargaDirectorio>{
- const actor=await exigirAdministrador(),base:EstadoCargaDirectorio={estado:'error',mensaje:'',hash:'',versiones:'',vista:[],omitidas:[]};
+ const actor=await exigirPermiso('directorio_personas','editar'),base:EstadoCargaDirectorio={estado:'error',mensaje:'',hash:'',versiones:'',vista:[],omitidas:[]};
  const archivo=f.get('archivo'),pegado=f.get('listado'),operacion=f.get('operacion');
  const esArchivo=archivo instanceof File&&archivo.size>0,esTexto=typeof pegado==='string'&&Boolean(pegado.trim());
  if(f.getAll('operacion').length!==1||!['previa','confirmar'].includes(String(operacion))||f.getAll('archivo').length>1||f.getAll('listado').length>1||esArchivo===esTexto||esArchivo&&(!(archivo instanceof File)||archivo.size>1024*1024||!/[.](csv|tsv|txt)$/i.test(archivo.name))||esTexto&&Buffer.byteLength(pegado as string)>1024*1024)return {...base,mensaje:'Selecciona un CSV/TSV/TXT o pega el listado con su cabecera, hasta 1 MB. Usa una sola fuente.'};

@@ -2,7 +2,7 @@
 import {randomUUID} from 'node:crypto';
 import {revalidatePath} from 'next/cache';
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {validarPrestamo,esOperacionPrestamo} from '@/lib/validacion-prestamos';
 import {validarMovimiento,retornoMovimiento} from '@/lib/validacion-movimientos-inventario';
@@ -12,7 +12,7 @@ import {esIdSede} from '@/lib/validacion-sedes';
 import {destinoConExito} from '@/lib/aviso-exito';
 export type EstadoMovimiento={estado:'inicial'|'error';mensaje:string;valores:Record<string,string>;revision?:string};
 export async function registrarMovimiento(_anterior:EstadoMovimiento,f:FormData):Promise<EstadoMovimiento>{
- const actor=await exigirAdministrador(),valores:Record<string,string>={},camposMovimiento=['solicitud','tipo','bienId','accion','destino','fecha','receptor','motivo','version','volver'],camposBase=esOperacionPrestamo(f.get('accion'))?[...camposMovimiento,'fechaLimite','prestamoId']:camposMovimiento,campos=[...camposBase,'actaSolicitud',...Object.keys(CAMPOS_ACTA)];
+ const actor=await exigirPermiso(esOperacionPrestamo(f.get('accion'))?'prestamos':'movimientos','confirmar'),valores:Record<string,string>={},camposMovimiento=['solicitud','tipo','bienId','accion','destino','fecha','receptor','motivo','version','volver'],camposBase=esOperacionPrestamo(f.get('accion'))?[...camposMovimiento,'fechaLimite','prestamoId']:camposMovimiento,campos=[...camposBase,'actaSolicitud',...Object.keys(CAMPOS_ACTA)];
  for(const k of ['fechaLimite','prestamoId','funcionario','destino','fecha','receptor','motivo',...Object.keys(CAMPOS_ACTA)]){const v=f.get(k);valores[k]=typeof v==='string'?v.slice(0,2500):'';}
  const error=(mensaje:string):EstadoMovimiento=>({estado:'error',revision:randomUUID(),mensaje,valores});let preparado:ReturnType<typeof validarMovimiento>|ReturnType<typeof validarPrestamo>,metadata:MetadataActa;const documento=f.get('actaSolicitud');
  try{
@@ -26,6 +26,7 @@ export async function registrarMovimiento(_anterior:EstadoMovimiento,f:FormData)
   await db.query('BEGIN');const movimiento=await db.query<{r:{repetida?:boolean}}>(esOperacionPrestamo(preparado.datos.accion)?'SELECT public.mover_prestamo_acceso($1,$2::uuid,$3::jsonb) AS r':'SELECT public.mover_bien_acceso($1,$2::uuid,$3::jsonb) AS r',[actor.email,preparado.solicitud,JSON.stringify(preparado.datos)]);
   if(!movimiento.rows[0].r.repetida&&['asignacion','prestamo'].includes(preparado.datos.accion)&&(await db.query<{tipo:string}>('SELECT tipo FROM public.sedes WHERE id=$1',[preparado.datos.destino])).rows[0]?.tipo==='nivel_central'&&!f.get('funcionario'))throw Object.assign(new Error('Selecciona funcionario o persona manual'),{code:'22023'});
   const funcionario=f.get('funcionario');if(funcionario&&!movimiento.rows[0].r.repetida){if(!['asignacion','prestamo'].includes(preparado.datos.accion))throw Object.assign(new Error('Destino incompatible'),{code:'22023'});await db.query('SELECT public.validar_receptor_nc_acceso($1,$2::uuid,$3::uuid)',[actor.email,funcionario==='manual'?null:funcionario,preparado.datos.destino]);}
+  if(funcionario&&funcionario!=='manual'&&preparado.datos.accion==='asignacion'&&!movimiento.rows[0].r.repetida)await db.query('SELECT public.rbac_vincular_asignacion($1,$2,$3,$4,$5,$6,$7,$8)',[actor.email,preparado.solicitud,preparado.datos.tipo,preparado.datos.bienId,preparado.datos.version+1,funcionario,preparado.solicitud,'Asignación confirmada a funcionario']);
   await completarActaEnTransaccion(db,actor.email,documento as string,preparado.solicitud,metadata);await db.query('COMMIT');
  }catch(e){if(db)await db.query('ROLLBACK').catch(()=>{});const c=(e as {code?:string}).code,m:Record<string,string>={P3002:'El registro está dado de baja y es de solo lectura.',P3003:'El estado administrativo o la condición no permiten entregar, prestar ni traspasar este bien.',P2601:'El bien cambió o la solicitud ya fue utilizada. Recarga el registro antes de confirmar.',P2602:'Solo se asigna desde Bodega TI y solo se devuelve un bien asignado.',P2604:'El bien o la sede ya no están disponibles.',P2605:'El equipo tiene un incidente de robo abierto. Revisa su recuperación antes de moverlo.',P2801:'El préstamo ya está cerrado o no corresponde a este bien. Recarga el listado.',P2802:'Solo se presta desde Bodega TI; un bien prestado debe devolverse antes de otra operación.',P2701:'La solicitud del acta ya fue utilizada con otros datos. Revisa el registro.',"42501":'Solo UTIC puede confirmar operaciones.',"22023":'Revisa los datos, participantes y fecha de la operación.'};return error(m[c??'']??'No se pudo completar la operación y su acta. No se guardaron cambios parciales.');
  }finally{db?.release();}

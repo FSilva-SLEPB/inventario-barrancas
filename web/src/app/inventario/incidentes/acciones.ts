@@ -1,11 +1,11 @@
 'use server';
-import {exigirGestionDependencias} from '@/lib/acceso';
+import {exigirAlguno} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {normalizarRut} from '@/lib/validacion-directorio';
 import {revalidatePath} from 'next/cache';
 export async function gestionarReporteIncidente(solicitud:string,id:string,version:number,accion:string,datos:Record<string,unknown>){
- const a=await exigirGestionDependencias();
+ const a=await exigirAlguno('incidentes.registrar','incidentes.editar','incidentes.aprobar');
  if(!esIdSede(solicitud)||!esIdSede(id)||!Number.isInteger(version)||version<0||version>=2147483647||!['guardar','enviar','validar','rechazar'].includes(accion)||!datos||JSON.stringify(datos).length>150000)return {ok:false as const,mensaje:'Solicitud inválida.'};
  if(accion==='guardar'&&datos.rut){const rut=normalizarRut(datos.rut);if(!rut)return {ok:false as const,mensaje:'Revisa el RUT de quien realizó la denuncia.'};datos={...datos,rut};}
  try{

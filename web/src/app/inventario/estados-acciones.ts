@@ -1,11 +1,11 @@
 'use server';
-import {exigirAdministrador} from '@/lib/acceso';
+import {exigirPermiso} from '@/lib/acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import {esIdSede} from '@/lib/validacion-sedes';
 import {revalidatePath} from 'next/cache';
 import {ESTADOS_ADMINISTRATIVOS_ACTIVO,ESTADOS_CONDICION_ACTIVO} from '@/lib/estados-activo';
 export async function guardarEstadosInventario(solicitud:string,datos:{clase:'equipo'|'celular';id:string;version:number;administrativo:string;condicion:string}){
- const actor=await exigirAdministrador();
+ const actor=await exigirPermiso('bajas','confirmar');
  if(!esIdSede(solicitud)||!datos||!esIdSede(datos.id)||!['equipo','celular'].includes(datos.clase)||!Number.isInteger(datos.version)||datos.version<1||datos.version>=2147483647||!Object.hasOwn(ESTADOS_ADMINISTRATIVOS_ACTIVO,datos.administrativo)||(datos.administrativo==='activo'&&datos.condicion!==''&&!Object.hasOwn(ESTADOS_CONDICION_ACTIVO,datos.condicion)))return {ok:false as const,mensaje:'Revisa los estados antes de guardar.'};
  try{
   const {rows}=await obtenerBaseDatos().query<{r:{version:number;fechaBaja:string|null}}>('SELECT public.guardar_estados_activo_acceso($1,$2::uuid,$3::jsonb) AS r',[actor.email,solicitud,JSON.stringify(datos)]);

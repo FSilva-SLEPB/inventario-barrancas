@@ -1,3 +1,3 @@
 import {redirect} from 'next/navigation';
-import {exigirAdministrador} from '@/lib/acceso';
-export default async function ModeloAnterior(){await exigirAdministrador();redirect('/documentacion/modelo-datos');}
+import {exigirPermiso} from '@/lib/acceso';
+export default async function ModeloAnterior(){await exigirPermiso('perfiles','consultar');redirect('/documentacion/modelo-datos');}

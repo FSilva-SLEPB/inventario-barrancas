@@ -3,7 +3,7 @@ import { esIdSede } from "@/lib/validacion-sedes";
 export { PERFILES } from "@/lib/politica-acceso";
 
 export type UsuarioAcceso = {
-  correo: string; nombre: string; rol: RolAcceso; activo: boolean; version: number;
+  perfil_id?:string|null;alcance_rbac?:string|null;funcionario_id?:string|null;perfilNombre?:string;clasePerfil?:string;perfilActivo?:boolean;correo: string; nombre: string; rol: RolAcceso; activo: boolean; version: number;
   sedeId: string | null;
 };
 export type ValoresUsuario = {
@@ -39,7 +39,7 @@ export function validarUsuario(formulario: FormData) {
     errores.nombre = "Usa un nombre de hasta 120 caracteres, sin controles ni saltos de línea.";
   }
   if (!rolValido(valores.rol)) errores.rol = "Selecciona un perfil permitido.";
-  if (requiereSede(valores.rol)) {
+  if (requiereSede(valores)) {
     if (!esIdSede(valores.sedeId)) errores.sedeId = "Selecciona una única sede EE o JI.";
   } else if (valores.sedeId !== "") errores.sedeId = "Un perfil general debe quedar sin sede asignada.";
   if (!["true", "false"].includes(valores.activo)) errores.activo = "Selecciona un estado válido.";
