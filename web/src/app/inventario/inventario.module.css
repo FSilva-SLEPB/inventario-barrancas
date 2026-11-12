@@ -26,7 +26,7 @@
 .estado { display: inline-flex; align-items: center; padding: 0.25rem 0.55rem; border: 1px solid; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; white-space: nowrap; }
 .recibido { background: var(--color-recibido-fondo); color: var(--color-recibido-texto); border-color: var(--color-recibido-borde); }
 .pendiente { background: var(--color-pendiente-fondo); color: var(--color-pendiente-texto); border-color: var(--color-pendiente-borde); }
-.tabla th:last-child, .tabla td:last-child { position: sticky; right: 0; text-align: center; background: var(--color-superficie); box-shadow: -6px 0 12px rgb(15 23 42 / 4%); }
+.tabla th:last-child, .tabla td:last-child { position: static; width:8.5rem;min-width:8.5rem;text-align:left;box-shadow:none; }
 .tabla th:last-child { background: var(--color-superficie-suave); }
 .historial { display: inline-flex; align-items: center; justify-content: center; padding: 0.4rem 0.65rem; min-height: 2.25rem; border: 1px solid var(--color-borde-suave); border-radius: 0.625rem; background: var(--color-superficie); color: var(--color-primario); font-size: 0.875rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .historial:hover { background: var(--color-seleccion); border-color: var(--color-primario); }

@@ -18,7 +18,7 @@ import ModalFicha from '@/components/modal-ficha';
 export default async function VentanaOperacion({parametros:p,volver}:{parametros:Record<string,string|string[]|undefined>;volver:string}){
  const actor=await exigirPermiso('movimientos','confirmar'),tipo=p.movimiento,clase=p.claseBien,id=p.bien;
  if(!['cambio','traspaso'].includes(String(tipo))||!['equipo','celular'].includes(String(clase))||typeof id!=='string'||!esIdSede(id))notFound();
- const bien=clase==='equipo'?await obtenerEquipo(id):(await detalleCelular(id))?.celular;if(!bien)notFound();
+ const bien=clase==='equipo'?await obtenerEquipo(id):(await detalleCelular(id))?.celular;if(!bien)notFound();if('bajaPendienteTI' in bien&&bien.bajaPendienteTI)return <ModalFicha titulo="Baja pendiente de validación TI" cerrarHref={volver}><p>Revisa los estados del activo y resuelve el antecedente de la carga antes de registrar movimientos.</p></ModalFicha>;
  const sedes=await listarSedes(),origen=sedes.find(s=>s.id===bien.sedeId),directa=tipo==='traspaso'&&bien.custodia==='asignado';
  const posible=bien.estadoAdministrativo==='activo'&&(tipo==='cambio'?bien.custodia==='asignado':bien.custodia==='en_bodega'||directa&&origen?.tipo!=='nivel_central');
  if(!posible)return <ModalFicha titulo="Revisar estado del bien" cerrarHref={volver} focoId={id}><p role="alert">Los bienes de Nivel Central deben devolverse a Bodega TI antes de traspasarlos. Los préstamos deben devolverse antes de otra operación.</p><Link href={volver}>Volver al listado</Link></ModalFicha>;

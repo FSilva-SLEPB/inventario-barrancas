@@ -3,7 +3,8 @@ export class ErrorCargaCsv extends Error {}
 export function leerCsv(texto: string): string[][] {
   texto=texto.replace(/^\uFEFF/,"");
   const primera=texto.split(/\r?\n/,1)[0];
-  const separador=primera.includes(";") ? ";" : ",";
+  const contar=(separador:string)=>{let n=0,citado=false;for(let i=0;i<primera.length;i++){if(primera[i]==='"'){if(citado&&primera[i+1]==='"')i++;else citado=!citado;}else if(!citado&&primera[i]===separador)n++;}return n;};
+  const separador=[";","\t",","].sort((a,b)=>contar(b)-contar(a))[0];
   const filas: string[][]=[]; let fila: string[]=[]; let celda=""; let citado=false; let cerrado=false;
   const agregar=()=> { if(celda.length>16000) throw new ErrorCargaCsv("Una celda supera el límite permitido."); fila.push(celda); celda=""; cerrado=false; };
   for(let i=0;i<texto.length;i++) {

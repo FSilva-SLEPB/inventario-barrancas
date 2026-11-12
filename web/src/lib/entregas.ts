@@ -20,7 +20,7 @@ export async function seleccionarEntregas(p: Record<string,string|string[]|undef
   const { rows } = await obtenerBaseDatos().query<EquipoEntrega>(`SELECT e.id,e.version,e.sede_id AS "sedeId",s.nombre AS "sedeNombre",s.rbd,s.comuna,s.direccion,s.correo_institucional AS "correoInstitucional",jsonb_build_array(s.nombre,COALESCE(s.direccion,''),COALESCE(s.comuna,''),COALESCE(s.correo_institucional,''))::text AS "sedeVersion",
     CASE WHEN d.situacion IN ('titular','subrogante') THEN d.nombre END AS "directoraNombre",d.rut AS "directoraRut",d.correo AS "directoraCorreo",e.marca,e.modelo,e.serie,e.numero_inventario AS inventario
     FROM public.equipos e JOIN public.sedes s ON s.id=e.sede_id LEFT JOIN public.directorio_sedes d ON d.sede_id=s.id
-    WHERE e.situacion='pendiente_entrega' AND s.tipo='jardin_infantil' AND s.activo
+    WHERE e.datos_compra->'bajaPendienteTI' IS DISTINCT FROM 'true'::jsonb AND e.situacion='pendiente_entrega' AND s.tipo='jardin_infantil' AND s.activo
       AND ($1::boolean OR e.id=ANY($2::uuid[]))
       AND (NOT $1::boolean OR (($3='' OR s.tipo=$3) AND ($4::uuid IS NULL OR s.id=$4::uuid) AND ($5='' OR s.rbd=$5)
         AND ($6='' OR e.marca ILIKE '%'||$6||'%' OR e.modelo ILIKE '%'||$6||'%' OR e.serie ILIKE '%'||$6||'%' OR e.numero_inventario ILIKE '%'||$6||'%'

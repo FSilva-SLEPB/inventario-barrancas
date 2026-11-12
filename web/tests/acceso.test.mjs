@@ -331,3 +331,17 @@ test('menú RBAC: sede sin Nivel Central y consultas sin Nueva solicitud ni Gest
  const a={rol:'consulta',permisos:['equipos.consultar','celulares.consultar','seguimiento_insumos.consultar','historial_insumos.consultar'],alcance:'sede',clasePerfil:'operativo',perfilId:'ficticio',perfilNombre:'Director EE',revisionAcceso:'1:1'};
  const enlaces=modulosSistema(a).flatMap(m=>m.accesos);assert.ok(!enlaces.some(x=>x.href==='/inventario/nivel-central'||x.href==='/insumos/solicitud'));assert.ok(enlaces.some(x=>x.href==='/insumos/seguimiento'&&x.titulo==='Seguimiento de insumos'));assert.ok(enlaces.some(x=>x.href==='/insumos/historial'));assert.ok(!enlaces.some(x=>x.titulo==='Gestor de insumos'));
 });
+
+test('Inventario completo acepta las 23 columnas, cantidades y antecedentes sin exigir Estado antiguo',async()=>{
+ const e=await entorno(),{prepararCargaEquipos}=await e.importar('@/lib/preparar-carga-equipos'),{COLUMNAS_CARGA_INVENTARIO:c}=await e.importar('@/lib/columnas-carga-inventario');
+ const sedes=[{id:randomUUID(),rbd:'12345-6',tipo:'establecimiento',activo:true}],cats=[{id:randomUUID(),nombre:'Pantalla',activo:true}];
+ const fila=['2025','12345','Escuela del archivo','Dirección original','Comuna original','12345678-5','Persona del archivo','Compra','OC-001','LIC-1','CDP-1','15/03/2025','FAC-1','10','Nuevo','Fondos propios','Pantalla','Marca','Modelo','','','Activo','Bodega de TI'];
+ for(const sep of [';','\t',',']){const r=prepararCargaEquipos(c.join(sep)+'\n'+fila.join(sep),sedes,cats);assert.deepEqual(r.errores,[]);assert.equal(r.total,10);assert.equal(r.datos.length,1);assert.equal(r.datos[0].cantidad,10);assert.equal(r.datos[0].condicionTecnica,'bodega_ti');assert.equal(r.datos[0].origen,'otro');assert.equal(r.datos[0].compra.fechaOrdenCompra,'2025-03-15');assert.equal(r.datos[0].antecedentesCarga['RUT DIRECTOR/A'],'12345678-5');assert.ok(r.datos[0].observaciones.includes('no informado'));assert.equal(r.vistas[0].antecedentes['N° OC'],'OC-001');}
+ const csv=f=>c.join(';')+'\n'+f.join(';');
+ const duplicado=[...fila];duplicado[19]='SERIE-ÚNICA';assert.match(prepararCargaEquipos(csv(duplicado),sedes,cats).errores.join(' '),/varias unidades/);
+ const baja=[...fila];baja[21]='Dado de baja';baja[22]='Obsoleto';const b=prepararCargaEquipos(csv(baja),sedes,cats);assert.deepEqual(b.errores,[]);assert.equal(b.datos[0].estadoAdministrativo,'dado_de_baja');assert.match(b.avisos.join(' '),/pendiente de validación TI/);
+ const robado=[...fila];robado[13]='1';robado[21]='Robado';const r=prepararCargaEquipos(csv(robado),sedes,cats);assert.deepEqual(r.errores,[]);assert.equal(r.datos[0].condicionTecnica,'');assert.equal(r.datos[0].antecedentesCarga['ESTADO CONDICION'],'Bodega de TI');
+ for(const valor of ['1.000','2.000','1,000','10,0']){const ambigua=[...fila];ambigua[13]=valor;assert.match(prepararCargaEquipos(csv(ambigua),sedes,cats).errores.join(' '),/sin puntos ni comas/);}
+ const exceso=[...fila];exceso[13]='2501';assert.ok(prepararCargaEquipos(csv(exceso),sedes,cats).errores.length);
+ const fecha=[...fila];fecha[11]='31/02/2025';assert.match(prepararCargaEquipos(csv(fecha),sedes,cats).errores.join(' '),/FECHA OC/);
+});
