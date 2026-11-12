@@ -1,3 +1,5 @@
+> Actualización 11/11: solo Administrador y Administrador de gestión pueden subir/cambiar fotografías desde el registro del establecimiento/jardín en Directorio. Los encargados y consultas de sede solo ven la foto en Inicio. La migración 32 restringe también SQL; esta regla reemplaza los permisos anteriores descritos a continuación.
+
 # Datos y fotografía del establecimiento
 
 Inicio de Encargado EE/JI y Consulta de establecimiento muestra **Datos del

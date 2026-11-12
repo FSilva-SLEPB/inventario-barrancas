@@ -1,5 +1,8 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ reportes_incidentes_inventario:{modulo:'Incidentes',uso:'Borrador, envío y validación TI de robo, sustracción o daño; parte y denunciante, selección y versiones, sin cambiar estados hasta validar.',fuentes:['migrations/1796054400000_reportes-incidentes-ti.cjs','src/lib/reportes-incidentes.ts']},
+ reportes_incidentes_operaciones:{modulo:'Incidentes',uso:'Operaciones idempotentes y auditoría de guardar, enviar y resolver, con actor y solicitud original.',fuentes:['migrations/1796054400000_reportes-incidentes-ti.cjs']},
+ reportes_incidentes_adjuntos:{modulo:'Incidentes',uso:'Denuncia o informe privado persistente por reporte, autor y bytes originales; se puede aportar después del envío.',fuentes:['src/app/api/inventario/incidentes/adjuntos/route.ts']},
  operaciones_inventario:{modulo:'Movimientos',uso:'Cambio con grupos devueltos y reemplazos, o traspaso entre sedes; ruta real directa educativa o vía Bodega TI, solicitud y procedencia inmutables.',fuentes:['migrations/1794787200000_operaciones-compuestas-inventario.mjs','src/lib/operaciones-inventario.ts']},
  operaciones_inventario_detalle:{modulo:'Movimientos',uso:'Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos.',fuentes:['migrations/1794787200000_operaciones-compuestas-inventario.mjs']},
  actas_contador:{modulo:'Actas',uso:'Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número.',fuentes:['migrations/1794355200000_actas-documentos-correo.mjs']},

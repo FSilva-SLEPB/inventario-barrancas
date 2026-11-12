@@ -62,7 +62,7 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
       <div className={styles.herramientas}>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
-        {puedeGestionarDependencias(actor.rol) && <Link className="btn btn-outline-primary btn-sm" href="/inventario/registro">Ir al registro</Link>}
+        {puedeGestionarDependencias(actor.rol) && <Link className="btn btn-outline-primary btn-sm" href={'/inventario/registro?volver='+encodeURIComponent(volver)}>Registrar equipo</Link>}
       </div>
     </div>
     {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están en Bodega TI. La sede indica su referencia de destino o procedencia; UTIC confirma su asignación.</p>}

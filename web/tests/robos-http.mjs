@@ -11,7 +11,7 @@ const admin=`robo-admin-${sufijo}@slepb.gob.cl`,local=`robo-local-${sufijo}@slep
 const cookie=async email=>'next-auth.session-token='+await encode({secret:process.env.NEXTAUTH_SECRET,token:{sub:'ficticio',correoInstitucional:email},maxAge:600});
 const pedir=(ruta,c)=>fetch(origen+ruta,{redirect:'manual',headers:{Cookie:c}});
 const reporte=(sede,items)=>({sedeId:sede,fecha:'2026-10-20',lugar:'Lugar sensible ficticio '+sufijo,descripcion:'Antecedentes restringidos ficticios '+sufijo,enlace:'https://example.org/denuncia-ficticia',equipos:items});
-const crear=async(actor,datos,id=randomUUID())=>{if(!incidentes.includes(id))incidentes.push(id);return(await app.query('SELECT public.reportar_robo_acceso($1,$2::uuid,$3::jsonb) AS resultado',[actor,id,JSON.stringify(datos)])).rows[0].resultado;};
+const crear=async(actor,datos,id=randomUUID())=>{if(!incidentes.includes(id))incidentes.push(id);return(await db.query('SELECT public.reportar_robo_historico_interno($1,$2::uuid,$3::jsonb) AS resultado',[actor,id,JSON.stringify(datos)])).rows[0].resultado;};
 const version=async id=>(await db.query('SELECT version FROM public.equipos WHERE id=$1',[id])).rows[0].version;
 const item=async id=>({id,version:await version(id)});
 const resolver=(actor,id,v,decision='validado')=>app.query('SELECT public.resolver_robo_acceso($1,$2::uuid,$3,$4,$5)',[actor,id,v,decision,'Revisión ficticia']);
@@ -52,10 +52,8 @@ try{
  const ficha=await(await pedir('/inventario/'+equipos[1],ca)).text();assert.ok(ficha.includes('Incidentes de robo'));assert.ok(ficha.includes('Robo validado'));assert.ok(ficha.includes('/inventario/robos/'+r.id));assert.ok(ficha.includes('Validación HTTP ficticia'));const fichaConsulta=await(await pedir('/inventario/'+equipos[1],cc)).text();assert.ok(!fichaConsulta.includes('Validación HTTP ficticia'));
  const pertenencia=await db.query('SELECT sede_id,situacion,condicion_tecnica FROM public.equipos WHERE id=$1',[equipos[1]]);assert.equal(pertenencia.rows[0].sede_id,sedes[0]);assert.equal(pertenencia.rows[0].situacion,'recibido');assert.equal(pertenencia.rows[0].condicion_tecnica,'sin_verificar');pruebas++;
  await assert.rejects(app.query("UPDATE public.incidentes_robos SET estado='validado'"),e=>e.code==='42501');assert.equal((await db.query('SELECT count(*) FROM public.equipos_historial WHERE equipo_id=$1 AND incidente_id=$2',[equipos[0],r.id])).rows[0].count,'3');pruebas++;
- // Reportar desde el formulario HTTP conserva los identificadores seleccionados.
- const formulario=await(await pedir('/inventario/robos/reportar?sede='+sedes[2],ca)).text(),fReporte=camposAccion(formulario,'formulario-reporte-robo'),idHTTP=randomUUID();incidentes.push(idHTTP);
- for(const[k,v]of Object.entries({solicitud:idHTTP,sedeId:sedes[2],fecha:'2026-10-20',lugar:'Reporte HTTP ficticio',descripcion:'Incidente creado desde la acción real',enlace:''}))fReporte.set(k,v);
- fReporte.append('equipo',JSON.stringify(await item(equipos[4])));const publicado=await enviar('/inventario/robos/reportar?sede='+sedes[2],ca,fReporte);assert.ok([200,303].includes(publicado.status));assert.equal((await db.query('SELECT count(*) FROM public.incidentes_robos WHERE id=$1',[idHTTP])).rows[0].count,'1');pruebas++;
+ // La entrada anterior lleva al modal; el envío real se comprueba en reportes-incidentes-http.
+ assert.equal((await pedir('/inventario/robos/reportar',ca)).headers.get('location'),'/inventario/robos?reporte=nuevo');pruebas++;
  // El incidente abierto bloquea también la entrega de un equipo pendiente.
  const bodega=await crear(admin,reporte(sedes[3],[await item(equipos[5])]));
  await assert.rejects(app.query('SELECT public.regularizar_entregas_acceso($1,$2::uuid,$3::jsonb)',[admin,randomUUID(),JSON.stringify([{sedeId:sedes[3],equipos:[await item(equipos[5])],receptora:'Directora ficticia',fecha:'2026-10-26',enlaceActa:''}])]),e=>e.code==='P2302');

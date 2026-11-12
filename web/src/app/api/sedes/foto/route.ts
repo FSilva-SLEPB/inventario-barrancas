@@ -9,7 +9,7 @@ import {esIdSede} from '@/lib/validacion-sedes';
 import {formularioImagenLimitado,imagenInsumoValida,origenInsumoValido} from '@/lib/imagenes-insumos';
 export async function POST(req:Request){
  const actor=await obtenerAcceso();if(!actor)return NextResponse.json({error:'Inicia sesión.'},{status:401});
- if((!puedeAdministrar(actor.rol)&&actor.rol!=='encargado')||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
+ if(!puedeAdministrar(actor.rol)||!origenInsumoValido(req))return NextResponse.json({error:'Operación no permitida.'},{status:403});
  try{
   const f=await formularioImagenLimitado(req),campos=['sede','solicitud','version','imagen'];
   if([...f.keys()].some(k=>!campos.includes(k))||campos.some(k=>f.getAll(k).length!==1))return NextResponse.json({error:'Formulario inválido.'},{status:400});

@@ -14,7 +14,7 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
   if(!datos)return fallo;
   const entradasRetorno=formulario.getAll('volver');
   const volver=entradasRetorno.length===1?retornoInventario(entradasRetorno[0]):null;
-  if(entradasRetorno.length&&(!datos.id||!volver||entradasRetorno.length!==1))return {...fallo,mensaje:'La dirección de regreso no es válida. Vuelve a abrir la ficha.'};
+  if(entradasRetorno.length&&(!volver||entradasRetorno.length!==1))return {...fallo,mensaje:'La dirección de regreso no es válida. Vuelve a abrir la ficha.'};
   const inicial=formulario.getAll('custodiaInicial');
   if(inicial.length>1||inicial.length&&(!['en_bodega','asignado'].includes(String(inicial[0]))||datos.id))return {...fallo,mensaje:'Estado inicial inválido.'};
   try {
@@ -29,7 +29,7 @@ export async function guardarEquipo(_anterior:EstadoEquipo,formulario:FormData):
     return {...fallo,mensaje:mensajes[codigo]??"No se pudo guardar el equipo. Revisa los datos e inténtalo nuevamente."};
   }
   revalidatePath("/inventario", "layout");
-  if(datos.id) redirect(destinoConExito(volver??`/inventario/${datos.id}?guardado=1`));
+  if(datos.id||volver) redirect(destinoConExito(volver??`/inventario/${datos.id}?guardado=1`));
   if(inicial.length){
     if(inicial[0]==='en_bodega')redirect(destinoConExito('/inventario/bodega-ti?clase=equipo'));
     const {rows}=await obtenerBaseDatos().query<{tipo:string}>('SELECT tipo FROM public.sedes WHERE id=$1::uuid',[datos.sedeId]);

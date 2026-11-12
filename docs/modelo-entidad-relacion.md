@@ -382,6 +382,36 @@ erDiagram
     uuid movimiento_devolucion_id FK
     date fecha_devolucion
   }
+  reportes_incidentes_adjuntos {
+    uuid id PK
+    uuid reporte_id FK
+    text actor
+    text nombre
+    text mime
+    bytea contenido
+    timestamp_with_time_zone registrado_en
+  }
+  reportes_incidentes_inventario {
+    uuid id PK
+    uuid sede_id FK
+    text actor FK
+    jsonb datos
+    text estado
+    integer version
+    timestamp_with_time_zone registrado_en
+    timestamp_with_time_zone actualizado_en
+    text validado_por FK
+    text motivo_validacion
+    uuid legado_id FK
+  }
+  reportes_incidentes_operaciones {
+    uuid id PK
+    uuid reporte_id FK
+    text actor
+    jsonb solicitud
+    jsonb resultado
+    timestamp_with_time_zone registrado_en
+  }
   reservas_insumos {
     uuid id PK
     uuid solicitud_id FK
@@ -532,6 +562,12 @@ erDiagram
   movimientos_inventario ||--o| prestamos_inventario : "id"
   movimientos_inventario |o--o| prestamos_inventario : "movimiento_devolucion_id"
   sedes ||--o{ prestamos_inventario : "origen_sede_id"
+  reportes_incidentes_inventario ||--o{ reportes_incidentes_adjuntos : "reporte_id"
+  usuarios_acceso ||--o{ reportes_incidentes_inventario : "actor"
+  incidentes_robos |o--o{ reportes_incidentes_inventario : "legado_id"
+  sedes ||--o{ reportes_incidentes_inventario : "sede_id"
+  usuarios_acceso |o--o{ reportes_incidentes_inventario : "validado_por"
+  reportes_incidentes_inventario ||--o{ reportes_incidentes_operaciones : "reporte_id"
   catalogo_insumos ||--o{ reservas_insumos : "producto_id"
   solicitudes_insumos ||--o{ reservas_insumos : "solicitud_id"
   actas_documentos |o--o{ solicitudes_insumos : "acta_id"

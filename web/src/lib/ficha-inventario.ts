@@ -1,11 +1,11 @@
 import {esIdSede} from '@/lib/validacion-sedes';
-export const RUTAS_INVENTARIO=['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti'] as const;
+export const RUTAS_INVENTARIO=['/inventario','/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti'] as const;
 // Solo filtros de consulta conocidos. Nunca se permite una redirección externa.
 export function retornoInventario(valor:unknown):string|null {
  if(typeof valor!=='string'||valor.length>2000||/[\p{Cc}\\]/u.test(valor))return null;
  try{
   const u=new URL(valor,'http://inventario.local');
-  if(u.origin!=='http://inventario.local'||!RUTAS_INVENTARIO.some(r=>r===u.pathname)||!valor.startsWith('/inventario/')||u.hash)return null;
+  if(u.origin!=='http://inventario.local'||!RUTAS_INVENTARIO.some(r=>r===u.pathname)||!(valor==='/inventario'||valor.startsWith('/inventario?')||valor.startsWith('/inventario/'))||u.hash)return null;
   const salida=new URLSearchParams();
   const limites:Record<string,number>={ubicacion:36,vista:20,q:150,pagina:7,tipo:30,clase:10,claseBien:10,sede:36,rbd:120,limite:3};
   for(const [k,max] of Object.entries(limites)){

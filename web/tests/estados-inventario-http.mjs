@@ -138,7 +138,7 @@ try{
  });
  await caso('incidente abierto impide volver a Activo y conserva el seguimiento',async()=>{
   const id=await crear('equipo','asignado'),reporte={sedeId:sedes[0],fecha,lugar:'Lugar ficticio',descripcion:'Incidente ficticio de la prueba de estados',enlace:'',equipos:[{id,version:(await leer('equipo',id)).version}]},incidente=randomUUID();
-  await app.query('SELECT public.reportar_robo_acceso($1,$2::uuid,$3::jsonb)',[usuarios.administrador_gestion,incidente,JSON.stringify(reporte)]);await guardar('equipo',id,'robado','');const antes=await leer('equipo',id);
+  await db.query('SELECT public.reportar_robo_historico_interno($1,$2::uuid,$3::jsonb)',[usuarios.administrador_gestion,incidente,JSON.stringify(reporte)]);await guardar('equipo',id,'robado','');const antes=await leer('equipo',id);
   await assert.rejects(guardar('equipo',id,'activo','operativo'),codigo('P3004'));assert.deepEqual(await leer('equipo',id),antes);assert.equal((await db.query('SELECT estado FROM public.incidentes_robos WHERE id=$1',[incidente])).rows[0].estado,'reportado');
  });
  await caso('la aplicación no escribe directamente el registro ni el historial de estados',async()=>{

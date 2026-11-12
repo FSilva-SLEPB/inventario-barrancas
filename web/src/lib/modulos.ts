@@ -1,16 +1,16 @@
-import {puedeAdministrar,puedeGestionarDependencias,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
+import {puedeAdministrar,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
 export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string;externo?:boolean};
 export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
 export function modulosSistema(rol:RolAcceso):ModuloSistema[]{
- const admin=puedeAdministrar(rol),gestion=puedeGestionarDependencias(rol),local=requiereSede(rol);
+ const admin=puedeAdministrar(rol),local=requiereSede(rol);
  const modulos:ModuloSistema[]=[{id:'inventario',titulo:'Inventario',href:'/inventario',descripcion:'Equipos, entregas e incidentes, con identificación e historial de cada bien.',accesos:[
   ...(!local?[{href:'/inventario/nivel-central',titulo:'Inventario Nivel Central',descripcion:'Equipos y bienes de Nivel Central.',icono:'NC'}]:[]),
   {href:'/inventario/p02',titulo:local?'Inventario de mi sede':'Inventario P02',descripcion:'Establecimientos educacionales, jardines infantiles y salas cunas.',icono:'P02'},
-  ...(gestion?[{href:'/inventario/registro',titulo:'Registro de equipos',descripcion:admin?'Ingreso individual y carga masiva de equipos.':'Registrar equipos propios de la sede.',icono:'+'}]:[]),
   ...(admin?[{href:'/inventario/bodega-ti',titulo:'Bodega TI',descripcion:'Equipos destinados a establecimientos y pendientes de entrega.',icono:'TI'},
    {href:'/inventario/prestamos',titulo:'Préstamos',descripcion:'Préstamos temporales desde Bodega TI, plazos y devoluciones vinculadas.',icono:'↔'},
    {href:'/inventario/movimientos',titulo:'Movimientos y actas',descripcion:'Entregas registradas, personas receptoras y antecedentes.',icono:'↔'}]:[]),
   {href:'/inventario/celulares',titulo:'Inventario de celulares',descripcion:'Equipos celulares y números asociados de establecimientos, jardines y Nivel Central.',icono:'CEL'},
+  {href:'/inventario/incidentes',titulo:'Reportes y validación de TI',descripcion:'Reportar robos, sustracciones o daños y consultar su revisión.',icono:'!'},
   {href:'/inventario/robos',titulo:'Consolidado de robos',descripcion:'Equipos reportados, robos validados y recuperaciones.',icono:'!'}
  ]},...(admin?[{id:'directorio' as const,titulo:'Directorio',href:'/directorio',descripcion:'Establecimientos, jardines y salas cuna, con los datos de sus directores y directoras.',accesos:[
   {href:'/directorio/establecimientos',titulo:'Directorio de establecimientos',descripcion:'RBD, nombre, dirección, comuna y correo del establecimiento.',icono:'EE'},

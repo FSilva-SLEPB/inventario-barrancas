@@ -1,3 +1,5 @@
+import ModalFicha from '@/components/modal-ficha';
+import {retornoInventario} from '@/lib/ficha-inventario';
 import Link from "next/link";
 import { exigirGestionDependencias } from "@/lib/acceso";
 import { puedeAdministrar, requiereSede } from "@/lib/politica-acceso";
@@ -8,7 +10,8 @@ import FormularioCargaEquipos from "@/components/formulario-carga-equipos";
 
 export const metadata = { title: "Registro de equipos | SLEP Barrancas" };
 
-export default async function Registro() {
+export default async function Registro({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}) {
+  const p=await searchParams,volver=retornoInventario(p.volver)??'/inventario';
   const actor = await exigirGestionDependencias();
   const [sedes, categorias] = await Promise.all([listarSedes(), listarCategorias()]);
   return <main>
@@ -16,8 +19,8 @@ export default async function Registro() {
       <p className="descripcion-pagina">Registra equipos en su inventario de destino. Cada ingreso conserva su identidad y su historial.</p>
     </header>
     <div className="acciones-catalogos"><Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link></div>
-    <RegistroEquipos sedes={sedes} categorias={categorias} local={requiereSede(actor.rol)} />
-    {puedeAdministrar(actor.rol) && <section className="panel-catalogos registro-carga" id="carga-masiva" aria-labelledby="carga-masiva-titulo">
+    {p.carga!=='1'&&<ModalFicha titulo="Registrar equipo" cerrarHref={volver} editando><RegistroEquipos sedes={sedes} categorias={categorias} local={requiereSede(actor.rol)} volver={volver}/></ModalFicha>}
+    {p.carga==='1'&&puedeAdministrar(actor.rol) && <section className="panel-catalogos registro-carga" id="carga-masiva" aria-labelledby="carga-masiva-titulo">
       <h2 id="carga-masiva-titulo">Carga masiva de equipos</h2>
       <p>Importa un CSV con vista previa. El destino de cada equipo se indica en el archivo mediante su RBD o el código NC para Nivel Central.</p>
       <p><a href="/plantillas/equipos-historicos.csv" download>Descargar plantilla CSV</a></p>

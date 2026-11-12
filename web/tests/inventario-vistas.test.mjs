@@ -179,7 +179,7 @@ test("portada administrativa ofrece accesos operativos y consultas no ven gesti�
     assert.ok(!html.includes('href="/mantenedores/directores"'));
   }
   const { html } = await pagina({}, false, [], 0, "", "consulta");
-  assert.ok(!html.includes('href="/inventario/registro"'));
+  assert.ok(!html.includes('/inventario/registro?volver='));
   assert.ok(!html.includes('href="/inventario/bodega-ti"'));
 });
 
@@ -188,7 +188,7 @@ test("las consultas de inventario ya no incluyen formularios de registro o carga
     const { html } = await pagina({}, false, [], 0, ruta, "administrador");
     assert.ok(!html.includes('id="nuevo-equipo"'));
     assert.ok(!html.includes('id="carga-masiva"'));
-    assert.ok(html.includes('href="/inventario/registro"'));
+    assert.ok(html.includes('/inventario/registro?volver='));
   }
 });
 
@@ -208,11 +208,12 @@ test("el registro único muestra destino y carga solo a administradores", async 
   assert.ok(html.includes('id="inventario-destino"'));
   assert.ok(html.includes('value="nc"'));
   assert.ok(html.includes('value="eeji"'));
-  assert.ok(html.includes('id="carga-masiva"'));
+  assert.ok(!html.includes('id="carga-masiva"'));
+  assert.ok((await pagina({carga:'1'},false,[],0,'registro','administrador_gestion')).html.includes('id="carga-masiva"'));
   const propio = await pagina({}, true, [], 0, "registro", "encargado");
   assert.ok(!propio.html.includes('id="inventario-destino"'));
   assert.ok(!propio.html.includes('id="carga-masiva"'));
   await assert.rejects(pagina({}, false, [], 0, "registro", "consulta"), /REDIRECT:\/sin-permiso/);
 });
 
-test("Acciones ofrece edición directa a UTIC y conserva la búsqueda",async()=>{const e={id:escuela.id,sedeNombre:escuela.nombre,categoriaNombre:'Equipo',modelo:'Modelo',marca:'Marca',serie:'SERIE',inventario:'INV',custodia:'asignado',situacion:'recibido_historico',condicionTecnica:'sin_verificar'};const {html}=await pagina({q:'SERIE',limite:'100'},false,[e],1,'p02','administrador_gestion');assert.ok(html.includes('aria-label="Ver:'));assert.ok(html.includes('aria-label="Editar:'));assert.ok(html.includes('editar='+e.id));for(const url of [...html.matchAll(/href="([^"]+)"/g)].map(m=>m[1].replaceAll('&amp;','&')).filter(x=>x.includes('editar=')||x.includes('ver='))){const u=new URL(url,'http://local');assert.equal(u.searchParams.get('q'),'SERIE');assert.equal(u.searchParams.get('limite'),'100');}});
+test("Acciones ofrece edición directa a UTIC y conserva la búsqueda",async()=>{const e={id:escuela.id,sedeNombre:escuela.nombre,categoriaNombre:'Equipo',modelo:'Modelo',marca:'Marca',serie:'SERIE',inventario:'INV',custodia:'asignado',situacion:'recibido_historico',condicionTecnica:'sin_verificar'};const {html}=await pagina({q:'SERIE',limite:'100'},false,[e],1,'p02','administrador_gestion');assert.ok(html.includes('aria-label="Ver:'));assert.ok(html.includes('aria-label="Editar:'));assert.ok(html.includes('editar='+e.id));for(const url of [...html.matchAll(/href="([^"]+)"/g)].map(m=>m[1].replaceAll('&amp;','&')).filter(x=>{const u=new URL(x,'http://local');return u.searchParams.has('editar')||u.searchParams.has('ver');})){const u=new URL(url,'http://local');assert.equal(u.searchParams.get('q'),'SERIE');assert.equal(u.searchParams.get('limite'),'100');}});
