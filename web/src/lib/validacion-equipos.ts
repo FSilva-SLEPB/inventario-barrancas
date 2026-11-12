@@ -44,8 +44,8 @@ export function validarEquipo(formulario: FormData) {
     if (/^(S\/?N|N\/?A|SIN (SERIE|INVENTARIO)|NO APLICA|-|0)$/iu.test(valores[campo]))
       errores[campo]="Deja el dato pendiente e indica el motivo; no uses identificadores genéricos.";
   }
-  if ((!valores.serie || !valores.inventario) && !valores.motivoIdentificacion)
-    errores.motivoIdentificacion="Indica por qué falta la serie o el número de inventario.";
+  if (!valores.serie && !valores.observaciones)
+    errores.observaciones="Explica en Observaciones por qué no se informó el número de serie.";
   if (!Object.hasOwn(ORIGENES,valores.origen)) errores.origen="Selecciona el origen.";
   if (!Object.hasOwn(CONDICIONES,valores.condicionTecnica)) errores.condicionTecnica="Selecciona la condición técnica.";
   if (!/^\d{1,10}$/.test(valores.version) || Number(valores.version)>2147483646) errores.version="Versión inválida. Recarga.";

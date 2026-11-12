@@ -60,8 +60,8 @@ try {
  await falla(correos.gestion,{...recibido,id,sedeId:sedes[1]},'P2003',1);
  await falla(correos.gestion,datos({serie:recibido.serie.toLowerCase()}),'23505');
  await falla(correos.gestion,datos({inventario:recibido.inventario.toLowerCase()}),'23505');
- await falla(correos.encargado,datos({serie:'',inventario:''}),'23514');
- const sinid=await guardar(correos.encargado,datos({serie:'',inventario:'',motivoIdentificacion:'Equipo antiguo sin etiquetas'}));
+ await falla(correos.encargado,datos({serie:'',inventario:''}),'22023');
+ const sinid=await guardar(correos.encargado,datos({serie:'',inventario:'',motivoIdentificacion:'Equipo antiguo sin etiquetas',observaciones:'Equipo antiguo sin etiquetas'}));
  assert.equal((await leer(sinid)).serie,null);pruebas++;
  const corregido={...recibido,id,serie:'CORREGIDA-'+sufijo,estadoHistorico:'Activo',situacion:'recibido',sede_id:sedes[1]};
  await guardar(correos.encargado,corregido,1,'Corrección documentada');
@@ -159,9 +159,9 @@ try {
  // Doble envío con versión antigua: no duplica el historial ni confirma éxito.
  const nAntes=(await db.query('SELECT count(*) AS n FROM public.equipos_historial WHERE equipo_id=$1',[id])).rows[0].n;const repetidoModal=await enviarModal(formularioModal);assert.equal(repetidoModal.status,200);assert.ok((await repetidoModal.text()).includes('El equipo cambió.'));assert.equal((await db.query('SELECT count(*) AS n FROM public.equipos_historial WHERE equipo_id=$1',[id])).rows[0].n,nAntes);pruebas++;
  const registro=await(await pedir('/inventario/registro',gestion)).text();
- assert.ok(registro.includes('id="inventario-destino"'));assert.ok(registro.includes('id="carga-masiva"'));pruebas++;
+ assert.ok(registro.includes('id="inventario-destino"'));assert.ok((await(await pedir('/inventario/registro?carga=1',gestion)).text()).includes('id="carga-masiva"'));pruebas++;
  assert.equal((await pedir('/inventario/registro',consulta)).headers.get('location'),'/sin-permiso');pruebas++;
- assert.equal((await pedir('/inventario/carga',gestion)).headers.get('location'),'/inventario/registro#carga-masiva');pruebas++;
+ assert.equal((await pedir('/inventario/carga',gestion)).headers.get('location'),'/inventario/registro?carga=1#carga-masiva');pruebas++;
  console.log(`${pruebas} comprobaciones de equipos: aislamiento NC/EE/JI, historial, pendientes, solo lectura, duplicados, concurrencia, carga atómica, ventanas, filtros y cierre del guardado.`);
 }finally{
  await db.query('DELETE FROM public.equipos_historial WHERE equipo_id IN(SELECT id FROM public.equipos WHERE sede_id=ANY($1::uuid[]))',[sedes]);

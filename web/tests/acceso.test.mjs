@@ -242,10 +242,9 @@ test("equipos permiten identificadores pendientes con motivo y conservan ceros/g
   const e=await entorno();const {validarEquipo,valoresEquipo}=await e.importar("@/lib/validacion-equipos");
   const preparar=(cambios={})=>{const f=new FormData();for(const [k,v] of Object.entries({...valoresEquipo(),sedeId:randomUUID(),categoriaId:randomUUID(),marca:"Marca ficticia",modelo:"Modelo ficticio",serie:"001-ABC",inventario:"00012-9",...cambios}))f.set(k,v);return f;};
   assert.equal(validarEquipo(preparar()).datos.serie,"001-ABC");
-  for(const campo of ["serie","inventario"]){
-    assert.equal(validarEquipo(preparar({[campo]:""})).datos,null);
-    assert.ok(validarEquipo(preparar({[campo]:"",motivoIdentificacion:"Etiqueta no legible"})).datos);
-  }
+  assert.equal(validarEquipo(preparar({serie:""})).datos,null);
+  assert.ok(validarEquipo(preparar({serie:"",observaciones:"Etiqueta no legible"})).datos);
+  assert.ok(validarEquipo(preparar({inventario:""})).datos);
   for(const cambio of [{serie:"S/N"},{inventario:"N/A"},{marca:""},{modelo:""},{origen:"traspaso"},{condicionTecnica:"robado"},
     {sedeId:"invalida"},{categoriaId:"invalida"},{version:"-1"},{marca:"a".repeat(121)},{id:randomUUID(),version:"1",motivoCambio:""}])
     assert.equal(validarEquipo(preparar(cambio)).datos,null);
@@ -319,10 +318,10 @@ test('el menú de Insumos respeta creación y lectura por perfil',async()=>{
  for(const rol of ['consulta','consulta_sede']){const m=modulosSistema(rol).find(m=>m.id==='solicitudes');assert.ok(m);assert.ok(m.accesos.some(a=>a.href==='/insumos/seguimiento'));assert.ok(m.accesos.some(a=>a.href==='/insumos/historial'));assert.equal(m.accesos.some(a=>a.href==='/insumos/solicitud'),false);}
 });
 
-test('fotografías: encargado solo edita su sede, consultas solo leen y gestor no hereda permisos',async()=>{
+test('fotografías: solo administradores editan, consultas solo leen y gestor no hereda permisos',async()=>{
  const e=await entorno(),p=await e.importar('@/lib/politica-fotos-sedes');
  for(const rol of ['administrador','administrador_gestion']){assert.equal(p.puedeEditarFotoSede(rol,null,'sede-a'),true);assert.equal(p.puedeVerFotoSede(rol,null,'sede-a'),true);}
- assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-a'),true);assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-b'),false);
+ assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-a'),false);assert.equal(p.puedeEditarFotoSede('encargado','sede-a','sede-b'),false);
  for(const rol of ['consulta_sede','consulta','gestor_insumos'])assert.equal(p.puedeEditarFotoSede(rol,'sede-a','sede-a'),false);
  assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-a'),true);assert.equal(p.puedeVerFotoSede('consulta_sede','sede-a','sede-b'),false);assert.equal(p.puedeVerFotoSede('consulta',null,'sede-b'),true);assert.equal(p.puedeVerFotoSede('gestor_insumos',null,'sede-b'),false);
 });

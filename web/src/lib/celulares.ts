@@ -11,14 +11,14 @@ export async function listarCelulares(f:FiltrosCelulares){
  const actor=await exigirAcceso(),db=obtenerBaseDatos(),local=requiereSede(actor.rol);
  const filtro=`WHERE ($1::boolean OR c.sede_id=$2::uuid) AND ($3='' OR s.tipo=$3) AND ($4::uuid IS NULL OR c.sede_id=$4::uuid)
  AND ($7='' OR s.rbd=$7) AND ($8='' OR c.custodia=$8) AND ($5='' OR ($5='activo' AND c.activo AND c.estado_administrativo<>'dado_de_baja') OR ($5<>'activo' AND (NOT c.activo OR c.estado_administrativo='dado_de_baja'))) AND ($6='' OR s.nombre ILIKE '%'||$6||'%' OR s.rbd ILIKE '%'||$6||'%' OR c.telefono ILIKE '%'||regexp_replace($6,'[ ().-]','','g')||'%' OR c.marca ILIKE '%'||$6||'%' OR c.modelo ILIKE '%'||$6||'%' OR c.imei ILIKE '%'||$6||'%' OR c.numero_inventario ILIKE '%'||$6||'%' OR c.responsable ILIKE '%'||$6||'%')`;
- const p=[!local,actor.sedeId,local?'':f.tipo,local?null:f.sede||null,f.estado,f.q,f.rbd??'',f.vista===undefined?'':f.vista==='pendientes'?'en_bodega':'asignado'];
+ const p=[!local,actor.sedeId,local?'':f.tipo,local?null:f.sede||null,f.estado,f.q,f.rbd??'',local?'asignado':f.vista===undefined?'':f.vista==='pendientes'?'en_bodega':'asignado'];
  const total=Number((await db.query<{n:string}>('SELECT count(*) AS n '+base+' '+filtro,p)).rows[0].n),paginas=Math.max(1,Math.ceil(total/f.limite)),pagina=Math.min(f.pagina,paginas);
  const {rows}=await db.query<Celular>(`SELECT ${columnas} ${base} ${filtro} ORDER BY lower(s.nombre),c.telefono,c.id LIMIT $9 OFFSET $10`,[...p,f.limite,(pagina-1)*f.limite]);
  return {filas:rows,total,pagina,paginas};
 }
 export async function detalleCelular(id:string){
  const actor=await exigirAcceso(),db=obtenerBaseDatos(),global=!requiereSede(actor.rol);
- const {rows}=await db.query<Celular>(`SELECT ${columnas} ${base} WHERE c.id=$1::uuid AND ($2::boolean OR c.sede_id=$3::uuid)`,[id,global,actor.sedeId]);if(!rows[0])return null;
+ const {rows}=await db.query<Celular>(`SELECT ${columnas} ${base} WHERE c.id=$1::uuid AND ($2::boolean OR (c.sede_id=$3::uuid AND c.custodia='asignado'))`,[id,global,actor.sedeId]);if(!rows[0])return null;
  const historial=await db.query<{id:string;actor:string;motivo:string;antes:Record<string,unknown>|null;despues:Record<string,unknown>;fecha:string}>(`SELECT h.id::text,COALESCE(NULLIF(btrim(u.nombre),''),'Funcionario UTIC') AS actor,h.motivo,h.antes,h.despues,h.registrado_en::text AS fecha FROM public.celulares_historial h LEFT JOIN public.usuarios_acceso u ON u.correo=h.actor WHERE h.celular_id=$1::uuid AND ($2::boolean OR (h.despues->>'sedeId'=$3 AND (h.antes IS NULL OR h.antes->>'sedeId'=$3))) ORDER BY h.registrado_en DESC,h.id DESC LIMIT 50`,[id,global,actor.sedeId]);
  return {celular:rows[0],historial:historial.rows};
 }
