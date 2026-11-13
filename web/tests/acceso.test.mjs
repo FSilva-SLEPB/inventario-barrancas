@@ -313,7 +313,7 @@ test('la guarda de Insumos no abre módulos generales al gestor',async()=>{
 
 test('el menú de Insumos respeta creación y lectura por perfil',async()=>{
  const e=await entorno(),{modulosSistema}=await e.importar('@/lib/modulos');
- const g=modulosSistema('gestor_insumos');assert.deepEqual(Array.from(g,m=>m.id),['mantenedores','solicitudes']);assert.equal(g.flatMap(m=>m.accesos).filter(a=>a.href==='/mantenedores/insumos').length,1);assert.deepEqual(Array.from(g.find(m=>m.id==='mantenedores').accesos,a=>a.href),['/mantenedores/insumos']);assert.equal(g.find(m=>m.id==='solicitudes').accesos.some(a=>a.href==='/mantenedores/insumos'),false);
+ const g=modulosSistema('gestor_insumos');assert.deepEqual(Array.from(g,m=>m.id),['mantenedores','solicitudes','gestor']);assert.equal(g.flatMap(m=>m.accesos).filter(a=>a.href==='/mantenedores/insumos').length,1);assert.deepEqual(Array.from(g.find(m=>m.id==='mantenedores').accesos,a=>a.href),['/mantenedores/insumos']);assert.equal(g.find(m=>m.id==='solicitudes').accesos.some(a=>a.href==='/mantenedores/insumos'),false);
  for(const rol of ['consulta','consulta_sede']){const m=modulosSistema(rol).find(m=>m.id==='solicitudes');assert.ok(m);assert.ok(m.accesos.some(a=>a.href==='/insumos/seguimiento'));assert.ok(m.accesos.some(a=>a.href==='/insumos/historial'));assert.equal(m.accesos.some(a=>a.href==='/insumos/solicitud'),false);}
 });
 
@@ -344,4 +344,11 @@ test('Inventario completo acepta las 23 columnas, cantidades y antecedentes sin 
  for(const valor of ['1.000','2.000','1,000','10,0']){const ambigua=[...fila];ambigua[13]=valor;assert.match(prepararCargaEquipos(csv(ambigua),sedes,cats).errores.join(' '),/sin puntos ni comas/);}
  const exceso=[...fila];exceso[13]='2501';assert.ok(prepararCargaEquipos(csv(exceso),sedes,cats).errores.length);
  const fecha=[...fila];fecha[11]='31/02/2025';assert.match(prepararCargaEquipos(csv(fecha),sedes,cats).errores.join(' '),/FECHA OC/);
+});
+
+test('filtros del gestor validan período, identificadores y conservan criterios de descarga',async()=>{
+ const e=await entorno(),{leerFiltroGestor,enlaceInformeInsumos}=await e.importar('@/lib/filtros-gestor-insumos');
+ const f=leerFiltroGestor({sede:'11111111-1111-4111-8111-111111111111',desde:'2026-01-01',hasta:'2026-01-31',base:'entrega',categoria:'Papel',q:'A & B',limite:'100'});
+ const u=new URL(enlaceInformeInsumos(f,'consolidado'),'http://local');assert.equal(u.pathname,'/gestor-insumos/exportar');for(const k of ['sede','desde','hasta','base','categoria','q'])assert.equal(u.searchParams.get(k),f[k]);assert.equal(u.searchParams.get('vista'),'consolidado');
+ for(const p of [{desde:'2026-02-30'},{desde:'2026-02-02',hasta:'2026-01-01'},{sede:'otra'},{q:['a','b']},{limite:'999'},{pagina:'0'},{grupo:'inventado'}])assert.throws(()=>leerFiltroGestor(p));
 });

@@ -64,7 +64,7 @@ try{
   id=await nueva(sedes[0],[{producto_id:producto,cantidad:4}]);const propia=await(await pedir('/insumos/seguimiento?ver='+id,cc)).text();assert.match(propia,/Solicitante /);
   const ajena=await nueva(sedes[1],[{producto_id:producto,cantidad:1}],gestor);const h=await(await pedir('/insumos/seguimiento?ver='+ajena,cc)).text();assert.doesNotMatch(h,new RegExp('Solicitud '+ajena.slice(0,8)));assert.equal((await pedir('/insumos/solicitud',cc)).status,307);const nav=await(await pedir('/insumos',cc)).text();assert.doesNotMatch(nav,/href="\/insumos\/solicitud"/);assert.match(await(await pedir('/insumos',ca)).text(),/href="\/insumos\/seguimiento"/);
  });
- const ruta='/insumos/seguimiento?estado=activas&limite=100&ver='+id;
+ const ruta='/gestor-insumos/pendientes?bandeja=validadas&estado=activas&limite=100&ver='+id;
  await caso('validación por HTTP conserva filtros y registra al gestor',async()=>{
   await assert.rejects(aprobar(id,[aprobacion(producto,4)],gestor),codigo('P2602'));
   const f=formulario(await(await pedir(ruta+'&paso=validar',cg)).text(),'validacion-observacion');f.set('observacion','Revisión ficticia');const r=await post('/insumos/seguimiento',f,cg);assert.equal(r.status,303);assert.match(r.headers.get('location'),/limite=100/);assert.equal((await solicitud(id)).validado_por,gestor);

@@ -1,0 +1,1 @@
+import Listado from '../listado';export default async function Solicitudes({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){return <Listado searchParams={searchParams} grupo="todas" ruta="/gestor-insumos/solicitudes" titulo="Solicitudes ingresadas"/>;}

@@ -1,0 +1,2 @@
+import {exigirGestor} from '@/lib/gestor-insumos';import {modulosSistema} from '@/lib/modulos';import PortadaModulo from '@/components/portada-modulo';
+export default async function Gestor(){const a=await exigirGestor();return <PortadaModulo modulo={modulosSistema(a).find(m=>m.id==='gestor')!}><p className="ayuda-catalogos">Las solicitudes aprobadas ya tienen stock reservado y están listas para entregar. Las validadas por TI que aún no se aprueban permanecen pendientes de aprobación. El catálogo y el ingreso de compras se mantienen en Mantenedores.</p></PortadaModulo>;}

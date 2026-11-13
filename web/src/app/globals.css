@@ -324,3 +324,6 @@ p {
     background: #006fb3;
   }
 }
+
+/* Gestor: métricas y ranking comparten el ancho disponible en móvil. */
+.gestor-metricas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:1rem;margin:1rem 0 2rem}.gestor-metricas h2{font-size:1rem}.gestor-numero{font-size:2rem}.gestor-ranking{padding-left:1.5rem}.gestor-ranking li{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;margin:1rem 0}.gestor-ranking li a{flex:1 1 240px}.gestor-ranking meter{flex:1 1 120px;max-width:240px}.gestor-ranking span{font-size:.9rem}.gestor-metricas .ficha-panel{padding:1rem;border:1px solid #ccdbee;border-radius:1rem}

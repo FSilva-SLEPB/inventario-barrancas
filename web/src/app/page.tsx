@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import {URL_TICKETS} from "@/lib/enlaces-institucionales";
 import {modulosSistema,type AccesoModulo} from "@/lib/modulos";
-import {requiereSede,puedeGestionarInsumos} from '@/lib/politica-acceso';
+import {requiereSede} from '@/lib/politica-acceso';
 import {listarSedes} from '@/lib/sedes';
 import IdentificacionSede from '@/components/identificacion-sede';
 import AccesosModulo from "@/components/accesos-modulo";
@@ -66,8 +66,7 @@ export default async function Home() {
 
   if(acceso.alcance==='propios')return <main><header><h1>Inicio</h1></header><InicioFuncionario/></main>;
   const sede=requiereSede(acceso)?(await listarSedes()).find(s=>s.id===acceso.sedeId):null;
-  const accesosVisibles:AccesoModulo[] = modulosSistema(acceso).map(m=>({href:m.href,titulo:m.titulo,descripcion:m.descripcion,icono:({inventario:'INV',directorio:'DIR',solicitudes:'IN',mantenedores:'ADM'})[m.id]}));
-  if(puedeGestionarInsumos(acceso))accesosVisibles.push({href:'/insumos/seguimiento',titulo:'Gestor de insumos',descripcion:'Valida solicitudes, aprueba cantidades y confirma entregas con acta.',icono:'GI'});
+  const accesosVisibles:AccesoModulo[] = modulosSistema(acceso).map(m=>({href:m.href,titulo:m.titulo,descripcion:m.descripcion,icono:({inventario:'INV',directorio:'DIR',solicitudes:'IN',mantenedores:'ADM',gestor:'GI'})[m.id]}));
   if(requiereSede(acceso))accesosVisibles.push({href:URL_TICKETS,titulo:'Sistema de tickets',descripcion:'Solicita soporte y consulta tus requerimientos en la mesa de ayuda TI.',icono:'ST',externo:true});
   return (
     <main>

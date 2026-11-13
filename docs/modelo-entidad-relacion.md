@@ -412,6 +412,13 @@ erDiagram
     text rol PK
     text__ permisos
   }
+  rbac_cambios_migracion {
+    text nombre PK
+    text actor_sql
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
   rbac_historial {
     uuid id PK
     uuid solicitud

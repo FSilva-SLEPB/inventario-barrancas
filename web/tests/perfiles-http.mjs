@@ -53,7 +53,8 @@ try {
     'SELECT public.guardar_usuario_acceso($1,$2,$3,$4,$5,$6,$7::uuid)',
     ['felipe.silva@slepb.gob.cl', correos[tipo], 'Persona ficticia', rol, true, 0,
       ['encargado','local'].includes(tipo) ? ids[0] : null]);
-  await fallaSql(['felipe.silva@slepb.gob.cl','felipe.silva@slepb.gob.cl','','consulta',true,1,null],'P1001');
+  const versionAdmin=Number((await db.query('SELECT version FROM public.usuarios_acceso WHERE correo=$1',['felipe.silva@slepb.gob.cl'])).rows[0].version);
+  await fallaSql(['felipe.silva@slepb.gob.cl','felipe.silva@slepb.gob.cl','','consulta',true,versionAdmin,null],'P1001');
   const cookies = Object.fromEntries(await Promise.all(Object.entries(correos).map(async ([tipo,email]) => [tipo,await cookie(email)])));
   const admin = await cookie('felipe.silva@slepb.gob.cl');
   // Lectura local: no se filtran nombres/IDs ajenos ni al forzar parámetros de edición.

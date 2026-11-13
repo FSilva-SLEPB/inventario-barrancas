@@ -10,7 +10,7 @@ export type InsumoCatalogo={id:string;codigo:string;nombre:string;categoria:stri
 export type InsumoStock={producto_id:string;existencia:number;reservado:number;disponible:number;nombre:string;codigo:string;unidad:string;categoria:string;activo:boolean;foto_url:string|null};
 export type SolicitudInsumo={id:string;sede_id:string;sede_nombre:string;sede_rbd:string|null;solicitante_correo:string;solicitante_nombre:string;solicitante_run:string;solicitante_cargo:string;solicitante_telefono:string;modalidad_entrega:string;estado:'solicitada'|'en_validacion'|'aprobada'|'entregada'|'cancelada';motivo:string;solicitado_en:string;validado_en:string|null;validado_por:string|null;observacion_validacion:string;aprobado_en:string|null;aprobado_por:string|null;entregado_en:string|null;cancelado_en:string|null;cancelado_por:string|null;cancelado_motivo:string|null;acta_id:string|null;lineas:SolicitudLinea[];};
 export type SolicitudLinea={id:string;producto_id:string;codigo:string;nombre:string;categoria:string;unidad:string;foto_url:string|null;cantidad_solicitada:number;cantidad_aprobada:number;cantidad_entregada:number;motivo_reduccion:string;};
-export type FiltrosSolicitudes={estado?:string;sede?:string;q?:string;pagina:number;limite:number;};
+export type FiltrosSolicitudes={estado?:string;sede?:string;q?:string;pagina:number;limite:number;ids?:string[];priorizar?:boolean;};
 export async function listarCatalogoInsumos(activosSolo=true){
  await exigirAcceso('insumos');
  const db=obtenerBaseDatos();
@@ -41,6 +41,7 @@ export async function listarSolicitudesInsumos(f:FiltrosSolicitudes){
  else if(f.estado){where.push(`si.estado = $${i++}`);params.push(f.estado);}
  if(f.sede){where.push(`si.sede_id = $${i++}`);params.push(f.sede);}
  if(f.q){where.push(`(si.solicitante_correo ILIKE $${i} OR sd.nombre ILIKE $${i} OR COALESCE(si.solicitante_nombre,'') ILIKE $${i})`);params.push(`%${f.q}%`);i++;}
+ if(f.ids!==undefined){where.push(`si.id=ANY($${i++}::uuid[])`);params.push(f.ids);}
  const whereSql=where.length?`WHERE ${where.join(' AND ')}`:'';
  const total=Number((await db.query<{n:string}>(`SELECT count(*) AS n FROM public.solicitudes_insumos si JOIN public.sedes sd ON sd.id=si.sede_id ${whereSql}`,params)).rows[0].n);
  const paginas=Math.max(1,Math.ceil(total/f.limite));const pagina=Math.min(f.pagina,paginas);
@@ -67,7 +68,7 @@ export async function listarSolicitudesInsumos(f:FiltrosSolicitudes){
   FROM public.solicitudes_insumos si
   JOIN public.sedes sd ON sd.id=si.sede_id
   ${whereSql}
-  ORDER BY si.solicitado_en DESC,si.id DESC
+  ORDER BY ${f.priorizar?"CASE WHEN si.estado='aprobada' THEN 0 WHEN si.validado_en IS NOT NULL THEN 1 ELSE 2 END,":''}si.solicitado_en DESC,si.id DESC
   LIMIT $${i++} OFFSET $${i++}`,params);
  return {filas:rows.map(r=>({...r,lineas:typeof r.lineas_json==='string'?JSON.parse(r.lineas_json):r.lineas_json,lineas_json:undefined})),total,pagina,paginas};
 }
