@@ -116,6 +116,17 @@ erDiagram
     text estado_administrativo
     timestamp_with_time_zone fecha_baja
     uuid ubicacion_bodega_id FK
+    text uso_contacto
+    text contacto_director_run
+  }
+  celulares_contacto_cambios {
+    uuid id PK
+    uuid celular_id FK
+    text actor
+    jsonb entrada
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
   }
   celulares_historial {
     bigint id PK
@@ -262,6 +273,15 @@ erDiagram
     uuid entrega_id FK
     uuid incidente_id FK
     uuid movimiento_id FK
+  }
+  fotografias_funcionarios {
+    uuid id PK
+    uuid funcionario_id FK
+    integer version
+    text actor
+    text mime
+    bytea contenido
+    timestamp_with_time_zone registrado_en
   }
   fotografias_sedes {
     uuid id PK
@@ -597,6 +617,7 @@ erDiagram
   categorias_insumos_codigos |o--o{ catalogo_insumos : "categoria_codigo"
   sedes ||--o{ celulares : "sede_id"
   ubicaciones_bodega |o--o{ celulares : "ubicacion_bodega_id"
+  celulares ||--o{ celulares_contacto_cambios : "celular_id"
   celulares ||--o{ celulares_historial : "celular_id"
   movimientos_inventario |o--o{ celulares_historial : "movimiento_id"
   usuarios_acceso ||--o{ correcciones_personales : "actor"
@@ -621,6 +642,7 @@ erDiagram
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
   movimientos_inventario |o--o{ equipos_historial : "movimiento_id"
+  funcionarios_nc ||--o{ fotografias_funcionarios : "funcionario_id"
   sedes ||--o{ fotografias_sedes : "sede_id"
   funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
   sedes ||--o{ incidentes_robos : "sede_id"

@@ -122,6 +122,8 @@ jobs:
           TEST_ADMIN_DATABASE_URL="$DATABASE_URL" node tests/gestor-migracion.mjs
           npx node-pg-migrate up 1 --migrations-schema public --no-verbose
           TEST_ADMIN_DATABASE_URL="$DATABASE_URL" node tests/descargas-migracion.mjs
+          npx node-pg-migrate up 1 --migrations-schema public --no-verbose
+          TEST_ADMIN_DATABASE_URL="$DATABASE_URL" node tests/contactos-migracion.mjs
           npm run db:migrate
           npm run db:migrate
 

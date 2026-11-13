@@ -1,0 +1,3 @@
+import 'server-only';import {exigirAcceso} from '@/lib/acceso';import {obtenerBaseDatos} from '@/lib/db';import {tienePermiso} from '@/lib/rbac';import type {FotoSede} from '@/lib/fotos-sedes';
+export async function obtenerFotoFuncionario(id:string):Promise<FotoSede|null>{const a=await exigirAcceso();return(await obtenerBaseDatos().query<FotoSede>('SELECT id,version FROM public.consultar_fotografia_funcionario($1,$2,NULL)',[a.email,id])).rows[0]??null;}
+export function puedeEditarFotoFuncionario(a:unknown){if(!a||typeof a!=='object')return false;const r=a as {clasePerfil?:string;alcance?:string};return r.alcance==='global'&&['sistema','utic'].includes(r.clasePerfil??'')&&tienePermiso(a,'funcionarios','editar');}

@@ -3,9 +3,9 @@ import {exigirAcceso} from '@/lib/acceso';
 import {requiereSede} from '@/lib/politica-acceso';
 import {obtenerBaseDatos} from '@/lib/db';
 import type {DatosCelular} from '@/lib/validacion-celulares';
-export type Celular=DatosCelular&{id:string;estadoAdministrativo:import('@/lib/estados-activo').EstadoAdministrativoActivo;fechaBaja:string|null;version:number;custodia:string;sedeNombre:string;rbd:string|null;sedeTipo:string;actualizadoPor:string;actualizadoEn:string};
+export type Celular=DatosCelular&{id:string;usoContacto:string;estadoAdministrativo:import('@/lib/estados-activo').EstadoAdministrativoActivo;fechaBaja:string|null;version:number;custodia:string;sedeNombre:string;rbd:string|null;sedeTipo:string;actualizadoPor:string;actualizadoEn:string};
 export type FiltrosCelulares={q:string;tipo:string;sede:string;estado:string;pagina:number;limite:number;rbd?:string;vista?:string};
-const columnas=`c.id,c.sede_id::text AS "sedeId",c.telefono,c.marca,c.modelo,COALESCE(c.imei,'') AS imei,COALESCE(c.numero_inventario,'') AS inventario,c.condicion_tecnica AS "condicionTecnica",c.estado_administrativo AS "estadoAdministrativo",c.fecha_baja::text AS "fechaBaja",c.responsable,c.observaciones,c.activo,c.version,c.custodia,s.nombre AS "sedeNombre",s.rbd,s.tipo AS "sedeTipo",c.actualizado_por AS "actualizadoPor",c.actualizado_en::text AS "actualizadoEn"`;
+const columnas=`c.id,c.uso_contacto AS "usoContacto",c.sede_id::text AS "sedeId",c.telefono,c.marca,c.modelo,COALESCE(c.imei,'') AS imei,COALESCE(c.numero_inventario,'') AS inventario,c.condicion_tecnica AS "condicionTecnica",c.estado_administrativo AS "estadoAdministrativo",c.fecha_baja::text AS "fechaBaja",c.responsable,c.observaciones,c.activo,c.version,c.custodia,s.nombre AS "sedeNombre",s.rbd,s.tipo AS "sedeTipo",c.actualizado_por AS "actualizadoPor",c.actualizado_en::text AS "actualizadoEn"`;
 const base='FROM public.celulares c JOIN public.sedes s ON s.id=c.sede_id';
 export async function listarCelulares(f:FiltrosCelulares){
  const actor=await exigirAcceso(),db=obtenerBaseDatos(),local=requiereSede(actor);

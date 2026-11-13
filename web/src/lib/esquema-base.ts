@@ -1,5 +1,7 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ fotografias_funcionarios:{modulo:'Funcionarios',uso:'Fotografías privadas versionadas, consultables en su ficha y en Inicio propio.',fuentes:['migrations/1796745600000_contactos-celulares-fotos-funcionarios.cjs']},
+ celulares_contacto_cambios:{modulo:'Celulares',uso:'Clasificación de uso institucional/director con actor, antes/después e idempotencia.',fuentes:['migrations/1796745600000_contactos-celulares-fotos-funcionarios.cjs']},
  rbac_cambios_migracion:{modulo:'Seguridad y auditoría',uso:'Antes y después de permisos actualizados por migración; actor SQL sin atribuirlo a una persona.',fuentes:['web/migrations/1796572800000_gestor-insumos-informes.cjs','web/src/lib/perfiles.ts']},
  rbac_permisos:{modulo:'Acceso',uso:'Acciones existentes por recurso.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},
  rbac_perfiles:{modulo:'Acceso',uso:'Perfiles configurables, clasificación protegida, alcances, vigencia y versión.',fuentes:['src/lib/perfiles.ts','migrations/1796140800000_rbac-perfiles.cjs']},

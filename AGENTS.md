@@ -102,3 +102,13 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   Exportar y Descargar. Ampliar los límites del perfil sin elevar facultades UTIC
   ni reabrir perfiles reducidos por el Administrador. Tipo de perfil es seguridad;
   Perfil activo es estado. Ver docs/descargas-enlaces-ee.md.
+
+- Celulares de contacto: fuente única Inventario de celulares, solo lectura en
+  directorios e Inicio. Clasificar uso institucional/director únicamente desde la
+  ficha de celular por UTIC; anteriores Sin clasificar. Director se vincula al RUN
+  vigente, no al nombre ni por inferencia; reemplazar director o devolver el bien
+  no hereda el contacto. Enlazar acta conservada solo con permiso existente.
+- Foto del funcionario: misma carga/versiones privadas que sedes, administrada
+  por Sistema/UTIC; funcionario solo consulta su propia foto en Inicio. Respetar
+  mis_datos/funcionarios, alcance y cuenta activa en SQL y API. Ver
+  docs/contactos-celulares-fotos-funcionarios.md.
