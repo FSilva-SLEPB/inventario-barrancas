@@ -114,10 +114,12 @@ jobs:
             -v ON_ERROR_STOP=1 --single-transaction -f - \
             < ../database/preparar-usuario.sql
 
-      - name: Aplicar migraciones y comprobar repetición
+      - name: Probar ampliación del gestor sin reasignar cuentas y comprobar migraciones
         env:
           DATABASE_URL: "postgresql://inventario_admin:ci_admin_inventario@127.0.0.1:${{ job.services.db.ports[5432] }}/inventario"
         run: |
+          npx node-pg-migrate up 38 --migrations-schema public --no-verbose
+          TEST_ADMIN_DATABASE_URL="$DATABASE_URL" node tests/gestor-migracion.mjs
           npm run db:migrate
           npm run db:migrate
 

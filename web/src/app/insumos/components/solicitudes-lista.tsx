@@ -1,4 +1,5 @@
 "use client";
+import type {ReactNode} from 'react';
 import ModalFicha from '@/components/modal-ficha';
 import IconoAccion from '@/components/icono-accion';
 import {enlaceActaInsumos} from '@/lib/navegacion-insumos';
@@ -14,6 +15,7 @@ import AccionesRegistro from "@/components/acciones-registro";
 import EnlaceAccion from "@/components/enlace-accion";
 
 export type Props={
+ volverHref?:string;filtrosExtra?:Record<string,string>;camposExtra?:ReactNode;busquedaPlaceholder?:string;descargas?:ReactNode;
  modo:'seguimiento'|'historial';
  ruta:string;titulo:string;descripcion:string;
  permisos:{aprobar:boolean;confirmar:boolean;actas:boolean;descargar:boolean};
@@ -26,17 +28,17 @@ export type Props={
 
 export default function SolicitudesLista(props:Props){
  const {ruta,titulo,descripcion,admin,permisos,sedes,solicitudes,stock,total,pagina,paginas,limite,filtroEstado,filtroSede,q,detalle,paso,emisor}=props;
- const filtros={q,estado:filtroEstado,sede:filtroSede};
- const base=new URLSearchParams({q,estado:filtroEstado,sede:filtroSede,limite:String(limite),pagina:String(pagina)});
+ const filtros={...props.filtrosExtra,q,estado:filtroEstado,sede:filtroSede};
+ const base=new URLSearchParams({...props.filtrosExtra,q,estado:filtroEstado,sede:filtroSede,limite:String(limite),pagina:String(pagina)});
  const volver=ruta+'?'+base.toString();
  const verHref=(id:string)=>ruta+'?'+new URLSearchParams({...Object.fromEntries(base),'ver':id}).toString();
  return <main>
   <header>
    <h1>{titulo}</h1>
    <p className="descripcion-pagina">{descripcion}</p>
-   <p><Link className="btn btn-outline-primary btn-sm" href="/insumos">Volver a insumos</Link></p>
+   <p><Link className="btn btn-outline-primary btn-sm" href={props.volverHref??'/insumos'}>{props.volverHref?'Volver a Gestor de insumos':'Volver a insumos'}</Link></p>
   </header>
-  <PanelFiltros ruta={ruta} titulo="Filtrar solicitudes" busqueda={{valor:q,placeholder:'Buscar por sede o solicitante'}} ocultos={{limite}}>
+  <PanelFiltros ruta={ruta} titulo="Filtrar solicitudes" busqueda={{valor:q,placeholder:props.busquedaPlaceholder??'Buscar por sede o solicitante'}} ocultos={{limite,...(props.filtrosExtra?.bandeja?{bandeja:props.filtrosExtra.bandeja}:{})}}>{props.camposExtra}
    <div className="filtro-inventario"><label htmlFor="filtro-estado">Estado</label><select id="filtro-estado" name="estado" defaultValue={filtroEstado}>
     <option value="">Todos</option>
     <option value="activas">En curso (seguimiento)</option>
@@ -45,11 +47,12 @@ export default function SolicitudesLista(props:Props){
    </select></div>
    <div className="filtro-inventario"><label htmlFor="filtro-sede">Sede</label><select id="filtro-sede" name="sede" defaultValue={filtroSede}><option value="">Todas</option>{sedes.map(s=><option key={s.id} value={s.id}>{s.nombre}{s.rbd&&' ('+s.rbd+')'}</option>)}</select></div>
   </PanelFiltros>
+  {props.descargas}
   <PanelResultados total={total} descripcion="solicitudes" ruta={ruta} limite={limite} filtros={filtros} pagina={pagina} paginas={paginas}>
    <div className="tabla-usuarios-contenedor"><table className="tabla-datos tabla-catalogos"><caption className="visually-hidden">Solicitudes ({total})</caption><thead><tr><th scope="col">Sede</th><th scope="col">Solicitante</th><th scope="col">Estado</th><th scope="col">Fecha</th><th scope="col">Ítems</th><th scope="col">Acciones</th></tr></thead><tbody>{solicitudes.map((s)=>{
     const nombre=`solicitud ${s.sede_nombre}`;
     const solicitante=(s.solicitante_nombre||s.solicitante_correo||'').trim();
-    return <tr key={s.id}><td>{s.sede_nombre}{s.sede_rbd&&` (${s.sede_rbd})`}</td><td>{solicitante}{s.solicitante_nombre&&s.solicitante_correo?` · ${s.solicitante_correo}`:''}</td><td><span className={'estado-solicitud estado-'+s.estado}>{ESTADOS_SOLICITUD_INSUMO[s.estado]||s.estado}</span></td><td>{new Date(s.solicitado_en).toLocaleDateString('es-CL')}</td><td>{s.lineas.length}</td><td><AccionesRegistro id={s.id} nombre={nombre} verTexto="Ver solicitud" verHref={verHref(s.id)}>{permisos.aprobar&&s.estado==='solicitada'&&<EnlaceAccion href={verHref(s.id)+'&paso=validar'} etiqueta={'Validar: '+nombre} icono="editar"/>}{permisos.aprobar&&s.estado==='en_validacion'&&<EnlaceAccion href={verHref(s.id)+'&paso=aprobar'} etiqueta={'Aprobar: '+nombre} icono="editar"/>}{permisos.confirmar&&s.estado==='aprobada'&&<EnlaceAccion href={verHref(s.id)+'&paso=entregar'} etiqueta={'Entregar: '+nombre} icono="asignar"/>}{permisos.actas&&s.acta_id&&<EnlaceAccion href={enlaceActaInsumos(s.acta_id,volver)} etiqueta={'Ver acta: '+nombre} icono="acta"/>}</AccionesRegistro></td></tr>;
+    return <tr key={s.id}><td>{s.sede_nombre}{s.sede_rbd&&` (${s.sede_rbd})`}</td><td>{solicitante}{s.solicitante_nombre&&s.solicitante_correo?` · ${s.solicitante_correo}`:''}</td><td><span className={'estado-solicitud estado-'+s.estado}>{ESTADOS_SOLICITUD_INSUMO[s.estado]||s.estado}</span>{s.validado_en&&s.estado!=='cancelada'&&<small className="dato-secundario">Validada por TI{s.estado==='aprobada'?' · lista para entregar':''}</small>}</td><td>{new Date(s.solicitado_en).toLocaleDateString('es-CL')}</td><td>{s.lineas.length}</td><td><AccionesRegistro id={s.id} nombre={nombre} verTexto="Ver solicitud" verHref={verHref(s.id)}>{permisos.aprobar&&s.estado==='solicitada'&&<EnlaceAccion href={verHref(s.id)+'&paso=validar'} etiqueta={'Validar: '+nombre} icono="editar"/>}{permisos.aprobar&&s.estado==='en_validacion'&&<EnlaceAccion href={verHref(s.id)+'&paso=aprobar'} etiqueta={'Aprobar: '+nombre} icono="editar"/>}{permisos.confirmar&&s.estado==='aprobada'&&<EnlaceAccion href={verHref(s.id)+'&paso=entregar'} etiqueta={'Entregar: '+nombre} icono="asignar"/>}{permisos.actas&&s.acta_id&&<EnlaceAccion href={enlaceActaInsumos(s.acta_id,volver)} etiqueta={'Ver acta: '+nombre} icono="acta"/>}</AccionesRegistro></td></tr>;
    })}{!solicitudes.length&&<tr><td colSpan={6}>No hay solicitudes para mostrar.</td></tr>}</tbody></table></div>
   </PanelResultados>
   {detalle&&<ModalFicha titulo={'Solicitud '+detalle.id.slice(0,8)} cerrarHref={volver} focoId={detalle.id} editando={Boolean(paso)}><DetalleSolicitud key={detalle.id+':'+detalle.estado+':'+paso} solicitud={detalle} stock={stock} admin={admin} permisos={permisos} paso={paso} emisor={emisor} volver={volver} gestionarHref={p=>verHref(detalle.id)+'&paso='+p}/></ModalFicha>}

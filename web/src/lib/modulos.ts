@@ -2,14 +2,14 @@ import {esAutorizacionRbac,tienePermiso,type AutorizacionRbac} from '@/lib/rbac'
 import {permisoRuta} from '@/lib/rbac-rutas';
 import {puedeAdministrar,puedeSolicitarInsumos,puedeGestionarInsumos,requiereSede,type RolAcceso} from '@/lib/politica-acceso';
 export type AccesoModulo={href:string;titulo:string;descripcion:string;icono:string;externo?:boolean};
-export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
+export type ModuloSistema={id:'inventario'|'directorio'|'mantenedores'|'solicitudes'|'gestor';titulo:string;href:string;descripcion:string;accesos:AccesoModulo[]};
 export function modulosSistema(entrada:RolAcceso|(Partial<AutorizacionRbac>&{rol:RolAcceso})):ModuloSistema[]{
  if(esAutorizacionRbac(entrada)){
   const todos=modulosSistema('administrador');
   todos.find(m=>m.id==='inventario')!.accesos.push({href:'/inventario/actas',titulo:'Actas emitidas',descripcion:'Consultar documentos conservados, imprimir y descargar según permisos.',icono:'ACT'});
   todos.find(m=>m.id==='mantenedores')!.accesos.push({href:'/mantenedores/perfiles',titulo:'Perfiles y permisos',descripcion:'Permisos por recurso y acción, alcances e historial.',icono:'PR'});
   if(['sistema','utic'].includes(entrada.clasePerfil)&&tienePermiso(entrada,'funcionarios','editar'))todos.find(m=>m.id==='mantenedores')!.accesos.push({href:'/mantenedores/asignaciones',titulo:'Vínculos de inventario personal',descripcion:'Vincular registros previos a su funcionario, con revisión e historial.',icono:'VP'});
-  return todos.map(m=>({...m,accesos:m.accesos.filter(a=>{if(a.href==='/inventario/nivel-central'&&entrada.alcance!=='global')return false;const p=permisoRuta(a.href);return p?entrada.permisos.includes(p):false;}).map(a=>a.href==='/insumos/seguimiento'&&!tienePermiso(entrada,'seguimiento_insumos','aprobar')&&!tienePermiso(entrada,'seguimiento_insumos','confirmar')?{...a,titulo:'Seguimiento de insumos',descripcion:'Consulta del avance de solicitudes autorizadas.'}:a.href==='/inventario/p02'&&entrada.alcance==='sede'?{...a,titulo:'Inventario de mi sede'}:a)})).filter(m=>m.accesos.length>0);
+  return todos.map(m=>({...m,accesos:m.accesos.filter(a=>{if(m.id==='gestor'&&!tienePermiso(entrada,a.href.endsWith('/stock')?'stock_insumos':'seguimiento_insumos'))return false;if(a.href==='/inventario/nivel-central'&&entrada.alcance!=='global')return false;const p=permisoRuta(a.href);return p?entrada.permisos.includes(p):false;}).map(a=>a.href==='/insumos/seguimiento'&&!tienePermiso(entrada,'seguimiento_insumos','aprobar')&&!tienePermiso(entrada,'seguimiento_insumos','confirmar')?{...a,titulo:'Seguimiento de insumos',descripcion:'Consulta del avance de solicitudes autorizadas.'}:a.href==='/inventario/p02'&&entrada.alcance==='sede'?{...a,titulo:'Inventario de mi sede'}:a)})).filter(m=>m.accesos.length>0&&(m.id!=='gestor'||entrada.alcance==='global'));
  }
  const rol=typeof entrada==='string'?entrada:entrada.rol;
  const admin=puedeAdministrar(rol),local=requiereSede(rol);
@@ -38,8 +38,9 @@ export function modulosSistema(entrada:RolAcceso|(Partial<AutorizacionRbac>&{rol
  ]},{id:'solicitudes',titulo:'Solicitudes de insumos',href:'/insumos',descripcion:'Solicitudes de insumos para establecimientos educacionales, jardines infantiles y Nivel Central.',accesos:[
   ...(puedeSolicitarInsumos(rol)?[
    {href:'/insumos/solicitud',titulo:'Solicitud de insumos',descripcion:'Crear y enviar una nueva solicitud de insumos.',icono:'+'}]:[]),
-   {href:'/insumos/seguimiento',titulo:puedeGestionarInsumos(rol)?'Gestor de insumos':'Seguimiento de insumos',descripcion:puedeGestionarInsumos(rol)?'Validar solicitudes, aprobar cantidades y confirmar entregas.':'Revisar el estado y avance de las solicitudes.',icono:'SG'},
+   {href:'/insumos/seguimiento',titulo:'Seguimiento de insumos',descripcion:'Revisar el estado y avance de las solicitudes.',icono:'SG'},
    {href:'/insumos/historial',titulo:'Historial de insumos',descripcion:'Consultar el historial de solicitudes realizadas.',icono:'HI'},
  ]}];
- return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'||m.id==='mantenedores'):modulos;
+ if(admin||rol==='gestor_insumos')modulos.push({id:'gestor',titulo:'Gestor de insumos',href:'/gestor-insumos',descripcion:'Solicitudes de todas las sedes, pendientes, entregas, stock e informes.',accesos:[{href:'/gestor-insumos/solicitudes',titulo:'Solicitudes ingresadas',descripcion:'Todas las solicitudes y sus antecedentes.',icono:'IN'},{href:'/gestor-insumos/pendientes',titulo:'Pendientes y validadas por TI',descripcion:'Priorizar aprobación y entrega.',icono:'PD'},{href:'/gestor-insumos/entregadas',titulo:'Solicitudes entregadas',descripcion:'Entregas confirmadas y sus actas.',icono:'EN'},{href:'/gestor-insumos/dashboard',titulo:'Dashboard de insumos',descripcion:'Demanda, entregas y stock actual.',icono:'DB'},{href:'/gestor-insumos/stock',titulo:'Stock de bodega',descripcion:'Existencias, reservas y disponibilidad por producto.',icono:'ST'},{href:'/gestor-insumos/consolidado',titulo:'Consolidados y descargas',descripcion:'Detalle por establecimiento y producto.',icono:'CSV'}]});
+ return rol==='gestor_insumos'?modulos.filter(m=>m.id==='solicitudes'||m.id==='mantenedores'||m.id==='gestor'):modulos;
 }

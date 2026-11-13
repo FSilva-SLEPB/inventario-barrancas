@@ -1,0 +1,1 @@
+import Listado from '../listado';export default async function Entregadas({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}){const p=await searchParams;return <Listado searchParams={Promise.resolve({...p,base:p.base??'entrega'})} grupo="entregadas" ruta="/gestor-insumos/entregadas" titulo="Solicitudes entregadas"/>;}
