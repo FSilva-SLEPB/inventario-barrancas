@@ -352,3 +352,9 @@ test('filtros del gestor validan período, identificadores y conservan criterios
  const u=new URL(enlaceInformeInsumos(f,'consolidado'),'http://local');assert.equal(u.pathname,'/gestor-insumos/exportar');for(const k of ['sede','desde','hasta','base','categoria','q'])assert.equal(u.searchParams.get(k),f[k]);assert.equal(u.searchParams.get('vista'),'consolidado');
  for(const p of [{desde:'2026-02-30'},{desde:'2026-02-02',hasta:'2026-01-01'},{sede:'otra'},{q:['a','b']},{limite:'999'},{pagina:'0'},{grupo:'inventado'}])assert.throws(()=>leerFiltroGestor(p));
 });
+
+test('mensajes de perfiles distinguen tipo, alcance y permisos sin exponer SQL',async()=>{
+ const e=await entorno(),{mensajePermisoPerfil}=await e.importar('@/lib/mensajes-perfiles');assert.match(mensajePermisoPerfil('Clasificación protegida'),/tipo.*estado/);assert.match(mensajePermisoPerfil('Facultad reservada a UTIC'),/UTIC/);assert.match(mensajePermisoPerfil('El perfil conserva sus límites funcionales aunque cambie de nombre'),/predefinido/);assert.ok(!mensajePermisoPerfil('SQL con datos privados').includes('datos privados'));
+});
+
+test('el rótulo solo lectura respeta permisos efectivos de un Enlaces con rol anterior de consulta',async()=>{const e=await entorno(),{esSoloLectura}=await e.importar('@/lib/rbac');assert.equal(esSoloLectura({rol:'consulta_sede',permisos:['equipos.consultar','equipos.registrar','equipos.descargar']}),false);assert.equal(esSoloLectura({rol:'administrador',permisos:['equipos.consultar','equipos.exportar','equipos.descargar']}),true);});

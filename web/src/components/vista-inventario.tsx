@@ -65,12 +65,12 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
         <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
         {tienePermiso(actor,'equipos','registrar') && <Link className="btn btn-outline-primary btn-sm" href={'/inventario/registro?volver='+encodeURIComponent(volver)}>Registrar equipo</Link>}
+        {!bodega&&<ExportarInventario integrado recurso="equipos" filtros={{...Object.fromEntries(new URL(volver,'http://local').searchParams),ambito}}/>}
       </div>
     </div>
     {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están en Bodega TI. La sede indica su referencia de destino o procedencia; UTIC confirma su asignación.</p>}
     <FiltrosInventario key={JSON.stringify([ambito, vista, tipo, sedeId, rbd, q, limite])}
       {...{ ambito, vista, local, tipo, rbd, q, limite, bodega }} sedeId={sedeId ?? ""} sedes={sedesFiltro} />
-    {!bodega&&<ExportarInventario recurso="equipos" filtros={{...Object.fromEntries(new URL(volver,'http://local').searchParams),ambito}}/>}
     <PanelResultados total={total} descripcion={vista==='pendientes'?'bienes en Bodega TI':'equipos registrados / recibidos'} ruta={ruta} limite={limite} filtros={{vista,tipo,sede:sedeId??'',rbd,q}} pagina={pagina} paginas={paginas} acciones={bodega?<SeleccionEntregas pagina={equipos.map(e=>e.id).join(',')}/>:undefined}>
     <div className={`${styles.contenedorTabla} tabla-contenedor tabla-inventario-contenedor`} role="region" aria-label="Resultados del inventario" tabIndex={0}>
       <table className={`tabla-datos ${styles.tabla} ${ambito === "eeji" ? styles.tablaP02 : styles.tablaCentral} ${bodega ? styles.tablaSeleccion : ""}`}>

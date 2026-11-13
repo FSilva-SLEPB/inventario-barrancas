@@ -95,3 +95,10 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   Descargas generales/filtradas aplican alcance y revocación. Ver
   docs/gestor-insumos-dashboard.md. Sustituye la ubicación anterior del gestor
   dentro de Solicitudes; los perfiles de lectura conservan sus accesos previos.
+
+- Corrección de Felipe para Enlaces EE: permitir descargar su inventario de equipos
+  y celulares asignados, siempre de su única sede. Botones junto a las acciones
+  superiores, con el componente compartido. Descargar permite PDF; CSV requiere
+  Exportar y Descargar. Ampliar los límites del perfil sin elevar facultades UTIC
+  ni reabrir perfiles reducidos por el Administrador. Tipo de perfil es seguridad;
+  Perfil activo es estado. Ver docs/descargas-enlaces-ee.md.
