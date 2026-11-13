@@ -1,3 +1,4 @@
+import {esSoloLectura} from '@/lib/rbac';
 import ActualizarPermisos from '@/components/actualizar-permisos';
 import { Suspense } from "react";
 import AvisosGuardado from "@/components/avisos-guardado";
@@ -85,7 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </header>
       <div className={acceso ? "estructura-app" : "estructura-app estructura-publica"}>
         {acceso?.revisionAcceso&&<ActualizarPermisos revision={acceso.revisionAcceso}/>}
-        {acceso && <Navegacion autorizacion={acceso} rol={acceso.rol} administrador={puedeAdministrar(acceso)} soloLectura={acceso.rol === "consulta" || acceso.rol === "consulta_sede"} />}
+        {acceso && <Navegacion autorizacion={acceso} rol={acceso.rol} administrador={puedeAdministrar(acceso)} soloLectura={esSoloLectura(acceso)} />}
         <div id="contenido-principal" className="contenido-app" tabIndex={-1}>{children}</div>
       </div>
       <footer className="app-footer">
