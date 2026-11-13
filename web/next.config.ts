@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   serverExternalPackages: ['pdfkit','actas-smtp'],
-  outputFileTracingIncludes: {'/insumos/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png'],'/inventario/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png']},
+  outputFileTracingIncludes: {'/exportaciones/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png'],'/insumos/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png'],'/inventario/**':['./src/app/fonts/*.otf','./public/identidad/barrancas-blanco.png']},
   experimental: { serverActions: { bodySizeLimit: "3mb" } },
   async headers() {
     return [

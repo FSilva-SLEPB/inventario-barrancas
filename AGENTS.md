@@ -112,3 +112,9 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   por Sistema/UTIC; funcionario solo consulta su propia foto en Inicio. Respetar
   mis_datos/funcionarios, alcance y cuenta activa en SQL y API. Ver
   docs/contactos-celulares-fotos-funcionarios.md.
+
+- Corrección de Felipe: Mi inventario asignado solo descarga PDF; quitar CSV de
+  esa pantalla y endpoint sin retirar planillas de otros módulos. No generar PDF
+  vacío ni inferir bienes para llenar la ficha. Es informe personal de consulta,
+  con diseño institucional; no reemplaza ni modifica las actas emitidas por UTIC.
+  Ver docs/informe-inventario-personal.md.
