@@ -59,7 +59,7 @@ export function abrirExcel(bytes:Uint8Array):LibroExcel{
    if(n==='v'||n==='t')captura='';if(n==='c'){
     let valor=tipo==='s'?compartidas[Number(v)]:tipo==='inlineStr'?inline:v;
     if(valor===undefined||tipo==='e'||formula&&!cache)valor='#REVISAR_FORMULA';
-    if(!tipo&&v&&cache)valor=fecha(v,estilo);
+    if((!tipo||tipo==='n')&&v&&cache)valor=fecha(v,estilo);
     celdas[col]=valor.normalize('NFC').trim();
    }
    if(n==='row'&&celdas.some(c=>c?.trim())){if(filas.length>=5001)throw new ErrorExcel('La hoja admite hasta 5.000 filas de datos.');filas.push({fila,celdas});}
