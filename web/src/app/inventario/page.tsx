@@ -1,3 +1,4 @@
+import {puedeImportarExcel} from '@/lib/importacion-excel/permisos';
 import {tienePermiso} from '@/lib/rbac';
 import Link from 'next/link';
 import {puedeAdministrar} from '@/lib/politica-acceso';
@@ -22,5 +23,5 @@ export default async function Inventario({ searchParams }: ParametrosInventario)
     for (const clave of claves) if (typeof p[clave] === "string") parametros.set(clave, p[clave]);
     redirect(ruta + (parametros.size ? `?${parametros}` : ""));
   }
-  return <PortadaModulo modulo={modulosSistema(actor).find(m=>m.id==='inventario')!}><div className="acciones-catalogos">{tienePermiso(actor,'equipos','registrar')&&<Link className="btn btn-primary" href="/inventario/registro">Registrar equipo</Link>}{puedeAdministrar(actor)&&<Link className="btn btn-outline-primary" href="/inventario/registro?carga=1">Carga masiva</Link>}</div></PortadaModulo>;
+  return <PortadaModulo modulo={modulosSistema(actor).find(m=>m.id==='inventario')!}><div className="acciones-catalogos">{tienePermiso(actor,'equipos','registrar')&&<Link className="btn btn-primary" href="/inventario/registro">Registrar equipo</Link>}{puedeAdministrar(actor)&&<Link className="btn btn-outline-primary" href="/inventario/registro?carga=1">Carga masiva</Link>}{puedeImportarExcel(actor,'central')&&<Link className="btn btn-outline-primary" href="/inventario/importar-excel">Importar Excel (.xlsx)</Link>}</div></PortadaModulo>;
 }

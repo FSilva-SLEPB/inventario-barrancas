@@ -1,3 +1,4 @@
+import {puedeImportarExcel} from '@/lib/importacion-excel/permisos';
 import ModalFicha from '@/components/modal-ficha';
 import {retornoInventario} from '@/lib/ficha-inventario';
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default async function Registro({searchParams}:{searchParams:Promise<Reco
     {p.carga!=='1'&&<ModalFicha titulo="Registrar equipo" cerrarHref={volver} editando><RegistroEquipos sedes={sedes} categorias={categorias} local={requiereSede(actor)} volver={volver}/></ModalFicha>}
     {p.carga==='1'&&puedeAdministrar(actor) && <section className="panel-catalogos registro-carga" id="carga-masiva" aria-labelledby="carga-masiva-titulo">
       <h2 id="carga-masiva-titulo">Carga masiva de equipos</h2>
+      {puedeImportarExcel(actor,'central')&&<p><Link className="btn btn-primary" href="/inventario/importar-excel">Importar Excel (.xlsx)</Link></p>}
       <p>Importa las 23 columnas de Inventario completo como CSV UTF-8 (punto y coma, coma o tabulaciones). Usa RBD o NC para Nivel Central. CANTIDAD crea bienes individuales: para varias unidades deja serie e inventario pendientes o separa una fila por equipo identificado.</p>
       <p><a href="/plantillas/equipos-historicos.csv" download>Descargar plantilla CSV</a></p>
       <details className="instrucciones-carga"><summary>Instrucciones para preparar el archivo</summary>

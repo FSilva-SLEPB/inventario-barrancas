@@ -118,3 +118,12 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   vacío ni inferir bienes para llenar la ficha. Es informe personal de consulta,
   con diseño institucional; no reemplaza ni modifica las actas emitidas por UTIC.
   Ver docs/informe-inventario-personal.md.
+
+- Carga Excel aprobada: aceptar .xlsx directamente con selección de hoja y vista
+  previa. Excluir fecha de entrega, PIN/usuarios de impresora y claves de candado,
+  incluso de los antecedentes guardados. Las fechas puestas en condición se
+  descartan, sin asumir Operativo. No crear cuentas, actas ni movimientos desde
+  antecedentes. Importar fichas nuevas, inventarios y luego vínculos explícitos por
+  RUN válido y serie completa; no sobrescribir fichas/vínculos existentes ni elegir
+  una fila histórica entre duplicados. Solo UTIC global con acciones vigentes en
+  servidor/SQL; toda confirmación es atómica e idempotente. Ver docs/importacion-excel.md.
