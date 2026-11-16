@@ -1,5 +1,4 @@
-import {puedeImportarExcel} from '@/lib/importacion-excel/permisos';
-import {tienePermiso} from '@/lib/rbac';
+import AccesosModulo from '@/components/accesos-modulo';
 import Link from 'next/link';
 import {redirect} from "next/navigation";
 import {exigirAcceso} from "@/lib/acceso";
@@ -22,7 +21,10 @@ export default async function Inventario({ searchParams }: ParametrosInventario)
     for (const clave of claves) if (typeof p[clave] === "string") parametros.set(clave, p[clave]);
     redirect(ruta + (parametros.size ? `?${parametros}` : ""));
   }
-  const modulo=modulosSistema(actor).find(m=>m.id==='inventario')!;
+  const modulo=modulosSistema(actor).find(m=>m.id==='inventario');
+  if(!modulo)redirect('/sin-permiso');
+  const principales=modulo.accesos.filter(a=>['/inventario/nivel-central/inicio','/inventario/p02/inicio'].includes(a.href));
+  const compartidos=modulo.accesos.filter(a=>!principales.includes(a));
   const grupos=['Equipamiento','Bodega TI','Entregas, devoluciones y préstamos','Incidentes'];
-  return <main className="portada-modulo"><header><h1>Inventario</h1><p className="descripcion-pagina">Consulta los bienes y selecciona el proceso que necesitas realizar.</p></header><div className="grupos-inventario">{grupos.map(g=>{const accesos=modulo.accesos.filter(a=>a.grupo===g);return accesos.length>0&&<section className="grupo-inventario" key={g}><h2>{g}</h2><ul>{accesos.map(a=><li key={a.href}><Link href={a.href}>{a.href==='/inventario/movimientos'?'Historial de asignaciones y movimientos':a.titulo}</Link></li>)}</ul>{g==='Equipamiento'&&<MenuAcciones titulo="Ingresar bienes">{tienePermiso(actor,'equipos','registrar')&&<Link className="btn btn-outline-primary" href="/inventario/registro">Registrar equipo</Link>}{puedeImportarExcel(actor,'central')&&<Link className="btn btn-outline-primary" href="/inventario/importar-excel">Importar Excel (.xlsx)</Link>}</MenuAcciones>}</section>;})}</div></main>;
+  return <main className="portada-modulo"><header><h1>Inventario</h1><p className="descripcion-pagina">Selecciona el inventario para acceder a sus equipos y procesos.</p></header><AccesosModulo id="seleccionar-inventario" titulo="Selecciona tu inventario" accesos={principales}/>{compartidos.length>0&&<section aria-labelledby="operaciones-compartidas"><h2 id="operaciones-compartidas">Operaciones compartidas</h2><div className="acciones-catalogos">{grupos.map(g=>{const accesos=compartidos.filter(a=>a.grupo===g);return accesos.length>0&&<MenuAcciones key={g} titulo={g==='Equipamiento'?'Celulares':g}>{accesos.map(a=><Link className="btn btn-outline-primary btn-sm" key={a.href} href={a.href}>{a.titulo}</Link>)}</MenuAcciones>;})}</div></section>}</main>;
 }

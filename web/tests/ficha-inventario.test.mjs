@@ -13,7 +13,7 @@ test('la ventana conserva todos los filtros de la página de origen sin duplicar
  for(const accion of ['ver','editar']){const u=new URL(enlaceFichaInventario(ruta,accion,id),'http://localhost');assert.equal(u.searchParams.get(accion),id);assert.equal(u.searchParams.get('q'),'Serie & modelo');assert.equal(u.searchParams.get('pagina'),'2');assert.equal(u.searchParams.size,8);}
 });
 test('el regreso solo permite los tres listados locales y rechaza destinos manipulados',()=>{
- for(const ruta of ['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti'])assert.equal(retornoInventario(ruta),ruta);
+ for(const ruta of ['/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti','/inventario/nivel-central/inicio','/inventario/p02/inicio'])assert.equal(retornoInventario(ruta),ruta);
  for(const ruta of ['https://otro.invalid/inventario/p02','//otro.invalid/inventario/p02','/inventario/p02#algo','/inventario/robos','/inventario/p02?aviso=inventado','/inventario/p02?editar='+id,'/inventario/p02?q=a&q=b','/inventario/p02?pagina=0','/inventario/p02?limite=1000','/inventario/p02?sede=incorrecto','/inventario/p02?tipo=nivel_central','/inventario/p02?q=%0a','/inventario/\\otro.invalid',{},null,'x'.repeat(2001)])assert.equal(retornoInventario(ruta),null,String(ruta));
 });
 test('abrir una ficha respeta Nivel Central, P02 y la separación entre recibido y pendiente',()=>{
