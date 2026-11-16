@@ -1,3 +1,4 @@
+import {puedeNumerar} from '@/lib/identificacion/acceso';
 import {COLUMNAS_CARGA_INVENTARIO} from '@/lib/columnas-carga-inventario';
 import {cabeceraCsv} from '@/lib/csv-equipos';
 import {tienePermiso} from '@/lib/rbac';
@@ -53,6 +54,8 @@ export default async function FichaEquipo({id,editar=false,guardado=false,contex
       {originales.length>0&&<section className="ficha-seccion"><details><summary>Datos originales de la carga</summary><p>Antecedentes conservados del archivo; no reemplazan los datos actuales del directorio. Cada bien conserva su unidad dentro de la cantidad declarada.</p><dl className="ficha-datos">{originales.map(([k,v])=>dato(k,v as string))}{dato('Unidad creada',String((e.compra as Record<string,unknown>).unidadCarga??1)+' de '+String((e.compra as Record<string,unknown>).cantidadCarga??1))}</dl></details></section>}
     </div>}
     {!editando&&tienePermiso(actor,'bajas','confirmar')&&<EstadosInventario key={id+':'+e.version} clase="equipo" bien={{id:e.id,version:e.version,condicionTecnica:e.condicionTecnica,estadoAdministrativo:e.estadoAdministrativo,fechaBaja:e.fechaBaja,custodia:e.custodia,bajaPendienteTI:e.bajaPendienteTI}} />}
+    {!editando&&!e.inventario&&puedeNumerar(actor,'confirmar')&&<Link href={'/inventario/numeracion?equipo='+e.id} className="btn btn-outline-primary btn-sm">Generar número de inventario</Link>}
+    {!editando&&tienePermiso(actor,'etiquetas_inventario')&&e.inventario&&<Link href={'/inventario/etiquetas?equipo='+e.id} className="btn btn-outline-primary btn-sm">Etiqueta QR</Link>}
     {!editando&&tienePermiso(actor,'actas')&&<DocumentosBien tipo="equipo" id={id} volver={volver}/>}
     {robos.length>0&&<section className="ficha-seccion"><h2>Incidentes de robo</h2><ul>{robos.map(r=><li key={r.id}>{r.fecha.split('-').reverse().join('/')} · {ESTADOS_ROBO[(r.recuperadoFecha?'recuperado':r.estado) as keyof typeof ESTADOS_ROBO]} {tienePermiso(actor,'equipos','editar')&&<Link href={'/inventario/robos/'+r.id}>Ver incidente</Link>}</li>)}</ul></section>}
     <SeccionHistorial id="historial" className="historial-equipo">{contexto?<summary>Historial del equipo</summary>:<h2>Historial del equipo</h2>}<p className="ayuda-catalogos">Registro de ingresos, entregas y actualizaciones, con fecha y responsable. Las ediciones conservan el valor anterior y el nuevo.</p>

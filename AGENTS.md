@@ -127,3 +127,14 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   RUN válido y serie completa; no sobrescribir fichas/vínculos existentes ni elegir
   una fila histórica entre duplicados. Solo UTIC global con acciones vigentes en
   servidor/SQL; toda confirmación es atómica e idempotente. Ver docs/importacion-excel.md.
+
+- Numeración y etiquetas: integrar los códigos entregados en Inventario, con
+  generación explícita por selección y etiquetas Adetec 66,5×25 mm en Carta 3×10.
+  Número = prefijo de categoría + AA de OC + cuatro dígitos, compartido por prefijo
+  y año; serie obligatoria, número existente se conserva, sin fecha OC se confirma
+  expresamente su año sin inventar una fecha. Correlativos atómicos, idempotentes y
+  permanentes. Felipe corrigió el QR: mostrar datos básicos de solo lectura como
+  texto, sin nombres/RUN ni dependencia de localhost o sesión. Preparar/descargar
+  no equivale a impresión física; confirmación manual y PDF original conservado.
+  Solo UTIC global numera; las etiquetas respetan permisos dinámicos y alcance.
+  Ver docs/numeracion-etiquetas-qr.md. No fusionar ni desplegar automáticamente.
