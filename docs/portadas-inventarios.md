@@ -31,6 +31,13 @@ amplían permisos. La configuración diferenciada del contenido QR y el rediseñ
 entregas por lotes siguen siendo trabajos distintos; los enlaces a etiquetas
 abren el flujo existente prefiltrado por inventario.
 
+## Dependencias
+
+Next.js y eslint-config-next se actualizan a 16.4.6 para resolver
+[GHSA-mfr8-8qww-v76h](https://github.com/advisories/GHSA-mfr8-8qww-v76h),
+detectada por la comprobación de dependencias del PR. Se mantiene el nivel de
+bloqueo del audit; no se omite la advertencia ni se aplica una actualización mayor.
+
 ## Comprobación y despliegue
 
 `tests/portadas-inventario-http.mjs` comprueba portadas, formularios sin mezcla de
