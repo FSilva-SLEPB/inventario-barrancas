@@ -64,7 +64,8 @@ rechaza revisiones NC, ajenas o no preparadas en P02.
 
 El contador se comparte por prefijo y AA con la numeración existente: se consideran
 números de equipos/celulares y registros de numeración conservados. Dos categorías
-con el mismo prefijo/año comparten secuencia para evitar colisiones. No se reinicia
+con el mismo prefijo/año comparten secuencia para evitar colisiones. El máximo global se contrasta una vez por prefijo/año dentro del lote; las
+unidades siguientes usan el contador protegido por los mismos bloqueos. No se reinicia
 el contador al cambiar de sede, reintentar o cambiar de categoría. Al llegar a 9999
 se rechaza la operación; no se amplía el formato por suposición.
 

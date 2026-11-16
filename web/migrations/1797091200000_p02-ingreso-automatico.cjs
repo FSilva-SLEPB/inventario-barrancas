@@ -35,7 +35,7 @@ BEGIN
  INSERT INTO public.p02_config_historial(solicitud,actor,entrada,antes,despues) VALUES(p_solicitud,p_actor,entrada,CASE WHEN anterior.categoria_id IS NOT NULL THEN to_jsonb(anterior) END,d);RETURN d;
 END;$f$;
 -- Función privada: solo se llama al crear un bien nuevo o confirmar su importación.
-CREATE FUNCTION public.p02_numerar_nuevo(p_actor text,p_equipo uuid,p_anio integer) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $f$
+CREATE FUNCTION public.p02_numerar_nuevo(p_actor text,p_equipo uuid,p_anio integer,p_revisar_maximo boolean) RETURNS boolean LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $f$
 DECLARE e public.equipos%ROWTYPE;p public.p02_prefijos%ROWTYPE;anio integer;aa integer;maximo integer;v_ultimo integer;numero text;antes jsonb;despues jsonb;
 BEGIN
  PERFORM public.rbac_exigir(p_actor,'equipos.registrar');PERFORM pg_advisory_xact_lock(1793577600000);PERFORM pg_advisory_xact_lock(1794268800000);PERFORM pg_advisory_xact_lock(1796918400000);
@@ -46,7 +46,9 @@ BEGIN
  SELECT * INTO p FROM public.p02_prefijos WHERE categoria_id=e.categoria_id AND activo AND EXISTS(SELECT 1 FROM public.categorias_bienes WHERE id=e.categoria_id AND activo) FOR SHARE;
  IF p.categoria_id IS NULL THEN RAISE EXCEPTION 'Configura el prefijo P02 de la categoría' USING ERRCODE='P4501';END IF;
  anio:=public.p02_anio_numeracion(e.datos_compra->>'fechaOrdenCompra',p_anio);aa:=anio%100;
+ IF p_revisar_maximo THEN
  SELECT COALESCE(max(right(v,4)::integer),0) INTO maximo FROM (SELECT upper(btrim(numero_inventario)) v FROM public.equipos UNION ALL SELECT upper(btrim(numero_inventario)) FROM public.celulares UNION ALL SELECT n.numero FROM public.numeracion_asignaciones n UNION ALL SELECT n.numero FROM public.p02_numeros n)x WHERE v ~ ('^'||p.prefijo||lpad(aa::text,2,'0')||'[0-9]{4}$');
+ ELSE maximo:=0;END IF;
  INSERT INTO public.numeracion_secuencias VALUES(p.prefijo,aa,maximo) ON CONFLICT(prefijo,anio2) DO UPDATE SET ultimo=GREATEST(numeracion_secuencias.ultimo,EXCLUDED.ultimo) RETURNING numeracion_secuencias.ultimo INTO v_ultimo;
  v_ultimo:=v_ultimo+1;IF v_ultimo>9999 THEN RAISE EXCEPTION 'Correlativo agotado' USING ERRCODE='P4303';END IF;
  numero:=p.prefijo||lpad(aa::text,2,'0')||lpad(v_ultimo::text,4,'0');antes:=to_jsonb(e);
@@ -55,6 +57,9 @@ BEGIN
  INSERT INTO public.p02_numeros(equipo_id,numero,prefijo,anio,correlativo,actor) VALUES(e.id,numero,p.prefijo,anio,v_ultimo,p_actor);
  INSERT INTO public.equipos_historial(equipo_id,actor,motivo,antes,despues) VALUES(e.id,p_actor,'Número P02 generado automáticamente al ingresar el bien',antes,despues);RETURN true;
 END;$f$;
+CREATE FUNCTION public.p02_numerar_nuevo(p_actor text,p_equipo uuid,p_anio integer) RETURNS boolean LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $f$
+ SELECT public.p02_numerar_nuevo(p_actor,p_equipo,p_anio,true);
+$f$;
 CREATE FUNCTION public.p02_proteger_numero() RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $f$
 BEGIN IF NEW.numero_inventario IS DISTINCT FROM OLD.numero_inventario AND EXISTS(SELECT 1 FROM public.p02_numeros WHERE equipo_id=OLD.id) THEN RAISE EXCEPTION 'El número generado es permanente' USING ERRCODE='P4502';END IF;RETURN NEW;END;$f$;
 CREATE TRIGGER p02_numero_permanente BEFORE UPDATE ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.p02_proteger_numero();
@@ -89,7 +94,7 @@ END;$f$;
 ALTER FUNCTION public.confirmar_importacion_excel(text,uuid) RENAME TO confirmar_importacion_excel_v44;
 REVOKE ALL ON FUNCTION public.confirmar_importacion_excel_v44(text,uuid) FROM PUBLIC,inventario_app;
 CREATE FUNCTION public.confirmar_importacion_excel(p_actor text,p_id uuid) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog,pg_temp AS $f$
-DECLARE r public.importaciones_excel%ROWTYPE;d jsonb;salida jsonb;unidades integer:=0;parte integer:=0;n integer;shas text[]:='{}';e record;numerados integer:=0;anio integer;
+DECLARE r public.importaciones_excel%ROWTYPE;d jsonb;salida jsonb;unidades integer:=0;parte integer:=0;n integer;shas text[]:='{}';e record;numerados integer:=0;anio integer;clave text;vistos text[]:='{}';
 BEGIN
  PERFORM pg_advisory_xact_lock(1793404800000);PERFORM pg_advisory_xact_lock(1793577600000);PERFORM pg_advisory_xact_lock(1794268800000);PERFORM pg_advisory_xact_lock(1794009600000);PERFORM pg_advisory_xact_lock(1796832000000);
  SELECT * INTO r FROM public.importaciones_excel WHERE id=p_id AND actor=p_actor FOR UPDATE;
@@ -102,8 +107,11 @@ BEGIN
  IF unidades>0 THEN parte:=parte+1;shas:=array_append(shas,encode(sha256(convert_to(r.sha256||r.tipo||r.hoja||r.id::text||parte::text,'UTF8')),'hex'));END IF;
  salida:=public.confirmar_importacion_excel_v44(p_actor,p_id);
  IF salida->>'repetida'='false' THEN
-  FOR e IN SELECT b.id FROM public.equipos b JOIN public.cargas_equipos c ON c.id=b.carga_id WHERE c.actor=p_actor AND c.sha256=ANY(shas) ORDER BY b.id LOOP
-   IF public.p02_numerar_nuevo(p_actor,e.id,anio) THEN numerados:=numerados+1;END IF;
+  -- Bajo los mismos bloqueos, contrastar el máximo global una vez por prefijo/año.
+  -- El contador transaccional incorpora todas las unidades siguientes del lote.
+  FOR e IN SELECT b.id,p.prefijo,b.datos_compra->>'fechaOrdenCompra' fecha FROM public.equipos b JOIN public.cargas_equipos c ON c.id=b.carga_id LEFT JOIN public.p02_prefijos p ON p.categoria_id=b.categoria_id WHERE c.actor=p_actor AND c.sha256=ANY(shas) AND NULLIF(btrim(b.numero_inventario),'') IS NULL ORDER BY b.id LOOP
+   clave:=COALESCE(e.prefijo,'')||':'||public.p02_anio_numeracion(e.fecha,anio)::text;
+   IF public.p02_numerar_nuevo(p_actor,e.id,anio,NOT clave=ANY(vistos)) THEN numerados:=numerados+1;vistos:=array_append(vistos,clave);END IF;
   END LOOP;
   salida:=salida||jsonb_build_object('numeradosP02',numerados);UPDATE public.importaciones_excel SET resultado=salida WHERE id=r.id;
  END IF;RETURN salida;
@@ -116,7 +124,7 @@ BEGIN
 END;$f$;
 REVOKE ALL ON FUNCTION public.p02_confirmar_importacion(text,uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.p02_confirmar_importacion(text,uuid) TO inventario_app;
-REVOKE ALL ON FUNCTION public.p02_anio_numeracion(text,integer),public.p02_numerar_nuevo(text,uuid,integer),public.p02_proteger_numero(),public.p02_validar_previa(jsonb,integer,jsonb) FROM PUBLIC,inventario_app;
+REVOKE ALL ON FUNCTION public.p02_anio_numeracion(text,integer),public.p02_numerar_nuevo(text,uuid,integer),public.p02_numerar_nuevo(text,uuid,integer,boolean),public.p02_proteger_numero(),public.p02_validar_previa(jsonb,integer,jsonb) FROM PUBLIC,inventario_app;
 REVOKE ALL ON FUNCTION public.p02_consultar_prefijos(text),public.p02_guardar_prefijo(text,uuid,uuid,integer,text,boolean),public.p02_registrar_equipo(text,uuid,jsonb,integer),public.p02_preparar_importacion(text,text,text,text,jsonb,integer,jsonb),public.confirmar_importacion_excel(text,uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.p02_consultar_prefijos(text),public.p02_guardar_prefijo(text,uuid,uuid,integer,text,boolean),public.p02_registrar_equipo(text,uuid,jsonb,integer),public.p02_preparar_importacion(text,text,text,text,jsonb,integer,jsonb),public.confirmar_importacion_excel(text,uuid) TO inventario_app;
 `);
