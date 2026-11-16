@@ -1,5 +1,9 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ p02_prefijos:{modulo:'Inventario P02',uso:'Prefijos independientes de Nivel Central; vigencia y versión para altas automáticas.',fuentes:['migrations/1797091200000_p02-ingreso-automatico.cjs']},
+ p02_numeros:{modulo:'Inventario P02',uso:'Número automático permanente, año confirmado u OC, correlativo y autor por bien nuevo.',fuentes:['migrations/1797091200000_p02-ingreso-automatico.cjs']},
+ p02_registros:{modulo:'Inventario P02',uso:'Solicitudes idempotentes de alta individual para evitar duplicación por reintentos.',fuentes:['migrations/1797091200000_p02-ingreso-automatico.cjs']},
+ p02_config_historial:{modulo:'Inventario P02',uso:'Cambios auditados de prefijos con valores anteriores/posteriores y autor.',fuentes:['migrations/1797091200000_p02-ingreso-automatico.cjs']},
  numeracion_categorias:{modulo:'Identificación',uso:'Prefijos configurables por categoría, con vigencia y versión.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
  numeracion_secuencias:{modulo:'Identificación',uso:'Último correlativo por prefijo y año de OC; nunca reiniciar por reintentos.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
  numeracion_lotes:{modulo:'Identificación',uso:'Solicitudes idempotentes de numeración con actor y resultado.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},

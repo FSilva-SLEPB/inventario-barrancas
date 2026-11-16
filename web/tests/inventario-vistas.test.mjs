@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { SourceTextModule, SyntheticModule } from "node:vm";
 import test from "node:test";
+import {randomUUID} from "node:crypto";
 import React from "react";
 import * as jsx from "react/jsx-runtime";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -18,6 +19,7 @@ async function pagina(parametros = {}, local = false, equipos = [], total = equi
   let consulta;
   const modulos = new Map();
   const dobles = {
+    "node:crypto": {randomUUID},
     "react": React,
     "react/jsx-runtime": jsx,
     "next/link": { default: ({ children, ...props }) => React.createElement("a", props, children) },
@@ -190,7 +192,7 @@ test("las consultas de inventario ya no incluyen formularios de registro o carga
     const { html } = await pagina({}, false, [], 0, ruta, "administrador");
     assert.ok(!html.includes('id="nuevo-equipo"'));
     assert.ok(!html.includes('id="carga-masiva"'));
-    assert.ok(html.includes('/inventario/registro?volver='));
+    assert.ok(html.includes(ruta==='p02'?'/inventario/p02/registro?volver=':'/inventario/registro?volver='));
   }
 });
 

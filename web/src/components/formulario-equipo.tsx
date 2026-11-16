@@ -8,8 +8,8 @@ import { CAMPOS_COMPRA,valoresEquipo,type ValoresEquipo,type EstadoEquipo } from
 import type { Sede } from "@/lib/validacion-sedes";
 import type { CategoriaBien } from "@/lib/catalogos";
 import { etiquetaSede } from "@/lib/etiqueta-sede";
-export default function FormularioEquipo({inicial,sedes,categorias,local=false,volver,estadoAdministrativo='activo'}:{
-  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;volver?:string;estadoAdministrativo?:string;
+export default function FormularioEquipo({inicial,sedes,categorias,local=false,volver,estadoAdministrativo='activo',p02=false,solicitudRegistro=''}:{
+  inicial?:ValoresEquipo;sedes:Sede[];categorias:CategoriaBien[];local?:boolean;volver?:string;estadoAdministrativo?:string;p02?:boolean;solicitudRegistro?:string;
 }) {
   const valores=inicial??{...valoresEquipo(),origen:"otro",sedeId:local?sedes[0]?.id??"":""};
   const base:EstadoEquipo={resultado:"inicial",mensaje:"",valores,errores:{},revision:"inicial"};
@@ -47,8 +47,9 @@ export default function FormularioEquipo({inicial,sedes,categorias,local=false,v
       <div className="campo-catalogos"><label htmlFor="equipo-observaciones">Observaciones{!identificacion.serie.trim()?" *":""}</label>
         <textarea id="equipo-observaciones" name="observaciones" required={!identificacion.serie.trim()} maxLength={2000} defaultValue={v.observaciones}/>
         <p className="error-catalogos">{estado.errores.observaciones}</p></div>
+      {p02&&!v.id&&<><input type="hidden" name="solicitudRegistro" value={solicitudRegistro}/>{!identificacion.inventario.trim()&&<><div className="campo-catalogos"><label htmlFor="p02-registro-anio">Año de numeración *</label><input type="number" id="p02-registro-anio" name="anioNumeracion" min="1900" max="2099" required defaultValue={estado.anioNumeracion??''}/><p className="ayuda-catalogos">Año de OC si se conoce; en su ausencia, confirma el año de numeración. No se creará una fecha de compra.</p></div><label><input type="checkbox" name="confirmarAnio" value="si" required defaultChecked={estado.confirmarAnio??false}/> Confirmo el año para generar el número automáticamente al guardar.</label></>}<p className="ayuda-catalogos">Los números anteriores se conservan. Si dejas el número vacío, se genera con el prefijo P02 de la categoría.</p></>}
       {v.id ? campo("motivoCambio","Descripción breve del cambio",true,500):<input type="hidden" name="motivoCambio" value=""/>}
-      <p className="ayuda-catalogos">Si no informas el número de serie, explica el motivo en Observaciones. El número de inventario puede incorporarse después.</p><p>* Estos datos son obligatorios.</p>
+      <p className="ayuda-catalogos">Si no informas el número de serie, explica el motivo en Observaciones. {p02&&!v.id?'El número faltante se genera automáticamente al guardar.':'El número de inventario puede incorporarse después.'}</p><p>* Estos datos son obligatorios.</p>
       <button type="submit" className="boton-catalogos" disabled={pendiente}>{pendiente?"Guardando…":v.id?"Guardar cambios":"Registrar equipo"}</button>
     </fieldset>
     <p role={estado.resultado==="error"?"alert":"status"}>{estado.mensaje}</p>

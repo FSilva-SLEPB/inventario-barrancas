@@ -5,8 +5,8 @@ import FormularioEquipo from "@/components/formulario-equipo";
 import type { Sede } from "@/lib/validacion-sedes";
 import type { CategoriaBien } from "@/lib/catalogos";
 
-export default function RegistroEquipos({ sedes, categorias, local, volver }: {
-  sedes: Sede[]; categorias: CategoriaBien[]; local: boolean; volver?:string;
+export default function RegistroEquipos({ sedes, categorias, local, volver,solicitudRegistro }: {
+  sedes: Sede[]; categorias: CategoriaBien[]; local: boolean; volver?:string;solicitudRegistro?:string;
 }) {
   const [destino, setDestino] = useState(local ? "eeji" : "");
   const disponibles = sedes.filter(s => destino === "nc" ? s.tipo === "nivel_central" : s.tipo !== "nivel_central");
@@ -22,7 +22,7 @@ export default function RegistroEquipos({ sedes, categorias, local, volver }: {
     </div>}
     {!destino ? <p className="ayuda-catalogos">Selecciona el inventario de destino para completar los datos del equipo.</p>
       : disponibles.some(s => s.activo) && categorias.some(c => c.activo)
-        ? <FormularioEquipo key={destino} sedes={disponibles} categorias={categorias} local={local} volver={volver} />
+        ? <FormularioEquipo key={destino} sedes={disponibles} categorias={categorias} local={local} volver={volver} p02={destino==='eeji'} solicitudRegistro={solicitudRegistro} />
         : <p role="status">Se requiere una sede de destino y una categoría activas en los mantenedores.</p>}
   </section>;
 }
