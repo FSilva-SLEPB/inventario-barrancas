@@ -324,6 +324,19 @@ erDiagram
     text creado_por
     timestamp_with_time_zone creado_en
   }
+  importaciones_excel {
+    uuid id PK
+    text actor FK
+    text archivo
+    text sha256
+    text tipo
+    text hoja
+    jsonb datos
+    timestamp_with_time_zone creado_en
+    timestamp_with_time_zone vence_en
+    timestamp_with_time_zone confirmado_en
+    jsonb resultado
+  }
   incidentes_robos {
     uuid id PK
     uuid sede_id FK
@@ -645,6 +658,7 @@ erDiagram
   funcionarios_nc ||--o{ fotografias_funcionarios : "funcionario_id"
   sedes ||--o{ fotografias_sedes : "sede_id"
   funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
+  usuarios_acceso ||--o{ importaciones_excel : "actor"
   sedes ||--o{ incidentes_robos : "sede_id"
   equipos ||--o{ incidentes_robos_equipos : "equipo_id"
   incidentes_robos ||--o{ incidentes_robos_equipos : "incidente_id"
