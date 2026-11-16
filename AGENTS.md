@@ -138,3 +138,16 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   no equivale a impresión física; confirmación manual y PDF original conservado.
   Solo UTIC global numera; las etiquetas respetan permisos dinámicos y alcance.
   Ver docs/numeracion-etiquetas-qr.md. No fusionar ni desplegar automáticamente.
+
+- Directorio NC, confirmado el 16/11: consulta interna con nombre, subdirección,
+  unidad, cargo, correo y miniatura; sin edición ni campos personales adicionales.
+  Permiso directorio_nc.consultar más pertenencia comprobada en servidor/SQL:
+  UTIC global o cuenta propia vinculada a ficha NC activa y mismo correo. No
+  extender por alcance global ni a EE/JI/Auditor automáticamente. Última foto
+  privada, carga por UTIC, ficha compacta y responsive. Ver docs/directorio-nc-y-navegacion.md.
+- Agrupar entregas, devoluciones y préstamos; quitar vínculos manuales del menú
+  rutinario y consultar antecedentes en historial de asignaciones. La asignación
+  NC con ficha válida debe reflejarse automáticamente también en cambios de varios
+  bienes; movimiento, vínculo y PDF atómicos. Motivo inicial automático; las
+  ediciones y decisiones auditadas conservan su motivo. No importar Excel real
+  automáticamente al instalar cambios de interfaz.

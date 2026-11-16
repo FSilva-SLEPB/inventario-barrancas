@@ -1,6 +1,6 @@
 import {PERMISOS_ANTERIORES} from '@/lib/rbac-anteriores';
 export type AlcanceRbac='global'|'sede'|'propios';
-export type AutorizacionRbac={permisos:readonly string[];alcance:AlcanceRbac;perfilId:string|null;perfilNombre:string;clasePerfil:string;revisionAcceso:string};
+export type AutorizacionRbac={permisos:readonly string[];alcance:AlcanceRbac;perfilId:string|null;perfilNombre:string;clasePerfil:string;revisionAcceso:string;directorioNC?:boolean};
 export function tienePermiso(actor:unknown,recurso:string,accion='consultar'):boolean{
  if(!actor||typeof actor!=='object')return false;
  const a=actor as Partial<AutorizacionRbac>&{rol?:string};if(!Array.isArray(a.permisos)&&a.rol)return (PERMISOS_ANTERIORES[a.rol]??[]).includes(recurso+'.'+accion);return Array.isArray(a.permisos)&&a.permisos.includes(recurso+'.'+accion);

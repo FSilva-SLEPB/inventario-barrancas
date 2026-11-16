@@ -26,6 +26,13 @@ export async function registrarOperacion(_anterior:EstadoMovimiento,f:FormData):
   const r=(await db.query<{r:{repetida:boolean}}>('SELECT public.mover_operacion_acceso($1,$2,$3::jsonb) AS r',[actor.email,p.solicitud,JSON.stringify(p.datos)])).rows[0].r;
   if(!r.repetida&&(await db.query<{tipo:string}>('SELECT tipo FROM public.sedes WHERE id=$1',[p.datos.destino])).rows[0]?.tipo==='nivel_central'&&!valores.funcionario)throw Object.assign(new Error('Selecciona funcionario o persona manual'),{code:'22023'});
   if(valores.funcionario&&!r.repetida)await db.query('SELECT public.validar_receptor_nc_acceso($1,$2::uuid,$3::uuid)',[actor.email,valores.funcionario==='manual'?null:valores.funcionario,p.datos.destino]);
+  if(valores.funcionario&&valores.funcionario!=='manual'&&!r.repetida){
+   for(const linea of p.datos.entregas){
+    const tabla=p.datos.clase==='equipo'?'equipos':'celulares';
+    const bien=(await db.query<{version:number;sedeTipo:string}>(`SELECT b.version,s.tipo AS "sedeTipo" FROM public.${tabla} b JOIN public.sedes s ON s.id=b.sede_id WHERE b.id=$1`,[linea.id])).rows[0];
+    if(bien?.sedeTipo==='nivel_central')await db.query('SELECT public.rbac_vincular_asignacion($1,$2,$3,$4,$5,$6,$7,$8)',[actor.email,linea.movimientoId,p.datos.clase,linea.id,bien.version,valores.funcionario,linea.movimientoId,'Asignación confirmada a funcionario en '+p.datos.tipo]);
+   }
+  }
   await completarActaEnTransaccion(db,actor.email,valores.actaSolicitud,p.solicitud,metadata,'operacion');await db.query('COMMIT');
  }catch(e){if(db)await db.query('ROLLBACK').catch(()=>{});const mensajes:Record<string,string>={P3002:'El registro está dado de baja y es de solo lectura.',P3003:'El estado administrativo o la condición no permiten entregar, prestar ni traspasar este bien.',P2901:'Revisa la procedencia y la ruta. Nivel Central requiere Bodega TI; entre sedes educativas se admite entrega directa. En un cambio, los devueltos pertenecen a la sede receptora.',P2601:'Un bien cambió o la solicitud fue utilizada. Reabre la operación para revisar las versiones.',P2602:'El estado de un bien cambió. Devuelve primero los bienes de Nivel Central a Bodega TI.',P2604:'Un bien o una sede ya no están disponibles.',P2605:'Hay un incidente de robo abierto; registra su recuperación antes de mover el bien.',P2701:'El acta ya existe o la solicitud fue utilizada con otros datos.',P2802:'Devuelve el préstamo antes de otra operación.','42501':'Solo UTIC puede confirmar operaciones.','22023':'Revisa las selecciones, participantes y fecha de la operación.'};return error(mensajes[(e as {code?:string}).code??'']??'No se guardó la operación ni el acta. No quedaron cambios parciales.');
  }finally{db?.release();}

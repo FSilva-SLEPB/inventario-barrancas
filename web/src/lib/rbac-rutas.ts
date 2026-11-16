@@ -7,6 +7,7 @@ export const RUTAS_RBAC:Record<string,string>={
  '/inventario/celulares':'celulares.consultar','/inventario/bodega-ti':'bodega.consultar','/inventario/movimientos':'movimientos.consultar','/inventario/prestamos':'prestamos.consultar','/inventario/actas':'actas.consultar','/inventario/incidentes':'incidentes.consultar','/inventario/robos':'incidentes.consultar',
  '/mantenedores/asignaciones':'funcionarios.editar',
  '/mantenedores/usuarios':'usuarios_operativos.consultar','/mantenedores/perfiles':'perfiles.consultar','/mantenedores/funcionarios':'funcionarios.consultar','/mantenedores/categorias':'categorias.consultar','/mantenedores/sedes':'sedes.consultar','/mantenedores/dependencias':'dependencias.consultar','/mantenedores/insumos':'catalogo_insumos.consultar',
+ '/directorio/funcionarios':'directorio_nc.consultar',
  '/directorio/establecimientos':'directorio_institucional.consultar','/directorio/jardines':'directorio_institucional.consultar','/directorio/directores':'directorio_personas.consultar','/directorio/directoras':'directorio_personas.consultar','/directorio/cargar':'directorio_institucional.registrar',
  '/insumos/solicitud':'solicitudes_insumos.registrar','/insumos/seguimiento':'seguimiento_insumos.consultar','/insumos/historial':'historial_insumos.consultar',
  '/mi-cuenta':'mis_datos.consultar','/mi-inventario':'mis_asignaciones.consultar','/correcciones':'correcciones.consultar','/directorio-autorizado':'directorio_autorizado.consultar',
