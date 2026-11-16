@@ -148,3 +148,26 @@ html[data-contraste="alto"] .estado-custodia{background:#111;color:#fff;border-c
 .tabla-contenedor,.tabla-usuarios-contenedor{overscroll-behavior-inline:contain;scrollbar-gutter:stable;touch-action:pan-x pan-y;}
 .acciones-registro .accion-icono svg{width:1rem;height:1rem;}
 @media(pointer:coarse){.acciones-registro{width:9rem;}.acciones-registro .accion-icono.btn{width:2.75rem;height:2.75rem;min-width:2.75rem;min-height:2.75rem;flex-basis:2.75rem;}}
+
+/* Fotografía personal compacta: el original permanece privado y sin recortes. */
+.foto-funcionario{width:min(100%,18rem);justify-self:start;align-self:start}
+.foto-funcionario .foto-establecimiento-imagen{aspect-ratio:auto;max-height:15rem;height:auto;min-height:0;object-fit:contain}
+.foto-funcionario .foto-establecimiento-vacia{aspect-ratio:auto;min-height:7rem;max-height:9rem}
+.directorio-foto{display:block;width:3rem;height:3rem;object-fit:cover;border-radius:50%;background:var(--color-fondo-suave);flex-shrink:0}
+.directorio-foto-vacia{display:grid;place-items:center;color:var(--color-parrafo)}
+.sesion-institucional{font-family:Arial,Helvetica,sans-serif;font-size:.875rem}
+.sesion-institucional .sesion-etiqueta{font-size:.8rem;text-transform:none;letter-spacing:normal;font-weight:400}
+.sesion-institucional .sesion-correo{font-size:.875rem;font-weight:600}
+.sesion-institucional .sesion-perfil,.sesion-institucional .sesion-sede{font-size:.8rem}
+.menu-acciones{position:relative;display:inline-block;max-width:100%}
+.menu-acciones>summary{list-style:none;cursor:pointer;white-space:normal}
+.menu-acciones>summary::-webkit-details-marker{display:none}
+.menu-acciones[open]>summary{margin-bottom:.5rem}
+.menu-acciones-contenido{display:flex;flex-direction:column;gap:.5rem;align-items:stretch;padding:.75rem;border:1px solid var(--color-borde-suave);border-radius:.75rem;background:var(--color-superficie);max-width:100%}
+.grupos-inventario{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,24rem),1fr));gap:1rem}
+.grupo-inventario{border:1px solid var(--color-borde-suave);border-radius:1rem;padding:1.25rem;min-width:0}
+.grupo-inventario h2{font-size:1.2rem}.grupo-inventario h3{font-size:1rem;margin-top:1rem}
+.grupo-inventario ul{padding-left:1.25rem}.grupo-inventario li{margin:.6rem 0}
+.submenu-grupo{display:block;padding:.7rem .75rem .2rem;font-size:.8rem;color:var(--color-parrafo)}
+
+.tabla-directorio-nc{min-width:60rem;table-layout:auto}.tabla-directorio-nc th,.tabla-directorio-nc td{overflow-wrap:normal;word-break:normal}.tabla-directorio-nc th:first-child{width:6rem}.tabla-historial-asignaciones{min-width:64rem}

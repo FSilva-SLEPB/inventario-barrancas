@@ -10,7 +10,7 @@ async function consultarAcceso(correo: string) {
   const { rows } = await obtenerBaseDatos().query<{
     autorizacion?:import('@/lib/rbac').AutorizacionRbac & {funcionarioId:string|null};rol: unknown; sedeId: string | null; sedeNombre: string | null; sedeRbd: string | null;
   }>(
-    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre", s.rbd AS "sedeRbd",public.rbac_contexto(u.correo) AS autorizacion
+    `SELECT u.rol, u.sede_id AS "sedeId", s.nombre AS "sedeNombre", s.rbd AS "sedeRbd",public.rbac_contexto(u.correo) || jsonb_build_object('directorioNC',public.directorio_nc_permitido(u.correo)) AS autorizacion
      FROM public.usuarios_acceso u LEFT JOIN public.sedes s ON s.id=u.sede_id
      WHERE u.correo=$1 AND public.rbac_contexto(u.correo) IS NOT NULL`,
     [correo],

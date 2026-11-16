@@ -28,7 +28,7 @@ export async function exigirAcceso(ambito:'general'|'insumos'='general') {
   }
   if(esAutorizacionRbac(acceso)){
    const ruta=(await (await import('next/headers')).headers()).get('x-inventario-ruta')??'',permiso=permisoRuta(ruta);
-   const familias:Record<string,string[]>={'/inventario':['equipos','celulares','bodega','actas','prestamos','incidentes'],'/insumos':['solicitudes_insumos','seguimiento_insumos','historial_insumos'],'/directorio':['directorio_institucional','directorio_personas'],'/mantenedores':['usuarios_operativos','perfiles','funcionarios','categorias','sedes','dependencias','catalogo_insumos']};
+   const familias:Record<string,string[]>={'/inventario':['equipos','celulares','bodega','actas','prestamos','incidentes'],'/insumos':['solicitudes_insumos','seguimiento_insumos','historial_insumos'],'/directorio':['directorio_institucional','directorio_personas','directorio_nc'],'/mantenedores':['usuarios_operativos','perfiles','funcionarios','categorias','sedes','dependencias','catalogo_insumos']};
    if(familias[ruta]&&!familias[ruta].some(r=>tienePermiso(acceso,r)||tienePermiso(acceso,r,'registrar')))redirect('/sin-permiso');
    const acta=ruta.startsWith('/inventario/actas/');
    if(permiso&&!acceso.permisos.includes(permiso)&&!(acta&&tienePermiso(acceso,'actas_insumos')))redirect('/sin-permiso');

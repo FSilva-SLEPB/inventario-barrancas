@@ -278,6 +278,13 @@
         "imprimir",
         "descargar"
       ]
+    },
+    {
+      "codigo": "directorio_nc",
+      "nombre": "Directorio de funcionarios de Nivel Central",
+      "acciones": [
+        "consultar"
+      ]
     }
   ],
   "perfiles": [
@@ -327,6 +334,7 @@
         "directorio_institucional.consultar",
         "directorio_institucional.editar",
         "directorio_institucional.registrar",
+        "directorio_nc.consultar",
         "directorio_personas.consultar",
         "directorio_personas.editar",
         "directorio_personas.registrar",
@@ -422,6 +430,7 @@
         "directorio_institucional.consultar",
         "directorio_institucional.editar",
         "directorio_institucional.registrar",
+        "directorio_nc.consultar",
         "directorio_personas.consultar",
         "directorio_personas.editar",
         "directorio_personas.registrar",
@@ -598,6 +607,7 @@
         "correcciones.registrar",
         "directorio_autorizado.consultar",
         "directorio_autorizado.descargar",
+        "directorio_nc.consultar",
         "mis_asignaciones.consultar",
         "mis_asignaciones.descargar",
         "mis_datos.consultar"
@@ -675,6 +685,7 @@
       "directorio_institucional.consultar",
       "directorio_institucional.editar",
       "directorio_institucional.registrar",
+      "directorio_nc.consultar",
       "directorio_personas.consultar",
       "directorio_personas.editar",
       "directorio_personas.registrar",
@@ -762,6 +773,7 @@
       "directorio_institucional.consultar",
       "directorio_institucional.editar",
       "directorio_institucional.registrar",
+      "directorio_nc.consultar",
       "directorio_personas.consultar",
       "directorio_personas.editar",
       "directorio_personas.registrar",

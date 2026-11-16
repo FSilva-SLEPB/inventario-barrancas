@@ -13,7 +13,7 @@ export async function guardarCelular(_anterior:EstadoCelular,f:FormData):Promise
  const actor=await exigirAlguno('celulares.registrar','celulares.editar'),revision=randomUUID(),crudos:Record<string,unknown>={},valores=celularVacio();
  for(const k of CAMPOS_CELULAR){crudos[k]=f.get(k);valores[k]=typeof crudos[k]==='string'?crudos[k].slice(0,2500):'';}
  crudos.activo=f.get('activo')==='si'?true:f.get('activo')==='no'?false:null;valores.activo=crudos.activo===true;
- const id=f.get('id'),version=Number(f.get('version')),motivo=f.get('motivo'),filtros=f.get('filtros');
+ const id=f.get('id'),version=Number(f.get('version')),motivo=version===0?'Registro inicial':f.get('motivo'),filtros=f.get('filtros');
  const fallo=(mensaje:string):EstadoCelular=>({estado:'error',mensaje,valores,custodiaInicial:f.get('custodiaInicial')==='asignado'?'asignado':'en_bodega',id:typeof id==='string'&&esIdSede(id)?id:randomUUID(),version:Number.isInteger(version)&&version>=0?version:0,revision,motivo:typeof motivo==='string'?motivo.slice(0,500):''});
  const permitidos=['id','version','motivo','filtros','activo',...CAMPOS_CELULAR];
  const destinos=f.getAll('volver'),volver=destinos.length===1&&typeof destinos[0]==='string'?retornoMovimiento(destinos[0]):null;if(destinos.length>1||destinos.length&&!volver)return fallo('El regreso a la consulta no es válido.');

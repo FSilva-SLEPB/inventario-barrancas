@@ -1,3 +1,5 @@
+import MenuAcciones from '@/components/menu-acciones';
+import {puedeImportarExcel} from '@/lib/importacion-excel/permisos';
 import {puedeNumerar} from '@/lib/identificacion/acceso';
 import ExportarInventario from '@/components/exportar-inventario';
 import {tienePermiso} from '@/lib/rbac';
@@ -59,16 +61,15 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
 
   return <main className={styles.inventario}>
     <div className={styles.cabecera}>
-      <div><p className={styles.etiqueta}>Gestión de inventario</p><h1>{titulo}</h1>
+      <div><h1>{titulo}</h1>
         <p className={styles.descripcion}>{bodega ? "Equipos pendientes de entrega a establecimientos, jardines infantiles y salas cunas" : local ? "Inventario de mi sede" : ambito === "nc" ? "Equipos de Nivel Central" : "Establecimientos educacionales, jardines infantiles y salas cunas"}</p>
       </div>
       <div className={styles.herramientas}>
-        <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
-        <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
-        {tienePermiso(actor,'equipos','registrar') && <Link className="btn btn-outline-primary btn-sm" href={'/inventario/registro?volver='+encodeURIComponent(volver)}>Registrar equipo</Link>}
-        {puedeNumerar(actor)&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/numeracion?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Generar números</Link>}
-        {tienePermiso(actor,'etiquetas_inventario')&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/etiquetas?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Etiquetas QR</Link>}
+        <Link href="/inventario">Volver a Inventario</Link>
+        {tienePermiso(actor,'equipos','registrar')&&<MenuAcciones titulo="Ingresar bienes"><Link className="btn btn-outline-primary btn-sm" href={'/inventario/registro?volver='+encodeURIComponent(volver)}>Registrar equipo</Link>{puedeImportarExcel(actor,'central')&&<Link className="btn btn-outline-primary btn-sm" href="/inventario/importar-excel">Importar Excel (.xlsx)</Link>}</MenuAcciones>}
         {!bodega&&<ExportarInventario integrado recurso="equipos" filtros={{...Object.fromEntries(new URL(volver,'http://local').searchParams),ambito}}/>}
+        {(puedeNumerar(actor)||tienePermiso(actor,'etiquetas_inventario'))&&<MenuAcciones titulo="Numeración y etiquetas">{puedeNumerar(actor)&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/numeracion?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Generar números</Link>}{tienePermiso(actor,'etiquetas_inventario')&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/etiquetas?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Etiquetas QR</Link>}</MenuAcciones>}
+
       </div>
     </div>
     {vista === "pendientes" && <p className={styles.aviso}>Estos equipos están en Bodega TI. La sede indica su referencia de destino o procedencia; UTIC confirma su asignación.</p>}
