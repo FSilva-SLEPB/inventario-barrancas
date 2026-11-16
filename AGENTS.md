@@ -151,3 +151,12 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   bienes; movimiento, vínculo y PDF atómicos. Motivo inicial automático; las
   ediciones y decisiones auditadas conservan su motivo. No importar Excel real
   automáticamente al instalar cambios de interfaz.
+
+- P02, regla aprobada después de PR80: ingreso individual y Excel propios;
+  numerar automáticamente solo los bienes nuevos sin número. Mantener prefijo +
+  AA de OC + cuatro dígitos. Sin OC/año se confirma expresamente año por registro
+  o lote; no inferir fecha ni año actual. Conservar números existentes. Prefijos
+  P02 independientes en Mantenedores, contador global compartido para evitar
+  colisiones, número permanente e idempotencia. La migración no importa archivos
+  reales ni crea entregas/actas. NC conserva su flujo. QR diferenciado y entregas
+  por lotes siguen en etapas posteriores. Ver docs/p02-ingreso-automatico.md.

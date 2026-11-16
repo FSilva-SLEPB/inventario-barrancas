@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import {puedeImportarExcel} from '@/lib/importacion-excel/permisos';
 import ModalFicha from '@/components/modal-ficha';
 import {retornoInventario} from '@/lib/ficha-inventario';
@@ -20,7 +21,7 @@ export default async function Registro({searchParams}:{searchParams:Promise<Reco
       <p className="descripcion-pagina">Registra equipos en su inventario de destino. Cada ingreso conserva su identidad y su historial.</p>
     </header>
     <div className="acciones-catalogos"><Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link></div>
-    {p.carga!=='1'&&<ModalFicha titulo="Registrar equipo" cerrarHref={volver} editando><RegistroEquipos sedes={sedes} categorias={categorias} local={requiereSede(actor)} volver={volver}/></ModalFicha>}
+    {p.carga!=='1'&&<ModalFicha titulo="Registrar equipo" cerrarHref={volver} editando><RegistroEquipos solicitudRegistro={randomUUID()} sedes={sedes} categorias={categorias} local={requiereSede(actor)} volver={volver}/></ModalFicha>}
     {p.carga==='1'&&puedeAdministrar(actor) && <section className="panel-catalogos registro-carga" id="carga-masiva" aria-labelledby="carga-masiva-titulo">
       <h2 id="carga-masiva-titulo">Carga masiva de equipos</h2>
       {puedeImportarExcel(actor,'central')&&<p><Link className="btn btn-primary" href="/inventario/importar-excel">Importar Excel (.xlsx)</Link></p>}

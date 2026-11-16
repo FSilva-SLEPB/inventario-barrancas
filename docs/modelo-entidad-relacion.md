@@ -347,6 +347,7 @@ erDiagram
     timestamp_with_time_zone vence_en
     timestamp_with_time_zone confirmado_en
     jsonb resultado
+    jsonb p02_numeracion
   }
   incidentes_robos {
     uuid id PK
@@ -473,6 +474,36 @@ erDiagram
     uuid operacion_id FK
     uuid movimiento_id PK, FK
     text grupo
+  }
+  p02_config_historial {
+    uuid solicitud PK
+    text actor FK
+    jsonb entrada
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
+  p02_numeros {
+    uuid equipo_id PK, FK
+    text numero
+    text prefijo
+    integer anio
+    integer correlativo
+    text actor FK
+    timestamp_with_time_zone registrado_en
+  }
+  p02_prefijos {
+    uuid categoria_id PK, FK
+    text prefijo
+    boolean activo
+    integer version
+  }
+  p02_registros {
+    uuid solicitud PK
+    text actor FK
+    jsonb entrada
+    uuid equipo_id FK
+    timestamp_with_time_zone registrado_en
   }
   prestamos_inventario {
     uuid id PK, FK
@@ -728,6 +759,12 @@ erDiagram
   sedes ||--o{ operaciones_inventario : "origen_sede_id"
   movimientos_inventario ||--o| operaciones_inventario_detalle : "movimiento_id"
   operaciones_inventario ||--o{ operaciones_inventario_detalle : "operacion_id"
+  usuarios_acceso ||--o{ p02_config_historial : "actor"
+  usuarios_acceso ||--o{ p02_numeros : "actor"
+  equipos ||--o| p02_numeros : "equipo_id"
+  categorias_bienes ||--o| p02_prefijos : "categoria_id"
+  usuarios_acceso ||--o{ p02_registros : "actor"
+  equipos ||--o{ p02_registros : "equipo_id"
   celulares |o--o{ prestamos_inventario : "celular_id"
   sedes ||--o{ prestamos_inventario : "destino_sede_id"
   equipos |o--o{ prestamos_inventario : "equipo_id"
@@ -764,13 +801,16 @@ erDiagram
 | actas_contador | Actas | Secuencia única de folios, comenzando en 0; imprimir y reenviar no consumen otro número. |
 | actas_documentos | Actas | Acta de movimiento, entrega histórica u operación compuesta (una sola fuente), con folio, datos de la emisión y PDF conservado con su huella SHA-256. |
 | actas_envios | Actas | Intentos y resultados de envío por correo del mismo PDF, con destinatarios, actor e idempotencia. |
+| asignaciones_funcionarios | Acceso | Vínculos explícitos del equipamiento con su funcionario; vigencia e historial. |
 | cambios_estados_activo | Estados del activo | Transiciones administrativas y de condición confirmadas por UTIC, con solicitud idempotente, versión e instantáneas inmutables. |
 | cargas_equipos | Equipos | Origen e idempotencia de las cargas masivas de inventario. |
 | catalogo_insumos | Insumos | Catálogo de insumos solicitables (código, nombre, categoría, unidad, foto y vigencia). |
 | categorias_bienes | Catálogos | Categorías que clasifican los bienes y equipos. |
 | categorias_insumos_codigos | Insumos | Prefijos únicos y correlativos por categoría para códigos automáticos de productos nuevos. |
 | celulares | Celulares | Inventario dedicado de celulares, un teléfono por equipo, sede, identificación, funcionamiento y vigencia. |
+| celulares_contacto_cambios | Celulares | Clasificación de uso institucional/director con actor, antes/después e idempotencia. |
 | celulares_historial | Celulares | Cambios de datos, número, sede y vigencia del celular con actor, motivo e instantáneas históricas. |
+| correcciones_personales | Acceso | Solicitud de corrección propia y resolución autorizada con versión. |
 | dependencias | Catálogos | Ubicaciones internas de una sede. Todavía no hay una FK desde equipos a dependencias. |
 | directorio_cargas | Directorio | Registro del hash de cada listado cargado para evitar duplicar cambios. |
 | directorio_historial | Directorio | Cambios de responsable y datos del establecimiento; conserva las personas anteriores. |
@@ -782,20 +822,42 @@ erDiagram
 | entregas_lotes | Entregas | Agrupa una operación de entrega y evita repetirla al reintentar. |
 | equipos | Equipos | Identidad estable del bien, sede, categoría, funcionamiento, custodia en Bodega TI/asignado/en préstamo y situación de entrega. |
 | equipos_historial | Equipos | Ingresos, ediciones, entregas e incidentes con datos anteriores y posteriores. |
+| etiquetas_lotes | Identificación | PDFs privados de etiquetas con datos congelados y confirmación manual de impresión. |
+| fotografias_funcionarios | Funcionarios | Fotografías privadas versionadas, consultables en su ficha y en Inicio propio. |
+| fotografias_sedes | Sedes | Fotografías de establecimientos y jardines, versiones persistentes con autor y permisos por sede. |
 | funcionarios_nc | Nivel Central | Ficha administrativa de funcionarios NC, unidad, contacto y vigencia; separada del acceso al sistema. |
 | funcionarios_nc_historial | Nivel Central | Cambios de la ficha del funcionario con actor, motivo y datos anteriores/posteriores. |
-| fotografias_sedes | Sedes | Fotografías de establecimientos y jardines, versiones persistentes con autor y permisos por sede. |
 | imagenes_insumos | Insumos | Fotografías de catálogo persistidas en PostgreSQL, con tipo, bytes y autor; incluidas en los respaldos. |
+| importaciones_excel | Cargas | Vistas previas privadas con vencimiento y registro idempotente de importación Excel; sin almacenar el libro original. |
 | incidentes_robos | Robos | Reporte de robo por sede, antecedentes, validación y estado. |
 | incidentes_robos_equipos | Robos | Equipos afectados y recuperación individual dentro de un incidente. |
 | incidentes_robos_historial | Robos | Reporte, revisión y recuperación con usuario, fecha y motivo. |
 | ingresos_insumos | Insumos | Compras por producto, cantidad, OC y fecha con instantánea; conserva saldos anteriores sin inventar documentos. |
 | insumos_historial | Insumos | Historial de catálogo, fotos e ingresos de stock con actor, solicitud idempotente e instantáneas. |
 | movimientos_inventario | Movimientos | Asignaciones, devoluciones, préstamos y traspasos directos de equipos y celulares, con fecha, receptor, idempotencia e instantáneas. |
+| numeracion_asignaciones | Identificación | Números permanentes emitidos, equipo, año OC y correlativo. |
+| numeracion_categorias | Identificación | Prefijos configurables por categoría, con vigencia y versión. |
+| numeracion_config_historial | Identificación | Auditoría anterior/posterior de prefijos y solicitudes. |
+| numeracion_lotes | Identificación | Solicitudes idempotentes de numeración con actor y resultado. |
+| numeracion_secuencias | Identificación | Último correlativo por prefijo y año de OC; nunca reiniciar por reintentos. |
 | operaciones_inventario | Movimientos | Cambio con grupos devueltos y reemplazos, o traspaso entre sedes; ruta real directa educativa o vía Bodega TI, solicitud y procedencia inmutables. |
 | operaciones_inventario_detalle | Movimientos | Vincula cada movimiento de devolución/entrega a su operación y acta compartida, sin duplicar documentos. |
+| p02_config_historial | Inventario P02 | Cambios auditados de prefijos con valores anteriores/posteriores y autor. |
+| p02_numeros | Inventario P02 | Número automático permanente, año confirmado u OC, correlativo y autor por bien nuevo. |
+| p02_prefijos | Inventario P02 | Prefijos independientes de Nivel Central; vigencia y versión para altas automáticas. |
+| p02_registros | Inventario P02 | Solicitudes idempotentes de alta individual para evitar duplicación por reintentos. |
 | pgmigrations | Migraciones | Control técnico de las migraciones aplicadas; no es una tabla de negocio. |
 | prestamos_inventario | Préstamos | Préstamos temporales desde Bodega TI, pertenencia conservada, destino y plazo, devolución vinculada e historial en movimientos. |
+| rbac_anteriores | Acceso | Compatibilidad explícita de perfiles anteriores sin reasignar usuarios. |
+| rbac_cambios_migracion | Seguridad y auditoría | Antes y después de permisos actualizados por migración; actor SQL sin atribuirlo a una persona. |
+| rbac_historial | Acceso | Auditoría inmutable de perfiles, cuentas, vínculos y correcciones. |
+| rbac_limites_perfiles | Acceso | Límites protegidos de los perfiles predefinidos. |
+| rbac_perfil_permisos | Acceso | Permisos efectivos de cada perfil. |
+| rbac_perfiles | Acceso | Perfiles configurables, clasificación protegida, alcances, vigencia y versión. |
+| rbac_permisos | Acceso | Acciones existentes por recurso. |
+| reportes_incidentes_adjuntos | Incidentes | Denuncia o informe privado persistente por reporte, autor y bytes originales; se puede aportar después del envío. |
+| reportes_incidentes_inventario | Incidentes | Borrador, envío y validación TI de robo, sustracción o daño; parte y denunciante, selección y versiones, sin cambiar estados hasta validar. |
+| reportes_incidentes_operaciones | Incidentes | Operaciones idempotentes y auditoría de guardar, enviar y resolver, con actor y solicitud original. |
 | reservas_insumos | Insumos | Reservas de stock asociadas a solicitudes aprobadas y su consumo al entregar. |
 | sedes | Catálogos | Identidad y datos de EE/JISC y Nivel Central; alcance por sede. |
 | solicitudes_insumos | Insumos | Solicitudes de insumos por sede con datos del solicitante, estado, validación/aprobación, entrega o cancelación. |
