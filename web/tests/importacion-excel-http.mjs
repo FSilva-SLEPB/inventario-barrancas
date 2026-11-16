@@ -1,7 +1,8 @@
 // Solo entorno de ensayo e identidades ficticias. Nunca usar en producción.
-import assert from 'node:assert/strict';import {randomUUID} from 'node:crypto';import {createRequire} from 'node:module';import pg from 'pg';import {excel} from './excel-fixture.mjs';
+import assert from 'node:assert/strict';import {randomUUID,randomInt} from 'node:crypto';import {createRequire} from 'node:module';import pg from 'pg';import {excel} from './excel-fixture.mjs';
 const{encode}=createRequire(import.meta.url)('next-auth/jwt'),url=process.env.ACCESO_HTTP_URL;assert.ok(url&&process.env.TEST_ADMIN_DATABASE_URL&&process.env.DATABASE_URL);
 const db=new pg.Client(process.env.TEST_ADMIN_DATABASE_URL),app=new pg.Client(process.env.DATABASE_URL),root='felipe.silva@slepb.gob.cl',suf=randomUUID(),sede=randomUUID(),cat=randomUUID(),cuentas=[];let n=0;
+let prefijoEnsayo='X'+Array.from({length:4},()=>String.fromCharCode(65+randomInt(26))).join('');
 const ck=async correo=>'next-auth.session-token='+await encode({secret:process.env.NEXTAUTH_SECRET,token:{correoInstitucional:correo,sub:'ficticio'},maxAge:900});
 const cuerpo=String(20000000+Math.floor(Math.random()*60000000)),suma=[...cuerpo].reverse().reduce((a,v,i)=>a+Number(v)*(2+i%6),0),dv=11-suma%11,run=cuerpo+'-'+(dv===11?'0':dv===10?'K':dv);
 const fallo=c=>e=>e.code===c;async function caso(t,f){try{await f();n++;}catch(e){throw new Error('Excel: '+t,{cause:e});}}
@@ -13,7 +14,8 @@ const confirmar=(id,cookie,tipo='establecimientos')=>post('confirmar',null,tipo,
 const preparar=async(b,c,t='establecimientos')=>{const r=await post('previa',b,t,c);assert.equal(r.status,200,await r.clone().text());return r.json();};
 await db.connect();await app.connect();try{
  await db.query("INSERT INTO public.sedes(id,tipo,nombre,rbd,direccion,comuna) VALUES($1,'establecimiento',$2,$3,'Dirección ficticia','Comuna ficticia')",[sede,'Sede Excel '+suf,'EX-'+suf]);await db.query('INSERT INTO public.categorias_bienes(id,nombre) VALUES($1,$2)',[cat,'Excel '+suf]);
- await db.query("INSERT INTO public.p02_prefijos VALUES($1,'EXCL',true,1)",[cat]);
+ while((await db.query('SELECT EXISTS(SELECT 1 FROM public.numeracion_secuencias WHERE prefijo=$1) e',[prefijoEnsayo])).rows[0].e)prefijoEnsayo='X'+Array.from({length:4},()=>String.fromCharCode(65+randomInt(26))).join('');
+ await db.query('INSERT INTO public.p02_prefijos VALUES($1,$2,true,1)',[cat,prefijoEnsayo]);
  const rootCookie=await ck(root),lector=await cuenta('auditor'),local=await cuenta('enlaces_ee',sede),gt=await cuenta('gestor_tic');const libro=excel(headers,[fila('EXCEL-'+suf)]);
  const baseAntes=(await db.query('SELECT (SELECT count(*) FROM public.equipos) equipos,(SELECT count(*) FROM public.movimientos_inventario) movimientos,(SELECT count(*) FROM public.actas_documentos) actas')).rows[0];
  let previa;

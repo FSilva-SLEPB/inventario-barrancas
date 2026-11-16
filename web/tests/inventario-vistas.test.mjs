@@ -128,8 +128,8 @@ test("tabla conserva identificadores y acciones de consulta sin edición para pe
 test("la entrada ofrece dos páginas independientes y ninguna tabla combinada", async () => {
   const { html, consulta } = await pagina({}, false, [], 0, "");
   assert.equal(consulta, undefined);
-  assert.ok(html.includes('href="/inventario/nivel-central"'));
-  assert.ok(html.includes('href="/inventario/p02"'));
+  assert.ok(html.includes('href="/inventario/nivel-central/inicio"'));
+  assert.ok(html.includes('href="/inventario/p02/inicio"'));
   assert.ok(!html.includes("<table"));
 });
 
@@ -178,7 +178,7 @@ test("el tamaño de página se valida y conserva en filtros y paginación", asyn
 test("portada administrativa ofrece accesos operativos y consultas no ven gestión", async () => {
   for (const rol of ["administrador", "administrador_gestion"]) {
     const { html } = await pagina({}, false, [], 0, "", rol);
-    for (const ruta of ["nivel-central", "p02", "registro", "bodega-ti", "movimientos"]) assert.ok(html.includes('href="/inventario/' + ruta + '"'));
+    for (const ruta of ["nivel-central/inicio", "p02/inicio", "bodega-ti", "movimientos"]) assert.ok(html.includes('href="/inventario/' + ruta + '"'));
     assert.ok(!html.includes("<table"));
     assert.ok(!html.includes('href="/mantenedores/directores"'));
   }
@@ -192,7 +192,7 @@ test("las consultas de inventario ya no incluyen formularios de registro o carga
     const { html } = await pagina({}, false, [], 0, ruta, "administrador");
     assert.ok(!html.includes('id="nuevo-equipo"'));
     assert.ok(!html.includes('id="carga-masiva"'));
-    assert.ok(html.includes(ruta==='p02'?'/inventario/p02/registro?volver=':'/inventario/registro?volver='));
+    assert.ok(html.includes(ruta==='p02'?'/inventario/p02/registro?volver=':'/inventario/nivel-central/registro?volver='));
   }
 });
 

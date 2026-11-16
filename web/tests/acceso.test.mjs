@@ -329,7 +329,7 @@ test('fotografías: solo administradores editan, consultas solo leen y gestor no
 test('menú RBAC: sede sin Nivel Central y consultas sin Nueva solicitud ni Gestor',async()=>{
  const e=await entorno(),{modulosSistema}=await e.importar('@/lib/modulos');
  const a={rol:'consulta',permisos:['equipos.consultar','celulares.consultar','seguimiento_insumos.consultar','historial_insumos.consultar'],alcance:'sede',clasePerfil:'operativo',perfilId:'ficticio',perfilNombre:'Director EE',revisionAcceso:'1:1'};
- const enlaces=modulosSistema(a).flatMap(m=>m.accesos);assert.ok(!enlaces.some(x=>x.href==='/inventario/nivel-central'||x.href==='/insumos/solicitud'));assert.ok(enlaces.some(x=>x.href==='/insumos/seguimiento'&&x.titulo==='Seguimiento de insumos'));assert.ok(enlaces.some(x=>x.href==='/insumos/historial'));assert.ok(!enlaces.some(x=>x.titulo==='Gestor de insumos'));
+ const enlaces=modulosSistema(a).flatMap(m=>m.accesos);assert.ok(!enlaces.some(x=>x.href==='/inventario/nivel-central/inicio'||x.href==='/insumos/solicitud'));assert.ok(enlaces.some(x=>x.href==='/insumos/seguimiento'&&x.titulo==='Seguimiento de insumos'));assert.ok(enlaces.some(x=>x.href==='/insumos/historial'));assert.ok(!enlaces.some(x=>x.titulo==='Gestor de insumos'));
 });
 
 test('Inventario completo acepta las 23 columnas, cantidades y antecedentes sin exigir Estado antiguo',async()=>{

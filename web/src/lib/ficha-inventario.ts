@@ -1,5 +1,5 @@
 import {esIdSede} from '@/lib/validacion-sedes';
-export const RUTAS_INVENTARIO=['/inventario','/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti'] as const;
+export const RUTAS_INVENTARIO=['/inventario','/inventario/nivel-central','/inventario/p02','/inventario/bodega-ti','/inventario/nivel-central/inicio','/inventario/p02/inicio'] as const;
 // Solo filtros de consulta conocidos. Nunca se permite una redirección externa.
 export function retornoInventario(valor:unknown):string|null {
  if(typeof valor!=='string'||valor.length>2000||/[\p{Cc}\\]/u.test(valor))return null;

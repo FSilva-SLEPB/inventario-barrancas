@@ -160,3 +160,11 @@ específicas de web/AGENTS.md para desarrollar con la versión instalada de Next
   colisiones, número permanente e idempotencia. La migración no importa archivos
   reales ni crea entregas/actas. NC conserva su flujo. QR diferenciado y entregas
   por lotes siguen en etapas posteriores. Ver docs/p02-ingreso-automatico.md.
+
+- Corrección visual posterior a PR81: Inventario abre dos entradas principales,
+  Nivel Central y P02, con portadas y accesos de registro/Excel propios. No usar
+  ingreso genérico en la portada principal. Conservar URLs de listados, filtros,
+  historial, permisos y selección activa del menú. Entregas, devoluciones y
+  préstamos siguen agrupados; los procesos compartidos no duplican datos.
+  No presentar esta navegación como configuración QR diferenciada o nuevo flujo
+  de entregas por lotes. Ver docs/portadas-inventarios.md.

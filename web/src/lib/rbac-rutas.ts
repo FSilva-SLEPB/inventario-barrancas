@@ -2,6 +2,7 @@
 export const RUTAS_RBAC:Record<string,string>={
  '/gestor-insumos':'gestion_insumos.consultar',
  '/inventario/numeracion':'numeracion_inventario.consultar','/inventario/etiquetas':'etiquetas_inventario.consultar',
+ '/inventario/nivel-central/registro':'equipos.registrar','/inventario/nivel-central/importar':'equipos.registrar',
  '/inventario/p02/registro':'equipos.registrar','/inventario/p02/importar':'equipos.registrar','/mantenedores/p02':'numeracion_inventario.consultar',
  '/inventario/importar-excel':'equipos.consultar',
  '/inventario/nivel-central':'equipos.consultar','/inventario/p02':'equipos.consultar','/inventario/registro':'equipos.registrar','/inventario/carga':'equipos.registrar',

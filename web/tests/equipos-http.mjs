@@ -92,7 +92,7 @@ try {
  const pendientes=await(await pedir('/inventario/p02?vista=pendientes',enc)).text();assert.ok(pendientes.includes('ver='+pendiente));assert.ok(!pendientes.includes('ver='+id));pruebas++;
  const nc=await(await pedir('/inventario/nivel-central',gestion)).text();assert.ok(nc.includes('ver='+central));assert.ok(!nc.includes('ver='+id));pruebas++;
  assert.equal((await pedir('/inventario/nivel-central',enc)).headers.get('location'),'/sin-permiso');pruebas++;
- const entrada=await(await pedir('/inventario',gestion)).text();assert.ok(entrada.includes('href="/inventario/nivel-central"'));assert.ok(entrada.includes('href="/inventario/p02"'));pruebas++;
+ const entrada=await(await pedir('/inventario',gestion)).text();assert.ok(entrada.includes('href="/inventario/nivel-central/inicio"'));assert.ok(entrada.includes('href="/inventario/p02/inicio"'));pruebas++;
  const jardines=await(await pedir('/inventario/p02?tipo=jardin_infantil',gestion)).text();assert.ok(jardines.includes('ver='+ajeno));assert.ok(!jardines.includes('ver='+id));pruebas++;
  // Los filtros de nombre (ID), RBD y tipo se combinan y conservan el alcance.
  const rbdEscuela='RBD-A-'+sufijo;
