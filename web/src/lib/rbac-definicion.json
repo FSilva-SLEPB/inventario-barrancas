@@ -261,6 +261,23 @@
         "exportar",
         "descargar"
       ]
+    },
+    {
+      "codigo": "numeracion_inventario",
+      "nombre": "Numeración de inventario",
+      "acciones": [
+        "consultar",
+        "confirmar"
+      ]
+    },
+    {
+      "codigo": "etiquetas_inventario",
+      "nombre": "Etiquetas QR de inventario",
+      "acciones": [
+        "consultar",
+        "imprimir",
+        "descargar"
+      ]
     }
   ],
   "perfiles": [
@@ -318,6 +335,9 @@
         "equipos.editar",
         "equipos.exportar",
         "equipos.registrar",
+        "etiquetas_inventario.consultar",
+        "etiquetas_inventario.descargar",
+        "etiquetas_inventario.imprimir",
         "fotos_sedes.consultar",
         "fotos_sedes.editar",
         "funcionarios.consultar",
@@ -336,6 +356,8 @@
         "mis_datos.consultar",
         "movimientos.confirmar",
         "movimientos.consultar",
+        "numeracion_inventario.confirmar",
+        "numeracion_inventario.consultar",
         "perfiles.administrar",
         "perfiles.consultar",
         "prestamos.confirmar",
@@ -408,6 +430,9 @@
         "equipos.editar",
         "equipos.exportar",
         "equipos.registrar",
+        "etiquetas_inventario.consultar",
+        "etiquetas_inventario.descargar",
+        "etiquetas_inventario.imprimir",
         "fotos_sedes.consultar",
         "fotos_sedes.editar",
         "funcionarios.consultar",
@@ -423,6 +448,8 @@
         "incidentes.registrar",
         "movimientos.confirmar",
         "movimientos.consultar",
+        "numeracion_inventario.confirmar",
+        "numeracion_inventario.consultar",
         "prestamos.confirmar",
         "prestamos.consultar",
         "sedes.consultar",
@@ -656,6 +683,9 @@
       "equipos.editar",
       "equipos.exportar",
       "equipos.registrar",
+      "etiquetas_inventario.consultar",
+      "etiquetas_inventario.descargar",
+      "etiquetas_inventario.imprimir",
       "fotos_sedes.consultar",
       "fotos_sedes.editar",
       "funcionarios.consultar",
@@ -674,6 +704,8 @@
       "mis_datos.consultar",
       "movimientos.confirmar",
       "movimientos.consultar",
+      "numeracion_inventario.confirmar",
+      "numeracion_inventario.consultar",
       "perfiles.administrar",
       "perfiles.consultar",
       "prestamos.confirmar",
@@ -738,6 +770,9 @@
       "equipos.editar",
       "equipos.exportar",
       "equipos.registrar",
+      "etiquetas_inventario.consultar",
+      "etiquetas_inventario.descargar",
+      "etiquetas_inventario.imprimir",
       "fotos_sedes.consultar",
       "fotos_sedes.editar",
       "funcionarios.consultar",
@@ -753,6 +788,8 @@
       "incidentes.registrar",
       "movimientos.confirmar",
       "movimientos.consultar",
+      "numeracion_inventario.confirmar",
+      "numeracion_inventario.consultar",
       "prestamos.confirmar",
       "prestamos.consultar",
       "sedes.consultar",

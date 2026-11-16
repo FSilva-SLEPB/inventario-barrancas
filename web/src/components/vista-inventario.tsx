@@ -1,3 +1,4 @@
+import {puedeNumerar} from '@/lib/identificacion/acceso';
 import ExportarInventario from '@/components/exportar-inventario';
 import {tienePermiso} from '@/lib/rbac';
 import {ESTADOS_ADMINISTRATIVOS_ACTIVO} from '@/lib/estados-activo';
@@ -65,6 +66,8 @@ export default async function VistaInventario({ searchParams, ambito, bodega = f
         <Link className="btn btn-outline-primary btn-sm" href="/inventario">Volver a Inventario</Link>
         <Link className="btn btn-outline-primary btn-sm" href="/inventario/robos">Consolidado de robos</Link>
         {tienePermiso(actor,'equipos','registrar') && <Link className="btn btn-outline-primary btn-sm" href={'/inventario/registro?volver='+encodeURIComponent(volver)}>Registrar equipo</Link>}
+        {puedeNumerar(actor)&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/numeracion?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Generar números</Link>}
+        {tienePermiso(actor,'etiquetas_inventario')&&<Link className="btn btn-outline-primary btn-sm" href={'/inventario/etiquetas?ambito='+(ambito==='nc'?'nc':'p02')+'&q='+encodeURIComponent(q)}>Etiquetas QR</Link>}
         {!bodega&&<ExportarInventario integrado recurso="equipos" filtros={{...Object.fromEntries(new URL(volver,'http://local').searchParams),ambito}}/>}
       </div>
     </div>

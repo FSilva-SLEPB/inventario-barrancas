@@ -1,5 +1,11 @@
 import type {Pool,Client} from 'pg';
 export const USO_TABLAS:Record<string,{modulo:string;uso:string;fuentes:string[]}>={
+ numeracion_categorias:{modulo:'Identificación',uso:'Prefijos configurables por categoría, con vigencia y versión.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
+ numeracion_secuencias:{modulo:'Identificación',uso:'Último correlativo por prefijo y año de OC; nunca reiniciar por reintentos.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
+ numeracion_lotes:{modulo:'Identificación',uso:'Solicitudes idempotentes de numeración con actor y resultado.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
+ numeracion_asignaciones:{modulo:'Identificación',uso:'Números permanentes emitidos, equipo, año OC y correlativo.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
+ numeracion_config_historial:{modulo:'Identificación',uso:'Auditoría anterior/posterior de prefijos y solicitudes.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
+ etiquetas_lotes:{modulo:'Identificación',uso:'PDFs privados de etiquetas con datos congelados y confirmación manual de impresión.',fuentes:['migrations/1796918400000_numeracion-etiquetas.cjs']},
  importaciones_excel:{modulo:'Cargas',uso:'Vistas previas privadas con vencimiento y registro idempotente de importación Excel; sin almacenar el libro original.',fuentes:['src/app/api/importaciones/excel/route.ts','migrations/1796832000000_importacion-excel.cjs']},
  fotografias_funcionarios:{modulo:'Funcionarios',uso:'Fotografías privadas versionadas, consultables en su ficha y en Inicio propio.',fuentes:['migrations/1796745600000_contactos-celulares-fotos-funcionarios.cjs']},
  celulares_contacto_cambios:{modulo:'Celulares',uso:'Clasificación de uso institucional/director con actor, antes/después e idempotencia.',fuentes:['migrations/1796745600000_contactos-celulares-fotos-funcionarios.cjs']},

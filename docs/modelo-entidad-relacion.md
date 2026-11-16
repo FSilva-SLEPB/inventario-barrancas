@@ -274,6 +274,17 @@ erDiagram
     uuid incidente_id FK
     uuid movimiento_id FK
   }
+  etiquetas_lotes {
+    uuid id PK
+    text actor FK
+    jsonb entrada
+    jsonb datos
+    jsonb opciones
+    bytea pdf
+    text estado
+    timestamp_with_time_zone registrado_en
+    timestamp_with_time_zone confirmado_en
+  }
   fotografias_funcionarios {
     uuid id PK
     uuid funcionario_id FK
@@ -409,6 +420,42 @@ erDiagram
     jsonb antes
     jsonb despues
     timestamp_with_time_zone registrado_en
+  }
+  numeracion_asignaciones {
+    uuid equipo_id PK, FK
+    text numero
+    uuid lote_id FK
+    text prefijo
+    integer anio_oc
+    integer correlativo
+    text actor FK
+    timestamp_with_time_zone registrado_en
+  }
+  numeracion_categorias {
+    uuid categoria_id PK, FK
+    text prefijo
+    boolean activo
+    integer version
+  }
+  numeracion_config_historial {
+    uuid id PK
+    text actor FK
+    jsonb entrada
+    jsonb antes
+    jsonb despues
+    timestamp_with_time_zone registrado_en
+  }
+  numeracion_lotes {
+    uuid id PK
+    text actor FK
+    jsonb entrada
+    jsonb resultado
+    timestamp_with_time_zone registrado_en
+  }
+  numeracion_secuencias {
+    text prefijo PK
+    integer anio2 PK
+    integer ultimo
   }
   operaciones_inventario {
     uuid id PK
@@ -655,6 +702,7 @@ erDiagram
   equipos ||--o{ equipos_historial : "equipo_id"
   incidentes_robos |o--o{ equipos_historial : "incidente_id"
   movimientos_inventario |o--o{ equipos_historial : "movimiento_id"
+  usuarios_acceso ||--o{ etiquetas_lotes : "actor"
   funcionarios_nc ||--o{ fotografias_funcionarios : "funcionario_id"
   sedes ||--o{ fotografias_sedes : "sede_id"
   funcionarios_nc ||--o{ funcionarios_nc_historial : "funcionario_id"
@@ -670,6 +718,12 @@ erDiagram
   sedes |o--o{ movimientos_inventario : "destino_sede_id"
   equipos |o--o{ movimientos_inventario : "equipo_id"
   sedes |o--o{ movimientos_inventario : "origen_sede_id"
+  usuarios_acceso ||--o{ numeracion_asignaciones : "actor"
+  equipos ||--o| numeracion_asignaciones : "equipo_id"
+  numeracion_lotes ||--o{ numeracion_asignaciones : "lote_id"
+  categorias_bienes ||--o| numeracion_categorias : "categoria_id"
+  usuarios_acceso ||--o{ numeracion_config_historial : "actor"
+  usuarios_acceso ||--o{ numeracion_lotes : "actor"
   sedes ||--o{ operaciones_inventario : "destino_sede_id"
   sedes ||--o{ operaciones_inventario : "origen_sede_id"
   movimientos_inventario ||--o| operaciones_inventario_detalle : "movimiento_id"
